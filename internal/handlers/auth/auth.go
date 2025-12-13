@@ -38,12 +38,11 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	ui.RegisterEchoRoutes(e, env.ServerPathPrefix, []*ui.EchoRoute{
 		ui.NewEchoRoute(http.MethodGet, path+"/login", h.GetLoginPage),
 		ui.NewEchoRoute(http.MethodPost, path+"/login", h.PostLoginPage),
-
 		ui.NewEchoRoute(http.MethodGet, path+"/logout", h.GetLogout),
 	})
 }
 
-func (h *Handler) GetLoginPage(c echo.Context) error {
+func (h *Handler) GetLoginPage(c echo.Context) *echo.HTTPError {
 	var (
 		invalid = shared.ParseQueryBool(c, "invalid")
 		apiKey  = c.FormValue("api-key")
@@ -58,7 +57,7 @@ func (h *Handler) GetLoginPage(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) PostLoginPage(c echo.Context) error {
+func (h *Handler) PostLoginPage(c echo.Context) *echo.HTTPError {
 	slog.Info("User authentication request received")
 
 	// Parse form
@@ -83,7 +82,7 @@ func (h *Handler) PostLoginPage(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) GetLogout(c echo.Context) error {
+func (h *Handler) GetLogout(c echo.Context) *echo.HTTPError {
 	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
@@ -105,28 +104,24 @@ func (h *Handler) GetLogout(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) error {
+func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) *errors.MasterError {
 	if len(apiKey) < shared.MinAPIKeyLength {
-		return fmt.Errorf("api key too short")
+		return errors.NewMasterError(fmt.Errorf("api key too short"), http.StatusBadRequest)
 	}
 
 	user, merr := helper.GetUserForApiKey(h.db, apiKey)
 	if merr != nil {
-		if merr.Code != http.StatusNotFound {
-			return errors.Wrap(merr, "database authentication")
-		} else {
-			return errors.Wrap(merr, "invalid api key")
-		}
+		return merr
 	}
 
-	err := h.clearExistingSession(ctx)
-	if err != nil {
-		slog.Warn("Failed to clear existing session", "error", err)
+	merr = h.clearExistingSession(ctx)
+	if merr != nil {
+		slog.Warn("Failed to clear existing session", "error", merr)
 	}
 
-	err = h.createSession(ctx, apiKey)
-	if err != nil {
-		return errors.Wrap(err, "create session")
+	merr = h.createSession(ctx, user.ID)
+	if merr != nil {
+		return merr
 	}
 
 	if user.IsAdmin() {
@@ -136,42 +131,41 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) error {
 	return nil
 }
 
-func (h *Handler) clearExistingSession(ctx echo.Context) error {
+func (h *Handler) clearExistingSession(ctx echo.Context) *errors.MasterError {
 	cookie, err := ctx.Cookie(CookieName)
 	if err != nil {
-		return nil
+		return errors.NewMasterError(err, 0)
 	}
 
-	if err := h.registry.Cookies.Remove(cookie.Value); err != nil {
-		return err
+	merr := h.db.User.Cookie.Delete(cookie.Value)
+	if merr != nil {
+		return merr
 	}
 
 	return nil
 }
 
-func (h *Handler) createSession(ctx echo.Context, apiKey string) error {
-	var (
-		cookieValue = uuid.New().String()
-		cookiePath  = env.ServerPathPrefix
-	)
-
-	if cookiePath == "" {
-		cookiePath = "/"
+func (h *Handler) createSession(ctx echo.Context, userID shared.TelegramID) *errors.MasterError {
+	cookie := &shared.Cookie{
+		UserAgent: ctx.Request().UserAgent(),
+		Value:     uuid.New().String(),
+		UserID:    userID,
+		LastLogin: shared.NewUnixMilli(time.Now()),
 	}
-
-	err := h.registry.Cookies.Add(ctx.Request().UserAgent(), cookieValue, apiKey)
-	if err != nil {
-		return err
+	merr := h.db.User.Cookie.Create(cookie)
+	if merr != nil {
+		return merr
 	}
 
 	ctx.SetCookie(&http.Cookie{
 		Name:     CookieName,
-		Value:    cookieValue,
-		Expires:  time.UnixMilli(time.Now().UnixMilli() + shared.CookieExpirationDuration), // TODO: Use the cookie's ExpiredAt method
-		Path:     cookiePath,
+		Value:    cookie.Value,
+		Expires:  cookie.ExpiredAtTime(),
+		Path:     env.ServerPathPrefix + "/",
 		HttpOnly: true,
 		Secure:   ctx.Request().TLS != nil || ctx.Scheme() == "https",
 		SameSite: http.SameSiteLaxMode,
 	})
+
 	return nil
 }
