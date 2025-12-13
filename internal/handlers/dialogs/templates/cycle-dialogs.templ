@@ -6,22 +6,22 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pg-press/internal/components"
-	"github.com/knackwurstking/pg-press/internal/env"
-	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 
 	ui "github.com/knackwurstking/ui/ui-templ"
 )
 
 templ NewCycleDialog(
-	tool *models.Tool,
-	inputPressNumber *models.PressNumber,
+	tool *shared.Tool,
+	currentPressNumber *shared.PressNumber,
+	inputPressNumber *shared.PressNumber,
 	inputTotalCycles int64,
 	originalDate *time.Time,
 ) {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPost,
-		Href:             utils.UrlDialogs().EditCycle(0, tool.ID, nil),
+		Href:             urlb.UrlDialogs().EditCycle(0, tool.ID, nil),
 		ID:               "cycle-dialog",
 		SubmitButtonText: "Erstellen",
 	}) {
@@ -34,7 +34,7 @@ templ NewCycleDialog(
 					<strong>Werkzeug:</strong> { tool.String() }
 				</div>
 				<div class="text-sm">
-					<strong>Position:</strong> { tool.Position.GermanString() }
+					<strong>Position:</strong> { tool.Position.German() }
 				</div>
 			</div>
 		}
@@ -51,19 +51,17 @@ templ NewCycleDialog(
 				<option
 					value=""
 					disabled
-					selected?={ tool.Press == nil && inputPressNumber == nil }
+					selected?={ currentPressNumber == nil && inputPressNumber == nil }
 				>
 					Presse auswählen
 				</option>
-				for _, i := range models.ValidPressNumbers {
+				for _, p := range shared.AllPressesNumbers {
 					<option
-						value={ fmt.Sprintf("%d", i) }
-						selected?={ (inputPressNumber != nil && *inputPressNumber == i) ||
-							(inputPressNumber == nil &&
-								tool.Press != nil &&
-								*tool.Press == i) }
+						value={ p }
+						selected?={ (inputPressNumber != nil && *inputPressNumber == p) ||
+							(inputPressNumber == nil && currentPressNumber != nil && *currentPressNumber == p) }
 					>
-						Presse { fmt.Sprintf("%d", i) }
+						Presse { p }
 					</option>
 				}
 			</select>
@@ -76,9 +74,9 @@ templ NewCycleDialog(
 				name="original_date"
 				type="text"
 				if originalDate == nil {
-					value={ time.Now().Format(env.DateFormat) }
+					value={ time.Now().Format(shared.DateFormat) }
 				} else {
-					value={ originalDate.Format(env.DateFormat) }
+					value={ originalDate.Format(shared.DateFormat) }
 				}
 				title="Datum des ursprünglichen Eintrags (wird nicht geändert)"
 			/>
@@ -118,17 +116,18 @@ templ NewCycleDialog(
 }
 
 templ EditCycleDialog(
-	tool *models.Tool,
-	cycle *models.Cycle,
-	tools []*models.Tool,
-	inputPressNumber *models.PressNumber,
+	tool *shared.Tool,
+	cycle *shared.Cycle,
+	tools []*shared.Tool,
+	currentPressNumber *shared.PressNumber,
+	inputPressNumber *shared.PressNumber,
 	inputTotalCycles int64,
 	originalDate *time.Time,
 ) {
 	{{ toolChangeMode := len(tools) > 0 }}
 	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPut,
-		Href:             utils.UrlDialogs().EditCycle(cycle.ID, 0, &toolChangeMode),
+		Href:             urlb.UrlDialogs().EditCycle(cycle.ID, 0, &toolChangeMode),
 		ID:               "cycle-edit-dialog",
 		SubmitButtonText: "Aktualisieren",
 	}) {
@@ -151,8 +150,8 @@ templ EditCycleDialog(
 						>
 							{{
 								statusText := ""
-								if t.Press != nil {
-									statusText = fmt.Sprintf(" [P%d]", *t.Press)
+								if currentPressNumber != nil {
+									statusText = fmt.Sprintf(" [P%d]", *currentPressNumber)
 								}
 								if t.Regenerating {
 									statusText += " [Reg.]"
@@ -161,7 +160,7 @@ templ EditCycleDialog(
 									statusText += " [✗]"
 								}
 							}}
-							{ fmt.Sprintf("%s %s%s", t.Code, t.Format.String(), statusText) }
+							{ fmt.Sprintf("%s %dx%d %s", t.Code, t.Width, t.Height, statusText) }
 						</option>
 					}
 				</select>
@@ -178,17 +177,15 @@ templ EditCycleDialog(
 				<option
 					value=""
 					disabled
-					selected?={ tool.Press == nil && inputPressNumber == nil }
+					selected?={ currentPressNumber == nil && inputPressNumber == nil }
 				>
 					Presse auswählen
 				</option>
-				for _, i := range models.ValidPressNumbers {
+				for _, i := range shared.AllPressesNumbers {
 					<option
 						value={ fmt.Sprintf("%d", i) }
 						selected?={ (inputPressNumber != nil && *inputPressNumber == i) ||
-							(inputPressNumber == nil &&
-								tool.Press != nil &&
-								*tool.Press == i) }
+							(inputPressNumber == nil && currentPressNumber != nil && *currentPressNumber == i) }
 					>
 						Presse { fmt.Sprintf("%d", i) }
 					</option>
@@ -201,9 +198,9 @@ templ EditCycleDialog(
 				name="original_date"
 				type="text"
 				if originalDate == nil {
-					value={ time.Now().Format(env.DateFormat) }
+					value={ time.Now().Format(shared.DateFormat) }
 				} else {
-					value={ originalDate.Format(env.DateFormat) }
+					value={ originalDate.Format(shared.DateFormat) }
 				}
 				title="Datum des ursprünglichen Eintrags (wird nicht geändert)"
 			/>

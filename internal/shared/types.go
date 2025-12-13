@@ -2,6 +2,7 @@ package shared
 
 import (
 	"fmt"
+	"slices"
 	"time"
 )
 
@@ -34,6 +35,25 @@ const (
 	PressTypeSITI  PressType = "SITI"
 )
 
+// Press number constants
+const (
+	PressNumber0 PressNumber = 0
+	PressNumber2 PressNumber = 2
+	PressNumber3 PressNumber = 3
+	PressNumber4 PressNumber = 4
+	PressNumber5 PressNumber = 5
+)
+
+var (
+	AllPressesNumbers []PressNumber = []PressNumber{
+		PressNumber0,
+		PressNumber2,
+		PressNumber3,
+		PressNumber4,
+		PressNumber5,
+	}
+)
+
 // Constants for date/time formats
 const (
 	DateFormat = "02.01.2006"
@@ -60,12 +80,7 @@ func (p PressNumber) String() string {
 }
 
 func (p PressNumber) IsValid() bool {
-	switch p {
-	case 0, 2, 3, 4, 5:
-		return true
-	default:
-		return false
-	}
+	return slices.Contains(AllPressesNumbers, p)
 }
 
 func (um UnixMilli) FormatDate() string {
