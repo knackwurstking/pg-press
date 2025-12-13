@@ -391,6 +391,7 @@ func (h *Handler) HTMXGetToolNotes(c echo.Context) error {
 	}
 
 	// Create ToolWithNotes for template compatibility
+	// TODO: Find another way without creating a ResolvedTool here
 	resolvedTool := models.NewResolvedTool(tool, nil, notes, nil)
 	t := templates.Notes(resolvedTool)
 	err := t.Render(c.Request().Context(), c.Response())
