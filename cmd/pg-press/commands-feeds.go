@@ -1,4 +1,4 @@
-// TODO: Before i can fix this, i need to implement the feed service
+// TODO: To keep it simple, we could kick the feed system from this refactoring for now.
 package main
 
 import (
