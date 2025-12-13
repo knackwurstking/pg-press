@@ -43,7 +43,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 
 func (h *Handler) GetLoginPage(c echo.Context) error {
 	var (
-		invalid = utils.ParseQueryBool(c, "invalid")
+		invalid = shared.ParseQueryBool(c, "invalid")
 		apiKey  = c.FormValue("api-key")
 		page    = templates.LoginPage(apiKey, invalid)
 	)

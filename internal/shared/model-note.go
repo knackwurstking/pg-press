@@ -2,6 +2,8 @@ package shared
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/knackwurstking/pg-press/internal/errors"
 )
@@ -56,6 +58,21 @@ func (n *Note) String() string {
 	)
 }
 
-// TODO: Get linked method
+type Linked struct {
+	Name string
+	ID   int64
+}
+
+// IsLinked returns true if the note is linked to any entity
+func (n *Note) IsLinked() bool {
+	return n.Linked != ""
+}
+
+// GetLinked returns the linked entity string
+func (n *Note) GetLinked() Linked {
+	s := strings.Split(n.Linked, "_")
+	id, _ := strconv.ParseInt(s[1], 10, 64)
+	return Linked{Name: s[0], ID: id}
+}
 
 var _ Entity[*Note] = (*Note)(nil)

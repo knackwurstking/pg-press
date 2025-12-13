@@ -43,3 +43,5 @@ func GetUserFromContext(c echo.Context) (*User, *errors.MasterError) {
 
 	return user, nil
 }
+
+// TODO: Add echo parse utilities
