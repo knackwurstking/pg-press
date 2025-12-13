@@ -7,12 +7,11 @@ import (
 	"strconv"
 
 	"github.com/a-h/templ"
+	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/tool/templates"
-	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/services"
-	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/pg-press/internal/shared"
 
 	ui "github.com/knackwurstking/ui/ui-templ"
 
@@ -20,12 +19,12 @@ import (
 )
 
 type Handler struct {
-	registry *services.Registry
+	db *common.DB
 }
 
-func NewHandler(r *services.Registry) *Handler {
+func NewHandler(db *common.DB) *Handler {
 	return &Handler{
-		registry: r,
+		db: db,
 	}
 }
 
@@ -71,7 +70,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 }
 
 func (h *Handler) GetToolPage(c echo.Context) error {
-	user, merr := utils.GetUserFromContext(c)
+	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -81,7 +80,7 @@ func (h *Handler) GetToolPage(c echo.Context) error {
 		return merr.Echo()
 	}
 
-	tool, merr := h.registry.Tools.Get(toolID)
+	tool, merr := h.db.Tool.Tool.GetByID(toolID)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -103,7 +102,7 @@ func (h *Handler) GetToolPage(c echo.Context) error {
 func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 	slog.Info("Initiating tool binding operation")
 
-	user, merr := utils.GetUserFromContext(c)
+	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -113,7 +112,7 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 		return merr.Echo()
 	}
 
-	t, merr := h.registry.Tools.Get(toolID)
+	t, merr := h.db.Tool.Tool.GetByID(toolID)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -187,7 +186,7 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 func (h *Handler) HTMXPatchToolUnBinding(c echo.Context) error {
 	slog.Info("Initiating tool unbinding operation")
 
-	user, merr := utils.GetUserFromContext(c)
+	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -284,7 +283,7 @@ func (h *Handler) HTMXGetToolTotalCycles(c echo.Context) error {
 func (h *Handler) HTMXDeleteToolCycle(c echo.Context) error {
 	slog.Info("Initiating cycle deletion operation")
 
-	user, merr := utils.GetUserFromContext(c)
+	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -340,7 +339,7 @@ func (h *Handler) HTMXDeleteToolCycle(c echo.Context) error {
 func (h *Handler) HTMXGetToolMetalSheets(c echo.Context) error {
 	slog.Info("Retrieving metal sheet entries for tool")
 
-	user, merr := utils.GetUserFromContext(c)
+	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -378,22 +377,13 @@ func (h *Handler) HTMXGetToolNotes(c echo.Context) error {
 		return merr.Echo()
 	}
 
-	// Get the tool
-	tool, merr := h.registry.Tools.Get(toolID)
-	if merr != nil {
-		return merr.Echo()
-	}
-
 	// Get notes for this tool
 	notes, merr := h.registry.Notes.ListByLinked("tool", int64(toolID))
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	// Create ToolWithNotes for template compatibility
-	// TODO: Find another way without creating a ResolvedTool here
-	resolvedTool := models.NewResolvedTool(tool, nil, notes, nil)
-	t := templates.Notes(resolvedTool)
+	t := templates.Notes(toolID, notes)
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "Notes")
@@ -405,7 +395,7 @@ func (h *Handler) HTMXGetToolNotes(c echo.Context) error {
 func (h *Handler) HTMXDeleteRegeneration(c echo.Context) error {
 	slog.Info("Deleting tool regeneration entry")
 
-	user, merr := utils.GetUserFromContext(c)
+	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -456,7 +446,7 @@ func (h *Handler) HTMXDeleteRegeneration(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetStatusEdit(c echo.Context) error {
-	user, merr := utils.GetUserFromContext(c)
+	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -482,7 +472,7 @@ func (h *Handler) HTMXGetStatusEdit(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetStatusDisplay(c echo.Context) error {
-	user, merr := utils.GetUserFromContext(c)
+	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -510,7 +500,7 @@ func (h *Handler) HTMXGetStatusDisplay(c echo.Context) error {
 func (h *Handler) HTMXUpdateToolStatus(c echo.Context) error {
 	slog.Info("Change the tool status")
 
-	user, merr := utils.GetUserFromContext(c)
+	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -601,7 +591,7 @@ func (h *Handler) HTMXUpdateToolStatus(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) getToolIDFromParam(c echo.Context) (models.ToolID, *errors.MasterError) {
+func (h *Handler) getToolIDFromParam(c echo.Context) (shared.EntityID, *errors.MasterError) {
 	toolIDQuery, merr := utils.ParseParamInt64(c, "id")
 	if merr != nil {
 		return 0, merr
@@ -671,7 +661,7 @@ func (h *Handler) getToolsForBinding(tool *models.Tool) ([]*models.Tool, *errors
 }
 
 func (h *Handler) buildCyclesProps(c echo.Context) (*templates.CyclesProps, *errors.MasterError) {
-	user, merr := utils.GetUserFromContext(c)
+	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return nil, merr
 	}

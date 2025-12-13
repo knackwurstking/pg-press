@@ -1,26 +1,17 @@
 package templates
 
 import (
-	"github.com/knackwurstking/pg-press/components"
-	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/shared"
 )
 
 type BindingSectionProps struct {
-	Tool            *models.ResolvedTool
-	ToolsForBinding []*models.Tool
+	Tool            *shared.Tool
+	ToolsForBinding []*shared.Tool
 	IsAdmin         bool
 }
 
 templ BindingSection(props BindingSectionProps) {
-	{{
-		var positionForBinding models.Position
-		if props.Tool.Position == models.PositionTop {
-			positionForBinding = models.PositionTopCassette
-		} else {
-			positionForBinding = models.PositionTop
-		}
-	}}
 	<span id="binding-section" class="flex flex-col gap">
 		@components.SectionTitle(components.SectionTitleLevelSub, "Werkzeuge Binden")
 		<span
@@ -46,7 +37,12 @@ templ BindingSection(props BindingSectionProps) {
 					disabled
 					selected?={ props.Tool.Binding == nil }
 				>
-					{ positionForBinding.GermanString() } Binden
+					if props.Tool.Position == shared.SlotUpper {
+						{ shared.SlotUpperCassette.German() }
+					} else {
+						{ shared.SlotUpper.German() }
+					}
+					Binden
 				</option>
 				for _, t := range props.ToolsForBinding {
 					<option

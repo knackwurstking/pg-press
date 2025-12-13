@@ -8,6 +8,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/tools/templates"
+	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
@@ -38,7 +39,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 }
 
 func (h *Handler) GetToolsPage(c echo.Context) error {
-	user, merr := utils.GetUserFromContext(c)
+	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -61,7 +62,7 @@ func (h *Handler) HTMXDeleteTool(c echo.Context) error {
 	}
 	toolID := models.ToolID(toolIDQuery)
 
-	user, merr := utils.GetUserFromContext(c)
+	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -92,7 +93,7 @@ func (h *Handler) HTMXMarkToolAsDead(c echo.Context) error {
 	}
 	toolID := models.ToolID(toolIDQuery)
 
-	user, merr := utils.GetUserFromContext(c)
+	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -137,7 +138,7 @@ func (h *Handler) HTMXGetSectionPress(c echo.Context) error {
 }
 
 func (h *Handler) HTMXGetSectionTools(c echo.Context) error {
-	user, merr := utils.GetUserFromContext(c)
+	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}

@@ -10,6 +10,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/press/templates"
 	"github.com/knackwurstking/pg-press/internal/pdf"
+	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
 	"github.com/knackwurstking/pg-press/utils"
@@ -54,7 +55,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 }
 
 func (h *Handler) GetPressPage(c echo.Context) error {
-	user, merr := utils.GetUserFromContext(c)
+	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}

@@ -14,21 +14,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// GetUserFromContext retrieves the authenticated user from the request context
-func GetUserFromContext(c echo.Context) (*shared.User, *errors.MasterError) {
-	userInterface := c.Get("user")
-	if userInterface == nil {
-		return nil, errors.NewMasterError(fmt.Errorf("user missing"), http.StatusBadRequest)
-	}
-
-	user, ok := userInterface.(*shared.User)
-	if !ok {
-		return nil, errors.NewMasterError(fmt.Errorf("invalid user"), http.StatusUnauthorized)
-	}
-
-	return user, nil
-}
-
 // ParseParamInt64 parses an int64 parameter from the request
 func ParseParamInt64(c echo.Context, paramName string) (int64, *errors.MasterError) {
 	idStr := c.Param(paramName)
