@@ -28,7 +28,8 @@ templ ToolStatusEdit(props *ToolStatusEditProps) {
 
 templ toolStatusDisplay(tool *models.Tool) {
 	<div class="flex items-center gap-lg">
-		@components.ToolStatusBadge(tool)
+		// TODO: Set press number if applicable
+		@components.ToolStateBadge(tool, -1)
 		<button
 			type="button"
 			class="small ghost flex gap"
@@ -49,7 +50,8 @@ templ toolStatusDisplay(tool *models.Tool) {
 templ toolStatusEditForm(tool *models.Tool, userHasPermission bool) {
 	<div class="card p-sm flex flex-col gap-sm">
 		<div class="flex items-center gap-sm mb-sm">
-			@components.ToolStatusBadge(tool)
+			// TODO: Set press number if applicable
+			@components.ToolStateBadge(tool, -1)
 			<span class="text-sm text-muted">Regenerierung steuern</span>
 		</div>
 		<div class="flex flex-col gap-sm">

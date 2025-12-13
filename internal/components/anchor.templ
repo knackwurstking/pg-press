@@ -37,7 +37,8 @@ templ ToolAnchor(tool *shared.ResolvedTool, options *ToolAnchorOptions) {
 					{ tool.Position.German() }
 				}
 				if options.EnableStatusBadge {
-					@ToolStatusBadge(tool.Tool)
+					// TODO: Set press number if applicable
+					@ToolStateBadge(tool.Tool, -1)
 				}
 				<span
 					class="total-cycles-container flex justify-end items-center w-full pr text-sm"
