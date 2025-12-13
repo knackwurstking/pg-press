@@ -1,32 +1,34 @@
 package components
 
-import "fmt"
+import (
+	"fmt"
 
-templ NoteCard(note *models.Note, tools []*models.Tool) {
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
+)
+
+templ NoteCard(note *shared.Note, tools []*shared.Tool) {
 	{{
 		filterClass := ""
+		icon := ""
 		switch note.Level {
-		case models.LevelInfo:
+		case shared.LevelInfo:
 			filterClass = "outline"
-		case models.LevelAttention:
+			icon = "bi-info-circle"
+		case shared.LevelAttention:
 			filterClass = "warning outline"
-		case models.LevelBroken:
+			icon = "bi-exclamation-triangle"
+		case shared.LevelBroken:
 			filterClass = "destructive outline"
+			icon = "bi-x-circle"
 		}
 	}}
-	<div class={ fmt.Sprintf("card compact elevation-2 flex-1 min-w-fit %s", filterClass) }>
+	<div class={ "card compact elevation-2 flex-1 min-w-fit " + filterClass }>
 		<div
 			class="card-header flex gap-sm justify-between items-center"
 		>
 			<span class="note-importance flex gap">
-				switch note.Level {
-					case models.LevelInfo:
-						<i class="bi bi-info-circle"></i>
-					case models.LevelAttention:
-						<i class="bi bi-exclamation-triangle"></i>
-					case models.LevelBroken:
-						<i class="bi bi-x-circle"></i>
-				}
+				<i class={ "bi " + icon }></i>
 				<span class="note-date">
 					{ note.CreatedAt.Format("2006-01-02 15:04") }
 				</span>
@@ -34,7 +36,7 @@ templ NoteCard(note *models.Note, tools []*models.Tool) {
 			<span class="flex gap">
 				<button
 					class="icon secondary small"
-					hx-get={ utils.UrlDialogs().EditNote(note.ID, note.Linked) }
+					hx-get={ urlb.UrlDialogs().EditNote(note.ID, note.Linked) }
 					hx-trigger="click"
 					hx-target="body"
 					hx-swap="beforeend"
@@ -45,7 +47,7 @@ templ NoteCard(note *models.Note, tools []*models.Tool) {
 				</button>
 				<button
 					class="icon small destructive"
-					hx-delete={ utils.UrlNotes(note.ID).Delete }
+					hx-delete={ urlb.UrlNotes(note.ID).Delete }
 					hx-trigger="click"
 					hx-confirm="Sind Sie sicher, dass Sie diese Notiz löschen möchten?"
 					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
@@ -66,21 +68,24 @@ templ NoteCard(note *models.Note, tools []*models.Tool) {
 					switch linked.Name {
 						case "tool":
 							for _, tool := range tools {
-								if tool.ID == models.ToolID(linked.ID) {
+								if tool.ID == shared.EntityID(linked.ID) {
 									<a
-										href={ utils.UrlTool(tool.ID, 0, 0).Page }
+										href={ urlb.UrlTool(tool.ID, 0, 0).Page }
 										class="tool-link"
 									>
-										{ fmt.Sprintf("Werkzeug %s %s %s (%s)", tool.Format.String(), tool.Type, tool.Code, tool.Position.GermanString()) }
-										if tool.Press != nil {
-											({ fmt.Sprintf("Presse %d", *tool.Press) })
-										}
+										{ fmt.Sprintf(
+											"Werkzeug %dx%d %s %s (%s)", 
+											tool.Width, tool.Height, 
+											tool.Type, 
+											tool.Code, 
+											tool.Position.German(),
+										) }
 									</a>
 								}
 							}
 						case "press":
 							<a
-								href={ utils.UrlPress(models.PressNumber(linked.ID)).Page }
+								href={ urlb.UrlPress(shared.PressNumber(linked.ID)).Page }
 								class="press-link"
 							>
 								{ fmt.Sprintf("Presse %d", linked.ID) }

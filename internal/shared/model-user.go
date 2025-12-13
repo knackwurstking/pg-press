@@ -1,6 +1,11 @@
 package shared
 
 import (
+	"fmt"
+	"slices"
+	"strings"
+
+	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 )
 
@@ -45,6 +50,15 @@ func (e *User) Clone() *User {
 
 func (e *User) String() string {
 	return "User[ID=" + e.ID.String() + ", Name=" + e.Name + ", ApiKey=" + MaskString(e.ApiKey) + "]"
+}
+
+// IsAdmin checks if the user is an administrator
+func (u *User) IsAdmin() bool {
+	if env.Admins == "" {
+		return false
+	}
+
+	return slices.Contains(strings.Split(env.Admins, ","), fmt.Sprintf("%d", u.ID))
 }
 
 var _ Entity[*User] = (*User)(nil)

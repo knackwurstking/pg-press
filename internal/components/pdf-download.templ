@@ -1,6 +1,9 @@
 package components
 
-import "github.com/knackwurstking/pg-press/models"
+import (
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
+)
 
 // DownloadPDF provides a reusable script function to download PDFs
 
@@ -76,18 +79,18 @@ script DownloadPDF(url templ.SafeURL, defaultFilename, loadingContent, resetCont
 	downloadPDF();
 }
 
-func DownloadCycleSummaryPDF(press models.PressNumber) templ.ComponentScript {
+func DownloadCycleSummaryPDF(press shared.PressNumber) templ.ComponentScript {
 	return DownloadPDF(
-		utils.UrlPress(press).CycleSummaryPDF,
+		urlb.UrlPress(press).CycleSummaryPDF,
 		"cycle_summary.pdf",
 		"Lädt...",
 		"Zusammenfassung (PDF)",
 	)
 }
 
-func DownloadTroubleReportPDF(troubleReportID models.TroubleReportID) templ.ComponentScript {
+func DownloadTroubleReportPDF(troubleReportID shared.EntityID) templ.ComponentScript {
 	return DownloadPDF(
-		utils.UrlTroubleReports(troubleReportID, 0, 0).SharePDF,
+		urlb.UrlTroubleReports(troubleReportID, 0, 0).SharePDF,
 		"trouble_report.pdf",
 		`<i class="bi bi-hourglass-split"></i>`,
 		`<i class="bi bi-share"></i>`,

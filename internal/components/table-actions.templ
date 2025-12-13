@@ -1,13 +1,13 @@
 package components
 
-import "github.com/knackwurstking/pg-press/models"
+import "github.com/knackwurstking/pg-press/internal/shared"
 
 type TableActionsOptions struct {
 	EditHref        templ.SafeURL
 	EditAdminOnly   bool
 	DeleteHref      templ.SafeURL
 	DeleteAdminOnly bool
-	User            *models.User
+	User            *shared.User
 }
 
 templ TableActions(options TableActionsOptions) {
