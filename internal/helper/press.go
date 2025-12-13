@@ -8,12 +8,9 @@ import (
 
 const (
 	SQLGetPressNumberForTool string = `
-		SELECT id, slot_up, slot_down FROM presses WHERE slot_up = :slot_up OR slot_down = :slot_down;
-	`
-	SQLListCyclesForPress string = `
-		SELECT id, press_number, cycles, start, stop
-		FROM press_cycles
-		WHERE slot_up = :tool_id OR slot_down = :tool_id;
+		SELECT id, slot_up, slot_down 
+		FROM presses 
+		WHERE slot_up = :slot_up OR slot_down = :slot_down;
 	`
 )
 
@@ -32,6 +29,14 @@ func GetPressNumberForTool(db *common.DB, toolID shared.EntityID) (shared.PressN
 		return pressNumber, shared.SlotUnknown
 	}
 }
+
+const (
+	SQLListCyclesForPress string = `
+		SELECT id, press_number, cycles, start, stop
+		FROM press_cycles
+		WHERE slot_up = :tool_id OR slot_down = :tool_id;
+	`
+)
 
 // ListCyclesForTool returns all cycles associated with a specific tool by finding
 // the press the tool is associated with and returning cycles for that press
