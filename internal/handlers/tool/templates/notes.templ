@@ -3,15 +3,16 @@ package templates
 import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/components"
-	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
-templ Notes(tool *models.ResolvedTool) {
+// TODO: `any` here is just a placeholder until we implement the notes system
+templ Notes(toolID shared.EntityID, notes []any) {
 	@components.SectionTitle(components.SectionTitleLevelSub, "Notizen") {
 		<button
 			class="icon secondary small flex"
-			hx-get={ utils.UrlDialogs().EditNote(0, fmt.Sprintf("tool_%d", tool.ID)) }
+			hx-get={ urlb.UrlDialogs().EditNote(0, fmt.Sprintf("tool_%d", toolID)) }
 			hx-trigger="click"
 			hx-target="body"
 			hx-swap="beforeend"
@@ -21,10 +22,10 @@ templ Notes(tool *models.ResolvedTool) {
 			<i class="bi bi-plus-lg"></i>
 		</button>
 	}
-	if len(tool.GetNotes()) > 0 {
+	if len(notes) > 0 {
 		<div class="notes-list">
-			for _, note := range tool.GetNotes() {
-				@components.NoteCard(note, nil)
+			for _, n := range notes {
+				@components.NoteCard(n, nil)
 			}
 		</div>
 	} else {
