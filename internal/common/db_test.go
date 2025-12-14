@@ -99,62 +99,62 @@ func TestUserCRUD(t *testing.T) {
 	}
 }
 
-//func TestCookieCRUD(t *testing.T) {
-//	removeDBFiles()
-//
-//	db := NewDB(config)
-//	assert.NotNil(t, db)
-//
-//	err := db.Setup()
-//	if err != nil {
-//		t.Fatalf("DB setup failed: %v", err)
-//	}
-//	defer db.Close()
-//
-//	// Create a test cookie
-//	cookieEntity := &shared.Cookie{
-//		UserAgent: "test-agent",
-//		Value:     "test-cookie-value",
-//		UserID:    1,
-//		LastLogin: 1234567890,
-//	}
-//
-//	// Test create cookie
-//	merr := db.User.Cookie.Create(cookieEntity)
-//	assertNoMasterError(t, merr, "Error creating cookie")
-//
-//	// Test get cookie by value
-//	fetchedCookie, merr := db.User.Cookie.GetByID(cookieEntity.Value)
-//	assertNoMasterError(t, merr, "Error fetching cookie by value")
-//	assert.NotNil(t, fetchedCookie)
-//	assert.Equal(t, cookieEntity.UserAgent, fetchedCookie.UserAgent)
-//	assert.Equal(t, cookieEntity.UserID, fetchedCookie.UserID)
-//
-//	// Test update cookie
-//	fetchedCookie.UserAgent = "updated-agent"
-//	merr = db.User.Cookie.Update(fetchedCookie)
-//	assertNoMasterError(t, merr, "Error updating cookie")
-//
-//	// Verify update
-//	updatedCookie, merr := db.User.Cookie.GetByID(cookieEntity.Value)
-//	assertNoMasterError(t, merr, "Error fetching updated cookie")
-//	assert.Equal(t, "updated-agent", updatedCookie.UserAgent)
-//
-//	// Test list cookies
-//	cookies, merr := db.User.Cookie.List()
-//	assertNoMasterError(t, merr, "Error listing cookies")
-//	assert.Len(t, cookies, 1)
-//
-//	// Test delete cookie
-//	merr = db.User.Cookie.Delete(cookieEntity.Value)
-//	assertNoMasterError(t, merr, "Error deleting cookie")
-//
-//	// Verify deletion, expecting an error
-//	_, merr = db.User.Cookie.GetByID(cookieEntity.Value)
-//	if merr == nil {
-//		t.Fatalf("Expected error when fetching deleted cookie, got none")
-//	}
-//}
+func TestCookieCRUD(t *testing.T) {
+	removeDBFiles()
+
+	db := NewDB(config)
+	assert.NotNil(t, db)
+
+	err := db.Setup()
+	if err != nil {
+		t.Fatalf("DB setup failed: %v", err)
+	}
+	defer db.Close()
+
+	// Create a test cookie
+	cookieEntity := &shared.Cookie{
+		UserAgent: "test-agent",
+		Value:     "test-cookie-value",
+		UserID:    1,
+		LastLogin: 1234567890,
+	}
+
+	// Test create cookie
+	merr := db.User.Cookie.Create(cookieEntity)
+	assertNoMasterError(t, merr, "Error creating cookie")
+
+	// Test get cookie by value
+	fetchedCookie, merr := db.User.Cookie.GetByID(cookieEntity.Value)
+	assertNoMasterError(t, merr, "Error fetching cookie by value")
+	assert.NotNil(t, fetchedCookie)
+	assert.Equal(t, cookieEntity.UserAgent, fetchedCookie.UserAgent)
+	assert.Equal(t, cookieEntity.UserID, fetchedCookie.UserID)
+
+	// Test update cookie
+	fetchedCookie.UserAgent = "updated-agent"
+	merr = db.User.Cookie.Update(fetchedCookie)
+	assertNoMasterError(t, merr, "Error updating cookie")
+
+	// Verify update
+	updatedCookie, merr := db.User.Cookie.GetByID(cookieEntity.Value)
+	assertNoMasterError(t, merr, "Error fetching updated cookie")
+	assert.Equal(t, "updated-agent", updatedCookie.UserAgent)
+
+	// Test list cookies
+	cookies, merr := db.User.Cookie.List()
+	assertNoMasterError(t, merr, "Error listing cookies")
+	assert.Len(t, cookies, 1)
+
+	// Test delete cookie
+	merr = db.User.Cookie.Delete(cookieEntity.Value)
+	assertNoMasterError(t, merr, "Error deleting cookie")
+
+	// Verify deletion, expecting an error
+	_, merr = db.User.Cookie.GetByID(cookieEntity.Value)
+	if merr == nil {
+		t.Fatalf("Expected error when fetching deleted cookie, got none")
+	}
+}
 
 func TestSessionCRUD(t *testing.T) {
 	removeDBFiles()
