@@ -54,12 +54,7 @@ func (s *Config) Open(dbName string) *errors.MasterError {
 
 func (s *Config) Close() error {
 	if s.db != nil {
-		if env.Verbose {
-			log.Println("Closing database:", s.DriverName, "at", s.DatabaseLocation)
-		}
-		err := s.db.Close()
-		s.db = nil
-		return err
+		return s.db.Close()
 	}
 	return nil
 }
