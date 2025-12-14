@@ -46,10 +46,15 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 }
 
 func (h *Handler) GetLoginPage(c echo.Context) *echo.HTTPError {
-	t := templates.LoginPage(
-		c.FormValue("api-key"),
-		shared.ParseQueryBool(c, "invalid"),
+	t := templates.Page(
+		templates.PageProps{
+			FormData: map[string]string{
+				"api-key":         c.FormValue("api-key"),
+				"api-key-invalid": fmt.Sprintf("%t", shared.ParseQueryBool(c, "invalid")),
+			},
+		},
 	)
+
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "Login Page")

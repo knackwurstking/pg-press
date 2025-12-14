@@ -2,7 +2,7 @@ package templates
 
 import "github.com/knackwurstking/pg-press/internal/urlb"
 
-templ apiKeyDialog(apiKey string, invalidApiKey bool) {
+templ apiKeyDialog(apiKey, invalidApiKey string) {
 	<dialog id="login-dialog" class="clean" oncancel="event.preventDefault();">
 		<form
 			action={ urlb.UrlLogin("", nil).Page }
@@ -15,9 +15,7 @@ templ apiKeyDialog(apiKey string, invalidApiKey bool) {
 					type="text"
 					placeholder="API-Schlüssel"
 					value={ apiKey }
-					if invalidApiKey {
-						aria-invalid="true"
-					}
+					aria-invalid?={ invalidApiKey == "true" }
 					required
 				/>
 			</label>

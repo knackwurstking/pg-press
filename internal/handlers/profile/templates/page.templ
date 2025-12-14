@@ -7,19 +7,23 @@ import (
 	"github.com/knackwurstking/pg-press/utils"
 )
 
-templ Page(user *models.User) {
+type PageProps struct {
+	User *models.User
+}
+
+templ Page(p PageProps) {
 	@components.Layout(
 		components.LayoutOptions{
 			PageTitle:      "PG Presse | Profil",
 			AppBarTitle:    "Profil",
-			AdditionalHead: pageProfileAdditionalHead(),
+			AdditionalHead: additionalHead(),
 			NavContent:     components.StandardNavContent(),
 		},
 	) {
 		<main class="container fluid" style="max-width: 42rem; margin: 0 auto;">
-			@profileHeader(user)
+			@profileHeader(p.User)
 			@sectionCookies()
-			@editUserDialog(user)
+			@editUserDialog(p.User)
 		</main>
 	}
 }
@@ -100,7 +104,7 @@ templ editUserDialog(user *models.User) {
 	</dialog>
 }
 
-templ pageProfileAdditionalHead() {
+templ additionalHead() {
 	<style>
 		.profile-header {
 			background: var(--ui-color-100);

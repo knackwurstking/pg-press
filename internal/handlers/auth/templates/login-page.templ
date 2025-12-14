@@ -2,14 +2,18 @@ package templates
 
 import "github.com/knackwurstking/pg-press/internal/components"
 
-templ LoginPage(apiKey string, invalidApiKey bool) {
+type PageProps struct {
+	FormData map[string]string
+}
+
+templ Page(p PageProps) {
 	@components.Layout(components.LayoutOptions{
 		PageTitle:   "PG Presse | Login",
 		AppBarTitle: "Login",
 		NavContent:  components.StandardNavContent(),
 	}) {
 		<main class="container">
-			@apiKeyDialog(apiKey, invalidApiKey)
+			@apiKeyDialog(p.FormData["api-key"], p.FormData["invalid-api-key"])
 			<script>
 				document.querySelector("#login-dialog").showModal();
 			</script>
