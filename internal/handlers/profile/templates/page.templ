@@ -1,19 +1,19 @@
 package templates
 
 import (
-	"github.com/knackwurstking/pg-press/components"
-	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/env"
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
 type PageProps struct {
-	User *models.User
+	User *shared.User
 }
 
 templ Page(p PageProps) {
 	@components.Layout(
-		components.LayoutOptions{
+		components.LayoutProps{
 			PageTitle:      "PG Presse | Profil",
 			AppBarTitle:    "Profil",
 			AdditionalHead: additionalHead(),
@@ -28,7 +28,7 @@ templ Page(p PageProps) {
 	}
 }
 
-templ profileHeader(user *models.User) {
+templ profileHeader(user *shared.User) {
 	<div class="profile-header border">
 		<div class="flex justify-between items-center mb">
 			<h1>{ user.Name }</h1>
@@ -43,7 +43,7 @@ templ profileHeader(user *models.User) {
 		<div class="flex gap flex-wrap justify-between items-center">
 			<div class="telegram-id">
 				<i class="bi bi-telegram"></i>
-				Telegram ID: { user.TelegramID }
+				Telegram ID: { user.ID }
 			</div>
 			<a
 				role="button"
@@ -61,7 +61,7 @@ templ sectionCookies() {
 	<div class="border" style="overflow: hidden; background: var(--ui-color-50);">
 		<span
 			id="cookies"
-			hx-get={ utils.UrlProfile("").Cookies }
+			hx-get={ urlb.UrlProfile("").Cookies }
 			hx-trigger="load"
 			hx-swap="outerHTML"
 			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
@@ -69,13 +69,13 @@ templ sectionCookies() {
 	</div>
 }
 
-templ editUserDialog(user *models.User) {
+templ editUserDialog(user *shared.User) {
 	<dialog
 		id="edit-user-name-dialog"
 		class="profile-dialog border clean"
 		oncancel="event.preventDefault()"
 	>
-		<form action={ utils.UrlProfile("").Page }>
+		<form action={ urlb.UrlProfile("").Page }>
 			<label class="flex flex-col">
 				<strong>Benutzername ändern</strong>
 				<input
@@ -89,7 +89,7 @@ templ editUserDialog(user *models.User) {
 			<footer class="flex gap justify-end mt-lg">
 				<a
 					role="button"
-					href={ utils.UrlProfile("").Page }
+					href={ urlb.UrlProfile("").Page }
 					class="secondary flex gap"
 				>
 					<i class="bi bi-x-circle"></i>

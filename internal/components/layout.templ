@@ -6,14 +6,14 @@ import (
 	ui "github.com/knackwurstking/ui/ui-templ"
 )
 
-type LayoutOptions struct {
+type LayoutProps struct {
 	PageTitle      string // NOTE: "#page-title"
 	AppBarTitle    string // NOTE: "#app-bar-title"
 	NavContent     templ.Component
 	AdditionalHead templ.Component
 }
 
-templ Layout(options LayoutOptions) {
+templ Layout(options LayoutProps) {
 	<!DOCTYPE html>
 	<html lang="de">
 		<head>

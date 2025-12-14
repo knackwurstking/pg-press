@@ -14,7 +14,7 @@ type imageOptions struct {
 	Translator func(string) string
 }
 
-type imageLayoutOptions struct {
+type imageLayoutProps struct {
 	PageWidth   float64
 	LeftMargin  float64
 	RightMargin float64
@@ -33,7 +33,7 @@ type imagePositionOptions struct {
 
 func processImageRow(
 	o *imageOptions,
-	layout *imageLayoutOptions,
+	layout *imageLayoutProps,
 	position *imagePositionOptions,
 	images []*models.Attachment,
 ) {

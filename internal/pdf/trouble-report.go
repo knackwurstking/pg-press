@@ -202,7 +202,7 @@ func renderTroubleReportImagesInGrid(o *troubleReportOptions, images []*models.A
 	usableWidth := pageWidth - leftMargin - rightMargin
 	imageWidth := (usableWidth - 10) / 2 // 10mm spacing between images
 
-	layout := &imageLayoutOptions{
+	layout := &imageLayoutProps{
 		PageWidth:   pageWidth,
 		LeftMargin:  leftMargin,
 		RightMargin: rightMargin,
