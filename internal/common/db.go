@@ -53,7 +53,8 @@ func NewDB(c *shared.Config) *DB {
 // Setup initializes all database services
 func (db *DB) Setup() error {
 	wg := &sync.WaitGroup{}
-	errCh := make(chan error, 3) // User, Press and Tool services
+	errCh := make(chan error, 4) // User, Pres, Tool and Note services
+	wg.Go(db.Tool.Close)
 
 	wg.Go(func() {
 		errCh <- db.User.Setup()
@@ -65,6 +66,10 @@ func (db *DB) Setup() error {
 
 	wg.Go(func() {
 		errCh <- db.Tool.Setup()
+	})
+
+	wg.Go(func() {
+		errCh <- db.Note.Setup()
 	})
 
 	wg.Wait()
@@ -90,6 +95,7 @@ func (db *DB) Close() {
 	wg.Go(db.User.Close)
 	wg.Go(db.Press.Close)
 	wg.Go(db.Tool.Close)
+	wg.Go(db.Note.Close)
 	wg.Wait()
 }
 
@@ -204,11 +210,8 @@ func setupServices(services ...setupServicesProps) error {
 	wg := &sync.WaitGroup{}
 	for _, s := range services {
 		wg.Go(func() {
-			if err := s.setupFn(); err != nil {
-				errCh <- errors.NewMasterError(
-					fmt.Errorf("%s: %w", s.name, err),
-					0,
-				)
+			if merr := s.setupFn(); merr != nil {
+				errCh <- merr.Wrap("%s", s.name)
 			}
 		})
 	}
@@ -221,7 +224,7 @@ func setupServices(services ...setupServicesProps) error {
 	}
 
 	if len(errs) > 0 {
-		return fmt.Errorf("failed to setup user database service:\n%s", strings.Join(errs, "\n -> "))
+		return fmt.Errorf("failed to setup user database service:\n\t%s", strings.Join(errs, "\n\t -> "))
 	}
 
 	return nil
