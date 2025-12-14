@@ -35,10 +35,11 @@ func NewDB(c *shared.Config) *DB {
 			Regeneration: press.NewPressRegenerationService(c),
 		},
 		Tool: &ToolDB{
-			Tool:         tool.NewToolService(c),
-			Regeneration: tool.NewToolRegenerationService(c),
-			Cassette:     tool.NewCassetteService(c),
-			MetalSheet:   tool.NewMetalSheetService(c),
+			Tool:            tool.NewToolService(c),
+			Regeneration:    tool.NewToolRegenerationService(c),
+			Cassette:        tool.NewCassetteService(c),
+			UpperMetalSheet: tool.NewUpperMetalSheetService(c),
+			LowerMetalSheet: tool.NewLowerMetalSheetService(c),
 		},
 	}
 }
@@ -242,10 +243,11 @@ func (pdb *PressDB) Close() {
 
 // ToolDB holds tool-related database services
 type ToolDB struct {
-	Tool         shared.Service[*shared.Tool, shared.EntityID]             `json:"tool"`
-	Regeneration shared.Service[*shared.ToolRegeneration, shared.EntityID] `json:"regeneration"`
-	Cassette     shared.Service[*shared.Cassette, shared.EntityID]         `json:"cassette"`
-	MetalSheet   shared.Service[any, shared.EntityID]                       `json:"metal_sheet"`
+	Tool            shared.Service[*shared.Tool, shared.EntityID]             `json:"tool"`
+	Regeneration    shared.Service[*shared.ToolRegeneration, shared.EntityID] `json:"regeneration"`
+	Cassette        shared.Service[*shared.Cassette, shared.EntityID]         `json:"cassette"`
+	UpperMetalSheet shared.Service[*shared.UpperMetalSheet, shared.EntityID]  `json:"upper_metal_sheet"`
+	LowerMetalSheet shared.Service[*shared.LowerMetalSheet, shared.EntityID]  `json:"lower_metal_sheet"`
 }
 
 // Setup initializes tool database services
@@ -272,8 +274,14 @@ func (tdb *ToolDB) Setup() error {
 	})
 
 	wg.Go(func() {
-		if err := tdb.MetalSheet.Setup(); err != nil {
-			errCh <- fmt.Errorf("metal_sheet: %w", err)
+		if err := tdb.UpperMetalSheet.Setup(); err != nil {
+			errCh <- fmt.Errorf("upper_metal_sheet: %w", err)
+		}
+	})
+
+	wg.Go(func() {
+		if err := tdb.LowerMetalSheet.Setup(); err != nil {
+			errCh <- fmt.Errorf("lower_metal_sheet: %w", err)
 		}
 	})
 
@@ -317,8 +325,14 @@ func (tdb *ToolDB) Close() {
 	})
 
 	wg.Go(func() {
-		if err := tdb.MetalSheet.Close(); err != nil {
-			errCh <- fmt.Errorf("metal_sheet: %w", err)
+		if err := tdb.UpperMetalSheet.Close(); err != nil {
+			errCh <- fmt.Errorf("upper_metal_sheet: %w", err)
+		}
+	})
+
+	wg.Go(func() {
+		if err := tdb.LowerMetalSheet.Close(); err != nil {
+			errCh <- fmt.Errorf("lower_metal_sheet: %w", err)
 		}
 	})
 
