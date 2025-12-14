@@ -3,10 +3,10 @@ package home
 import (
 	"net/http"
 
+	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/home/templates"
-	"github.com/knackwurstking/pg-press/services"
 
 	ui "github.com/knackwurstking/ui/ui-templ"
 
@@ -14,12 +14,12 @@ import (
 )
 
 type Handler struct {
-	registry *services.Registry
+	db *common.DB
 }
 
-func NewHandler(r *services.Registry) *Handler {
+func NewHandler(db *common.DB) *Handler {
 	return &Handler{
-		registry: r,
+		db: db,
 	}
 }
 
@@ -29,12 +29,11 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	})
 }
 
-func (h *Handler) GetHomePage(c echo.Context) error {
-	t := templates.Page()
+func (h *Handler) GetHomePage(c echo.Context) *echo.HTTPError {
+	t := templates.HomePage()
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "Home Page")
 	}
-
 	return nil
 }
