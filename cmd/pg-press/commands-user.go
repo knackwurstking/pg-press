@@ -14,9 +14,9 @@ import (
 
 func listUserCommand() cli.Command {
 	return createSimpleCommand("list", "List all users", func(r *common.DB) error {
-		users, err := r.User.User.List()
-		if err != nil {
-			return err
+		users, merr := r.User.User.List()
+		if merr != nil {
+			return merr
 		}
 
 		fmt.Printf("%-15s %s\n", "Telegram ID", "User Name")
@@ -108,7 +108,7 @@ func addUserCommand() cli.Command {
 					if merr != nil && merr.IsExistsError() {
 						return fmt.Errorf("user already exists: %d (%s)", telegramID, *userName)
 					}
-					return merr
+					return nil
 				})
 			}
 		}),
