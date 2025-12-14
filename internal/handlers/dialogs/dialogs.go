@@ -32,6 +32,9 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 		ui.NewEchoRoute(http.MethodGet, path+"/edit-tool", h.GetEditTool),
 		ui.NewEchoRoute(http.MethodPost, path+"/edit-tool", h.PostEditTool),
 		ui.NewEchoRoute(http.MethodPut, path+"/edit-tool", h.PutEditTool),
+		ui.NewEchoRoute(http.MethodGet, path+"/new-tool", h.GetNewTool),
+		ui.NewEchoRoute(http.MethodPost, path+"/new-tool", h.PostNewTool),
+		ui.NewEchoRoute(http.MethodPut, path+"/new-tool", h.PutNewTool),
 
 		// Edit metal sheet dialog
 		ui.NewEchoRoute(http.MethodGet, path+"/edit-metal-sheet", h.GetEditMetalSheet),

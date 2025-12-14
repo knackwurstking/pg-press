@@ -11,11 +11,12 @@ import (
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/dialogs/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/pg-press/internal/shared"
 
 	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 )
+
+// TODO: Split *EditTool methods into NewTool and EditTool variants fitting for the NewToolDialog and the EditToolDialog
 
 func (h *Handler) GetEditTool(c echo.Context) *echo.HTTPError {
 	var tool *models.Tool
@@ -89,6 +90,145 @@ func (h *Handler) PostEditTool(c echo.Context) *echo.HTTPError {
 }
 
 func (h *Handler) PutEditTool(c echo.Context) *echo.HTTPError {
+	slog.Info("Updating existing tool")
+
+	user, merr := utils.GetUserFromContext(c)
+	if merr != nil {
+		return merr.Echo()
+	}
+
+	toolIDQuery, merr := utils.ParseQueryInt64(c, "id")
+	if merr != nil {
+		return merr.Echo()
+	}
+	toolID := models.ToolID(toolIDQuery)
+
+	formData, merr := GetEditToolFormData(c)
+	if merr != nil {
+		return merr.Echo()
+	}
+
+	tool, merr := h.registry.Tools.Get(toolID)
+	if merr != nil {
+		return merr.Echo()
+	}
+
+	tool.Press = formData.Press
+	tool.Position = formData.Position
+	tool.Format = formData.Format
+	tool.Code = formData.Code
+	tool.Type = formData.Type
+
+	merr = h.registry.Tools.Update(tool, user)
+	if merr != nil {
+		return merr.Echo()
+	}
+
+	// Create feed entry
+	title := "Werkzeug aktualisiert"
+
+	content := fmt.Sprintf("Werkzeug: %s\nTyp: %s\nCode: %s\nPosition: %s",
+		tool.String(), tool.Type, tool.Code, string(tool.Position))
+
+	if tool.Press != nil {
+		content += fmt.Sprintf("\nPresse: %d", *tool.Press)
+	}
+
+	merr = h.registry.Feeds.Add(title, content, user.TelegramID)
+	if merr != nil {
+		slog.Warn("Failed to create feed for tool update", "error", merr)
+	}
+
+	// Set HX headers
+	utils.SetHXTrigger(c, env.HXGlobalTrigger)
+
+	utils.SetHXAfterSettle(c, map[string]any{
+		"toolUpdated": map[string]string{
+			"pageTitle": fmt.Sprintf("PG Presse | %s %s",
+				tool.String(), tool.Position.GermanString()),
+			"appBarTitle": fmt.Sprintf("%s %s", tool.String(),
+				tool.Position.GermanString()),
+		},
+	})
+
+	return nil
+}
+
+// TODO: ...
+func (h *Handler) GetNewTool(c echo.Context) *echo.HTTPError {
+	var tool *models.Tool
+
+	toolIDQuery, _ := utils.ParseQueryInt64(c, "id")
+	if toolIDQuery > 0 {
+		var merr *errors.MasterError
+		tool, merr = h.registry.Tools.Get(models.ToolID(toolIDQuery))
+		if merr != nil {
+			return merr.Echo()
+		}
+	}
+
+	var t templ.Component
+	var tName string
+	if tool != nil {
+		t = templates.EditToolDialog(tool)
+		tName = "EditToolDialog"
+	} else {
+		t = templates.NewToolDialog()
+		tName = "NewToolDialog"
+	}
+
+	err := t.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, tName)
+	}
+
+	return nil
+}
+
+// TODO: ...
+func (h *Handler) PostNewTool(c echo.Context) *echo.HTTPError {
+	slog.Info("Creating new tool")
+
+	user, merr := utils.GetUserFromContext(c)
+	if merr != nil {
+		return merr.Echo()
+	}
+
+	formData, merr := GetEditToolFormData(c)
+	if merr != nil {
+		return merr.Echo()
+	}
+
+	tool := models.NewTool(formData.Position, formData.Format, formData.Code, formData.Type)
+	tool.SetPress(formData.Press)
+
+	_, merr = h.registry.Tools.Add(tool, user)
+	if merr != nil {
+		return merr.Echo()
+	}
+
+	// Create feed entry
+	title := "Neues Werkzeug erstellt"
+
+	content := fmt.Sprintf("Werkzeug: %s\nTyp: %s\nCode: %s\nPosition: %s",
+		tool.String(), tool.Type, tool.Code, string(tool.Position))
+
+	if tool.Press != nil {
+		content += fmt.Sprintf("\nPresse: %d", *tool.Press)
+	}
+
+	merr = h.registry.Feeds.Add(title, content, user.TelegramID)
+	if merr != nil {
+		slog.Warn("Failed to create feed for tool creation", "error", merr)
+	}
+
+	utils.SetHXTrigger(c, env.HXGlobalTrigger)
+
+	return nil
+}
+
+// TODO: ...
+func (h *Handler) PutNewTool(c echo.Context) *echo.HTTPError {
 	slog.Info("Updating existing tool")
 
 	user, merr := utils.GetUserFromContext(c)
