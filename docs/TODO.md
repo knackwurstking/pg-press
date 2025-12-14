@@ -53,3 +53,4 @@ Fix all handler and templates
 - [x] home
 - [x] auth
 - [x] profile
+- [-] tools
