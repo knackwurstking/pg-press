@@ -2,8 +2,10 @@ package tool
 
 import (
 	"database/sql"
+	"log"
 	"sync"
 
+	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
@@ -69,6 +71,9 @@ func NewToolRegenerationService(c *shared.Config) *ToolRegenerationService {
 }
 
 func (s *ToolRegenerationService) Setup() *errors.MasterError {
+	if env.Verbose {
+		log.Println("Setting up ToolRegenerationService", DBName, s.DatabaseLocation)
+	}
 	return s.BaseService.Setup(DBName, SQLCreateToolRegenerationTable)
 }
 

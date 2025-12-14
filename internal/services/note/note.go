@@ -2,8 +2,10 @@ package note
 
 import (
 	"database/sql"
+	"log"
 	"sync"
 
+	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
@@ -66,6 +68,9 @@ func NewNoteService(c *shared.Config) *NoteService {
 }
 
 func (s *NoteService) Setup() *errors.MasterError {
+	if env.Verbose {
+		log.Println("Setting up NoteService", DBName, s.DatabaseLocation)
+	}
 	return s.BaseService.Setup(DBName, SQLCreateNoteTable)
 }
 

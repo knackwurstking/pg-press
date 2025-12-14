@@ -2,8 +2,10 @@ package user
 
 import (
 	"database/sql"
+	"log"
 	"sync"
 
+	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
@@ -64,6 +66,9 @@ func NewUserService(c *shared.Config) *UserService {
 }
 
 func (s *UserService) Setup() *errors.MasterError {
+	if env.Verbose {
+		log.Println("Setting up UserService", DBName, s.DatabaseLocation)
+	}
 	return s.BaseService.Setup(DBName, SQLCreateUserTable)
 }
 

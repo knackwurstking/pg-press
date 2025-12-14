@@ -2,8 +2,10 @@ package press
 
 import (
 	"database/sql"
+	"log"
 	"sync"
 
+	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
@@ -64,6 +66,9 @@ func NewCycleService(c *shared.Config) *CycleService {
 }
 
 func (s *CycleService) Setup() *errors.MasterError {
+	if env.Verbose {
+		log.Println("Setting up CycleService", DBName, s.DatabaseLocation)
+	}
 	return s.BaseService.Setup(DBName, SQLCreateCycleTable)
 }
 

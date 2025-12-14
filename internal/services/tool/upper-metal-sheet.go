@@ -2,8 +2,10 @@ package tool
 
 import (
 	"database/sql"
+	"log"
 	"sync"
 
+	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
@@ -54,6 +56,9 @@ func NewUpperMetalSheetService(c *shared.Config) *UpperMetalSheetService {
 }
 
 func (s *UpperMetalSheetService) Setup() *errors.MasterError {
+	if env.Verbose {
+		log.Println("Setting up UpperMetalSheetService", DBName, s.DatabaseLocation)
+	}
 	return s.BaseService.Setup(DBName, SQLCreateMetalSheetTable)
 }
 

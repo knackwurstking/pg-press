@@ -2,8 +2,10 @@ package press
 
 import (
 	"database/sql"
+	"log"
 	"sync"
 
+	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
@@ -75,6 +77,9 @@ func NewPressService(c *shared.Config) *PressService {
 }
 
 func (s *PressService) Setup() *errors.MasterError {
+	if env.Verbose {
+		log.Println("Setting up PressService", DBName, s.DatabaseLocation)
+	}
 	return s.BaseService.Setup(DBName, SQLCreatePressTable)
 }
 

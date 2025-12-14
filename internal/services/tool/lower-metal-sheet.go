@@ -2,8 +2,10 @@ package tool
 
 import (
 	"database/sql"
+	"log"
 	"sync"
 
+	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
@@ -58,6 +60,9 @@ func NewLowerMetalSheetService(c *shared.Config) *LowerMetalSheetService {
 }
 
 func (s *LowerMetalSheetService) Setup() *errors.MasterError {
+	if env.Verbose {
+		log.Println("Setting up LowerMetalSheetService", DBName, s.DatabaseLocation)
+	}
 	return s.BaseService.Setup(DBName, SQLCreateMetalSheetTable)
 }
 

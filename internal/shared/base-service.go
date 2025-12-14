@@ -1,25 +1,65 @@
 package shared
 
 import (
+	"database/sql"
+	"fmt"
+	"os"
+	"path/filepath"
+	"time"
+
 	"github.com/knackwurstking/pg-press/internal/errors"
 )
 
+type Config struct {
+	DriverName       string `json:"driver_name"`
+	DatabaseLocation string `json:"database_location"`
+}
+
 type BaseService struct {
-	*Config
+	*Config `json:"config"`
+
+	db *sql.DB `json:"-"`
+}
+
+func (s *BaseService) DB() *sql.DB {
+	return s.db
 }
 
 func (bs *BaseService) Setup(dbName, tableCreationQuery string) *errors.MasterError {
-	merr := bs.Open(dbName)
-	if merr != nil {
-		return merr
+	if bs.db != nil {
+		return nil
 	}
 
+	var err error
+	err = os.MkdirAll(bs.DatabaseLocation, 0700)
+	if err != nil {
+		return errors.NewMasterError(err, 0)
+	}
+
+	path := fmt.Sprintf(
+		"file:%s.sqlite?cache=shared&mode=rwc&_journal=WAL&_sync=0",
+		filepath.Join(bs.DatabaseLocation, dbName),
+	)
+	bs.db, err = sql.Open(bs.DriverName, path)
+	if err != nil {
+		return errors.NewMasterError(err, 0)
+	}
+
+	// Configure connection pool to prevent resource exhaustion
+	bs.db.SetMaxOpenConns(10)                 // Allow more concurrent connections
+	bs.db.SetMaxIdleConns(5)                  // Keep some connections alive
+	bs.db.SetConnMaxLifetime(5 * time.Minute) // Close connections after 5 minutes
+
 	return bs.createSQLTable(tableCreationQuery)
+
 }
 
-func (s *BaseService) Close() *errors.MasterError {
-	err := s.Config.Close()
-	if err != nil {
+func (bs *BaseService) Close() *errors.MasterError {
+	if bs.db != nil {
+		err := bs.db.Close()
+		if err == nil {
+			bs.db = nil
+		}
 		return errors.NewMasterError(err, 0)
 	}
 	return nil

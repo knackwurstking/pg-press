@@ -2,8 +2,10 @@ package tool
 
 import (
 	"database/sql"
+	"log"
 	"sync"
 
+	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
@@ -81,6 +83,9 @@ func NewCassetteService(c *shared.Config) *CassetteService {
 }
 
 func (s *CassetteService) Setup() *errors.MasterError {
+	if env.Verbose {
+		log.Println("Setting up CassetteService", DBName, s.DatabaseLocation)
+	}
 	return s.BaseService.Setup(DBName, SQLCreateCassetteTable)
 }
 

@@ -2,8 +2,10 @@ package user
 
 import (
 	"database/sql"
+	"log"
 	"sync"
 
+	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
@@ -67,6 +69,9 @@ func NewCookieService(c *shared.Config) *CookieService {
 }
 
 func (s *CookieService) Setup() *errors.MasterError {
+	if env.Verbose {
+		log.Println("Setting up CookieService", DBName, s.DatabaseLocation)
+	}
 	return s.BaseService.Setup(DBName, SQLCreateCookieTable)
 }
 
