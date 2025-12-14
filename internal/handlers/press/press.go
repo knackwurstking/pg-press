@@ -11,9 +11,9 @@ import (
 	"github.com/knackwurstking/pg-press/internal/handlers/press/templates"
 	"github.com/knackwurstking/pg-press/internal/pdf"
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/services"
-	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/pg-press/internal/shared"
 
 	ui "github.com/knackwurstking/ui/ui-templ"
 

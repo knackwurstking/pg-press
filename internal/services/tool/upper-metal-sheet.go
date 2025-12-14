@@ -142,8 +142,7 @@ func (s *UpperMetalSheetService) Create(entity *shared.UpperMetalSheet) *errors.
 		return errors.NewMasterError(err, 0)
 	}
 	if id <= 0 {
-		return errors.NewMasterError(
-			errors.New ValidationError("invalid ID returned after insert: %v", id), 0)
+		return errors.NewValidationError("invalid ID returned after insert: %v", id).MasterError()
 	}
 
 	entity.ID = shared.EntityID(id)
@@ -187,3 +186,5 @@ func (s *UpperMetalSheetService) Delete(id shared.EntityID) *errors.MasterError 
 
 	return nil
 }
+
+var _ shared.Service[*shared.UpperMetalSheet, shared.EntityID] = (*UpperMetalSheetService)(nil)

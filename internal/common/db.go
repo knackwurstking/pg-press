@@ -6,6 +6,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/services/note"
 	"github.com/knackwurstking/pg-press/internal/services/press"
 	"github.com/knackwurstking/pg-press/internal/services/tool"
 	"github.com/knackwurstking/pg-press/internal/services/user"
@@ -19,6 +21,7 @@ type DB struct {
 	User  *UserDB  `json:"user"`
 	Press *PressDB `json:"press"`
 	Tool  *ToolDB  `json:"tool"`
+	Note  *NoteDB  `json:"note"`
 }
 
 // NewDB creates a new database instance with initialized services
@@ -40,6 +43,10 @@ func NewDB(c *shared.Config) *DB {
 			Cassette:        tool.NewCassetteService(c),
 			UpperMetalSheet: tool.NewUpperMetalSheetService(c),
 			LowerMetalSheet: tool.NewLowerMetalSheetService(c),
+		},
+		Note: &NoteDB{
+
+			Note: note.NewNoteService(c),
 		},
 	}
 }
@@ -96,72 +103,20 @@ type UserDB struct {
 
 // Setup initializes user database services
 func (udb *UserDB) Setup() error {
-	wg := &sync.WaitGroup{}
-	errCh := make(chan error, 3)
-
-	wg.Go(func() {
-		if err := udb.User.Setup(); err != nil {
-			errCh <- fmt.Errorf("user: %w", err)
-		}
-	})
-
-	wg.Go(func() {
-		if err := udb.Cookie.Setup(); err != nil {
-			errCh <- fmt.Errorf("cookie: %w", err)
-		}
-	})
-
-	wg.Go(func() {
-		if err := udb.Session.Setup(); err != nil {
-			errCh <- fmt.Errorf("session: %w", err)
-		}
-	})
-
-	wg.Wait()
-	close(errCh)
-
-	errs := []string{}
-	for err := range errCh {
-		errs = append(errs, err.Error())
-		slog.Error("Failed to setup user database service", "error", err)
-	}
-
-	if len(errs) > 0 {
-		return fmt.Errorf("failed to setup user database service:\n%s", strings.Join(errs, "\n -> "))
-	}
-
-	return nil
+	return setupServices([]setupServicesProps{
+		{"user", udb.User.Setup},
+		{"cookie", udb.Cookie.Setup},
+		{"session", udb.Session.Setup},
+	}...)
 }
 
 // Close shuts down user database services
 func (udb *UserDB) Close() {
-	wg := &sync.WaitGroup{}
-	errCh := make(chan error, 3)
-
-	wg.Go(func() {
-		if err := udb.User.Close(); err != nil {
-			errCh <- fmt.Errorf("user: %w", err)
-		}
-	})
-
-	wg.Go(func() {
-		if err := udb.Cookie.Close(); err != nil {
-			errCh <- fmt.Errorf("cookie: %w", err)
-		}
-	})
-
-	wg.Go(func() {
-		if err := udb.Session.Close(); err != nil {
-			errCh <- fmt.Errorf("session: %w", err)
-		}
-	})
-
-	wg.Wait()
-	close(errCh)
-
-	for err := range errCh {
-		slog.Error("Failed to close user database service", "error", err)
-	}
+	closeServices([]closeServicesProps{
+		{"user", udb.User.Close},
+		{"cookie", udb.Cookie.Close},
+		{"session", udb.Session.Close},
+	}...)
 }
 
 // PressDB holds press-related database services
@@ -173,72 +128,20 @@ type PressDB struct {
 
 // Setup initializes press database services
 func (pdb *PressDB) Setup() error {
-	wg := &sync.WaitGroup{}
-	errCh := make(chan error, 3)
-
-	wg.Go(func() {
-		if err := pdb.Press.Setup(); err != nil {
-			errCh <- fmt.Errorf("press: %w", err)
-		}
-	})
-
-	wg.Go(func() {
-		if err := pdb.Cycle.Setup(); err != nil {
-			errCh <- fmt.Errorf("cycle: %w", err)
-		}
-	})
-
-	wg.Go(func() {
-		if err := pdb.Regeneration.Setup(); err != nil {
-			errCh <- fmt.Errorf("regeneration: %w", err)
-		}
-	})
-
-	wg.Wait()
-	close(errCh)
-
-	errs := []string{}
-	for err := range errCh {
-		errs = append(errs, err.Error())
-		slog.Error("Failed to setup press database service", "error", err)
-	}
-
-	if len(errs) > 0 {
-		return fmt.Errorf("failed to setup press database service:\n%s", strings.Join(errs, "\n -> "))
-	}
-
-	return nil
+	return setupServices([]setupServicesProps{
+		{"press", pdb.Press.Setup},
+		{"cycle", pdb.Cycle.Setup},
+		{"regeneration", pdb.Regeneration.Setup},
+	}...)
 }
 
 // Close shuts down press database services
 func (pdb *PressDB) Close() {
-	wg := &sync.WaitGroup{}
-	errCh := make(chan error, 3)
-
-	wg.Go(func() {
-		if err := pdb.Press.Close(); err != nil {
-			errCh <- fmt.Errorf("press: %w", err)
-		}
-	})
-
-	wg.Go(func() {
-		if err := pdb.Cycle.Close(); err != nil {
-			errCh <- fmt.Errorf("cycle: %w", err)
-		}
-	})
-
-	wg.Go(func() {
-		if err := pdb.Regeneration.Close(); err != nil {
-			errCh <- fmt.Errorf("regeneration: %w", err)
-		}
-	})
-
-	wg.Wait()
-	close(errCh)
-
-	for err := range errCh {
-		slog.Error("Failed to close press database service", "error", err)
-	}
+	closeServices([]closeServicesProps{
+		{"press", pdb.Press.Close},
+		{"cycle", pdb.Cycle.Close},
+		{"regeneration", pdb.Regeneration.Close},
+	}...)
 }
 
 // ToolDB holds tool-related database services
@@ -252,94 +155,99 @@ type ToolDB struct {
 
 // Setup initializes tool database services
 func (tdb *ToolDB) Setup() error {
+	return setupServices([]setupServicesProps{
+		{"tool", tdb.Tool.Setup},
+		{"regeneration", tdb.Regeneration.Setup},
+		{"cassette", tdb.Cassette.Setup},
+		{"upper_metal_sheet", tdb.UpperMetalSheet.Setup},
+		{"lower_metal_sheet", tdb.LowerMetalSheet.Setup},
+	}...)
+}
+
+// Close shuts down tool database services
+func (tdb *ToolDB) Close() {
+	closeServices([]closeServicesProps{
+		{"tool", tdb.Tool.Close},
+		{"regeneration", tdb.Regeneration.Close},
+		{"cassette", tdb.Cassette.Close},
+		{"upper_metal_sheet", tdb.UpperMetalSheet.Close},
+		{"lower_metal_sheet", tdb.LowerMetalSheet.Close},
+	}...)
+}
+
+// NoteDB holds tool-related database services
+type NoteDB struct {
+	Note shared.Service[*shared.Note, shared.EntityID] `json:"note"`
+}
+
+// Setup initializes tool database services
+func (ndb *NoteDB) Setup() error {
+	return setupServices([]setupServicesProps{
+		{"note", ndb.Note.Setup},
+	}...)
+}
+
+// Close shuts down tool database services
+func (ndb *NoteDB) Close() {
+	closeServices([]closeServicesProps{
+		{"note", ndb.Note.Close},
+	}...)
+}
+
+type setupServicesProps struct {
+	name    string
+	setupFn func() *errors.MasterError
+}
+
+func setupServices(services ...setupServicesProps) error {
+	errCh := make(chan *errors.MasterError, len(services))
+
 	wg := &sync.WaitGroup{}
-	errCh := make(chan error, 4)
-
-	wg.Go(func() {
-		if err := tdb.Tool.Setup(); err != nil {
-			errCh <- fmt.Errorf("tool: %w", err)
-		}
-	})
-
-	wg.Go(func() {
-		if err := tdb.Regeneration.Setup(); err != nil {
-			errCh <- fmt.Errorf("regeneration: %w", err)
-		}
-	})
-
-	wg.Go(func() {
-		if err := tdb.Cassette.Setup(); err != nil {
-			errCh <- fmt.Errorf("cassette: %w", err)
-		}
-	})
-
-	wg.Go(func() {
-		if err := tdb.UpperMetalSheet.Setup(); err != nil {
-			errCh <- fmt.Errorf("upper_metal_sheet: %w", err)
-		}
-	})
-
-	wg.Go(func() {
-		if err := tdb.LowerMetalSheet.Setup(); err != nil {
-			errCh <- fmt.Errorf("lower_metal_sheet: %w", err)
-		}
-	})
-
+	for _, s := range services {
+		wg.Go(func() {
+			if err := s.setupFn(); err != nil {
+				errCh <- errors.NewMasterError(
+					fmt.Errorf("%s: %w", s.name, err),
+					0,
+				)
+			}
+		})
+	}
 	wg.Wait()
 	close(errCh)
 
 	errs := []string{}
 	for err := range errCh {
 		errs = append(errs, err.Error())
-		slog.Error("Failed to setup tool database service", "error", err)
 	}
 
 	if len(errs) > 0 {
-		return fmt.Errorf("failed to setup tool database service:\n%s", strings.Join(errs, "\n -> "))
+		return fmt.Errorf("failed to setup user database service:\n%s", strings.Join(errs, "\n -> "))
 	}
 
 	return nil
 }
 
-// Close shuts down tool database services
-func (tdb *ToolDB) Close() {
+type closeServicesProps struct {
+	name    string
+	closeFn func() *errors.MasterError
+}
+
+func closeServices(services ...closeServicesProps) {
+	errCh := make(chan error, len(services))
+
 	wg := &sync.WaitGroup{}
-	errCh := make(chan error, 4)
-
-	wg.Go(func() {
-		if err := tdb.Tool.Close(); err != nil {
-			errCh <- fmt.Errorf("tool: %w", err)
-		}
-	})
-
-	wg.Go(func() {
-		if err := tdb.Regeneration.Close(); err != nil {
-			errCh <- fmt.Errorf("regeneration: %w", err)
-		}
-	})
-
-	wg.Go(func() {
-		if err := tdb.Cassette.Close(); err != nil {
-			errCh <- fmt.Errorf("cassette: %w", err)
-		}
-	})
-
-	wg.Go(func() {
-		if err := tdb.UpperMetalSheet.Close(); err != nil {
-			errCh <- fmt.Errorf("upper_metal_sheet: %w", err)
-		}
-	})
-
-	wg.Go(func() {
-		if err := tdb.LowerMetalSheet.Close(); err != nil {
-			errCh <- fmt.Errorf("lower_metal_sheet: %w", err)
-		}
-	})
-
+	for _, s := range services {
+		wg.Go(func() {
+			if err := s.closeFn(); err != nil {
+				errCh <- fmt.Errorf("%s: %w", s.name, err)
+			}
+		})
+	}
 	wg.Wait()
 	close(errCh)
 
 	for err := range errCh {
-		slog.Error("Failed to close tool database service", "error", err)
+		slog.Error("Failed to close database service(s)", "error", err)
 	}
 }

@@ -10,22 +10,22 @@ import (
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/dialogs/templates"
-	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 
 	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 )
 
 func (h *Handler) GetEditNote(c echo.Context) *echo.HTTPError {
-	user, merr := utils.GetUserFromContext(c)
+	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}
 
 	var (
 		linkToTables []string
-		note         *models.Note
+		note         *shared.Note
 	)
 
 	// Parse linked tables from query parameter
@@ -34,10 +34,10 @@ func (h *Handler) GetEditNote(c echo.Context) *echo.HTTPError {
 	}
 
 	// Check if we're editing an existing note
-	if id, _ := utils.ParseQueryInt64(c, "id"); id > 0 {
-		noteID := models.NoteID(id)
+	if id, _ := shared.ParseQueryInt64(c, "id"); id > 0 {
+		noteID := shared.EntityID(id)
 
-		note, merr = h.registry.Notes.Get(noteID)
+		note, merr = h.db.Note.Note.Get(noteID)
 		if merr != nil {
 			return merr.Echo()
 		}
@@ -66,31 +66,12 @@ func (h *Handler) GetEditNote(c echo.Context) *echo.HTTPError {
 func (h *Handler) PostEditNote(c echo.Context) *echo.HTTPError {
 	slog.Info("Creating new note")
 
-	user, merr := utils.GetUserFromContext(c)
-	if merr != nil {
-		return merr.Echo()
-	}
-
 	note, merr := GetNoteFormData(c)
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	// Create feed entry
-	title := "Neue Notiz erstellt"
-	content := fmt.Sprintf("Eine neue Notiz wurde erstellt: %s", note.Content)
-
-	// Add linked info if any
-	if note.Linked != "" {
-		content += fmt.Sprintf("\nVerknüpft mit: %s", note.Linked)
-	}
-
-	merr = h.registry.Feeds.Add(title, content, user.TelegramID)
-	if merr != nil {
-		slog.Warn("Failed to create feed for cycle creation", "error", merr)
-	}
-
-	utils.SetHXTrigger(c, env.HXGlobalTrigger)
+	urlb.SetHXTrigger(c, env.HXGlobalTrigger)
 
 	return nil
 }
@@ -138,13 +119,13 @@ func (h *Handler) PutEditNote(c echo.Context) *echo.HTTPError {
 	}
 
 	// Trigger reload of notes sections
-	utils.SetHXTrigger(c, env.HXGlobalTrigger)
+	urlb.SetHXTrigger(c, env.HXGlobalTrigger)
 
 	return nil
 }
 
-func GetNoteFormData(c echo.Context) (*models.Note, *errors.MasterError) {
-	note := &models.Note{}
+func GetNoteFormData(c echo.Context) (*shared.Note, *errors.MasterError) {
+	note := &shared.Note{}
 
 	// Parse level (required)
 	levelStr := c.FormValue("level")
@@ -168,7 +149,7 @@ func GetNoteFormData(c echo.Context) (*models.Note, *errors.MasterError) {
 		)
 	}
 
-	note.Level = models.Level(levelInt)
+	note.Level = shared.NoteLevel(levelInt)
 
 	// Parse content (required)
 	note.Content = strings.TrimSpace(c.FormValue("content"))

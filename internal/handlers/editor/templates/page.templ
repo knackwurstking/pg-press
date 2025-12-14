@@ -2,20 +2,21 @@ package templates
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pg-press/internal/components"
-	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/utils"
 	"strconv"
+
+	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
 type PageProps struct {
-	Type        models.EditorType
+	Type        shared.EditorType
 	ID          int64
 	ReturnURL   templ.SafeURL
 	Title       string
 	Content     string
 	UseMarkdown bool
-	Attachments []*models.Attachment
+	Attachments []*shared.Attachment
 }
 
 templ Page(props *PageProps) {
@@ -42,7 +43,7 @@ templ Page(props *PageProps) {
 				<form
 					class="editor-form flex flex-col gap px"
 					method="POST"
-					action={ utils.UrlEditor(props.Type, fmt.Sprintf("%d", props.ID), props.ReturnURL).Save }
+					action={ urlb.UrlEditor(props.Type, fmt.Sprintf("%d", props.ID), props.ReturnURL).Save }
 					enctype="multipart/form-data"
 				>
 					@hiddenFields(props)
@@ -364,7 +365,7 @@ templ markdownToggle(useMarkdown bool) {
 				<div class="ml-auto flex justify-end items-center gap-xs">
 					<a
 						role="button"
-						href={ utils.UrlHelp().MarkdownPage }
+						href={ urlb.UrlHelp().MarkdownPage }
 						target="_blank"
 						class="small primary ghost"
 						style="text-wrap: nowrap;"
@@ -445,7 +446,7 @@ templ attachmentsSeparator() {
 	</div>
 }
 
-templ attachmentsSection(attachments []*models.Attachment) {
+templ attachmentsSection(attachments []*shared.Attachment) {
 	<div class="border-2 p-lg muted mt transition-all" style="border-radius: var(--ui-radius);">
 		@attachmentsSectionHeader()
 		if len(attachments) > 0 {
@@ -468,7 +469,7 @@ templ attachmentsSectionHeader() {
 	</div>
 }
 
-templ existingAttachments(attachments []*models.Attachment) {
+templ existingAttachments(attachments []*shared.Attachment) {
 	<details class="border mb" style="border-radius: var(--ui-radius);">
 		<summary class="p cursor-pointer text-medium flex gap items-center">
 			<i class="bi bi-images"></i>
@@ -482,7 +483,7 @@ templ existingAttachments(attachments []*models.Attachment) {
 	</details>
 }
 
-templ existingAttachmentItem(attachment *models.Attachment, index int) {
+templ existingAttachmentItem(attachment *shared.Attachment, index int) {
 	<div
 		class="p border flex gap justify-between items-center"
 		data-id={ fmt.Sprintf("%d", attachment.GetID()) }
@@ -497,7 +498,7 @@ templ existingAttachmentItem(attachment *models.Attachment, index int) {
 				type="button"
 				class="secondary small"
 				onclick={ components.OpenImageViewer(
-					utils.UrlTroubleReports(0, attachment.GetID(), 0).Attachment,
+					urlb.UrlTroubleReports(0, attachment.GetID(), 0).Attachment,
 				) }
 			>
 				<i class="bi bi-eye"></i>
@@ -586,19 +587,19 @@ templ formActions(options *PageProps) {
 	</div>
 }
 
-func getTypeName(editorType models.EditorType) string {
+func getTypeName(editorType shared.EditorType) string {
 	switch editorType {
-	case models.TypeTroubleReport:
+	case shared.TypeTroubleReport:
 		return "Problembericht"
 	default:
 		return "Dokument"
 	}
 }
 
-func supportsAttachments(editorType models.EditorType) bool {
-	return editorType == models.TypeTroubleReport
+func supportsAttachments(editorType shared.EditorType) bool {
+	return editorType == shared.TypeTroubleReport
 }
 
-script deleteAttachment(attachmentId models.AttachmentID) {
+script deleteAttachment(attachmentId shared.EntityID) {
 	deleteAttachment(attachmentId);
 }

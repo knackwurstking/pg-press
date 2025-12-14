@@ -7,8 +7,7 @@ import (
 
 	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/env"
-	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/pg-press/internal/shared"
 
 	ui "github.com/knackwurstking/ui/ui-templ"
 
@@ -33,17 +32,17 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 }
 
 // DeleteMetalSheet handles the deletion of metal sheets
-func (h *Handler) HTMXDeleteMetalSheet(c echo.Context) error {
+func (h *Handler) HTMXDeleteMetalSheet(c echo.Context) *echo.HTTPError {
 	slog.Info("Remove a metal sheet entry")
 
 	// Get current user for feed creation
-	user, merr := utils.GetUserFromContext(c)
+	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}
 
 	// Extract metal sheet ID from query parameters
-	metalSheetIDQuery, merr := utils.ParseQueryInt64(c, "id")
+	metalSheetIDQuery, merr := shared.ParseQueryInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}

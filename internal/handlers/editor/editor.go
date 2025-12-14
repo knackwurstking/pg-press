@@ -12,8 +12,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/editor/templates"
-	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/pg-press/internal/shared"
 
 	ui "github.com/knackwurstking/ui/ui-templ"
 
@@ -38,7 +37,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	})
 }
 
-func (h *Handler) GetEditorPage(c echo.Context) error {
+func (h *Handler) GetEditorPage(c echo.Context) *echo.HTTPError {
 	// Parse query parameters
 	editorType := models.EditorType(c.QueryParam("type"))
 	if editorType == "" {
@@ -78,7 +77,7 @@ func (h *Handler) GetEditorPage(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) PostSaveContent(c echo.Context) error {
+func (h *Handler) PostSaveContent(c echo.Context) *echo.HTTPError {
 	var (
 		editorType = c.FormValue("type")
 		idParam    = c.FormValue("id")
@@ -87,7 +86,7 @@ func (h *Handler) PostSaveContent(c echo.Context) error {
 	slog.Info("Save editor content", "type", editorType, "id", idParam)
 
 	// Get user from context
-	user, merr := utils.GetUserFromContext(c)
+	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}
