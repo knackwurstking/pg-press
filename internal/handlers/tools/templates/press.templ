@@ -2,98 +2,105 @@ package templates
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pg-press/components"
+	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 )
+
+type SectionPressProps struct {
+	PressUtilizations map[shared.PressNumber]*shared.PressUtilization
+}
 
 // TODO:
 // - The trigger "pageLoaded from:body" needs to be removed and replaced with something more specific.
-templ SectionPress(pressUtilization []models.PressUtilization) {
+templ SectionPress(p SectionPressProps) {
 	<span
-		hx-get={ utils.UrlTools(0).SectionPress }
+		hx-get={ urlb.UrlTools(0).SectionPress }
 		hx-trigger="pageLoaded from:body"
-		hx-target={ "#" + IDTabContent }
+		hx-target="#tab-content"
 		hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 	></span>
 	<ul class="flex flex-col gap m-0 p-0" style="list-style: none;">
-		for _, u := range pressUtilization {
-			{{
-				var (
-					top         string
-					topCassette string
-					bottom      string
-				)
-
-				for _, t := range u.Tools {
-					switch t.Position {
-					case models.PositionTop:
-						top = fmt.Sprintf("%s %s %s", t.Format.String(), t.Code, t.Type)
-					case models.PositionTopCassette:
-						topCassette = fmt.Sprintf("%s %s %s", t.Format.String(), t.Code, t.Type)
-					case models.PositionBottom:
-						bottom = fmt.Sprintf("%s %s %s", t.Format.String(), t.Code, t.Type)
-					}
-				}
-			}}
-			@listPressItem(listPressItemOptions{
-				Title:       fmt.Sprintf("Presse %d", u.PressNumber),
-				Top:         top,
-				TopCassette: topCassette,
-				Bottom:      bottom,
-				Href:        string(utils.UrlPress(u.PressNumber).Page),
+		for pn, u := range p.PressUtilizations {
+			@listPressItem(listPressItemProps{
+				PressNumber:       pn,
+				SlotUpper:         u.SlotUpper,
+				SlotUpperCassette: u.SlotUpperCassette,
+				SlotLower:         u.SlotLower,
 			})
 		}
 	</ul>
 }
 
-type listPressItemOptions struct {
-	Title       string
-	Top         string
-	TopCassette string
-	Bottom      string
-	Href        string
+type listPressItemProps struct {
+	PressNumber       shared.PressNumber
+	SlotUpper         *shared.Tool
+	SlotUpperCassette *shared.Cassette
+	SlotLower         *shared.Tool
 }
 
-templ listPressItem(props listPressItemOptions) {
-	<li title={ props.Title }>
+templ listPressItem(p listPressItemProps) {
+	{{ title := fmt.Sprintf("Presse %d", p.PressNumber) }}
+	<li title={ title }>
 		<a
 			role="button"
-			href={ templ.SafeURL(props.Href) }
+			href={ urlb.UrlPress(p.PressNumber).Page }
 			class="outline contrast flex justify-between items-center"
 		>
 			<span class="flex flex-col gap-lg w-full">
-				<h5>{ props.Title }</h5>
+				<h5>{ title }</h5>
 				<span class="flex flex-wrap gap-lg justify-between items-center w-full">
-					if props.Top != "" || props.TopCassette != "" {
+					if p.SlotUpper != nil || p.SlotUpperCassette != nil {
 						<!-- Upper Tool -->
 						<span class="flex flex-col gap-sm">
-							if props.Top != "" {
+							if p.SlotUpper != nil {
+								{{
+									text := fmt.Sprintf("%dx%d %s %s",
+										p.SlotUpper.Width, p.SlotUpper.Height,
+										p.SlotUpper.Code,
+										p.SlotUpper.Type,
+									)
+								}}
 								<span class="flex flex-col gap-0 justify-center items-start gap-sm">
 									@components.SmallBadge("primary", "text-bold") {
 										{ shared.SlotUpper.German() }
 									}
-									<small class="text-sm">{ props.Top }</small>
+									<small class="text-sm">{ text }</small>
 								</span>
 							}
-							if props.TopCassette != "" {
+							if p.SlotUpperCassette != nil {
+								{{
+									text := fmt.Sprintf("%dx%d %s %s %.1fmm -> %.1fmm",
+										p.SlotUpperCassette.Width, p.SlotUpperCassette.Height,
+										p.SlotUpperCassette.Code,
+										p.SlotUpperCassette.Type,
+										p.SlotUpperCassette.MinThickness,
+										p.SlotUpperCassette.MaxThickness,
+									)
+								}}
 								<span class="flex flex-col gap-0 justify-center items-start gap-sm">
 									@components.SmallBadge("primary", "text-bold") {
 										{ shared.SlotUpperCassette.German() }
 									}
-									<small class="text-sm">{ props.TopCassette }</small>
+									<small class="text-sm">{ text }</small>
 								</span>
 							}
 						</span>
 					}
-					if props.Bottom != "" {
+					if p.SlotLower != nil {
+						{{
+							text := fmt.Sprintf("%dx%d %s %s",
+								p.SlotUpper.Width, p.SlotUpper.Height,
+								p.SlotUpper.Code,
+								p.SlotUpper.Type,
+							)
+						}}
 						<!-- Lower Tool -->
 						<span class="flex flex-col justify-center items-start gap-sm">
 							@components.SmallBadge("primary", "text-bold") {
 								{ shared.SlotLower.German() }
 							}
-							<small class="text-sm">{ props.Bottom }</small>
+							<small class="text-sm">{ text }</small>
 						</span>
 					}
 				</span>

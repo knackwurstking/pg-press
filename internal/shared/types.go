@@ -45,7 +45,7 @@ const (
 )
 
 var (
-	AllPressesNumbers []PressNumber = []PressNumber{
+	AllPressNumbers []PressNumber = []PressNumber{
 		PressNumber0,
 		PressNumber2,
 		PressNumber3,
@@ -80,7 +80,7 @@ func (p PressNumber) String() string {
 }
 
 func (p PressNumber) IsValid() bool {
-	return slices.Contains(AllPressesNumbers, p)
+	return slices.Contains(AllPressNumbers, p)
 }
 
 func (um UnixMilli) FormatDate() string {

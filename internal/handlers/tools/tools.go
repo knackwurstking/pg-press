@@ -1,26 +1,31 @@
 package tools
 
 import (
-	"fmt"
-	"log/slog"
+	"log"
 	"net/http"
 
+	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/tools/templates"
+	"github.com/knackwurstking/pg-press/internal/helper"
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/pg-press/services"
+	"github.com/knackwurstking/pg-press/internal/urlb"
+
 	ui "github.com/knackwurstking/ui/ui-templ"
+
 	"github.com/labstack/echo/v4"
 )
 
 type Handler struct {
-	registry *services.Registry
+	DB     *common.DB
+	Logger *log.Logger
 }
 
-func NewHandler(r *services.Registry) *Handler {
+func NewHandler(db *common.DB) *Handler {
 	return &Handler{
-		registry: r,
+		DB:     db,
+		Logger: env.NewLogger("handler: tools: "),
 	}
 }
 
@@ -36,13 +41,13 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	})
 }
 
-func (h *Handler) GetToolsPage(c echo.Context) error {
+func (h *Handler) GetToolsPage(c echo.Context) *echo.HTTPError {
 	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	t := templates.Page(user)
+	t := templates.Page(templates.PageProps{User: user})
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "Tools Page")
@@ -51,82 +56,63 @@ func (h *Handler) GetToolsPage(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) HTMXDeleteTool(c echo.Context) error {
-	slog.Info("Deleting tool")
-
-	toolIDQuery, merr := utils.ParseQueryInt64(c, "id")
+func (h *Handler) HTMXDeleteTool(c echo.Context) *echo.HTTPError {
+	id, merr := shared.ParseQueryInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
-	toolID := models.ToolID(toolIDQuery)
+	toolID := shared.EntityID(id)
 
-	user, merr := shared.GetUserFromContext(c)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	tool, merr := h.registry.Tools.Get(toolID)
+	merr = h.DB.Tool.Tool.Delete(toolID)
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	merr = h.registry.Tools.Delete(toolID, user)
-	if merr != nil {
-		return merr.Echo()
+	if env.Verbose {
+		log.Println("Deleted tool with ID:", toolID)
 	}
 
-	// Create feed entry
-	h.createToolFeed(user, tool, "Werkzeug gelöscht")
+	urlb.SetHXTrigger(c, "tools-tab")
 
-	utils.SetHXRedirect(c, "/tools")
 	return nil
 }
 
-func (h *Handler) HTMXMarkToolAsDead(c echo.Context) error {
-	slog.Info("Marking tool as dead")
-
-	toolIDQuery, merr := utils.ParseQueryInt64(c, "id")
+func (h *Handler) HTMXMarkToolAsDead(c echo.Context) *echo.HTTPError {
+	id, merr := shared.ParseQueryInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
-	toolID := models.ToolID(toolIDQuery)
+	toolID := shared.EntityID(id)
 
-	user, merr := shared.GetUserFromContext(c)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	tool, merr := h.registry.Tools.Get(toolID)
+	tool, merr := h.DB.Tool.Tool.GetByID(toolID)
 	if merr != nil {
 		return merr.Echo()
 	}
 
 	if tool.IsDead {
-		return echo.NewHTTPError(
-			http.StatusBadRequest,
-			"tool is already marked as dead",
-		)
+		return nil
 	}
+	tool.IsDead = true
 
-	merr = h.registry.Tools.MarkAsDead(toolID, user)
+	merr = h.DB.Tool.Tool.Update(tool)
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	// Create feed entry
-	h.createToolFeed(user, tool, "Werkzeug als Tot markiert")
+	urlb.SetHXTrigger(c, "tools-tab")
 
-	utils.SetHXRedirect(c, "/tools")
 	return nil
 }
 
-func (h *Handler) HTMXGetSectionPress(c echo.Context) error {
-	pressUtilization, merr := h.registry.Tools.PressUtilization()
+func (h *Handler) HTMXGetSectionPress(c echo.Context) *echo.HTTPError {
+	pressUtilizations, merr := helper.GetPressUtilizations(h.DB, shared.AllPressNumbers)
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	t := templates.SectionPress(pressUtilization)
+	t := templates.SectionPress(templates.SectionPressProps{
+		PressUtilizations: pressUtilizations,
+	})
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "SectionPress")
@@ -161,27 +147,15 @@ func (h *Handler) renderSectionTools(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	allTools, merr := h.registry.Tools.List()
+	tools, merr := h.DB.Tool.Tool.List()
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	// TODO: Continue here...
-	var tools []*models.ResolvedTool
-	for _, t := range allTools {
-		if t.IsDead {
-			continue
-		}
-
-		rt, merr := services.ResolveTool(h.registry, t)
-		if merr != nil {
-			return merr.Echo()
-		}
-
-		tools = append(tools, rt)
-	}
-
-	t := templates.SectionTools(tools, user)
+	t := templates.SectionTools(templates.SectionToolsProps{
+		Tools: tools,
+		User:  user,
+	})
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "SectionTools")

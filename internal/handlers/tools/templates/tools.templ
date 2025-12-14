@@ -2,22 +2,26 @@ package templates
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pg-press/components"
+	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"github.com/knackwurstking/pg-press/models"
 )
+
+type SectionToolsProps struct {
+	Tools []*shared.Tool
+	User  *shared.User
+}
 
 // TODO:
 // - The trigger "pageLoaded from:body" needs to be removed and replaced with something more specific.
-templ SectionTools(tools []*shared.Tool, user *models.User) {
+templ SectionTools(p SectionToolsProps) {
 	<span
 		hx-get={ urlb.UrlTools(0).SectionTools }
 		hx-trigger="pageLoaded from:body"
-		hx-target={ "#" + IDTabContent }
+		hx-target="#tab-content"
 		hx-on::response-error="alert(event.detail.xhr.responseText)"
 	></span>
-	@sectionToolsFilter(tools)
+	@sectionToolsFilter(p.Tools)
 	<div class="all-tools p" style="margin-top: 3.5rem;">
 		@components.ActionBar() {
 			<button
@@ -32,12 +36,12 @@ templ SectionTools(tools []*shared.Tool, user *models.User) {
 			</button>
 		}
 		<ul id="tools-list" class="flex flex-col gap p-0" style="list-style: none;">
-			@ToolsList(tools, user)
+			@ToolsList(p.Tools, p.User)
 		</ul>
 	</div>
 }
 
-templ sectionToolsFilter(tools []*models.ResolvedTool) {
+templ sectionToolsFilter(tools []*shared.Tool) {
 	<div
 		class="flex gap-sm flex-wrap justify-evenly backdrop"
 		style="
@@ -60,20 +64,18 @@ templ sectionToolsFilter(tools []*models.ResolvedTool) {
 	<script>initFilterInputFromQuery()</script>
 }
 
-templ ToolsList(tools []*models.ResolvedTool, user *models.User) {
+templ ToolsList(tools []*shared.Tool, user *shared.User) {
 	for _, t := range tools {
 		// NOTE: This is just a provisorium
-		if (t.Tool.Type == "Unbekannt" || t.Tool.Code == "Unbekannt") && !user.IsAdmin() {
+		if (t.Type == "Unbekannt" || t.Code == "Unbekannt") && !user.IsAdmin() {
 			{{ continue }}
 		}
 		@toolsListItem(t.ID, t)
 	}
 }
 
-templ toolsListItem(id models.ToolID, tool *models.ResolvedTool) {
-	<li id={ fmt.Sprintf("tool-%d", id) } class="tool-item" style="display: none;">
-		@components.ToolAnchor(tool, &components.ToolAnchorOptions{
-			EnableStatusBadge: true,
-		})
+templ toolsListItem(toolID shared.EntityID, tool *shared.Tool) {
+	<li id={ fmt.Sprintf("tool-%d", toolID) } class="tool-item" style="display: none;">
+		@components.ToolAnchor(tool, nil, nil, nil)
 	</li>
 }

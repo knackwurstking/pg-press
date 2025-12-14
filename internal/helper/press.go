@@ -69,3 +69,62 @@ func ListCyclesForTool(db *common.DB, toolID shared.EntityID) ([]*shared.Cycle, 
 
 	return cycles, nil
 }
+
+func GetPressUtilization(db *common.DB, pressNumber shared.PressNumber) (
+	*shared.PressUtilization, *errors.MasterError,
+) {
+	pu := &shared.PressUtilization{PressNumber: pressNumber}
+
+	press, merr := db.Press.Press.GetByID(pressNumber)
+	if merr != nil {
+		return nil, merr
+	}
+
+	if press.SlotUp > 0 {
+		// Get the top tool and cassette
+		tool, merr := db.Tool.Tool.GetByID(press.SlotUp)
+		if merr != nil {
+			return nil, merr
+		}
+		pu.SlotUpper = tool
+
+		if tool.Cassette > 0 {
+			cassette, merr := db.Tool.Cassette.GetByID(tool.Cassette)
+			if merr != nil {
+				return nil, merr
+			}
+			pu.SlotUpperCassette = cassette
+		}
+	} else {
+		// Get the bottom tool
+		pu.SlotUpper = nil
+	}
+
+	if press.SlotDown > 0 {
+		tool, merr := db.Tool.Tool.GetByID(press.SlotDown)
+		if merr != nil {
+			return nil, merr
+		}
+		pu.SlotLower = tool
+	} else {
+		pu.SlotLower = nil
+	}
+
+	return pu, nil
+}
+
+func GetPressUtilizations(db *common.DB, pressNumbers []shared.PressNumber) (
+	map[shared.PressNumber]*shared.PressUtilization, *errors.MasterError,
+) {
+	utilizations := make(map[shared.PressNumber]*shared.PressUtilization, len(pressNumbers))
+
+	for _, pn := range pressNumbers {
+		pu, merr := GetPressUtilization(db, pn)
+		if merr != nil {
+			return nil, merr
+		}
+		utilizations[pn] = pu
+	}
+
+	return utilizations, nil
+}
