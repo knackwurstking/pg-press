@@ -6,14 +6,26 @@ import (
 	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
-templ Cookies(cookies []*shared.Cookie) {
-	if len(cookies) > 0 {
-		<details id="cookies" class="cookies-details" open>
+type CookiesProps struct {
+	Cookies []*shared.Cookie
+	OOB     bool
+}
+
+templ Cookies(p CookiesProps) {
+	if len(p.Cookies) > 0 {
+		<details
+			id="cookies"
+			class="cookies-details"
+			open
+			if p.OOB {
+				hx-swap-oob="true"
+			}
+		>
 			<summary class="cookies-summary">
 				<i class="bi bi-cookie"></i>
-				Aktive Sitzungen { fmt.Sprintf("%d", len(cookies)) }
+				Aktive Sitzungen { fmt.Sprintf("%d", len(p.Cookies)) }
 			</summary>
-			@cookiesTable(cookies)
+			@cookiesTable(p.Cookies)
 			<figure class="overflow-auto"></figure>
 		</details>
 	} else {
@@ -49,10 +61,7 @@ templ cookieRow(cookie *shared.Cookie) {
 			<a
 				hx-delete={ urlb.UrlProfile(cookie.Value).Cookies }
 				hx-trigger="click"
-				hx-target="#cookies"
-				hx-swap="outerHTML"
 				hx-confirm="Sind Sie sicher, dass Sie dieses Cookie löschen möchten?"
-				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 				role="button"
 				class="ghost destructive icon"
 				title="Sitzung beenden"

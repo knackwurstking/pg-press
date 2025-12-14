@@ -17,7 +17,7 @@ func RegisterAll(r *common.DB, e *echo.Echo) {
 		{handler: home.NewHandler(r).RegisterRoutes, subPath: ""},
 		{handler: auth.NewHandler(r).RegisterRoutes, subPath: ""},
 		{handler: profile.NewHandler(r).RegisterRoutes, subPath: "/profile"},
-		{handler: tools.NewHandler(r).RegisterRoutes, subPath: "/tools"},
+		//{handler: tools.NewHandler(r).RegisterRoutes, subPath: "/tools"},
 	}
 	for _, reg := range registers {
 		reg.handler(e, reg.subPath)

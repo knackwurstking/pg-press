@@ -64,27 +64,7 @@ func (h *Handler) GetProfilePage(c echo.Context) *echo.HTTPError {
 }
 
 func (h *Handler) HTMXGetCookies(c echo.Context) *echo.HTTPError {
-	user, merr := shared.GetUserFromContext(c)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	cookies, merr := helper.ListCookiesForApiKey(h.DB, user.ApiKey)
-	if merr != nil {
-		return merr.Echo()
-	}
-	// Sort cookies by last login
-	slices.SortFunc(cookies, func(a, b *shared.Cookie) int {
-		return int(a.LastLogin - b.LastLogin)
-	})
-
-	t := templates.Cookies(cookies)
-	err := t.Render(c.Request().Context(), c.Response())
-	if err != nil {
-		return errors.NewRenderError(err, "Cookies")
-	}
-
-	return nil
+	return h.renderCookies(c, false)
 }
 
 func (h *Handler) HTMXDeleteCookies(c echo.Context) *echo.HTTPError {
@@ -103,7 +83,7 @@ func (h *Handler) HTMXDeleteCookies(c echo.Context) *echo.HTTPError {
 		return eerr
 	}
 
-	return nil
+	return h.renderCookies(c, true)
 }
 
 func (h *Handler) handleUserNameChange(c echo.Context, user *shared.User) *errors.MasterError {
@@ -126,5 +106,32 @@ func (h *Handler) handleUserNameChange(c echo.Context, user *shared.User) *error
 	}
 	h.Logger.Printf("User %s changed their name to %s\n", user.Name, userName)
 
+	return nil
+}
+
+func (h *Handler) renderCookies(c echo.Context, oob bool) *echo.HTTPError {
+	user, merr := shared.GetUserFromContext(c)
+	if merr != nil {
+		return merr.Echo()
+	}
+
+	cookies, merr := helper.ListCookiesForApiKey(h.DB, user.ApiKey)
+	if merr != nil {
+		return merr.Echo()
+	}
+
+	// Sort cookies by last login
+	slices.SortFunc(cookies, func(a, b *shared.Cookie) int {
+		return int(a.LastLogin - b.LastLogin)
+	})
+
+	t := templates.Cookies(templates.CookiesProps{
+		Cookies: cookies,
+		OOB:     oob,
+	})
+	err := t.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "Cookies")
+	}
 	return nil
 }

@@ -1,10 +1,11 @@
 package templates
 
 import (
-	"github.com/knackwurstking/pg-press/components"
-	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/env"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/utils"
+
 	ui "github.com/knackwurstking/ui/ui-templ"
 )
 
@@ -12,9 +13,13 @@ const (
 	IDTabContent = "tab-content"
 )
 
-templ Page(user *models.User) {
+type PageProps struct {
+	User *models.User
+}
+
+templ Page(p PageProps) {
 	@components.Layout(
-		components.LayoutOptions{
+		components.LayoutProps{
 			PageTitle:      "PG Presse | Werkzeuge",
 			AppBarTitle:    "Werkzeuge",
 			NavContent:     components.StandardNavContent(),
@@ -31,11 +36,11 @@ templ Page(user *models.User) {
 					width: calc(100% - var(--ui-spacing) * 2);
 				"
 			>
-				if user.IsAdmin() {
+				if p.User.IsAdmin() {
 					<div
 						data-index="0"
 						class="tab secondary ghost"
-						hx-get={ utils.UrlTools(0).AdminOverlappingTools }
+						hx-get={ urlb.UrlTools(0).AdminOverlappingTools }
 						hx-trigger="loadTabContent"
 						hx-target={ "#" + IDTabContent }
 						hx-on::response-error="alert(event.detail.xhr.responseText)"
@@ -45,7 +50,7 @@ templ Page(user *models.User) {
 				<div
 					data-index="1"
 					class="tab secondary ghost"
-					hx-get={ utils.UrlTools(0).SectionPress }
+					hx-get={ urlb.UrlTools(0).SectionPress }
 					hx-trigger="loadTabContent"
 					hx-target={ "#" + IDTabContent }
 					hx-on::response-error="alert(event.detail.xhr.responseText)"
@@ -54,7 +59,7 @@ templ Page(user *models.User) {
 				<div
 					data-index="2"
 					class="tab secondary ghost"
-					hx-get={ utils.UrlTools(0).SectionTools }
+					hx-get={ urlb.UrlTools(0).SectionTools }
 					hx-trigger="loadTabContent"
 					hx-target={ "#" + IDTabContent }
 					hx-on::response-error="alert(event.detail.xhr.responseText)"

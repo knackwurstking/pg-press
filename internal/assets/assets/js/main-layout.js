@@ -23,34 +23,35 @@ matchMedia("(prefers-color-scheme: dark)").addEventListener(
 	},
 );
 
-document.addEventListener("DOMContentLoaded", function() {
-	// Debounce function to prevent rapid reloads
-	function debounce(func, wait) {
-		let timeout;
-		return function executedFunction(...args) {
-			const later = function() {
-				clearTimeout(timeout);
-				func(...args);
-			};
-			clearTimeout(timeout);
-			timeout = setTimeout(later, wait);
-		};
-	}
-
-	// Debounced reload function
-	const debouncedReload = debounce(function() {
-		if (document.visibilityState === "visible") {
-			console.log("Page became visible - reloading HTMX sections");
-			document.body.dispatchEvent(new CustomEvent(globalHxTrigger));
-		}
-	}, 500);
-
-	// Listen for visibility changes
-	window.addEventListener("visibilitychange", debouncedReload);
-
-	// Add manual refresh functionality
-	window.refreshPressSections = function() {
-		console.log("Manual refresh triggered");
-		document.body.dispatchEvent(new CustomEvent(globalHxTrigger));
-	};
-});
+// TODO: Can be removed? Not sure if needed anymore, but we will see.
+//document.addEventListener("DOMContentLoaded", function() {
+//	//// Debounce function to prevent rapid reloads
+//	function debounce(func, wait) {
+//		let timeout;
+//		return function executedFunction(...args) {
+//			const later = function() {
+//				clearTimeout(timeout);
+//				func(...args);
+//			};
+//			clearTimeout(timeout);
+//			timeout = setTimeout(later, wait);
+//		};
+//	}
+//
+//	// Debounced reload function
+//	const debouncedReload = debounce(function() {
+//		if (document.visibilityState === "visible") {
+//			console.log("Page became visible - reloading HTMX sections");
+//			document.body.dispatchEvent(new CustomEvent(globalHxTrigger));
+//		}
+//	}, 500);
+//
+//	// Listen for visibility changes
+//	window.addEventListener("visibilitychange", debouncedReload);
+//
+//	// Add manual refresh functionality
+//	window.refreshPressSections = function() {
+//		console.log("Manual refresh triggered");
+//		document.body.dispatchEvent(new CustomEvent(globalHxTrigger));
+//	};
+//});
