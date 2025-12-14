@@ -22,12 +22,18 @@ templ SectionPress(p SectionPressProps) {
 	></span>
 	<ul class="flex flex-col gap m-0 p-0" style="list-style: none;">
 		for pn, u := range p.PressUtilizations {
-			@listPressItem(listPressItemProps{
-				PressNumber:       pn,
-				SlotUpper:         u.SlotUpper,
-				SlotUpperCassette: u.SlotUpperCassette,
-				SlotLower:         u.SlotLower,
-			})
+			if u == nil {
+				@listPressItem(listPressItemProps{
+					PressNumber: pn,
+				})
+			} else {
+				@listPressItem(listPressItemProps{
+					PressNumber:       pn,
+					SlotUpper:         u.SlotUpper,
+					SlotUpperCassette: u.SlotUpperCassette,
+					SlotLower:         u.SlotLower,
+				})
+			}
 		}
 	</ul>
 }

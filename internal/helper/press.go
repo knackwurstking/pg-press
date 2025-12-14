@@ -1,6 +1,8 @@
 package helper
 
 import (
+	"net/http"
+
 	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -120,7 +122,7 @@ func GetPressUtilizations(db *common.DB, pressNumbers []shared.PressNumber) (
 
 	for _, pn := range pressNumbers {
 		pu, merr := GetPressUtilization(db, pn)
-		if merr != nil {
+		if merr != nil && merr.Code != http.StatusNotFound {
 			return nil, merr
 		}
 		utilizations[pn] = pu

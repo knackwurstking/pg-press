@@ -32,7 +32,6 @@ func NewHandler(db *common.DB) *Handler {
 func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	ui.RegisterEchoRoutes(e, env.ServerPathPrefix, []*ui.EchoRoute{
 		ui.NewEchoRoute(http.MethodGet, path, h.GetToolsPage),
-
 		ui.NewEchoRoute(http.MethodDelete, path+"/delete", h.HTMXDeleteTool),
 		ui.NewEchoRoute(http.MethodPatch, path+"/mark-dead", h.HTMXMarkToolAsDead),
 		ui.NewEchoRoute(http.MethodGet, path+"/section/press", h.HTMXGetSectionPress),
