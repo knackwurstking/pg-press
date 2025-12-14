@@ -2,6 +2,7 @@ package profile
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"slices"
 
@@ -116,10 +117,12 @@ func (h *Handler) handleUserNameChange(c echo.Context, user *shared.User) *error
 		)
 	}
 
+	user.Name = userName
 	merr := h.DB.User.User.Update(user)
 	if merr != nil {
 		return merr
 	}
+	log.Printf("User %s changed their name to %s\n", user.Name, userName)
 
 	return nil
 }
