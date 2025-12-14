@@ -78,7 +78,7 @@ func (db *DB) Setup() error {
 	}
 
 	if len(errs) > 0 {
-		return fmt.Errorf("failed to setup DB:\n%s", strings.Join(errs, "\n"))
+		return fmt.Errorf("\n%s", strings.Join(errs, "\n"))
 	}
 
 	return nil
