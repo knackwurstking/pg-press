@@ -103,10 +103,6 @@ func (e *MasterError) Error() string {
 		panic("error is nil?")
 	}
 
-	if e.Code > 0 {
-		return fmt.Sprintf("%d: %s", e.Code, e.Err.Error())
-	}
-
 	return e.Err.Error()
 }
 
