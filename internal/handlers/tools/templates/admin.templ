@@ -9,6 +9,8 @@ import (
 	"time"
 )
 
+// TODO:
+// - The trigger "pageLoaded from:body" needs to be removed and replaced with something more specific.
 templ AdminToolsSectionContent(overlappingTools []*models.OverlappingTool) {
 	<span
 		hx-get={ utils.UrlTools(0).AdminOverlappingTools }

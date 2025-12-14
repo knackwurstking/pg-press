@@ -8,6 +8,8 @@ import (
 	"github.com/knackwurstking/pg-press/utils"
 )
 
+// TODO:
+// - The trigger "pageLoaded from:body" needs to be removed and replaced with something more specific.
 templ SectionPress(pressUtilization []models.PressUtilization) {
 	<span
 		hx-get={ utils.UrlTools(0).SectionPress }
