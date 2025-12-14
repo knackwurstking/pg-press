@@ -28,3 +28,30 @@ func GetUserForApiKey(db *common.DB, apiKey string) (user *shared.User, merr *er
 	}
 	return user, merr
 }
+
+func ListCookiesForApiKey(db *common.DB, apiKey string) (cookies []*shared.Cookie, merr *errors.MasterError) {
+	user, merr := GetUserForApiKey(db, apiKey)
+	if merr != nil {
+		return cookies, merr
+	}
+	if user.ApiKey != apiKey {
+		return cookies, errors.NewMasterError(
+			fmt.Errorf("api key mismatch for user id %d", user.ID),
+			http.StatusUnauthorized,
+		)
+	}
+
+	cookies, merr = db.User.Cookie.List()
+	if merr != nil {
+		return cookies, merr
+	}
+	// in-place filtering
+	i := 0
+	for _, cookie := range cookies {
+		if cookie.UserID == user.ID {
+			cookies[i] = cookie
+			i++
+		}
+	}
+	return cookies[:i], nil
+}
