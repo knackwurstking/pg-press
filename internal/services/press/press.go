@@ -8,6 +8,8 @@ import (
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
 
+const DBName string = "press"
+
 const (
 	SQLCreatePressTable string = `
 		CREATE TABLE IF NOT EXISTS presses (
@@ -54,8 +56,6 @@ const (
 		SELECT id, slot_up, slot_down, last_regeneration, start_cycles, cycles, type
 		FROM presses;
 	`
-
-	DBName string = "pg-press-presses"
 )
 
 type PressService struct {

@@ -9,6 +9,10 @@ import (
 )
 
 const (
+	DBName = "user"
+)
+
+const (
 	SQLCreateUserTable string = `
 		CREATE TABLE IF NOT EXISTS users (
 			id 			INTEGER NOT NULL,
@@ -41,8 +45,6 @@ const (
 		SELECT id, name, api_key
 		FROM users;
 	`
-
-	DBName string = "pg-press-users"
 )
 
 type UserService struct {

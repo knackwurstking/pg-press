@@ -9,6 +9,10 @@ import (
 )
 
 const (
+	DBName = "tool"
+)
+
+const (
 	SQLCreateToolTable string = `
 		CREATE TABLE IF NOT EXISTS tools (
 			id					INTEGER NOT NULL,
@@ -58,8 +62,6 @@ const (
 		SELECT id, width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, cassette
 		FROM tools;
 	`
-
-	DBName string = "pg-press-tools"
 )
 
 type ToolService struct {

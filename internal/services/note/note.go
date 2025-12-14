@@ -8,6 +8,8 @@ import (
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
 
+const DBName string = "note"
+
 const (
 	SQLCreateNoteTable string = `
 		CREATE TABLE IF NOT EXISTS notes (
@@ -64,7 +66,7 @@ func NewNoteService(c *shared.Config) *NoteService {
 }
 
 func (s *NoteService) Setup() *errors.MasterError {
-	return s.BaseService.Setup("pg-press", SQLCreateNoteTable)
+	return s.BaseService.Setup(DBName, SQLCreateNoteTable)
 }
 
 func (s *NoteService) Create(entity *shared.Note) *errors.MasterError {

@@ -62,8 +62,6 @@ const (
 		SELECT id, width, height, position, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, min_thickness, max_thickness
 		FROM cassettes;
 	`
-
-	// Note: DBName is defined in tool.go, so we don't declare it again here
 )
 
 type CassetteService struct {
