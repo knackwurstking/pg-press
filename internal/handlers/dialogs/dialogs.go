@@ -1,6 +1,7 @@
 package dialogs
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/internal/common"
@@ -12,12 +13,14 @@ import (
 )
 
 type Handler struct {
-	db *common.DB
+	DB     *common.DB
+	Logger *log.Logger
 }
 
 func NewHandler(db *common.DB) *Handler {
 	return &Handler{
-		db: db,
+		DB:     db,
+		Logger: env.NewLogger("handler: dialogs: "),
 	}
 }
 

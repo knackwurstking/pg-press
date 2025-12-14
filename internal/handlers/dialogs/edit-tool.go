@@ -2,6 +2,7 @@ package dialogs
 
 import (
 	"fmt"
+	"log"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -9,20 +10,21 @@ import (
 
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/handler/dialogs/templates"
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/knackwurstking/pg-press/models"
 
 	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 )
 
-// GetToolDialog renders the appropriate dialog (new or edit) based on whether a tool ID is provided
 func (h *Handler) GetToolDialog(c echo.Context) *echo.HTTPError {
-	var tool *models.Tool
-
-	toolIDQuery, _ := utils.ParseQueryInt64(c, "id")
-	if toolIDQuery > 0 {
+	var tool *shared.Tool
+	id, _ := shared.ParseQueryInt64(c, "id")
+	if id > 0 {
 		var merr *errors.MasterError
-		tool, merr = h.registry.Tools.Get(models.ToolID(toolIDQuery))
+		tool, merr = h.DB.Tool.Tool.GetByID(shared.EntityID(id))
 		if merr != nil {
 			return merr.Echo()
 		}
@@ -33,9 +35,15 @@ func (h *Handler) GetToolDialog(c echo.Context) *echo.HTTPError {
 	if tool != nil {
 		t = templates.EditToolDialog(tool)
 		tName = "EditToolDialog"
+		if env.Verbose {
+			h.Logger.Println("Rendering edit tool dialog:", tool.String())
+		}
 	} else {
 		t = templates.NewToolDialog()
 		tName = "NewToolDialog"
+		if env.Verbose {
+			h.Logger.Println("Rendering new tool dialog")
+		}
 	}
 
 	err := t.Render(c.Request().Context(), c.Response())
@@ -46,48 +54,27 @@ func (h *Handler) GetToolDialog(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-// PostTool handles creating a new tool
 func (h *Handler) PostTool(c echo.Context) *echo.HTTPError {
-	slog.Info("Creating new tool")
-
-	user, merr := utils.GetUserFromContext(c)
+	tool, merr := GetToolDialogForm(c)
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	formData, merr := GetEditToolFormData(c)
+	if env.Verbose {
+		h.Logger.Println("Creating new tool:", tool.String())
+	}
+
+	merr = h.DB.Tool.Tool.Create(tool)
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	tool := models.NewTool(formData.Position, formData.Format, formData.Code, formData.Type)
-	tool.SetPress(formData.Press)
-
-	_, merr = h.registry.Tools.Add(tool, user)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	// Create feed entry
-	title := "Neues Werkzeug erstellt"
-
-	content := fmt.Sprintf("Werkzeug: %s\nTyp: %s\nCode: %s\nPosition: %s",
-		tool.String(), tool.Type, tool.Code, string(tool.Position))
-
-	if tool.Press != nil {
-		content += fmt.Sprintf("\nPresse: %d", *tool.Press)
-	}
-
-	merr = h.registry.Feeds.Add(title, content, user.TelegramID)
-	if merr != nil {
-		slog.Warn("Failed to create feed for tool creation", "error", merr)
-	}
-
-	utils.SetHXTrigger(c, env.HXGlobalTrigger)
+	urlb.SetHXTrigger(c, "tools-tab")
 
 	return nil
 }
 
+// TODO: Continue here...
 // PutTool handles updating an existing tool
 func (h *Handler) PutTool(c echo.Context) *echo.HTTPError {
 	slog.Info("Updating existing tool")
@@ -154,15 +141,9 @@ func (h *Handler) PutTool(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-type EditToolFormData struct {
-	Position models.Position
-	Format   models.Format
-	Type     string
-	Code     string
-	Press    *models.PressNumber
-}
-
-func GetEditToolFormData(c echo.Context) (*EditToolFormData, *errors.MasterError) {
+// TODO: This needs to be updated, ex.: the position needs to be replaced with the new slot logic
+// TODO: Press selection needs to be kicked, the press page will handle that exclusively
+func GetToolDialogForm(c echo.Context) (*shared.Tool, *errors.MasterError) {
 	positionStr := c.FormValue("position")
 	position := models.Position(positionStr)
 
@@ -176,7 +157,7 @@ func GetEditToolFormData(c echo.Context) (*EditToolFormData, *errors.MasterError
 		)
 	}
 
-	data := &EditToolFormData{Position: position}
+	data := &ToolDialogForm{Position: position}
 
 	// Parse width
 	if widthStr := c.FormValue("width"); widthStr != "" {
@@ -218,26 +199,6 @@ func GetEditToolFormData(c echo.Context) (*EditToolFormData, *errors.MasterError
 			fmt.Errorf("code must be 25 characters or less"),
 			http.StatusBadRequest,
 		)
-	}
-
-	// Parse press number
-	if pressStr := c.FormValue("press-selection"); pressStr != "" {
-		press, err := strconv.Atoi(pressStr)
-		if err != nil {
-			return nil, errors.NewMasterError(
-				fmt.Errorf("invalid press number: %v", err),
-				http.StatusBadRequest,
-			)
-		}
-
-		pressNumber := models.PressNumber(press)
-		if !models.IsValidPressNumber(&pressNumber) {
-			return nil, errors.NewMasterError(
-				fmt.Errorf("invalid press number: must be 0, 2, 3, 4, or 5"),
-				http.StatusBadRequest,
-			)
-		}
-		data.Press = &pressNumber
 	}
 
 	return data, nil
