@@ -1,0 +1,36 @@
+package templates
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
+)
+
+// TODO: `any` here is just a placeholder until we implement the notes system
+templ Notes(toolID shared.EntityID, notes []any) {
+	@components.SectionTitle(components.SectionTitleLevelSub, "Notizen") {
+		<button
+			class="icon secondary small flex"
+			hx-get={ urlb.UrlDialogs().EditNote(0, fmt.Sprintf("tool_%d", toolID)) }
+			hx-trigger="click"
+			hx-target="body"
+			hx-swap="beforeend"
+			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+			title="Neue Notiz hinzufügen"
+		>
+			<i class="bi bi-plus-lg"></i>
+		</button>
+	}
+	if len(notes) > 0 {
+		<div class="notes-list">
+			for _, n := range notes {
+				@components.NoteCard(n, nil)
+			}
+		</div>
+	} else {
+		<div class="empty-state">
+			<p class="text-muted">Keine Notizen für dieses Werkzeug vorhanden.</p>
+		</div>
+	}
+}

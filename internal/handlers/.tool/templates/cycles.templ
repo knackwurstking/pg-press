@@ -1,0 +1,234 @@
+package templates
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/internal/components"
+)
+
+type CyclesProps struct {
+	User            *models.User
+	Tool            *models.ResolvedTool
+	ToolsForBinding []*models.Tool
+	ToolPosition    string
+	TotalCycles     int64
+	Cycles          []*models.Cycle
+	Regenerations   []*models.ResolvedToolRegeneration
+}
+
+templ Cycles(props CyclesProps) {
+	@components.SectionTitle(components.SectionTitleLevelMain, "Werkzeugnutzung & Zyklen")
+	<div class="flex flex-col gap">
+		@toolStatusSection(props)
+		// For now tool cycles for top cassette tools are ignored
+		@regenerationsSection(props)
+		@cyclesSection(props)
+	</div>
+}
+
+templ toolStatusSection(props CyclesProps) {
+	@components.Section(templ.Attributes{
+		"id": "tool-status-section",
+	}) {
+		@components.SectionTitle(components.SectionTitleLevelSub, "Aktueller Status")
+		@toolStatus(props.Tool, props.ToolsForBinding, props.User)
+	}
+}
+
+templ toolStatus(tool *models.ResolvedTool, toolsForBinding []*models.Tool, user *models.User) {
+	<div class="flex flex-col gap">
+		<span class="flex gap-lg">
+			@ToolStatusEdit(&ToolStatusEditProps{
+				Tool:              tool.Tool,
+				UserHasPermission: user.IsAdmin(),
+			})
+			if tool.IsActive() {
+				<a
+					role="button"
+					class="small ghost flex gap"
+					href={ utils.UrlPress(*tool.Press).Page }
+					title="Zur Pressenübersicht"
+				>
+					<i class="bi bi-arrow-right"></i>
+					Presse { fmt.Sprintf("%d", *tool.Press) }
+				</a>
+			}
+		</span>
+		if tool.IsBindable() {
+			@BindingSection(BindingSectionProps{
+				Tool:            tool,
+				ToolsForBinding: toolsForBinding,
+				IsAdmin:         user.IsAdmin(),
+			})
+		}
+	</div>
+}
+
+templ regenerationsSection(props CyclesProps) {
+	@components.Section(templ.Attributes{
+		"id": "regenerations-section",
+	}) {
+		@components.SectionTitle(components.SectionTitleLevelSub, "Regenerationen")
+		if len(props.Regenerations) == 0 {
+			<span class="flex justify-center items-center">
+				<i><small>Keine Regenerationen verzeichnet für dieses Werkzeug</small></i>
+			</span>
+		} else {
+			@regenerationsTable(props.Regenerations, props.User)
+		}
+	}
+}
+
+templ regenerationsTable(regenerations []*models.ResolvedToolRegeneration, user *models.User) {
+	<figure class="w-full overflow-x-scroll">
+		<table title="Regenerationen">
+			<thead>
+				<tr>
+					<th name="date">Datum</th>
+					<th name="reason">Bemerkung</th>
+					<th name="actions"></th>
+				</tr>
+			</thead>
+			<tbody>
+				if len(regenerations) == 0 {
+					<tr>
+						<td colspan="3" class="text-center">
+							<i><small>Keine Regenerationen verzeichnet</small></i>
+						</td>
+					</tr>
+				} else {
+					@regenerationsTableRows(regenerations, user)
+				}
+			</tbody>
+		</table>
+	</figure>
+}
+
+templ regenerationsTableRows(regenerations []*models.ResolvedToolRegeneration, user *models.User) {
+	for _, regen := range regenerations {
+		<tr>
+			<td>
+				<span>{ regen.GetCycle().Date.Format(env.DateFormat) }</span>
+			</td>
+			<td>
+				<span>{ regen.Reason }</span>
+			</td>
+			<td>
+				@components.TableActions(components.TableActionsOptions{
+					EditHref:        utils.UrlDialogs().EditToolRegeneration(regen.ID),
+					EditAdminOnly:   false,
+					DeleteHref:      utils.UrlTool(regen.GetTool().ID, regen.ID, 0).DeleteRegeneration,
+					DeleteAdminOnly: true,
+					User:            user,
+				})
+			</td>
+		</tr>
+	}
+}
+
+templ cyclesSection(props CyclesProps) {
+	@components.Section(templ.Attributes{
+		"id": "cycles-section",
+	}) {
+		@components.SectionTitle(components.SectionTitleLevelSub, "Pressennutzungsverlauf") {
+			<button
+				class="icon secondary small flex"
+				hx-get={ utils.UrlDialogs().EditCycle(0, props.Tool.ID, nil) }
+				hx-trigger="click"
+				hx-target="body"
+				hx-swap="beforeend"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+				title="Neuen Eintrag hinzufügen"
+				if !props.User.IsAdmin() {
+					disabled
+				}
+			>
+				<i class="bi bi-plus-lg"></i>
+			</button>
+		}
+		@components.Section(nil) {
+			<h6 class="mb">
+				Gesamtzyklen für "{ fmt.Sprintf("%s %s %s", props.Tool.Format.String(), props.Tool.Code, props.Tool.Type) }":
+			</h6>
+			<span>
+				@TotalCycles(props.TotalCycles, true)
+			</span>
+		}
+		@cyclesTable(props)
+	}
+}
+
+templ cyclesTable(props CyclesProps) {
+	<figure class="w-full overflow-x-scroll">
+		<table
+			name="tool-cycles-table"
+			class="table borderless compact"
+			title="Zyklusverlauf"
+		>
+			<thead>
+				<tr>
+					<th name="press">Presse</th>
+					<th name="date">Datum</th>
+					<th name="total">Gesamtzyklen</th>
+					<th name="partial">Teilzyklen (berechnet)</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				if len(props.Cycles) == 0 {
+					<tr>
+						<td colspan="5" class="text-center">
+							<i><small>Kein Pressenverlauf verfügbar</small></i>
+						</td>
+					</tr>
+				} else {
+					{{
+						var lastRegeneration *models.ResolvedToolRegeneration
+						if len(props.Regenerations) > 0 {
+							lastRegeneration = props.Regenerations[0]
+						}
+					}}
+					for _, cycle := range props.Cycles {
+						@cycleRowWithPartialCalc(cycle, lastRegeneration, props)
+					}
+				}
+			</tbody>
+		</table>
+	</figure>
+}
+
+templ cycleRowWithPartialCalc(
+	cycle *models.Cycle,
+	lastRegeneration *models.ResolvedToolRegeneration,
+	props CyclesProps,
+) {
+	<tr
+		if lastRegeneration != nil && lastRegeneration.CycleID == cycle.ID {
+			style="color: var(--ui-muted);"
+		}
+	>
+		<td>
+			<span>{ fmt.Sprintf("%d", cycle.PressNumber) }</span>
+		</td>
+		<td>
+			<span class="text-sm">{ cycle.Date.Format(env.DateFormat) }</span>
+		</td>
+		<td>
+			{ fmt.Sprintf("%d", cycle.TotalCycles) }
+		</td>
+		<td>
+			<span title="Berechnet: Gesamtzyklen - Gesamtzyklen des letzten Eintrags">
+				{ fmt.Sprintf("%d", cycle.PartialCycles) }
+			</span>
+		</td>
+		<td>
+			@components.TableActions(components.TableActionsOptions{
+				EditHref:        utils.UrlDialogs().EditCycle(cycle.ID, props.Tool.ID, nil),
+				EditAdminOnly:   true,
+				DeleteHref:      utils.UrlTool(props.Tool.ID, 0, cycle.ID).CycleDelete,
+				DeleteAdminOnly: true,
+				User:            props.User,
+			})
+		</td>
+	</tr>
+}

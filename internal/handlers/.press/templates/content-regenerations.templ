@@ -1,0 +1,43 @@
+package templates
+
+import (
+	"github.com/knackwurstking/pg-press/components"
+	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/utils"
+)
+
+templ RegenerationsContent(pressRegenerations []*models.PressRegeneration, user *models.User) {
+	if len(pressRegenerations) == 0 {
+		@components.NotFoundSectionText(
+			"Es sind keine Regenerationen für diese Presse vorhanden.",
+		)
+		{{ return }}
+	}
+	<figure>
+		<table>
+			<tr>
+				<th>Von</th>
+				<th>Bis</th>
+				<th>Bemerkung</th>
+				<th></th>
+			</tr>
+			for _, r := range pressRegenerations {
+				<tr>
+					<td>{ r.StartedAt.Format(env.DateFormat) }</td>
+					<td>{ r.CompletedAt.Format(env.DateFormat) }</td>
+					<td>{ r.Reason }</td>
+					<td>
+						@components.TableActions(components.TableActionsOptions{
+							EditHref:        utils.UrlDialogs().EditPressRegeneration(r.ID),
+							EditAdminOnly:   false,
+							DeleteHref:      utils.UrlPressRegeneration(r.PressNumber, r.ID).Delete,
+							DeleteAdminOnly: true,
+							User:            user,
+						})
+					</td>
+				</tr>
+			}
+		</table>
+	</figure>
+}

@@ -1,0 +1,93 @@
+package templates
+
+import (
+	"net/http"
+	"strings"
+
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
+
+	ui "github.com/knackwurstking/ui/ui-templ"
+)
+
+templ NewNoteDialog(linkToTables []string, user *shared.User) {
+	@ui.Dialog(ui.DialogOptions{
+		Method:           http.MethodPost,
+		Href:             urlb.UrlDialogs().EditNote(0, strings.Join(linkToTables, ",")),
+		ID:               "notes-dialog",
+		SubmitButtonText: "Erstellen",
+	}) {
+		@noteLevelSelect(0)
+		@noteContent("")
+		@displayLinkedTables(linkToTables, user)
+	}
+}
+
+templ EditNoteDialog(note *shared.Note, linkToTables []string, user *shared.User) {
+	@ui.Dialog(ui.DialogOptions{
+		Method:           http.MethodPut,
+		Href:             urlb.UrlDialogs().EditNote(note.ID, strings.Join(linkToTables, ",")),
+		ID:               "notes-edit-dialog",
+		SubmitButtonText: "Aktualisieren",
+	}) {
+		@noteLevelSelect(note.Level)
+		@noteContent(note.Content)
+		@displayLinkedTables(linkToTables, user)
+	}
+}
+
+templ noteLevelSelect(level shared.NoteLevel) {
+	<label for="level" class="flex flex-col">
+		Priorität
+		<select id="level" name="level" required>
+			<option value="0" selected?={ level == 0 }>
+				Info
+			</option>
+			<option value="1" selected?={ level == 1 }>
+				Achtung
+			</option>
+			<option value="2" selected?={ level == 2 }>
+				Defekt
+			</option>
+		</select>
+	</label>
+}
+
+templ noteContent(content string) {
+	<label for="content" class="flex flex-col">
+		Inhalt
+		<textarea
+			name="content"
+			id="content"
+			placeholder="Notiz-Inhalt eingeben..."
+			rows="5"
+			required
+		>{ content }</textarea>
+	</label>
+}
+
+templ displayLinkedTables(linkToTables []string, user *shared.User) {
+	if len(linkToTables) > 0 {
+		<div
+			class="flex flex-col gap"
+			if !user.IsAdmin() {
+				style="display: none;"
+			}
+		>
+			<h3>Verknüpfte Tabellen</h3>
+			<div class="flex flex-col gap-sm">
+				for _, table := range linkToTables {
+					<label class="flex flex-row gap items-center" disabled>
+						<input
+							type="checkbox"
+							name="linked_tables"
+							value={ table }
+							checked
+						/>
+						{ table }
+					</label>
+				}
+			</div>
+		</div>
+	}
+}

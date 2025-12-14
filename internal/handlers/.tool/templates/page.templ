@@ -1,0 +1,93 @@
+package templates
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pg-press/env"
+	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/models"
+)
+
+type PageProps struct {
+	User       *models.User
+	ToolString string
+	ToolID     models.ToolID
+	Position   models.Position
+}
+
+templ Page(props *PageProps) {
+	{{
+		pageTitle := fmt.Sprintf("PG Presse | %s %s",
+			props.ToolString, props.Position.GermanString())
+		appBarTitle := fmt.Sprintf("%s %s",
+			props.ToolString, props.Position.GermanString())
+	}}
+	@components.Layout(
+		components.LayoutOptions{
+			PageTitle:   pageTitle,
+			AppBarTitle: appBarTitle,
+			NavContent:  components.StandardNavContent(),
+		},
+	) {
+		<main class="container fluid flex flex-col gap">
+			<script>
+				var hxToolUpdated = '{{ env.HXPageTool_ToolUpdated }}'
+
+				// This will be called after submitting a tool change via the edit tool dialog on this page
+				htmx.on(hxToolUpdated, function(event) {
+					console.debug(`Got an hmtx:on event named "${hxToolUpdated}"`);
+
+					// Update the page title
+					document.querySelector("#page-title").textContent = event.detail.pageTitle;
+					document.querySelector("#app-bar-title").textContent = event.detail.appBarTitle;
+				});
+			</script>
+			@components.ActionBar() {
+				<button
+					class="primary flex gap"
+					hx-get={ utils.UrlDialogs().EditTool(props.ToolID) }
+					hx-trigger="click"
+					hx-target="body"
+					hx-swap="beforeend"
+					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+				>
+					<i class="bi bi-pencil"></i>
+					Bearbeiten
+				</button>
+				<button
+					class="destructive flex gap"
+					hx-patch={ utils.UrlTools(props.ToolID).MarkDead }
+					hx-trigger="click"
+					hx-confirm="Sind Sie sicher, dass Sie dieses Werkzeug löschen möchten?"
+					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+					if !props.User.IsAdmin() {
+						disabled
+					}
+				>
+					<i class="bi bi-trash"></i>
+					Löschen
+				</button>
+			}
+			@components.Section(templ.Attributes{
+				"id":                        "notes-section",
+				"hx-get":                    string(utils.UrlTool(props.ToolID, 0, 0).Notes),
+				"hx-trigger":                "load, pageLoaded from:body",
+				"hx-swap":                   "innerHTML",
+				"hx-on:htmx:response-error": "alert(event.detail.xhr.responseText)",
+			}) {
+				@components.Spinner()
+			}
+			if props.Position == models.PositionTop || props.Position == models.PositionBottom {
+				@components.Section(templ.Attributes{
+					"id":                        "metal-sheets-section",
+					"hx-get":                    string(utils.UrlTool(props.ToolID, 0, 0).MetalSheets),
+					"hx-trigger":                "load, pageLoaded from:body",
+					"hx-swap":                   "innerHTML",
+					"hx-on:htmx:response-error": "alert(event.detail.xhr.responseText)",
+				}) {
+					@components.Spinner()
+				}
+			}
+			@OOBCyclesSection(false, props.ToolID, nil)
+		</main>
+	}
+}

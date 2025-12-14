@@ -1,0 +1,238 @@
+package templates
+
+import (
+	"fmt"
+	"net/http"
+	"time"
+
+	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
+
+	ui "github.com/knackwurstking/ui/ui-templ"
+)
+
+templ NewCycleDialog(
+	tool *shared.Tool,
+	currentPressNumber *shared.PressNumber,
+	inputPressNumber *shared.PressNumber,
+	inputTotalCycles int64,
+	originalDate *time.Time,
+) {
+	@ui.Dialog(ui.DialogOptions{
+		Method:           http.MethodPost,
+		Href:             urlb.UrlDialogs().EditCycle(0, tool.ID, nil),
+		ID:               "cycle-dialog",
+		SubmitButtonText: "Erstellen",
+	}) {
+		@components.Section(templ.Attributes{
+			"class": "tool-info flex flex-col gap-sm",
+		}) {
+			<label>Aktives Werkzeug</label>
+			<div class="flex flex-col gap-xs">
+				<div class="text-sm">
+					<strong>Werkzeug:</strong> { tool.String() }
+				</div>
+				<div class="text-sm">
+					<strong>Position:</strong> { tool.Position.German() }
+				</div>
+			</div>
+		}
+		<input
+			type="hidden"
+			name="original_tool_id"
+			value={ fmt.Sprintf("%d", tool.ID) }
+		/>
+		@components.Section(templ.Attributes{
+			"class": "press flex flex-col gap-sm",
+		}) {
+			<label for="press">Presse</label>
+			<select id="press" name="press_number" required>
+				<option
+					value=""
+					disabled
+					selected?={ currentPressNumber == nil && inputPressNumber == nil }
+				>
+					Presse auswählen
+				</option>
+				for _, p := range shared.AllPressesNumbers {
+					<option
+						value={ p }
+						selected?={ (inputPressNumber != nil && *inputPressNumber == p) ||
+							(inputPressNumber == nil && currentPressNumber != nil && *currentPressNumber == p) }
+					>
+						Presse { p }
+					</option>
+				}
+			</select>
+		}
+		@components.Section(templ.Attributes{
+			"class": "original-date flex flex-col gap-sm",
+		}) {
+			<label>Ursprüngliches Datum</label>
+			<input
+				name="original_date"
+				type="text"
+				if originalDate == nil {
+					value={ time.Now().Format(shared.DateFormat) }
+				} else {
+					value={ originalDate.Format(shared.DateFormat) }
+				}
+				title="Datum des ursprünglichen Eintrags (wird nicht geändert)"
+			/>
+		}
+		@components.Section(templ.Attributes{
+			"class": "total-cycles flex flex-col gap-sm",
+		}) {
+			<label for="total_cycles">Gesamtzyklen</label>
+			<input
+				type="number"
+				min="0"
+				step="1"
+				id="total_cycles"
+				name="total_cycles"
+				placeholder="Gesamtzyklen"
+				if inputTotalCycles != 0 {
+					value={ fmt.Sprintf("%d", inputTotalCycles) }
+				}
+				required
+			/>
+		}
+		@components.Section(templ.Attributes{
+			"class": "regeneration",
+		}) {
+			<label class="flex flex-row justify-between items-center">
+				<span>
+					Werkzeug in den Regenerationszustand versetzen
+				</span>
+				<input
+					name="regenerating"
+					type="checkbox"
+					onchange="if (this.checked && !confirm('Sicher, diesen Zustand ändern?')) this.checked = false;"
+				/>
+			</label>
+		}
+	}
+}
+
+templ EditCycleDialog(
+	tool *shared.Tool,
+	cycle *shared.Cycle,
+	tools []*shared.Tool,
+	currentPressNumber *shared.PressNumber,
+	inputPressNumber *shared.PressNumber,
+	inputTotalCycles int64,
+	start *time.Time,
+	stop *time.Time
+) {
+	{{ toolChangeMode := len(tools) > 0 }}
+	@ui.Dialog(ui.DialogOptions{
+		Method:           http.MethodPut,
+		Href:             urlb.UrlDialogs().EditCycle(cycle.ID, 0, &toolChangeMode),
+		ID:               "cycle-edit-dialog",
+		SubmitButtonText: "Aktualisieren",
+	}) {
+		if toolChangeMode {
+			<section class="tool-selection flex flex-col gap-sm min-w-0">
+				<label for="tool_id">Werkzeug auswählen</label>
+				<select
+					id="tool_id"
+					name="tool_id"
+					required
+					class="w-full max-w-full min-w-0 text-sm overflow-hidden text-ellipsis"
+				>
+					for _, t := range tools {
+						<option
+							value={ fmt.Sprintf("%d", t.ID) }
+							selected?={ t.ID == tool.ID }
+							if t.IsDead {
+								class="text-gray-500 italic"
+							}
+						>
+							{{
+								statusText := ""
+								if currentPressNumber != nil {
+									statusText = fmt.Sprintf(" [P%d]", *currentPressNumber)
+								}
+								if t.Regenerating {
+									statusText += " [Reg.]"
+								}
+								if t.IsDead {
+									statusText += " [✗]"
+								}
+							}}
+							{ fmt.Sprintf("%s %dx%d %s", t.Code, t.Width, t.Height, statusText) }
+						</option>
+					}
+				</select>
+			</section>
+		}
+		<input
+			type="hidden"
+			name="original_tool_id"
+			value={ fmt.Sprintf("%d", tool.ID) }
+		/>
+		<section class="press flex flex-col gap-sm">
+			<label for="press">Presse</label>
+			<select id="press" name="press_number" required>
+				<option
+					value=""
+					disabled
+					selected?={ currentPressNumber == nil && inputPressNumber == nil }
+				>
+					Presse auswählen
+				</option>
+				for _, i := range shared.AllPressesNumbers {
+					<option
+						value={ fmt.Sprintf("%d", i) }
+						selected?={ (inputPressNumber != nil && *inputPressNumber == i) ||
+							(inputPressNumber == nil && currentPressNumber != nil && *currentPressNumber == i) }
+					>
+						Presse { fmt.Sprintf("%d", i) }
+					</option>
+				}
+			</select>
+		</section>
+		<section class="original-date flex flex-col gap-sm">
+			<label>Ursprüngliches Datum</label>
+			<input
+				name="original_date"
+				type="text"
+				if originalDate == nil {
+					value={ time.Now().Format(shared.DateFormat) }
+				} else {
+					value={ originalDate.Format(shared.DateFormat) }
+				}
+				title="Datum des ursprünglichen Eintrags (wird nicht geändert)"
+			/>
+		</section>
+		<section class="total-cycles flex flex-col gap-sm">
+			<label for="total_cycles">Gesamtzyklen</label>
+			<input
+				type="number"
+				min="0"
+				step="1"
+				id="total_cycles"
+				name="total_cycles"
+				placeholder="Gesamtzyklen"
+				if inputTotalCycles != 0 {
+					value={ fmt.Sprintf("%d", inputTotalCycles) }
+				}
+				required
+			/>
+		</section>
+		<section class="regeneration">
+			<label class="flex flex-row justify-between items-center">
+				<span>
+					Werkzeug in den Regenerationszustand versetzen
+				</span>
+				// TODO: Need to set checked state based on current cycle/tool regeneration state
+				<input
+					name="regenerating"
+					type="checkbox"
+					onchange="if (this.checked && !confirm('Sicher, diesen Zustand ändern?')) this.checked = false;"
+				/>
+			</label>
+		</section>
+	}
+}

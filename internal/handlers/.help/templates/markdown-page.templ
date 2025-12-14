@@ -1,0 +1,296 @@
+package templates
+
+import (
+	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/utils"
+)
+
+templ MarkdownPage() {
+	@components.Layout(components.LayoutOptions{
+		PageTitle:      "Markdown Hilfe",
+		AppBarTitle:    "Markdown Hilfe",
+		AdditionalHead: helpMarkdownPageAdditionalHead(),
+		NavContent:     helpMarkdownPageNavContent(),
+	}) {
+		<main class="container py-lg">
+			<div class="max-w-4xl mx-auto">
+				<header>
+					<h1 class="text-2xl text-bold flex items-center gap">
+						<i class="bi bi-markdown ghost primary"></i>
+						Markdown Hilfe
+					</h1>
+					<p class="text-lg muted border">
+						Eine vollständige Übersicht aller unterstützten Markdown-Funktionen mit Beispielen und Live-Vorschau.
+					</p>
+				</header>
+				<div class="my-lg flex flex-col gap-lg">
+					@quickReferenceSection()
+					@interactiveDemoSection()
+					@textFormattingSection()
+					@blockquoteSection()
+					@tipsSection()
+				</div>
+			</div>
+		</main>
+	}
+}
+
+templ helpMarkdownPageNavContent() {
+	<a href={ utils.UrlHome().Page } class="flex items-center gap-xs muted hover:contrast transition-colors">
+		<i class="bi bi-house"></i>
+		<span class="hidden sm:inline">Startseite</span>
+	</a>
+}
+
+templ helpMarkdownPageAdditionalHead() {
+	<style>
+		.demo-grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+		}
+
+		@media (max-width: 768px) {
+			.demo-grid {
+				grid-template-columns: 1fr;
+			}
+		}
+
+		.example-grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			align-items: start;
+		}
+
+		@media (max-width: 768px) {
+			.example-grid {
+				grid-template-columns: 1fr;
+			}
+		}
+	</style>
+	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			var textarea = document.getElementById('demo-textarea');
+
+			function updatePreview() {
+				var previewContent = document.getElementById('demo-preview');
+				if (textarea && previewContent) {
+					var content = textarea.value;
+					// Simple markdown rendering for demo
+					var html = content
+						.replace(/### (.*$)/gm, '<h3>$1</h3>')
+						.replace(/## (.*$)/gm, '<h2>$1</h2>')
+						.replace(/# (.*$)/gm, '<h1>$1</h1>')
+						.replace(/__(.*?)__/g, '<u>$1</u>')
+						.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+						.replace(/\*(.*?)\*/g, '<em>$1</em>')
+						.replace(/`(.*?)`/g, '<code>$1</code>')
+						.replace(/^- (.*$)/gm, '<li>$1</li>')
+						.replace(/^> (.*$)/gm, '<blockquote>$1</blockquote>')
+						.replace(/\n/g, '<br>');
+
+					previewContent.innerHTML = html;
+				}
+			}
+
+			if (textarea) {
+				textarea.addEventListener('input', updatePreview);
+				setTimeout(updatePreview, 100);
+			}
+		});
+	</script>
+}
+
+templ quickReferenceSection() {
+	@components.Section(templ.Attributes{
+		"class": "card p-lg",
+	}) {
+		<h2 class="text-xl text-bold flex items-center ghost primary gap">
+			<i class="bi bi-lightning"></i>
+			Schnellreferenz
+		</h2>
+		<div class="grid gap-sm">
+			@quickReferenceItem("**Fett**", "Fett", "strong")
+			@quickReferenceItem("*Kursiv*", "Kursiv", "em")
+			@quickReferenceItem("__Unterstrichen__", "Unterstrichen", "u")
+			@quickReferenceItem("`Code`", "Code", "code")
+			@quickReferenceItem("# Überschrift 1", "Überschrift 1", "h1")
+		</div>
+	}
+}
+
+templ quickReferenceItem(syntax, result, tagType string) {
+	<div class="flex items-center justify-between p-sm border rounded gap">
+		<code class="contrast px-sm py-xs rounded text-sm">{ syntax }</code>
+		<span class="flex gap justify-between items-center w-50">
+			→
+			switch tagType {
+				case "strong":
+					<strong>{ result }</strong>
+				case "em":
+					<em>{ result }</em>
+				case "u":
+					<u>{ result }</u>
+				case "code":
+					<code class="muted px-xs rounded">{ result }</code>
+				case "h1":
+					<strong class="text-xl">{ result }</strong>
+			}
+		</span>
+	</div>
+}
+
+templ interactiveDemoSection() {
+	@components.Section(templ.Attributes{
+		"class": "card p-lg",
+	}) {
+		<h2 class="text-xl text-bold flex items-center ghost success gap">
+			<i class="bi bi-play-circle"></i>
+			Interaktive Vorschau
+		</h2>
+		<p class="muted border">
+			Probieren Sie verschiedene Markdown-Syntaxen aus und sehen Sie das Ergebnis in Echtzeit:
+		</p>
+		<div class="demo-grid gap-lg">
+			<div class="flex flex-col">
+				<label for="demo-textarea" class="text-sm text-medium">Markdown eingeben:</label>
+				<textarea
+					id="demo-textarea"
+					class="w-full h-full border rounded p-sm text-sm resize-y"
+					placeholder="Hier können Sie Markdown ausprobieren..."
+					style="min-height: 200px;"
+				>
+					# Willkommen bei Markdown!
+					Dies ist ein **Beispieltext** mit verschiedenen Formatierungen:
+					- *Kursiver Text*
+					- **Fetter Text**
+					- __Unterstrichener Text__
+					- `Inline-Code`
+					> Ein Blockzitat für wichtige Informationen.
+					Und natürlich mehr Beispiele für die Vorschau!
+				</textarea>
+			</div>
+			<div>
+				<label class="text-sm text-medium block">Vorschau:</label>
+				<div id="demo-preview" class="border rounded p-sm overflow-y-auto" style="min-height: 200px; max-height: 300px;"></div>
+			</div>
+		</div>
+	}
+}
+
+templ textFormattingSection() {
+	@components.Section(templ.Attributes{
+		"class": "card p-lg flex flex-col gap",
+	}) {
+		<h2 class="text-xl text-bold flex items-center ghost info gap">
+			<i class="bi bi-type"></i>
+			Textformatierung
+		</h2>
+		<div class="py-lg flex flex-col gap">
+			@formattingExample("Fetter Text", "**Dies ist fetter Text**", "strong", "Verwenden Sie doppelte Sterne (**) um Text fett zu formatieren.")
+			<hr/>
+			@formattingExample("Kursiver Text", "*Dies ist kursiver Text*", "em", "Verwenden Sie einzelne Sterne (*) um Text kursiv zu formatieren.")
+			<hr/>
+			@formattingExample("Unterstrichener Text", "__Dies ist unterstrichener Text__", "u", "Verwenden Sie doppelte Unterstriche (__) um Text zu unterstreichen.")
+			<hr/>
+			@formattingExample("Inline-Code", "Dies ist Code: `print(\"Hallo\")`", "code", "Verwenden Sie Backticks (`) um Inline-Code zu markieren.")
+			<hr/>
+			@listExample()
+		</div>
+	}
+}
+
+templ formattingExample(title, syntax, tagType, description string) {
+	<div class="flex flex-col gap">
+		<h3 class="text-lg text-medium">{ title }</h3>
+		<div class="example-grid gap">
+			<div class="muted outline rounded p-sm">
+				<code class="text-sm">{ syntax }</code>
+			</div>
+			<div class="border rounded p-sm">
+				<p>
+					switch tagType {
+						case "strong":
+							<strong>Dies ist fetter Text</strong>
+						case "em":
+							<em>Dies ist kursiver Text</em>
+						case "u":
+							<u>Dies ist unterstrichener Text</u>
+						case "code":
+							Dies ist Code: <code>print("Hallo")</code>
+					}
+				</p>
+			</div>
+		</div>
+		<p class="text-sm muted border">{ description }</p>
+	</div>
+}
+
+templ listExample() {
+	<div class="flex flex-col gap">
+		<h3 class="text-lg text-medium">Listen</h3>
+		<div class="example-grid gap">
+			<div class="muted outline rounded p-sm">
+				<code class="text-sm">- Erstes Element<br/>- Zweites Element<br/>- Drittes Element</code>
+			</div>
+			<div class="border rounded p-sm">
+				<ul>
+					<li>Erstes Element</li>
+					<li>Zweites Element</li>
+					<li>Drittes Element</li>
+				</ul>
+			</div>
+		</div>
+		<p class="text-sm muted border">
+			Verwenden Sie Bindestriche (-) für ungeordnete Listen.
+		</p>
+	</div>
+}
+
+templ blockquoteSection() {
+	@components.Section(templ.Attributes{
+		"class": "card p-lg flex flex-col gap",
+	}) {
+		<h2 class="text-xl text-bold flex items-center ghost secondary gap">
+			<i class="bi bi-quote"></i>
+			Zitate
+		</h2>
+		<div class="example-grid gap">
+			<div class="muted outline rounded p-sm">
+				<code class="text-sm">> Dies ist ein wichtiges Zitat<br/>> mit mehreren Zeilen</code>
+			</div>
+			<div class="border rounded p-sm">
+				<blockquote>
+					<p>Dies ist ein wichtiges Zitat<br/>mit mehreren Zeilen</p>
+				</blockquote>
+			</div>
+		</div>
+		<p class="text-sm muted border">
+			Verwenden Sie das Größer-als-Zeichen (>) am Zeilenanfang für Zitate.
+		</p>
+	}
+}
+
+templ tipsSection() {
+	@components.Section(templ.Attributes{
+		"class": "card success outline p-lg",
+	}) {
+		<h2 class="text-xl text-bold mb flex items-center ghost success gap">
+			<i class="bi bi-lightbulb"></i>
+			Tipps & Häufige Fehler
+		</h2>
+		<div class="my-lg">
+			@tipItem("Leerzeichen beachten:", "Achten Sie auf Leerzeichen vor und nach Formatierungszeichen.")
+			@tipItem("Zeilen trennen:", "Verwenden Sie Leerzeilen zwischen verschiedenen Elementen.")
+		</div>
+	}
+}
+
+templ tipItem(title, description string) {
+	<div class="flex items-start gap pb">
+		<i class="bi bi-check-circle-fill success ghost text-lg mt"></i>
+		<div>
+			<strong class="text-medium">{ title }</strong>
+			<span class="text-sm muted block">{ description }</span>
+		</div>
+	</div>
+}

@@ -1,0 +1,33 @@
+package templates
+
+import "fmt"
+
+// TotalCycles renders an input field displaying the total cycles since last regeneration
+templ TotalCycles(totalCycles int64, input bool) {
+	{{
+		var colorClass = "contrast ghost"
+
+		if totalCycles > env.ToolCycleWarning {
+			colorClass = "warning ghost"
+		}
+
+		if totalCycles > env.ToolCycleError {
+			colorClass = "destructive ghost"
+		}
+	}}
+	if input {
+		<input
+			class={ colorClass }
+			type="number"
+			value={ fmt.Sprintf("%d", totalCycles) }
+			readonly
+			title="Gesamtzyklen seit der letzten Regenerierung"
+		/>
+	} else {
+		<span class={ fmt.Sprintf("card compact flat %s", colorClass) }>
+			<span class="card-body">
+				{ totalCycles }
+			</span>
+		</span>
+	}
+}

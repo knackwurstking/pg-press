@@ -1,0 +1,191 @@
+package templates
+
+import (
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/utils"
+
+	ui "github.com/knackwurstking/ui/ui-templ"
+)
+
+templ NewToolDialog() {
+	@ui.Dialog(ui.DialogOptions{
+		Method:           "POST",
+		Href:             utils.UrlDialogs().EditTool(0),
+		ID:               "tool-dialog",
+		SubmitButtonText: "Erstellen",
+	}) {
+		{{ tool := &shared.Tool{} }}
+		@toolPositionAndPressSelection(tool.Position, tool.Press)
+		@toolFormat(tool.Format.Width, tool.Format.Height)
+		@toolType(tool.Type)
+		@toolCode(tool.Code)
+	}
+}
+
+templ EditToolDialog(tool *shared.Tool) {
+	@ui.Dialog(ui.DialogOptions{
+		Method:           "PUT",
+		Href:             utils.UrlDialogs().EditTool(tool.ID),
+		ID:               "tool-edit-dialog",
+		SubmitButtonText: "Aktualisieren",
+	}) {
+		@toolPositionAndPressSelection(tool.Position, tool.Press)
+		@toolFormat(tool.Format.Width, tool.Format.Height)
+		@toolType(tool.Type)
+		@toolCode(tool.Code)
+	}
+}
+
+templ toolPositionAndPressSelection(inputPosition shared.Position, inputPressSelection *shared.PressNumber) {
+	<div class="flex flex-row gap flex-wrap justify-between items-center">
+		<div class="flex flex-col gap-0">
+			<label for="position">Position</label>
+			<select id="position" name="position" required>
+				<option
+					value=""
+					if inputPosition == "" {
+						selected
+					}
+				>
+					Position auswählen
+				</option>
+				<option
+					value={ shared.SlotUpper }
+					if inputPosition == shared.SlotUpper {
+						selected
+					}
+				>
+					Oberteil
+				</option>
+				<option
+					value={ shared.SlotLower }
+					if inputPosition == shared.SlotLower {
+						selected
+					}
+				>
+					Unterteil
+				</option>
+				<option
+					value={ shared.SlotUpperCassette }
+					if inputPosition == shared.SlotUpperCassette {
+						selected
+					}
+				>
+					Kassette
+				</option>
+			</select>
+		</div>
+		<div class="flex flex-col gap-0 w-fit">
+			<label for="pressSelection">Presse</label>
+			{{ validInputPressSelection := inputPressSelection.IsValid() }}
+			<select id="pressSelection" name="press-selection">
+				<option
+					value=""
+					if ! {
+						selected
+					}
+				>
+					Nicht Eingebaut
+				</option>
+				<option
+					value="0"
+					if validInputPressSelection && *inputPressSelection == 0 {
+						selected
+					}
+				>
+					Presse 0
+				</option>
+				<option
+					value="2"
+					if validInputPressSelection && *inputPressSelection == 2 {
+						selected
+					}
+				>
+					Presse 2
+				</option>
+				<option
+					value="3"
+					if validInputPressSelection && *inputPressSelection == 3 {
+						selected
+					}
+				>
+					Presse 3
+				</option>
+				<option
+					value="4"
+					if validInputPressSelection && *inputPressSelection == 4 {
+						selected
+					}
+				>
+					Presse 4
+				</option>
+				<option
+					value="5"
+					if validInputPressSelection && *inputPressSelection == 5 {
+						selected
+					}
+				>
+					Presse 5
+				</option>
+			</select>
+		</div>
+	</div>
+}
+
+templ toolFormat(inputWidth int, inputHeight int) {
+	<div class="flex flex-col gap-0">
+		<label>Format</label>
+		<div class="flex gap-sm">
+			<input
+				type="number"
+				id="width"
+				name="width"
+				class="w-full"
+				placeholder="z.B. 120"
+				if inputWidth != 0 {
+					value={ inputWidth }
+				}
+				required
+			/>
+			<span class="text-xl" style="margin: auto 0;">x</span>
+			<input
+				type="number"
+				id="height"
+				name="height"
+				class="w-full"
+				placeholder="z.B. 60"
+				if inputHeight != 0 {
+					value={ inputHeight }
+				}
+				required
+			/>
+		</div>
+	</div>
+}
+
+templ toolType(inputType string) {
+	<div class="flex flex-col gap-0">
+		<label for="type">Typ</label>
+		<input
+			type="text"
+			id="type"
+			name="type"
+			placeholder="z.B. MASS, FC, GTC"
+			value={ inputType }
+		/>
+	</div>
+}
+
+templ toolCode(inputCode string) {
+	<div class="flex flex-col gap-0">
+		<label for="code">Code</label>
+		<input
+			type="text"
+			id="code"
+			name="code"
+			placeholder="z.B. G01, G02, XXL01, 3573"
+			value={ inputCode }
+			required
+		/>
+	</div>
+}

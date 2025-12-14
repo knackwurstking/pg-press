@@ -1,0 +1,124 @@
+package templates
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pg-press/components"
+	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/utils"
+	"strconv"
+	"strings"
+)
+
+templ NotesSection(press models.PressNumber, notes []*models.Note, tools []*models.Tool) {
+	{{
+		pressNotes := make([]*models.Note, 0)
+		toolNotes := make([]*models.Note, 0)
+		for _, n := range notes {
+			if strings.HasPrefix(n.Linked, "press_") {
+				pressNotes = append(pressNotes, n)
+			} else if strings.HasPrefix(n.Linked, "tool_") {
+				toolNotes = append(toolNotes, n)
+			}
+		}
+	}}
+	@pressNotesSection(pressNotes, press)
+	if len(toolNotes) > 0 {
+		@toolNotesSection(toolNotes, tools)
+	}
+}
+
+templ pressNotesSection(notes []*models.Note, press models.PressNumber) {
+	if len(notes) > 0 {
+		// Press Notes
+		@components.Section(templ.Attributes{
+			"class": "notes-list flex flex-col gap-lg p",
+		}) {
+			for _, note := range notes {
+				@components.NoteCard(note, nil)
+			}
+		}
+		@components.Section(templ.Attributes{
+			"class": "flex justify-center mt",
+		}) {
+			<button
+				class="primary"
+				hx-get={ utils.UrlDialogs().EditNote(0, fmt.Sprintf("press_%d", press)) }
+				hx-trigger="click"
+				hx-target="body"
+				hx-swap="beforeend"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+				title="Neue Notiz für diese Presse hinzufügen"
+			>
+				<i class="bi bi-plus-lg"></i>
+				Notiz hinzufügen
+			</button>
+		}
+	} else {
+		@components.Section(templ.Attributes{
+			"class": "empty-state",
+		}) {
+			<h4>Keine Notizen</h4>
+			<p>Es gibt keine Notizen für Werkzeuge auf dieser Presse.</p>
+			<button
+				class="primary"
+				hx-get={ utils.UrlDialogs().EditNote(0, fmt.Sprintf("press_%d", press)) }
+				hx-trigger="click"
+				hx-target="body"
+				hx-swap="beforeend"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+				title="Neue Notiz für diese Presse hinzufügen"
+			>
+				<i class="bi bi-plus-lg"></i>
+				Erste Notiz hinzufügen
+			</button>
+		}
+	}
+}
+
+templ toolNotesSection(notes []*models.Note, tools []*models.Tool) {
+	@components.Section(templ.Attributes{
+		"class": "notes-list flex flex-col gap-lg p",
+	}) {
+		{{
+			topToolNotes := make([]*models.Note, 0)
+			topCassetteToolNotes := make([]*models.Note, 0)
+			bottomToolNotes := make([]*models.Note, 0)
+			for _, n := range notes {
+				sID, _ := strings.CutPrefix(n.Linked, "tool_")
+				id, _ := strconv.ParseInt(sID, 10, 64)
+				for _, t := range tools {
+					if t.ID != models.ToolID(id) {
+						continue
+					}
+
+					switch t.Position {
+					case models.PositionTop:
+						topToolNotes = append(topToolNotes, n)
+					case models.PositionTopCassette:
+						topCassetteToolNotes = append(topCassetteToolNotes, n)
+					case models.PositionBottom:
+						bottomToolNotes = append(bottomToolNotes, n)
+					}
+				}
+			}
+		}}
+		if len(topToolNotes) > 0 {
+			<h4>{ models.PositionTop.GermanString() }</h4>
+			for _, n := range topToolNotes {
+				@components.NoteCard(n, nil)
+			}
+		}
+		if len(topCassetteToolNotes) > 0 {
+			<h4>{ models.PositionTopCassette.GermanString() }</h4>
+			for _, n := range topCassetteToolNotes {
+				@components.NoteCard(n, nil)
+			}
+		}
+		if len(bottomToolNotes) > 0 {
+			<h4>{ models.PositionBottom.GermanString() }</h4>
+			for _, n := range bottomToolNotes {
+				@components.NoteCard(n, nil)
+			}
+		}
+	}
+}

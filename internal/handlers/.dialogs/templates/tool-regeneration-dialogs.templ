@@ -1,0 +1,34 @@
+package templates
+
+import (
+	"net/http"
+
+	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
+
+	ui "github.com/knackwurstking/ui/ui-templ"
+)
+
+templ EditToolRegenerationDialog(r *shared.ToolRegeneration, tool *shared.Tool) {
+	@ui.Dialog(ui.DialogOptions{
+		Method:           http.MethodPut,
+		Href:             urlb.UrlDialogs().EditToolRegeneration(r.ID),
+		ID:               "regeneration-dialog",
+		SubmitButtonText: "Aktualisieren",
+	}) {
+		@components.Section(nil) {
+			<p>Tool: { tool.Width }x{ tool.Height } { tool.Type } { tool.Code }</p>
+			<p>Regeneriert am: { r.Start.FormatDate() } -> { r.Stop.FormatDate() }</p>
+		}
+		<label class="flex flex-col gap-0" for="cycles-input">
+			Zyklen
+			<input
+				id="cycles-input"
+				name="cycles-input"
+				type="number"
+				value={ r.Cycles }
+			/>
+		</label>
+	}
+}
