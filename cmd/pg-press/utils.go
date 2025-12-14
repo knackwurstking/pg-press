@@ -16,10 +16,12 @@ func openDB(dbPath string, logging bool) (*common.DB, error) {
 		slog.Info("Database opened", "path", dbPath)
 	}
 
-	return common.NewDB(&shared.Config{
+	db := common.NewDB(&shared.Config{
 		DriverName:       "sqlite3",
 		DatabaseLocation: dbPath,
-	}), nil
+	})
+
+	return db, db.Setup()
 }
 
 // createDBPathOption creates a standardized database path CLI option
