@@ -9,9 +9,6 @@ import (
 type Service[T any, ID comparable] interface {
 	DB() *sql.DB
 
-	// TableName returns the (SQL) table name in use
-	TableName() string
-
 	// Setup initializes the service with the provided setup configuration
 	Setup() *errors.MasterError
 

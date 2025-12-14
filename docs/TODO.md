@@ -52,4 +52,4 @@ Fix all handler and templates
 
 - [x] home
 - [x] auth
-- [-] profile
+- [x] profile

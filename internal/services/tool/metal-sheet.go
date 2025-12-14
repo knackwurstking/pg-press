@@ -72,12 +72,8 @@ func NewMetalSheetService(c *shared.Config) *MetalSheetService {
 	}
 }
 
-func (s *MetalSheetService) TableName() string {
-	return "metal_sheets"
-}
-
 func (s *MetalSheetService) Setup() *errors.MasterError {
-	return s.BaseService.Setup(DBName, s.TableName(), SQLCreateMetalSheetTable)
+	return s.BaseService.Setup(DBName, SQLCreateMetalSheetTable)
 }
 
 func (s *MetalSheetService) Create(entity any) *errors.MasterError {

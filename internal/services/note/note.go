@@ -63,12 +63,8 @@ func NewNoteService(c *shared.Config) *NoteService {
 	}
 }
 
-func (s *NoteService) TableName() string {
-	return "notes"
-}
-
 func (s *NoteService) Setup() *errors.MasterError {
-	return s.BaseService.Setup("pg-press", s.TableName(), SQLCreateNoteTable)
+	return s.BaseService.Setup("pg-press", SQLCreateNoteTable)
 }
 
 func (s *NoteService) Create(entity *shared.Note) *errors.MasterError {

@@ -68,12 +68,8 @@ func NewToolRegenerationService(c *shared.Config) *ToolRegenerationService {
 	}
 }
 
-func (s *ToolRegenerationService) TableName() string {
-	return "tool_regenerations"
-}
-
 func (s *ToolRegenerationService) Setup() *errors.MasterError {
-	return s.BaseService.Setup(DBName, s.TableName(), SQLCreateToolRegenerationTable)
+	return s.BaseService.Setup(DBName, SQLCreateToolRegenerationTable)
 }
 
 func (s *ToolRegenerationService) Create(entity *shared.ToolRegeneration) *errors.MasterError {

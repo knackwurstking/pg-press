@@ -14,25 +14,23 @@ const (
 			id 			INTEGER NOT NULL,
 			name 		TEXT NOT NULL,
 			api_key 	TEXT NOT NULL UNIQUE,
-			last_feed 	TEXT NOT NULL,
 
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
 	`
 	SQLCreateUser string = `
-		INSERT INTO users (name, api_key, last_feed) 
-		VALUES (:name, :api_key, :last_feed);
+		INSERT INTO users (name, api_key)
+		VALUES (:name, :api_key);
 	`
 	SQLGetUserByID string = `
-		SELECT id, name, api_key, last_feed 
+		SELECT id, name, api_key
 		FROM users
 		WHERE id = :id;
 	`
 	SQLUpdateUser string = `
 		UPDATE users
 		SET name 	= :name,
-			api_key 	= :api_key,
-			last_feed 	= :last_feed
+			api_key	= :api_key
 		WHERE id = :id;
 	`
 	SQLDeleteUser string = `
@@ -40,7 +38,7 @@ const (
 		WHERE id = :id;
 	`
 	SQLListUsers string = `
-		SELECT id, name, api_key, last_feed 
+		SELECT id, name, api_key
 		FROM users;
 	`
 
@@ -63,12 +61,8 @@ func NewUserService(c *shared.Config) *UserService {
 	}
 }
 
-func (s *UserService) TableName() string {
-	return "users"
-}
-
 func (s *UserService) Setup() *errors.MasterError {
-	return s.BaseService.Setup(DBName, s.TableName(), SQLCreateUserTable)
+	return s.BaseService.Setup(DBName, SQLCreateUserTable)
 }
 
 func (s *UserService) Create(entity *shared.User) *errors.MasterError {
@@ -81,10 +75,8 @@ func (s *UserService) Create(entity *shared.User) *errors.MasterError {
 	defer s.mx.Unlock()
 
 	r, err := s.DB().Exec(SQLCreateUser,
-		sql.Named("table_name", s.TableName()),
 		sql.Named("name", entity.Name),
 		sql.Named("api_key", entity.ApiKey),
-		sql.Named("last_feed", entity.LastFeed),
 	)
 	if err != nil {
 		return errors.NewMasterError(err, 0)
@@ -115,11 +107,9 @@ func (s *UserService) Update(entity *shared.User) *errors.MasterError {
 	defer s.mx.Unlock()
 
 	_, err := s.DB().Exec(SQLUpdateUser,
-		sql.Named("table_name", s.TableName()),
 		sql.Named("id", entity.ID),
 		sql.Named("name", entity.Name),
 		sql.Named("api_key", entity.ApiKey),
-		sql.Named("last_feed", entity.LastFeed),
 	)
 	if err != nil {
 		return errors.NewMasterError(err, 0)
@@ -137,7 +127,6 @@ func (s *UserService) GetByID(id shared.TelegramID) (*shared.User, *errors.Maste
 	defer s.mx.Unlock()
 
 	r := s.DB().QueryRow(SQLGetUserByID,
-		sql.Named("table_name", s.TableName()),
 		sql.Named("id", id),
 	)
 
@@ -147,7 +136,6 @@ func (s *UserService) GetByID(id shared.TelegramID) (*shared.User, *errors.Maste
 		&u.ID,
 		&u.Name,
 		&u.ApiKey,
-		&u.LastFeed,
 	)
 	if err != nil {
 		return u, errors.NewMasterError(err, 0)
@@ -160,9 +148,7 @@ func (s *UserService) List() ([]*shared.User, *errors.MasterError) {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
-	rows, err := s.DB().Query(SQLListUsers,
-		sql.Named("table_name", s.TableName()),
-	)
+	rows, err := s.DB().Query(SQLListUsers)
 	if err != nil {
 		return nil, errors.NewMasterError(err, 0)
 	}
@@ -175,7 +161,6 @@ func (s *UserService) List() ([]*shared.User, *errors.MasterError) {
 			&u.ID,
 			&u.Name,
 			&u.ApiKey,
-			&u.LastFeed,
 		)
 		if err != nil {
 			return nil, errors.NewMasterError(err, 0)
@@ -195,7 +180,6 @@ func (s *UserService) Delete(id shared.TelegramID) *errors.MasterError {
 	defer s.mx.Unlock()
 
 	_, err := s.DB().Exec(SQLDeleteUser,
-		sql.Named("table_name", s.TableName()),
 		sql.Named("id", id),
 	)
 	if err != nil {

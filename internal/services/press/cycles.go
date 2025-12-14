@@ -63,12 +63,8 @@ func NewCycleService(c *shared.Config) *CycleService {
 	}
 }
 
-func (s *CycleService) TableName() string {
-	return "press_cycles"
-}
-
 func (s *CycleService) Setup() *errors.MasterError {
-	return s.BaseService.Setup(DBName, s.TableName(), SQLCreateCycleTable)
+	return s.BaseService.Setup(DBName, SQLCreateCycleTable)
 }
 
 func (s *CycleService) Create(entity *shared.Cycle) *errors.MasterError {

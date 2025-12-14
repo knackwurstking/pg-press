@@ -66,12 +66,8 @@ func NewCookieService(c *shared.Config) *CookieService {
 	}
 }
 
-func (s *CookieService) TableName() string {
-	return "cookies"
-}
-
 func (s *CookieService) Setup() *errors.MasterError {
-	return s.BaseService.Setup(DBName, s.TableName(), SQLCreateCookieTable)
+	return s.BaseService.Setup(DBName, SQLCreateCookieTable)
 }
 
 func (s *CookieService) Create(entity *shared.Cookie) *errors.MasterError {
@@ -136,7 +132,6 @@ func (s *CookieService) GetByID(value string) (*shared.Cookie, *errors.MasterErr
 	defer s.mx.Unlock()
 
 	r := s.DB().QueryRow(SQLGetCookieByID,
-		sql.Named("table_name", s.TableName()),
 		sql.Named("value", value),
 	)
 
@@ -154,9 +149,7 @@ func (s *CookieService) List() ([]*shared.Cookie, *errors.MasterError) {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
-	rows, err := s.DB().Query(SQLListCookies,
-		sql.Named("table_name", s.TableName()),
-	)
+	rows, err := s.DB().Query(SQLListCookies)
 	if err != nil {
 		return nil, errors.NewMasterError(err, 0)
 	}
@@ -184,7 +177,6 @@ func (s *CookieService) Delete(value string) *errors.MasterError {
 	defer s.mx.Unlock()
 
 	_, err := s.DB().Exec(SQLDeleteCookie,
-		sql.Named("table_name", s.TableName()),
 		sql.Named("value", value),
 	)
 	if err != nil {

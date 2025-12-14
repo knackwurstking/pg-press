@@ -82,12 +82,8 @@ func NewCassetteService(c *shared.Config) *CassetteService {
 	}
 }
 
-func (s *CassetteService) TableName() string {
-	return "cassettes"
-}
-
 func (s *CassetteService) Setup() *errors.MasterError {
-	return s.BaseService.Setup(DBName, s.TableName(), SQLCreateCassetteTable)
+	return s.BaseService.Setup(DBName, SQLCreateCassetteTable)
 }
 
 func (s *CassetteService) Create(entity *shared.Cassette) *errors.MasterError {

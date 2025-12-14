@@ -57,12 +57,8 @@ func NewLowerMetalSheetService(c *shared.Config) *LowerMetalSheetService {
 	}
 }
 
-func (s *LowerMetalSheetService) TableName() string {
-	return "metal_sheets"
-}
-
 func (s *LowerMetalSheetService) Setup() *errors.MasterError {
-	return s.BaseService.Setup(DBName, s.TableName(), SQLCreateMetalSheetTable)
+	return s.BaseService.Setup(DBName, SQLCreateMetalSheetTable)
 }
 
 func (s *LowerMetalSheetService) GetByID(id shared.EntityID) (*shared.LowerMetalSheet, *errors.MasterError) {

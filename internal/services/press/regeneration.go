@@ -68,12 +68,8 @@ func NewPressRegenerationService(c *shared.Config) *PressRegenerationService {
 	}
 }
 
-func (s *PressRegenerationService) TableName() string {
-	return "press_regenerations"
-}
-
 func (s *PressRegenerationService) Setup() *errors.MasterError {
-	return s.BaseService.Setup(DBName, s.TableName(), SQLCreatePressRegenerationTable)
+	return s.BaseService.Setup(DBName, SQLCreatePressRegenerationTable)
 }
 
 func (s *PressRegenerationService) Create(entity *shared.PressRegeneration) *errors.MasterError {

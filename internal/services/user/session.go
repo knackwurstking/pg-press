@@ -27,10 +27,6 @@ func NewSessionService(c *shared.Config) *SessionService {
 	}
 }
 
-func (s *SessionService) TableName() string {
-	return "sessions"
-}
-
 func (s *SessionService) Setup() *errors.MasterError {
 	return nil // Only in-memory storage; no setup needed
 }

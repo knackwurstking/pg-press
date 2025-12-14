@@ -53,12 +53,8 @@ func NewUpperMetalSheetService(c *shared.Config) *UpperMetalSheetService {
 	}
 }
 
-func (s *UpperMetalSheetService) TableName() string {
-	return "metal_sheets"
-}
-
 func (s *UpperMetalSheetService) Setup() *errors.MasterError {
-	return s.BaseService.Setup(DBName, s.TableName(), SQLCreateMetalSheetTable)
+	return s.BaseService.Setup(DBName, SQLCreateMetalSheetTable)
 }
 
 func (s *UpperMetalSheetService) GetByID(id shared.EntityID) (*shared.UpperMetalSheet, *errors.MasterError) {

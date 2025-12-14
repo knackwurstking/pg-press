@@ -10,13 +10,13 @@ type BaseService struct {
 	*Config
 }
 
-func (bs *BaseService) Setup(dbName, tableName, tableCreationQuery string) *errors.MasterError {
+func (bs *BaseService) Setup(dbName, tableCreationQuery string) *errors.MasterError {
 	merr := bs.Open(dbName)
 	if merr != nil {
 		return merr
 	}
 
-	return bs.createSQLTable(tableName, tableCreationQuery)
+	return bs.createSQLTable(tableCreationQuery)
 }
 
 func (s *BaseService) Close() *errors.MasterError {
@@ -27,8 +27,8 @@ func (s *BaseService) Close() *errors.MasterError {
 	return nil
 }
 
-func (bs *BaseService) createSQLTable(tableName, tableCreationQuery string) *errors.MasterError {
-	_, err := bs.DB().Exec(tableCreationQuery, sql.Named("table_name", tableName))
+func (bs *BaseService) createSQLTable(tableCreationQuery string) *errors.MasterError {
+	_, err := bs.DB().Exec(tableCreationQuery)
 	if err != nil {
 		return errors.NewMasterError(err, 0)
 	}

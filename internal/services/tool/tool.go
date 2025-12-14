@@ -78,12 +78,8 @@ func NewToolService(c *shared.Config) *ToolService {
 	}
 }
 
-func (s *ToolService) TableName() string {
-	return "tools"
-}
-
 func (s *ToolService) Setup() *errors.MasterError {
-	return s.BaseService.Setup(DBName, s.TableName(), SQLCreateToolTable)
+	return s.BaseService.Setup(DBName, SQLCreateToolTable)
 }
 
 func (s *ToolService) Create(entity *shared.Tool) *errors.MasterError {

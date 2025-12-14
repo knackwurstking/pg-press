@@ -74,12 +74,8 @@ func NewPressService(c *shared.Config) *PressService {
 	}
 }
 
-func (s *PressService) TableName() string {
-	return "presses"
-}
-
 func (s *PressService) Setup() *errors.MasterError {
-	return s.BaseService.Setup(DBName, s.TableName(), SQLCreatePressTable)
+	return s.BaseService.Setup(DBName, SQLCreatePressTable)
 }
 
 func (s *PressService) Close() *errors.MasterError {
