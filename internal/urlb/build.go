@@ -275,7 +275,6 @@ func UrlPressRegeneration(press shared.PressNumber, pressRegenerationID shared.E
 func UrlDialogs() (url struct {
 	EditCycle             func(cycleID shared.EntityID, toolID shared.EntityID, toolChangeMode *bool) templ.SafeURL
 	EditTool              func(toolID shared.EntityID) templ.SafeURL
-	NewTool               func(toolID shared.EntityID) templ.SafeURL
 	EditMetalSheet        func(metalSheetID shared.EntityID, toolID shared.EntityID) templ.SafeURL
 	EditNote              func(noteID shared.EntityID, linkToTables string) templ.SafeURL
 	EditToolRegeneration  func(toolRegenerationID shared.EntityID) templ.SafeURL
@@ -283,7 +282,6 @@ func UrlDialogs() (url struct {
 }) {
 	url.EditCycle = urlEditCycleDialog
 	url.EditTool = urlEditToolDialog
-	url.NewTool = urlNewToolDialog
 	url.EditMetalSheet = urlEditMetalSheetDialog
 	url.EditNote = urlEditNoteDialog
 	url.EditToolRegeneration = urlEditToolRegenerationDialog
@@ -316,15 +314,6 @@ func urlEditToolDialog(toolID shared.EntityID) templ.SafeURL {
 	}
 
 	return BuildURLWithParams("/dialog/edit-tool", params)
-}
-
-func urlNewToolDialog(toolID shared.EntityID) templ.SafeURL {
-	params := map[string]string{}
-	if toolID != 0 {
-		params["id"] = fmt.Sprintf("%d", toolID)
-	}
-
-	return BuildURLWithParams("/dialog/new-tool", params)
 }
 
 // urlEditMetalSheetDialog constructs edit metal sheet dialog URL
