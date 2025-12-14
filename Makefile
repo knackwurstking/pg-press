@@ -46,8 +46,7 @@ dev:
 			exit 1 \
 		)
 	mkdir -p data
-	export LOG_LEVEL=debug && \
-	export LOG_FORMAT=text && \
+	export VERBOSE=true && \
 	export SERVER_PATH_PREFIX=${SERVER_PATH_PREFIX} && \
 	gow -e=go,json,html,js,css -r run ./cmd/${BINARY_NAME} server --addr ${SERVER_ADDR_DEV} --db data/dev.db
 
@@ -89,10 +88,6 @@ define LAUNCHCTL_PLIST
 		<string>:9020</string>
 		<key>SERVER_PATH_PREFIX</key>
 		<string>/pg-press</string>
-		<key>LOG_LEVEL</key>
-		<string>info</string>
-		<key>LOG_FORMAT</key>
-		<string>text</string>
 		<key>ADMINS</key>
 		<string></string>
 	</dict>
