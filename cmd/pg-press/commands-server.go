@@ -6,6 +6,7 @@
 package main
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 
@@ -34,11 +35,9 @@ func serverCommand() cli.Command {
 				cli.Usage("Set server address in format <host>:<port> (e.g., localhost:8080)"))
 
 			return func(cmd *cli.Command) error {
-				initializeLogging()
-
 				r, err := openDB(*customDBPath, true)
 				if err != nil {
-					slog.Error("Failed to open database", "error", err)
+					fmt.Fprintf(os.Stderr, "Error opening database: %v\n", err)
 					return err
 				}
 

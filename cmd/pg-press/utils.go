@@ -2,51 +2,14 @@ package main
 
 import (
 	"log/slog"
-	"os"
-	"time"
 
-	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/shared"
 
 	"github.com/SuperPaintman/nice/cli"
-	"github.com/lmittmann/tint"
 
 	_ "github.com/mattn/go-sqlite3"
 )
-
-func initializeLogging() {
-	level := slog.LevelWarn
-
-	switch env.LogLevel {
-	case "DEBUG", "debug":
-		level = slog.LevelDebug
-	case "INFO", "info":
-		level = slog.LevelInfo
-	case "WARN", "warn":
-		level = slog.LevelWarn
-	case "ERROR", "error":
-		level = slog.LevelError
-	}
-
-	var handler slog.Handler
-	if env.LogFormat == "text" {
-		handler = tint.NewHandler(os.Stderr, &tint.Options{
-			AddSource:  true,
-			Level:      level,
-			TimeFormat: time.DateTime,
-		})
-	} else {
-		handler = slog.NewJSONHandler(
-			os.Stderr, &slog.HandlerOptions{
-				AddSource: true,
-				Level:     level,
-			},
-		)
-	}
-
-	slog.SetDefault(slog.New(handler))
-}
 
 func openDB(dbPath string, logging bool) (*common.DB, error) {
 	if logging {

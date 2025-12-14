@@ -20,26 +20,25 @@ import (
 )
 
 var (
-	keyAuthFilesToSkip       []string
-	keyAuthFilesToSkipRegExp *regexp.Regexp
-	pages                    []string
+	keyAuthFilesToSkip []string
+	pages              []string
 )
 
 func init() {
 	// NOTE: Used for updating cookies
 	pages = []string{
-		env.ServerPathPrefix + "/",
-		env.ServerPathPrefix + "/feed",
+		env.ServerPathPrefix + "",
 		env.ServerPathPrefix + "/profile",
-		env.ServerPathPrefix + "/editor",
-		env.ServerPathPrefix + "/help",
-		env.ServerPathPrefix + "/trouble-reports",
-		env.ServerPathPrefix + "/notes",
-		env.ServerPathPrefix + "/tools",
-		env.ServerPathPrefix + "/tool",
-		env.ServerPathPrefix + "/press",
-		env.ServerPathPrefix + "/umbau",
-		env.ServerPathPrefix + "/press-regenerations",
+		//env.ServerPathPrefix + "/feed",
+		//env.ServerPathPrefix + "/editor",
+		//env.ServerPathPrefix + "/help",
+		//env.ServerPathPrefix + "/trouble-reports",
+		//env.ServerPathPrefix + "/notes",
+		//env.ServerPathPrefix + "/tools",
+		//env.ServerPathPrefix + "/tool",
+		//env.ServerPathPrefix + "/press",
+		//env.ServerPathPrefix + "/umbau",
+		//env.ServerPathPrefix + "/press-regenerations",
 	}
 
 	// NOTE: Important for skipping key authentication
@@ -69,8 +68,6 @@ func init() {
 		env.ServerPathPrefix + "/pwa-512x512.png",
 		env.ServerPathPrefix + "/pwa-64x64.png",
 	}
-
-	keyAuthFilesToSkipRegExp = regexp.MustCompile(`.*woff[2]`)
 }
 
 func middlewareKeyAuth(db *common.DB) echo.MiddlewareFunc {
@@ -97,10 +94,9 @@ func middlewareKeyAuth(db *common.DB) echo.MiddlewareFunc {
 func keyAuthSkipper(ctx echo.Context) bool {
 	url := ctx.Request().URL.String()
 	path := ctx.Request().URL.Path
-	if slices.Contains(keyAuthFilesToSkip, path) || slices.Contains(keyAuthFilesToSkip, url) {
-		return true
-	}
-	return keyAuthFilesToSkipRegExp.MatchString(url)
+
+	return slices.Contains(keyAuthFilesToSkip, path) ||
+		slices.Contains(keyAuthFilesToSkip, url)
 }
 
 func keyAuthValidator(auth string, ctx echo.Context, db *common.DB) (bool, error) {

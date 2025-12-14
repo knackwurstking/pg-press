@@ -2,8 +2,9 @@ package auth
 
 import (
 	"fmt"
-	"log/slog"
+	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/knackwurstking/pg-press/internal/common"
@@ -25,12 +26,14 @@ const (
 )
 
 type Handler struct {
-	db *common.DB
+	DB     *common.DB
+	Logger *log.Logger
 }
 
 func NewHandler(db *common.DB) *Handler {
 	return &Handler{
-		db: db,
+		DB:     db,
+		Logger: log.New(os.Stderr, "auth-handler: ", log.LstdFlags),
 	}
 }
 
@@ -55,11 +58,15 @@ func (h *Handler) GetLoginPage(c echo.Context) *echo.HTTPError {
 }
 
 func (h *Handler) PostLoginPage(c echo.Context) *echo.HTTPError {
+	if env.Verbose {
+		h.Logger.Println("Login attempt from IP:", c.RealIP())
+	}
+
 	apiKey := c.FormValue("api-key")
 
 	err := h.processApiKeyLogin(apiKey, c)
 	if err != nil {
-		slog.Warn("Processing api key failed", "api_key", shared.MaskString(apiKey), "error", err)
+		fmt.Println("Processing api key failed:", err)
 	}
 	if apiKey == "" || err != nil {
 		invalid := true
@@ -78,24 +85,20 @@ func (h *Handler) PostLoginPage(c echo.Context) *echo.HTTPError {
 }
 
 func (h *Handler) GetLogout(c echo.Context) *echo.HTTPError {
-	user, merr := shared.GetUserFromContext(c)
-	if merr != nil {
-		return merr.Echo()
+	if env.Verbose {
+		h.Logger.Println("Logout attempt from IP:", c.RealIP())
 	}
 
-	cookie, err := c.Cookie(CookieName)
-	if err == nil {
-		merr := h.db.User.Cookie.Delete(cookie.Value)
+	if cookie, err := c.Cookie(CookieName); err == nil {
+		merr := h.DB.User.Cookie.Delete(cookie.Value)
 		if merr != nil {
-			slog.Error("Failed to remove cookie", "user_name", user.Name, "error", merr)
+			log.Println("Failed to delete cookie from database:", merr)
 		}
 	}
 
-	merr = urlb.RedirectTo(c, urlb.UrlLogin("", nil).Page)
-	if merr != nil {
+	if merr := urlb.RedirectTo(c, urlb.UrlLogin("", nil).Page); merr != nil {
 		return merr.Echo()
 	}
-
 	return nil
 }
 
@@ -104,14 +107,14 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) *errors.Ma
 		return errors.NewMasterError(fmt.Errorf("api key too short"), http.StatusBadRequest)
 	}
 
-	user, merr := helper.GetUserForApiKey(h.db, apiKey)
+	user, merr := helper.GetUserForApiKey(h.DB, apiKey)
 	if merr != nil {
 		return merr
 	}
 
 	merr = h.clearExistingSession(ctx)
 	if merr != nil {
-		slog.Warn("Failed to clear existing session", "error", merr)
+		log.Println("Failed to clear existing session:", merr)
 	}
 
 	merr = h.createSession(ctx, user.ID)
@@ -120,7 +123,7 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) *errors.Ma
 	}
 
 	if user.IsAdmin() {
-		slog.Info("Administrator login successful", "user", user.Name, "ip", ctx.RealIP())
+		log.Println("Administrator login successful:", user.Name, "from IP:", ctx.RealIP())
 	}
 
 	return nil
@@ -132,7 +135,7 @@ func (h *Handler) clearExistingSession(ctx echo.Context) *errors.MasterError {
 		return errors.NewMasterError(err, 0)
 	}
 
-	merr := h.db.User.Cookie.Delete(cookie.Value)
+	merr := h.DB.User.Cookie.Delete(cookie.Value)
 	if merr != nil {
 		return merr
 	}
@@ -147,7 +150,7 @@ func (h *Handler) createSession(ctx echo.Context, userID shared.TelegramID) *err
 		UserID:    userID,
 		LastLogin: shared.NewUnixMilli(time.Now()),
 	}
-	merr := h.db.User.Cookie.Create(cookie)
+	merr := h.DB.User.Cookie.Create(cookie)
 	if merr != nil {
 		return merr
 	}
