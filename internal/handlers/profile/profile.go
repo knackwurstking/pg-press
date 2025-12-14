@@ -27,7 +27,7 @@ type Handler struct {
 func NewHandler(db *common.DB) *Handler {
 	return &Handler{
 		DB:     db,
-		Logger: env.NewLogger("profile-handler: "),
+		Logger: env.NewLogger("handler: profile: "),
 	}
 }
 

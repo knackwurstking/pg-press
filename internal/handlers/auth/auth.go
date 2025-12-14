@@ -32,7 +32,7 @@ type Handler struct {
 func NewHandler(db *common.DB) *Handler {
 	return &Handler{
 		DB:     db,
-		Logger: env.NewLogger("auth-handler: "),
+		Logger: env.NewLogger("handler: auth: "),
 	}
 }
 
