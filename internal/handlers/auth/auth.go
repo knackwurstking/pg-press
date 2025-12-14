@@ -45,6 +45,10 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 }
 
 func (h *Handler) GetLoginPage(c echo.Context) *echo.HTTPError {
+	if env.Verbose {
+		h.Logger.Println("Login page requested from IP:", c.RealIP())
+	}
+
 	t := templates.Page(
 		templates.PageProps{
 			FormData: map[string]string{

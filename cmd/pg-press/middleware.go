@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"log/slog"
-	"regexp"
 	"slices"
 	"strings"
 	"time"
@@ -80,13 +80,12 @@ func middlewareKeyAuth(db *common.DB) echo.MiddlewareFunc {
 			return keyAuthValidator(auth, ctx, db)
 		},
 		ErrorHandler: func(err error, c echo.Context) error {
-			slog.Error(
-				"Authentication required",
-				"method", c.Request().Method,
-				"url_path", c.Request().URL.Path,
-				"real_ip", c.RealIP(),
-			)
-			return urlb.RedirectTo(c, urlb.UrlLogin("", nil).Page)
+			log.Println("KeyAuth error:", err, "Method:", c.Request().Method, "Path:", c.Request().URL.Path, "RealIP:", c.RealIP())
+			merr := urlb.RedirectTo(c, urlb.UrlLogin("", nil).Page)
+			if merr != nil {
+				return merr.Err
+			}
+			return nil
 		},
 	})
 }
@@ -104,11 +103,11 @@ func keyAuthValidator(auth string, ctx echo.Context, db *common.DB) (bool, error
 
 	user, err := validateUserFromCookie(ctx, db)
 	if err != nil {
-		slog.Warn("Validate user from cookie failed... Get user from api key now...", "error", err)
+		log.Println("Validate user from cookie failed:", err, "RealIP:", realIP)
 		// Try to get user directly from the API key
 		users, merr := db.User.User.List()
 		if merr != nil {
-			return false, merr.Echo()
+			return false, merr.Err
 		}
 
 		// Find user by API key
@@ -126,7 +125,10 @@ func keyAuthValidator(auth string, ctx echo.Context, db *common.DB) (bool, error
 		user = foundUser
 	}
 
-	slog.Info("API key auth successful", "user_name", user.Name, "real_ip", realIP)
+	if env.Verbose {
+		log.Println("API key auth successful for user:", user.Name, "RealIP:", realIP)
+	}
+
 	ctx.Set("user", user)
 	return true, nil
 }
@@ -140,30 +142,17 @@ func validateUserFromCookie(ctx echo.Context, db *common.DB) (*shared.User, erro
 
 	cookie, merr := db.User.Cookie.GetByID(httpCookie.Value)
 	if merr != nil {
-		return nil, merr.Wrap("get cookie")
+		return nil, merr.Wrap("get cookie").Err
 	}
 
 	// Check if cookie has expired
 	if cookie.IsExpired() {
-		slog.Error("Cookie has expired", "real_ip", realIP)
 		return nil, fmt.Errorf("cookie has expired")
 	}
 
 	user, merr := db.User.User.GetByID(cookie.UserID)
 	if merr != nil {
-		return nil, merr.Wrap("validate user from API key")
-	}
-
-	// Log user agent mismatch as potential security concern
-	// Be more lenient for PWA compatibility - only log significant changes
-	requestUserAgent := ctx.Request().UserAgent()
-	if cookie.UserAgent != requestUserAgent {
-		// Only log if the change seems significant (different browser/version, not just PWA vs browser mode)
-		if !isMinorUserAgentChange(cookie.UserAgent, requestUserAgent) {
-			slog.Info("Significant user agent change", "user_name", user.Name, "real_ip", realIP)
-		} else {
-			slog.Info("Minor user agent variation (likely PWA)", "user_name", user.Name, "real_ip", realIP)
-		}
+		return nil, merr.Wrap("validate user from API key").Err
 	}
 
 	// Check if the path matches any of the tracked pages (ignoring prefix and query parameters)
@@ -180,61 +169,11 @@ func validateUserFromCookie(ctx echo.Context, db *common.DB) (*shared.User, erro
 		slog.Info("Updating cookie", "user_name", user.Name, "real_ip", realIP, "url_path", ctx.Request().URL.Path)
 
 		// Try to update cookie with lock
-		err := db.User.Cookie.Update(cookie)
-		if err != nil {
-			// If the update failed due to a race condition (another goroutine updated first),
-			// we log it but don't treat it as a critical error
-			if strings.Contains(err.Error(), "cookie was updated by another process") {
-				slog.Debug("Cookie update skipped due to race condition", "user_name", user.Name, "real_ip", realIP)
-			} else {
-				slog.Error("Failed to update cookie with lock", "user_name", user.Name, "real_ip", realIP, "error", err)
-			}
-		} else {
-			slog.Debug("Cookie successfully updated with lock", "user_name", user.Name, "real_ip", realIP)
+		merr = db.User.Cookie.Update(cookie)
+		if merr != nil {
+			log.Println("Failed to update cookie with lock:", merr, "UserName:", user.Name, "RealIP:", realIP)
 		}
 	}
 
 	return user, nil
-}
-
-// isMinorUserAgentChange checks if the user agent change is minor (e.g., PWA vs browser mode)
-// rather than a significant change (different browser/device)
-func isMinorUserAgentChange(originalUA, newUA string) bool {
-	if originalUA == newUA {
-		return true
-	}
-
-	// If either is empty, consider it a significant change
-	if originalUA == "" || newUA == "" {
-		return false
-	}
-
-	// Common PWA-related user agent variations that should be considered minor:
-	// - Addition or removal of "wv" (WebView)
-	// - Changes in Chrome version numbers
-	// - Addition/removal of PWA-specific identifiers
-
-	// Extract the core browser identifier (Chrome, Firefox, Safari, etc.)
-	originalCore := extractBrowserCore(originalUA)
-	newCore := extractBrowserCore(newUA)
-
-	// If the core browser is the same, consider it a minor change
-	return originalCore != "" && originalCore == newCore
-}
-
-// extractBrowserCore extracts the core browser identifier from a user agent string
-func extractBrowserCore(userAgent string) string {
-	// Look for common browser patterns
-	patterns := []string{
-		"Chrome/", "Firefox/", "Safari/", "Edge/", "Opera/",
-	}
-
-	for _, pattern := range patterns {
-		if pos := regexp.MustCompile(pattern).FindStringIndex(userAgent); pos != nil {
-			// Return the browser name without version
-			return pattern[:len(pattern)-1]
-		}
-	}
-
-	return ""
 }
