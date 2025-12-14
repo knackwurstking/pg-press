@@ -1,8 +1,6 @@
 package shared
 
 import (
-	"database/sql"
-
 	"github.com/knackwurstking/pg-press/internal/errors"
 )
 

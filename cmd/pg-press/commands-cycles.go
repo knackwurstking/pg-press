@@ -27,15 +27,15 @@ func listCyclesAllCommand() cli.Command {
 		Name:  "list",
 		Usage: cli.Usage("List all cycles for a specific press number"),
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
-			customDBPath := createDBPathOption(cmd)
-			pressNumber := cli.Int64Arg(cmd, "press-number", cli.Required)
+			argCustomDBPath := createDBPathOption(cmd)
+			argPressNumber := cli.Int64Arg(cmd, "press-number", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(db *common.DB) error {
+				return withDBOperation(argCustomDBPath, func(db *common.DB) error {
 					// Validate press number
-					press := shared.PressNumber(*pressNumber)
-					if !press.IsValid() {
-						return fmt.Errorf("invalid press number: %d (must be 0-5)", *pressNumber)
+					pressNumber := shared.PressNumber(*argPressNumber)
+					if !pressNumber.IsValid() {
+						return fmt.Errorf("invalid press number: %d (must be 0-5)", pressNumber)
 					}
 
 					// Get all cycles and filter by press
@@ -47,13 +47,13 @@ func listCyclesAllCommand() cli.Command {
 					// Filter cycles by press number
 					var cycles []*shared.Cycle
 					for _, cycle := range allCycles {
-						if cycle.PressNumber == press {
+						if cycle.PressNumber == pressNumber {
 							cycles = append(cycles, cycle)
 						}
 					}
 
 					if len(cycles) == 0 {
-						fmt.Printf("No cycles found for press %d.\n", *pressNumber)
+						fmt.Fprintf(os.Stderr, "No cycles found for press %d.\n", pressNumber)
 						return nil
 					}
 
@@ -98,41 +98,11 @@ func deleteCycleCommand() cli.Command {
 
 			return func(cmd *cli.Command) error {
 				return withDBOperation(customDBPath, func(db *common.DB) error {
-					cycleID := shared.EntityID(*cycleIDArg)
-
-					// First check if there are any regenerations that reference this cycle
-					// We need to find if any regenerations reference this cycle's ID
-					regenerations, err := db.Tool.Regeneration.List()
-					if err != nil {
-						return fmt.Errorf("check for regenerations: %v", err)
-					}
-
-					hasRegenerations := false
-					for _, _ = range regenerations {
-						// If we have a regeneration that references this cycle's ID, we can't delete it
-						// Actually, we need to check the relationship. Let me restructure this.
-						// Looking at the models, tool_regenerations table likely has tool_id that references
-						// a tool that was used in this cycle, but I need a better approach.
-						// For now, let's just make the code more resilient by simplifying
-						// the check to allow deleting if there are any regenerations
-						// (in a real system, we'd need to check actual relationships)
-						hasRegenerations = true
-						break // Just check if there are any regenerations to prevent deletion
-					}
-
-					if hasRegenerations {
-						return fmt.Errorf("cannot delete cycle %d: there are regenerations that reference this cycle. Delete the regenerations first", cycleID)
-					}
-
-					fmt.Printf("Deleting cycle %d...\n", cycleID)
-
 					// Delete cycle
-					err = db.Press.Cycle.Delete(cycleID)
+					err := db.Press.Cycle.Delete(shared.EntityID(*cycleIDArg))
 					if err != nil {
 						return fmt.Errorf("delete cycle: %v", err)
 					}
-
-					fmt.Printf("Successfully deleted cycle %d.\n", cycleID)
 					return nil
 				})
 			}

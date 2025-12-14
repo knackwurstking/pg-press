@@ -35,7 +35,7 @@ func serverCommand() cli.Command {
 				cli.Usage("Set server address in format <host>:<port> (e.g., localhost:8080)"))
 
 			return func(cmd *cli.Command) error {
-				r, err := openDB(*customDBPath, true)
+				db, err := openDB(*customDBPath, true)
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "Error opening database: %v\n", err)
 					return err
@@ -44,9 +44,9 @@ func serverCommand() cli.Command {
 				e := echo.New()
 				e.HideBanner = true
 
-				middlewareConfiguration(e, r)
-				setupRouter(e, r, env.ServerPathPrefix)
-				startServer(e, r, env.ServerAddress)
+				middlewareConfiguration(e, db)
+				setupRouter(e, db, env.ServerPathPrefix)
+				startServer(e, env.ServerAddress)
 
 				return nil
 			}
@@ -58,14 +58,14 @@ func serverCommand() cli.Command {
  * Server Middleware Configuration
  ******************************************************************************/
 
-func middlewareConfiguration(e *echo.Echo, r *common.DB) {
+func middlewareConfiguration(e *echo.Echo, db *common.DB) {
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Output:           os.Stderr,
 		Format:           "${time_custom} ${method} ${status} ${uri} ${latency_human} ${remote_ip} ${error}\n",
 		CustomTimeFormat: "2006-01-02 15:04:05",
 	}))
 
-	e.Use(middlewareKeyAuth(r))
+	e.Use(middlewareKeyAuth(db))
 	e.Use(ui.EchoMiddlewareCache(pages))
 }
 
@@ -73,17 +73,17 @@ func middlewareConfiguration(e *echo.Echo, r *common.DB) {
  * Server Route Configuration
  ******************************************************************************/
 
-func setupRouter(e *echo.Echo, r *common.DB, prefix string) {
+func setupRouter(e *echo.Echo, db *common.DB, prefix string) {
 	// Static File Server
 	e.StaticFS(prefix+"/", assets.GetAssets())
-	handlers.RegisterAll(r, e)
+	handlers.RegisterAll(db, e)
 }
 
 /*******************************************************************************
  * Server Startup
  ******************************************************************************/
 
-func startServer(e *echo.Echo, r *common.DB, address string) {
+func startServer(e *echo.Echo, address string) {
 	slog.Info("Starting HTTP server", "address", address)
 	if err := e.Start(address); err != nil {
 		slog.Error("Server startup failed", "address", address, "error", err)

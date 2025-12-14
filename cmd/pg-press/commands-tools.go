@@ -92,7 +92,7 @@ func listToolsCommand() cli.Command {
 							stateStr = "Dead"
 						}
 
-						fmt.Fprintf(w, "%d\t%dx%d\t%s\t%s\t%s\t%s\t%s\t%s\n",
+						fmt.Fprintf(w, "%d\t%dx%d\t%s\t%s\t%s\t%s\t%s\n",
 							tool.ID,
 							tool.Width, tool.Height,
 							tool.Code,
@@ -352,7 +352,7 @@ func listCyclesCommand() cli.Command {
 						fmt.Fprintln(w, "----\t-----\t-------\t-----\t----")
 
 						for _, cycle := range cycles {
-							fmt.Fprintf(w, "%d\t%d\t%s\t%d\t%s\t%d\n",
+							fmt.Fprintf(w, "%d\t%d\t%d\t%s\t%s\n",
 								cycle.ID,
 								cycle.PressNumber,
 								cycle.Cycles,
