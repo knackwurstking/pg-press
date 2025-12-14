@@ -3,15 +3,16 @@ package templates
 import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/components"
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/utils"
 )
 
 // TODO:
 // - The trigger "pageLoaded from:body" needs to be removed and replaced with something more specific.
-templ SectionTools(tools []*models.ResolvedTool, user *models.User) {
+templ SectionTools(tools []*shared.Tool, user *models.User) {
 	<span
-		hx-get={ utils.UrlTools(0).SectionTools }
+		hx-get={ urlb.UrlTools(0).SectionTools }
 		hx-trigger="pageLoaded from:body"
 		hx-target={ "#" + IDTabContent }
 		hx-on::response-error="alert(event.detail.xhr.responseText)"
@@ -20,7 +21,7 @@ templ SectionTools(tools []*models.ResolvedTool, user *models.User) {
 	<div class="all-tools p" style="margin-top: 3.5rem;">
 		@components.ActionBar() {
 			<button
-				hx-get={ utils.UrlDialogs().EditTool(0) }
+				hx-get={ urlb.UrlDialogs().EditTool(0) }
 				hx-trigger="click"
 				hx-swap="beforeend"
 				hx-on::response-error="alert(event.detail.xhr.responseText)"

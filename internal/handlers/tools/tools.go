@@ -9,9 +9,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/tools/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/services"
-	"github.com/knackwurstking/pg-press/internal/shared"
 	ui "github.com/knackwurstking/ui/ui-templ"
 	"github.com/labstack/echo/v4"
 )
@@ -137,7 +135,27 @@ func (h *Handler) HTMXGetSectionPress(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) HTMXGetSectionTools(c echo.Context) error {
+func (h *Handler) HTMXGetSectionTools(c echo.Context) *echo.HTTPError {
+	return h.renderSectionTools(c)
+}
+
+// TODO: Fix all other stuff first
+func (h *Handler) HTMXGetAdminOverlappingTools(c echo.Context) *echo.HTTPError {
+	//overlappingTools, merr := h.registry.PressCycles.GetOverlappingTools()
+	//if merr != nil {
+	//	return merr.Echo()
+	//}
+
+	t := templates.AdminToolsSectionContent()
+	err := t.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "AdminToolsSectionContent")
+	}
+
+	return nil
+}
+
+func (h *Handler) renderSectionTools(c echo.Context) *echo.HTTPError {
 	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
@@ -148,6 +166,7 @@ func (h *Handler) HTMXGetSectionTools(c echo.Context) error {
 		return merr.Echo()
 	}
 
+	// TODO: Continue here...
 	var tools []*models.ResolvedTool
 	for _, t := range allTools {
 		if t.IsDead {
@@ -169,32 +188,4 @@ func (h *Handler) HTMXGetSectionTools(c echo.Context) error {
 	}
 
 	return nil
-}
-
-func (h *Handler) HTMXGetAdminOverlappingTools(c echo.Context) error {
-	overlappingTools, merr := h.registry.PressCycles.GetOverlappingTools()
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	t := templates.AdminToolsSectionContent(overlappingTools)
-	err := t.Render(c.Request().Context(), c.Response())
-	if err != nil {
-		return errors.NewRenderError(err, "AdminToolsSectionContent")
-	}
-
-	return nil
-}
-
-func (h *Handler) createToolFeed(user *models.User, tool *models.Tool, title string) {
-	content := fmt.Sprintf("Werkzeug: %s\nTyp: %s\nCode: %s\nPosition: %s",
-		tool.String(), tool.Type, tool.Code, string(tool.Position))
-	if tool.Press != nil {
-		content += fmt.Sprintf("\nPresse: %d", *tool.Press)
-	}
-
-	merr := h.registry.Feeds.Add(title, content, user.TelegramID)
-	if merr != nil {
-		slog.Warn("Failed to create feed", "error", merr)
-	}
 }

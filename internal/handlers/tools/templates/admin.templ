@@ -5,18 +5,17 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pg-press/internal/components"
-	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
-type AdminToolsProps struct {
-	// TODO: Continue here...
-	OverlappingTools []shared.OverlappingTool
-}
+//type AdminToolsProps struct {
+//	// TODO: Continue here...
+//	OverlappingTools []shared.OverlappingTool
+//}
 
 // TODO:
 // - The trigger "pageLoaded from:body" needs to be removed and replaced with something more specific.
-templ AdminToolsSectionContent(p AdminToolsProps) {
+templ AdminToolsSectionContent() {
 	<span
 		hx-get={ urlb.UrlTools(0).AdminOverlappingTools }
 		hx-trigger="pageLoaded from:body"
@@ -24,77 +23,78 @@ templ AdminToolsSectionContent(p AdminToolsProps) {
 		hx-on::response-error="alert(event.detail.xhr.responseText)"
 	></span>
 	<div class="admin-overlapping-tools">
-		if len(p.OverlappingTools) == 0 {
-			<div class="card success outline p text-center">
-				<div class="flex justify-center items-center gap">
-					<i class="bi bi-check-circle-fill text-lg"></i>
-					<div>
-						<h5 class="m-0">Keine Überschneidungen gefunden</h5>
-						<p class="muted border m-0">Alle Werkzeuge sind korrekt auf einzelne Pressen beschränkt.</p>
-					</div>
-				</div>
-			</div>
-		} else {
-			<div class="card warning outline p mb">
-				<div class="flex items-center gap">
-					<i class="bi bi-exclamation-triangle-fill text-lg"></i>
-					<div>
-						<h5 class="m-0">Überschneidungen erkannt!</h5>
-						<p class="muted border m-0">
-							{ fmt.Sprintf(
-								"Es wurden %d Werkzeuge gefunden, die gleichzeitig an mehreren Pressen verwendet wurden.", 
-								len(p.OverlappingTools),
-							) }
-						</p>
-					</div>
-				</div>
-			</div>
-			<div class="flex flex-col gap">
-				for _, overlappingTool := range p.OverlappingTools {
-					<div class="card error outline p">
-						<div class="mb">
-							<h6 class="m-0">{ overlappingTool.ToolCode }</h6>
-							<small>
-								<pre>
-									@templ.Raw(fmt.Sprintf(
-										"Tool ID:  %s\n"+
-											"Zeitraum: %s - %s",
-										fmt.Sprintf("%d", overlappingTool.ToolID),
-										overlappingTool.Start.Format(shared.DateFormat),
-										overlappingTool.End.Format(shared.DateFormat),
-									))
-								</pre>
-							</small>
-						</div>
-						<div class="overlapping-instances">
-							<h6>Betroffene Pressen:</h6>
-							<div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--ui-spacing);">
-								for _, overlappingInstance := range overlappingTool.Overlaps {
-									<div class="border p-sm">
-										<div class="flex justify-between items-center mb-sm">
-											<strong>Presse { fmt.Sprintf("%d", overlappingInstance.PressNumber) }</strong>
-											@components.SmallBadge("secondary", "text-bold") {
-												{ overlappingInstance.Position.German() }
-											}
-										</div>
-										<pre>
-											@templ.Raw(fmt.Sprintf(
-												"Start: %s\n"+
-													"Ende:  %s\n"+
-													"Dauer: %s",
-												overlappingInstance.Start.Format(shared.DateFormat+" "+shared.TimeFormat),
-												overlappingInstance.End.Format(shared.DateFormat+" "+shared.TimeFormat),
-												formatDuration(overlappingInstance.EndDate.Sub(overlappingInstance.StartDate)),
-											))
-										</pre>
-									</div>
-								}
-							</div>
-						</div>
-					</div>
-				}
-			</div>
-		}
+		@components.NotFoundSectionText("Under Construction")
+		//if len(p.OverlappingTools) == 0 {
+		//	<div class="card success outline p text-center">
+		//		<div class="flex justify-center items-center gap">
+		//			<i class="bi bi-check-circle-fill text-lg"></i>
+		//			<div>
+		//				<h5 class="m-0">Keine Überschneidungen gefunden</h5>
+		//				<p class="muted border m-0">Alle Werkzeuge sind korrekt auf einzelne Pressen beschränkt.</p>
+		//			</div>
+		//		</div>
+		//	</div>
+		//} else {
+		//	<div class="card warning outline p mb">
+		//		<div class="flex items-center gap">
+		//			<i class="bi bi-exclamation-triangle-fill text-lg"></i>
+		//			<div>
+		//				<h5 class="m-0">Überschneidungen erkannt!</h5>
+		//				<p class="muted border m-0">
+		//					{ fmt.Sprintf(
+		//						"Es wurden %d Werkzeuge gefunden, die gleichzeitig an mehreren Pressen verwendet wurden.", 
+		//						len(p.OverlappingTools),
+		//					) }
+		//				</p>
+		//			</div>
+		//		</div>
+		//	</div>
+		//	<div class="flex flex-col gap">
+		//		for _, overlappingTool := range p.OverlappingTools {
+		//			<div class="card error outline p">
+		//				<div class="mb">
+		//					<h6 class="m-0">{ overlappingTool.ToolCode }</h6>
+		//					<small>
+		//						<pre>
+		//							@templ.Raw(fmt.Sprintf(
+		//								"Tool ID:  %s\n"+
+		//									"Zeitraum: %s - %s",
+		//								fmt.Sprintf("%d", overlappingTool.ToolID),
+		//								overlappingTool.Start.Format(shared.DateFormat),
+		//								overlappingTool.End.Format(shared.DateFormat),
+		//							))
+		//						</pre>
+		//					</small>
+		//				</div>
+		//				<div class="overlapping-instances">
+		//					<h6>Betroffene Pressen:</h6>
+		//					<div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--ui-spacing);">
+		//						for _, overlappingInstance := range overlappingTool.Overlaps {
+		//							<div class="border p-sm">
+		//								<div class="flex justify-between items-center mb-sm">
+		//									<strong>Presse { fmt.Sprintf("%d", overlappingInstance.PressNumber) }</strong>
+		//									@components.SmallBadge("secondary", "text-bold") {
+		//										{ overlappingInstance.Position.German() }
+		//									}
+		//								</div>
+		//								<pre>
+		//									@templ.Raw(fmt.Sprintf(
+		//										"Start: %s\n"+
+		//											"Ende:  %s\n"+
+		//											"Dauer: %s",
+		//										overlappingInstance.Start.Format(shared.DateFormat+" "+shared.TimeFormat),
+		//										overlappingInstance.End.Format(shared.DateFormat+" "+shared.TimeFormat),
+		//										formatDuration(overlappingInstance.EndDate.Sub(overlappingInstance.StartDate)),
+		//									))
+		//								</pre>
+		//							</div>
+		//						}
+		//					</div>
+		//				</div>
+		//			</div>
+		//		}
+		//	</div>
+		//}
 	</div>
 }
 
