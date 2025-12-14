@@ -167,7 +167,7 @@ func (h *Handler) createSession(ctx echo.Context, userID shared.TelegramID) *err
 		Name:     CookieName,
 		Value:    cookie.Value,
 		Expires:  cookie.ExpiredAtTime(),
-		Path:     env.ServerPathPrefix + "/",
+		Path:     env.ServerPathPrefix,
 		HttpOnly: true,
 		Secure:   ctx.Request().TLS != nil || ctx.Scheme() == "https",
 		SameSite: http.SameSiteLaxMode,
