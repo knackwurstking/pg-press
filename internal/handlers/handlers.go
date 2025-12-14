@@ -17,6 +17,7 @@ func RegisterAll(r *common.DB, e *echo.Echo) {
 		{handler: home.NewHandler(r).RegisterRoutes, subPath: ""},
 		{handler: auth.NewHandler(r).RegisterRoutes, subPath: ""},
 		{handler: profile.NewHandler(r).RegisterRoutes, subPath: "/profile"},
+		{handler: tools.NewHandler(r).RegisterRoutes, subPath: "/tools"},
 	}
 	for _, reg := range registers {
 		reg.handler(e, reg.subPath)
@@ -30,7 +31,6 @@ func RegisterAll(r *common.DB, e *echo.Echo) {
 	//metalsheets.NewHandler(r).RegisterRoutes(e, "/metal-sheets")
 	//umbau.NewHandler(r).RegisterRoutes(e, "/umbau")
 	//troublereports.NewHandler(r).RegisterRoutes(e, "/trouble-reports")
-	//tools.NewHandler(r).RegisterRoutes(e, "/tools")
 	//tool.NewHandler(r).RegisterRoutes(e, "/tool")
 	//press.NewHandler(r).RegisterRoutes(e, "/press")
 	//pressregenerations.NewHandler(r).RegisterRoutes(e, "/press-regeneration")
