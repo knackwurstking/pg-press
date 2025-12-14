@@ -43,25 +43,20 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 }
 
 func (h *Handler) GetLoginPage(c echo.Context) *echo.HTTPError {
-	var (
-		invalid = shared.ParseQueryBool(c, "invalid")
-		apiKey  = c.FormValue("api-key")
-		page    = templates.LoginPage(apiKey, invalid)
+	t := templates.LoginPage(
+		c.FormValue("api-key"),
+		shared.ParseQueryBool(c, "invalid"),
 	)
-
-	err := page.Render(c.Request().Context(), c.Response())
+	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "Login Page")
 	}
-
 	return nil
 }
 
 func (h *Handler) PostLoginPage(c echo.Context) *echo.HTTPError {
-	slog.Info("User authentication request received")
-
-	// Parse form
 	apiKey := c.FormValue("api-key")
+
 	err := h.processApiKeyLogin(apiKey, c)
 	if err != nil {
 		slog.Warn("Processing api key failed", "api_key", shared.MaskString(apiKey), "error", err)
