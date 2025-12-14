@@ -51,5 +51,5 @@
 Fix all handler and templates
 
 - [x] home
-- [-] auth
-- [ ] profile
+- [x] auth
+- [-] profile
