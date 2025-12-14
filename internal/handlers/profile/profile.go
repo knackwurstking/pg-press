@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"slices"
 
 	"github.com/knackwurstking/pg-press/internal/common"
@@ -19,12 +20,14 @@ import (
 )
 
 type Handler struct {
-	DB *common.DB
+	DB     *common.DB
+	Logger *log.Logger
 }
 
 func NewHandler(db *common.DB) *Handler {
 	return &Handler{
-		DB: db,
+		DB:     db,
+		Logger: env.NewLogger("profile-handler: "),
 	}
 }
 
@@ -122,7 +125,7 @@ func (h *Handler) handleUserNameChange(c echo.Context, user *shared.User) *error
 	if merr != nil {
 		return merr
 	}
-	log.Printf("User %s changed their name to %s\n", user.Name, userName)
+	h.Logger.Printf("User %s changed their name to %s\n", user.Name, userName)
 
 	return nil
 }

@@ -100,7 +100,7 @@ func (h *Handler) GetLogout(c echo.Context) *echo.HTTPError {
 	if cookie, err := c.Cookie(CookieName); err == nil {
 		merr := h.DB.User.Cookie.Delete(cookie.Value)
 		if merr != nil {
-			log.Println("Failed to delete cookie from database:", merr)
+			h.Logger.Println("Failed to delete cookie from database:", merr)
 		}
 	}
 
@@ -122,7 +122,7 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) *errors.Ma
 
 	merr = h.clearExistingSession(ctx)
 	if merr != nil {
-		log.Println("Failed to clear existing session:", merr)
+		h.Logger.Println("Failed to clear existing session:", merr)
 	}
 
 	merr = h.createSession(ctx, user.ID)
@@ -131,7 +131,7 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) *errors.Ma
 	}
 
 	if user.IsAdmin() {
-		log.Println("Administrator login successful:", user.Name, "from IP:", ctx.RealIP())
+		h.Logger.Println("Administrator login successful:", user.Name, "from IP:", ctx.RealIP())
 	}
 
 	return nil
