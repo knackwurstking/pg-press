@@ -2,15 +2,15 @@ package profile
 
 import (
 	"fmt"
-	"log/slog"
 	"net/http"
+	"slices"
 
+	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/profile/templates"
+	"github.com/knackwurstking/pg-press/internal/helper"
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/pg-press/services"
 
 	ui "github.com/knackwurstking/ui/ui-templ"
 
@@ -18,12 +18,12 @@ import (
 )
 
 type Handler struct {
-	registry *services.Registry
+	DB *common.DB
 }
 
-func NewHandler(r *services.Registry) *Handler {
+func NewHandler(db *common.DB) *Handler {
 	return &Handler{
-		registry: r,
+		DB: db,
 	}
 }
 
@@ -40,8 +40,8 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	)
 }
 
-func (h *Handler) GetProfilePage(c echo.Context) error {
-	user, merr := utils.GetUserFromContext(c)
+func (h *Handler) GetProfilePage(c echo.Context) *echo.HTTPError {
+	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -51,7 +51,7 @@ func (h *Handler) GetProfilePage(c echo.Context) error {
 		return merr.Echo()
 	}
 
-	t := templates.Page(user)
+	t := templates.Page(templates.PageProps{User: user})
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "Profile Page")
@@ -60,18 +60,22 @@ func (h *Handler) GetProfilePage(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) HTMXGetCookies(c echo.Context) error {
-	user, merr := utils.GetUserFromContext(c)
+func (h *Handler) HTMXGetCookies(c echo.Context) *echo.HTTPError {
+	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	cookies, merr := h.registry.Cookies.ListApiKey(user.ApiKey)
+	cookies, merr := helper.ListCookiesForApiKey(h.DB, user.ApiKey)
 	if merr != nil {
 		return merr.Echo()
 	}
+	// Sort cookies by last login
+	slices.SortFunc(cookies, func(a, b *shared.Cookie) int {
+		return int(a.LastLogin - b.LastLogin)
+	})
 
-	t := templates.Cookies(models.SortCookies(cookies))
+	t := templates.Cookies(cookies)
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "Cookies")
@@ -80,28 +84,26 @@ func (h *Handler) HTMXGetCookies(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) HTMXDeleteCookies(c echo.Context) error {
-	slog.Info("Eat the cookie from a user :)")
-
-	value, merr := utils.ParseQueryString(c, "value")
+func (h *Handler) HTMXDeleteCookies(c echo.Context) *echo.HTTPError {
+	value, merr := shared.ParseQueryString(c, "value")
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	merr = h.registry.Cookies.Remove(value)
+	merr = h.DB.User.Cookie.Delete(value)
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	err := h.HTMXGetCookies(c)
-	if err != nil {
-		return errors.NewMasterError(err, 0).Echo()
+	eerr := h.HTMXGetCookies(c)
+	if eerr != nil {
+		return eerr
 	}
 
 	return nil
 }
 
-func (h *Handler) handleUserNameChange(c echo.Context, user *models.User) *errors.MasterError {
+func (h *Handler) handleUserNameChange(c echo.Context, user *shared.User) *errors.MasterError {
 	userName := c.FormValue("user-name")
 	if userName == "" || userName == user.Name {
 		return nil
@@ -114,25 +116,10 @@ func (h *Handler) handleUserNameChange(c echo.Context, user *models.User) *error
 		)
 	}
 
-	slog.Info("Changing user name", "user_from", user.Name, "user_to", userName)
-
-	updatedUser := models.NewUser(user.TelegramID, userName, user.ApiKey)
-	updatedUser.LastFeed = user.LastFeed
-
-	merr := h.registry.Users.Update(updatedUser)
+	merr := h.DB.User.User.Update(user)
 	if merr != nil {
 		return merr
 	}
-
-	// Create feed entry
-	feedTitle := "Benutzername geändert"
-	feedContent := fmt.Sprintf("Alter Name: %s\nNeuer Name: %s", user.Name, userName)
-	merr = h.registry.Feeds.Add(feedTitle, feedContent, user.TelegramID)
-	if merr != nil {
-		slog.Warn("Failed to create feed for username change", "error", merr)
-	}
-
-	user.Name = userName
 
 	return nil
 }
