@@ -45,7 +45,6 @@ func NewDB(c *shared.Config) *DB {
 			LowerMetalSheet: tool.NewLowerMetalSheetService(c),
 		},
 		Note: &NoteDB{
-
 			Note: note.NewNoteService(c),
 		},
 	}

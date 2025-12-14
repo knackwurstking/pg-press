@@ -1,6 +1,8 @@
 package env
 
-import "os"
+import (
+	"os"
+)
 
 var (
 	Admins           = os.Getenv("ADMINS")

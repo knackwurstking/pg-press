@@ -15,13 +15,11 @@ import (
 
 type Handler struct {
 	DB *common.DB
-	//Logger *log.Logger
 }
 
 func NewHandler(db *common.DB) *Handler {
 	return &Handler{
 		DB: db,
-		//Logger: log.New(os.Stderr, "home-handler: ", log.LstdFlags),
 	}
 }
 

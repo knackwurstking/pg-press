@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/knackwurstking/pg-press/internal/common"
@@ -33,7 +32,7 @@ type Handler struct {
 func NewHandler(db *common.DB) *Handler {
 	return &Handler{
 		DB:     db,
-		Logger: log.New(os.Stderr, "auth-handler: ", log.LstdFlags),
+		Logger: env.NewLogger("auth-handler: "),
 	}
 }
 

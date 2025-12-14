@@ -30,6 +30,7 @@ init: generate
 	git submodule update --recursive
 
 test:
+	mkdir -p data
 	go test -v ./...
 
 lint:

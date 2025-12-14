@@ -3,10 +3,11 @@ package shared
 import (
 	"database/sql"
 	"fmt"
-	"log/slog"
+	"log"
 	"path/filepath"
 	"time"
 
+	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 )
 
@@ -25,13 +26,12 @@ func (s *Config) Open(dbName string) *errors.MasterError {
 	var err error
 
 	if s.db != nil {
-		err = s.Close()
-		if err != nil {
-			return errors.NewMasterError(err, 0).Wrap("failed to close existing database connection")
-		}
+		_ = s.Close()
 	}
 
-	slog.Debug("Opening SQL database connection", "driver", s.DriverName, "location", s.DatabaseLocation)
+	if env.Verbose {
+		log.Println("Opening database:", s.DriverName, "at", filepath.Join(s.DatabaseLocation, dbName))
+	}
 
 	// NOTE: Previously used: "?_busy_timeout=30000&_journal_mode=WAL&_foreign_keys=on&_synchronous=NORMAL"
 	path := fmt.Sprintf(
@@ -54,8 +54,12 @@ func (s *Config) Open(dbName string) *errors.MasterError {
 
 func (s *Config) Close() error {
 	if s.db != nil {
-		slog.Debug("Closing SQL database connection", "driver", s.DriverName, "location", s.DatabaseLocation)
-		return s.db.Close()
+		if env.Verbose {
+			log.Println("Closing database:", s.DriverName, "at", s.DatabaseLocation)
+		}
+		err := s.db.Close()
+		s.db = nil
+		return err
 	}
 	return nil
 }
