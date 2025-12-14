@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"slices"
 
 	"github.com/knackwurstking/pg-press/internal/common"
