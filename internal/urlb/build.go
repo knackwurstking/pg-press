@@ -49,7 +49,7 @@ func UrlLogin(apiKey string, invalid *bool) (url struct {
 func UrlHome() (url struct {
 	Page templ.SafeURL
 }) {
-	url.Page = BuildURL("")
+	url.Page = BuildURL("/")
 	return url
 }
 
