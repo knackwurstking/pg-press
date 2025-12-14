@@ -57,10 +57,10 @@ func (bs *BaseService) Setup(dbName, tableCreationQuery string) *errors.MasterEr
 func (bs *BaseService) Close() *errors.MasterError {
 	if bs.db != nil {
 		err := bs.db.Close()
-		if err == nil {
-			bs.db = nil
+		if err != nil {
+			return errors.NewMasterError(err, 0)
 		}
-		return errors.NewMasterError(err, 0)
+		bs.db = nil
 	}
 	return nil
 }
