@@ -8,9 +8,8 @@ import (
 )
 
 const (
-	appName      = "pg-press"
-	version      = "v0.0.1"
-	databaseFile = "pg-press.db"
+	appName = "pg-press"
+	version = "v0.0.1"
 
 	exitCodeGeneric     = 1
 	exitCodeNotFound    = 10
