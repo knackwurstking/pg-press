@@ -2,7 +2,6 @@ package dialogs
 
 import (
 	"fmt"
-	"log"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -36,13 +35,13 @@ func (h *Handler) GetToolDialog(c echo.Context) *echo.HTTPError {
 		t = templates.EditToolDialog(tool)
 		tName = "EditToolDialog"
 		if env.Verbose {
-			h.Logger.Println("Rendering edit tool dialog:", tool.String())
+			h.Logger.Println(env.ANSIVerbose+"Rendering edit tool dialog:", env.ANSIBlue+tool.String()+env.ANSIReset)
 		}
 	} else {
 		t = templates.NewToolDialog()
 		tName = "NewToolDialog"
 		if env.Verbose {
-			h.Logger.Println("Rendering new tool dialog")
+			h.Logger.Println(env.ANSIVerbose + "Rendering new tool dialog" + env.ANSIReset)
 		}
 	}
 
@@ -61,7 +60,7 @@ func (h *Handler) PostTool(c echo.Context) *echo.HTTPError {
 	}
 
 	if env.Verbose {
-		h.Logger.Println("Creating new tool:", tool.String())
+		h.Logger.Println(env.ANSIVerbose+"Creating new tool:", tool.String()+env.ANSIReset)
 	}
 
 	merr = h.DB.Tool.Tool.Create(tool)

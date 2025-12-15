@@ -45,6 +45,7 @@ const (
 
 type LowerMetalSheetService struct {
 	*shared.BaseService
+	Logger *log.Logger
 
 	mx *sync.Mutex `json:"-"`
 }
@@ -54,6 +55,7 @@ func NewLowerMetalSheetService(c *shared.Config) *LowerMetalSheetService {
 		BaseService: &shared.BaseService{
 			Config: c,
 		},
+		Logger: env.NewLogger(env.ANSIService + "service: lower-metal-sheet: " + env.ANSIReset),
 
 		mx: &sync.Mutex{},
 	}
@@ -61,7 +63,7 @@ func NewLowerMetalSheetService(c *shared.Config) *LowerMetalSheetService {
 
 func (s *LowerMetalSheetService) Setup() *errors.MasterError {
 	if env.Verbose {
-		log.Println("Setting up LowerMetalSheetService", DBName, s.DatabaseLocation)
+		s.Logger.Println("Setting up LowerMetalSheetService", DBName, s.DatabaseLocation)
 	}
 	return s.BaseService.Setup(DBName, SQLCreateMetalSheetTable)
 }

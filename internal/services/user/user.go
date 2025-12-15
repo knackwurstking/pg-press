@@ -51,6 +51,7 @@ const (
 
 type UserService struct {
 	*shared.BaseService
+	Logger *log.Logger
 
 	mx *sync.Mutex `json:"-"`
 }
@@ -60,6 +61,7 @@ func NewUserService(c *shared.Config) *UserService {
 		BaseService: &shared.BaseService{
 			Config: c,
 		},
+		Logger: env.NewLogger(env.ANSIService + "service: user: " + env.ANSIReset),
 
 		mx: &sync.Mutex{},
 	}
@@ -67,7 +69,7 @@ func NewUserService(c *shared.Config) *UserService {
 
 func (s *UserService) Setup() *errors.MasterError {
 	if env.Verbose {
-		log.Println("Setting up UserService", DBName, s.DatabaseLocation)
+		s.Logger.Println("Setting up UserService", DBName, s.DatabaseLocation)
 	}
 	return s.BaseService.Setup(DBName, SQLCreateUserTable)
 }

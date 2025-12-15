@@ -25,7 +25,7 @@ type Handler struct {
 func NewHandler(db *common.DB) *Handler {
 	return &Handler{
 		DB:     db,
-		Logger: env.NewLogger("handler: tools: "),
+		Logger: env.NewLogger(env.ANSIHandler + "handler: tools: " + env.ANSIReset),
 	}
 }
 
@@ -68,7 +68,7 @@ func (h *Handler) HTMXDeleteTool(c echo.Context) *echo.HTTPError {
 	}
 
 	if env.Verbose {
-		log.Println("Deleted tool with ID:", toolID)
+		h.Logger.Println("Deleted tool with ID:", toolID)
 	}
 
 	urlb.SetHXTrigger(c, "tools-tab")

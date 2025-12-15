@@ -62,6 +62,7 @@ const (
 
 type PressService struct {
 	*shared.BaseService
+	Logger *log.Logger
 
 	mx *sync.Mutex `json:"-"`
 }
@@ -71,6 +72,7 @@ func NewPressService(c *shared.Config) *PressService {
 		BaseService: &shared.BaseService{
 			Config: c,
 		},
+		Logger: env.NewLogger(env.ANSIService + "service: press: " + env.ANSIReset),
 
 		mx: &sync.Mutex{},
 	}
@@ -78,7 +80,7 @@ func NewPressService(c *shared.Config) *PressService {
 
 func (s *PressService) Setup() *errors.MasterError {
 	if env.Verbose {
-		log.Println("Setting up PressService", DBName, s.DatabaseLocation)
+		s.Logger.Println("Setting up PressService", DBName, s.DatabaseLocation)
 	}
 	return s.BaseService.Setup(DBName, SQLCreatePressTable)
 }

@@ -3,6 +3,7 @@ package handlers
 import (
 	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/handlers/auth"
+	"github.com/knackwurstking/pg-press/internal/handlers/dialogs"
 	"github.com/knackwurstking/pg-press/internal/handlers/home"
 	"github.com/knackwurstking/pg-press/internal/handlers/profile"
 	"github.com/knackwurstking/pg-press/internal/handlers/tools"

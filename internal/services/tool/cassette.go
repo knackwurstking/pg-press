@@ -68,6 +68,7 @@ const (
 
 type CassetteService struct {
 	*shared.BaseService
+	Logger *log.Logger
 
 	mx *sync.Mutex `json:"-"`
 }
@@ -77,6 +78,7 @@ func NewCassetteService(c *shared.Config) *CassetteService {
 		BaseService: &shared.BaseService{
 			Config: c,
 		},
+		Logger: env.NewLogger(env.ANSIService + "service: cassette: " + env.ANSIReset),
 
 		mx: &sync.Mutex{},
 	}
@@ -84,7 +86,7 @@ func NewCassetteService(c *shared.Config) *CassetteService {
 
 func (s *CassetteService) Setup() *errors.MasterError {
 	if env.Verbose {
-		log.Println("Setting up CassetteService", DBName, s.DatabaseLocation)
+		s.Logger.Println("Setting up CassetteService", DBName, s.DatabaseLocation)
 	}
 	return s.BaseService.Setup(DBName, SQLCreateCassetteTable)
 }

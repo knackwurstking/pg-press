@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"log/slog"
 	"slices"
 	"strings"
 	"time"
@@ -20,11 +19,14 @@ import (
 )
 
 var (
+	middlewareLogger   *log.Logger
 	keyAuthFilesToSkip []string
 	pages              []string
 )
 
 func init() {
+	middlewareLogger = env.NewLogger(env.ANSIMiddleware + "middleware: " + env.ANSIReset)
+
 	// NOTE: Used for updating cookies
 	pages = []string{
 		env.ServerPathPrefix + "",
@@ -80,7 +82,12 @@ func middlewareKeyAuth(db *common.DB) echo.MiddlewareFunc {
 			return keyAuthValidator(auth, ctx, db)
 		},
 		ErrorHandler: func(err error, c echo.Context) error {
-			log.Println("KeyAuth error:", err, "Method:", c.Request().Method, "Path:", c.Request().URL.Path, "RealIP:", c.RealIP())
+			middlewareLogger.Println(
+				"KeyAuth error:", err,
+				", Method:", c.Request().Method,
+				", Path:", c.Request().URL.Path,
+				", RealIP:", c.RealIP(),
+			)
 			merr := urlb.RedirectTo(c, urlb.UrlLogin("", nil).Page)
 			if merr != nil {
 				return merr.Err
@@ -103,7 +110,10 @@ func keyAuthValidator(auth string, ctx echo.Context, db *common.DB) (bool, error
 
 	user, err := validateUserFromCookie(ctx, db)
 	if err != nil {
-		log.Println("Validate user from cookie failed:", err, "RealIP:", realIP)
+		middlewareLogger.Println(
+			"Validate user from cookie failed:", err,
+			", RealIP:", realIP,
+		)
 		// Try to get user directly from the API key
 		users, merr := db.User.User.List()
 		if merr != nil {
@@ -126,7 +136,10 @@ func keyAuthValidator(auth string, ctx echo.Context, db *common.DB) (bool, error
 	}
 
 	if env.Verbose {
-		log.Println("API key auth successful for user:", user.Name, "RealIP:", realIP)
+		middlewareLogger.Println(
+			"API key auth successful for user:", user.Name,
+			", RealIP:", realIP,
+		)
 	}
 
 	ctx.Set("user", user)
@@ -166,12 +179,14 @@ func validateUserFromCookie(ctx echo.Context, db *common.DB) (*shared.User, erro
 		cookie.LastLogin = shared.NewUnixMilli(time.Now())
 		httpCookie.Expires = cookie.ExpiredAtTime()
 
-		slog.Info("Updating cookie", "user_name", user.Name, "real_ip", realIP, "url_path", ctx.Request().URL.Path)
-
 		// Try to update cookie with lock
 		merr = db.User.Cookie.Update(cookie)
 		if merr != nil {
-			log.Println("Failed to update cookie with lock:", merr, "UserName:", user.Name, "RealIP:", realIP)
+			middlewareLogger.Println(
+				"Failed to update cookie with lock:", merr,
+				", UserName:", user.Name,
+				", RealIP:", realIP,
+			)
 		}
 	}
 

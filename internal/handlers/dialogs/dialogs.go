@@ -20,7 +20,7 @@ type Handler struct {
 func NewHandler(db *common.DB) *Handler {
 	return &Handler{
 		DB:     db,
-		Logger: env.NewLogger("handler: dialogs: "),
+		Logger: env.NewLogger(env.ANSIHandler + "handler: dialogs: " + env.ANSIReset),
 	}
 }
 

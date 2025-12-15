@@ -56,6 +56,7 @@ const (
 
 type ToolRegenerationService struct {
 	*shared.BaseService
+	Logger *log.Logger
 
 	mx *sync.Mutex `json:"-"`
 }
@@ -65,6 +66,7 @@ func NewToolRegenerationService(c *shared.Config) *ToolRegenerationService {
 		BaseService: &shared.BaseService{
 			Config: c,
 		},
+		Logger: env.NewLogger(env.ANSIService + "service: tool-regeneration: " + env.ANSIReset),
 
 		mx: &sync.Mutex{},
 	}
@@ -72,7 +74,7 @@ func NewToolRegenerationService(c *shared.Config) *ToolRegenerationService {
 
 func (s *ToolRegenerationService) Setup() *errors.MasterError {
 	if env.Verbose {
-		log.Println("Setting up ToolRegenerationService", DBName, s.DatabaseLocation)
+		s.Logger.Println("Setting up ToolRegenerationService", DBName, s.DatabaseLocation)
 	}
 	return s.BaseService.Setup(DBName, SQLCreateToolRegenerationTable)
 }

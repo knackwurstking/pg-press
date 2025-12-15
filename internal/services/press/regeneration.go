@@ -56,6 +56,7 @@ const (
 
 type PressRegenerationService struct {
 	*shared.BaseService
+	Logger *log.Logger
 
 	mx *sync.Mutex `json:"-"`
 }
@@ -65,6 +66,7 @@ func NewPressRegenerationService(c *shared.Config) *PressRegenerationService {
 		BaseService: &shared.BaseService{
 			Config: c,
 		},
+		Logger: env.NewLogger(env.ANSIService + "service: press-regeneration: " + env.ANSIReset),
 
 		mx: &sync.Mutex{},
 	}
@@ -72,7 +74,7 @@ func NewPressRegenerationService(c *shared.Config) *PressRegenerationService {
 
 func (s *PressRegenerationService) Setup() *errors.MasterError {
 	if env.Verbose {
-		log.Println("Setting up PressRegenerationService", DBName, s.DatabaseLocation)
+		s.Logger.Println("Setting up PressRegenerationService", DBName, s.DatabaseLocation)
 	}
 	return s.BaseService.Setup(DBName, SQLCreatePressRegenerationTable)
 }

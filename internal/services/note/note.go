@@ -53,6 +53,7 @@ const (
 
 type NoteService struct {
 	*shared.BaseService
+	Logger *log.Logger
 
 	mx *sync.Mutex `json:"-"`
 }
@@ -62,6 +63,7 @@ func NewNoteService(c *shared.Config) *NoteService {
 		BaseService: &shared.BaseService{
 			Config: c,
 		},
+		Logger: env.NewLogger(env.ANSIService + "service: note: " + env.ANSIReset),
 
 		mx: &sync.Mutex{},
 	}
@@ -69,7 +71,7 @@ func NewNoteService(c *shared.Config) *NoteService {
 
 func (s *NoteService) Setup() *errors.MasterError {
 	if env.Verbose {
-		log.Println("Setting up NoteService", DBName, s.DatabaseLocation)
+		s.Logger.Println("Setting up NoteService", DBName, s.DatabaseLocation)
 	}
 	return s.BaseService.Setup(DBName, SQLCreateNoteTable)
 }

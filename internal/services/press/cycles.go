@@ -51,6 +51,7 @@ const (
 
 type CycleService struct {
 	*shared.BaseService
+	Logger *log.Logger
 
 	mx *sync.Mutex `json:"-"`
 }
@@ -60,6 +61,7 @@ func NewCycleService(c *shared.Config) *CycleService {
 		BaseService: &shared.BaseService{
 			Config: c,
 		},
+		Logger: env.NewLogger(env.ANSIService + "service: cycle: " + env.ANSIReset),
 
 		mx: &sync.Mutex{},
 	}
@@ -67,7 +69,7 @@ func NewCycleService(c *shared.Config) *CycleService {
 
 func (s *CycleService) Setup() *errors.MasterError {
 	if env.Verbose {
-		log.Println("Setting up CycleService", DBName, s.DatabaseLocation)
+		s.Logger.Println("Setting up CycleService", DBName, s.DatabaseLocation)
 	}
 	return s.BaseService.Setup(DBName, SQLCreateCycleTable)
 }

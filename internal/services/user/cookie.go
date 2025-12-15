@@ -54,6 +54,7 @@ const (
 
 type CookieService struct {
 	*shared.BaseService
+	Logger *log.Logger
 
 	mx *sync.Mutex `json:"-"`
 }
@@ -63,6 +64,7 @@ func NewCookieService(c *shared.Config) *CookieService {
 		BaseService: &shared.BaseService{
 			Config: c,
 		},
+		Logger: env.NewLogger(env.ANSIService + "service: cookie: " + env.ANSIReset),
 
 		mx: &sync.Mutex{},
 	}
@@ -70,7 +72,7 @@ func NewCookieService(c *shared.Config) *CookieService {
 
 func (s *CookieService) Setup() *errors.MasterError {
 	if env.Verbose {
-		log.Println("Setting up CookieService", DBName, s.DatabaseLocation)
+		s.Logger.Println("Setting up CookieService", DBName, s.DatabaseLocation)
 	}
 	return s.BaseService.Setup(DBName, SQLCreateCookieTable)
 }
