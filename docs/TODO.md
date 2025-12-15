@@ -53,4 +53,6 @@ Fix all handler and templates
 - [x] home
 - [x] auth
 - [x] profile
-- [-] tools
+- [x] tools
+- [ ] dialogs
+    - [-] tool dialog (new/edit)
