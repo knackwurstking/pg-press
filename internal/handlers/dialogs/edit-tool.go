@@ -29,11 +29,11 @@ func (h *Handler) GetToolDialog(c echo.Context) *echo.HTTPError {
 	if tool != nil {
 		t = templates.EditToolDialog(tool)
 		tName = "EditToolDialog"
-		h.Logger.Debug("Rendering edit tool dialog: %#v", tool.String())
+		h.Log.Debug("Rendering edit tool dialog: %#v", tool.String())
 	} else {
 		t = templates.NewToolDialog()
 		tName = "NewToolDialog"
-		h.Logger.Debug("Rendering new tool dialog...")
+		h.Log.Debug("Rendering new tool dialog...")
 	}
 
 	err := t.Render(c.Request().Context(), c.Response())
@@ -50,7 +50,7 @@ func (h *Handler) PostTool(c echo.Context) *echo.HTTPError {
 		return verr.MasterError().Echo()
 	}
 
-	h.Logger.Debug("Creating new tool: %#v", tool.String())
+	h.Log.Debug("Creating new tool: %#v", tool.String())
 
 	merr := h.DB.Tool.Tool.Create(tool)
 	if merr != nil {
@@ -76,7 +76,7 @@ func (h *Handler) PutTool(c echo.Context) *echo.HTTPError {
 	}
 	tool.ID = toolID // Just to be sure
 
-	h.Logger.Debug("Updating tool: %#v", tool.String())
+	h.Log.Debug("Updating tool: %#v", tool.String())
 
 	merr = h.DB.Tool.Tool.Update(tool)
 	if merr != nil {

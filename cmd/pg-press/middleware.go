@@ -10,6 +10,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/auth"
+	"github.com/knackwurstking/pg-press/internal/logger"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	ui "github.com/knackwurstking/ui/ui-templ"
@@ -19,13 +20,13 @@ import (
 )
 
 var (
-	middlewareLogger   *ui.Logger
+	logMiddleware      *ui.Logger
 	keyAuthFilesToSkip []string
 	pages              []string
 )
 
 func init() {
-	middlewareLogger = env.NewLogger("middleware")
+	logMiddleware = logger.New("middleware")
 
 	// NOTE: Used for updating cookies
 	pages = []string{
@@ -82,7 +83,7 @@ func middlewareKeyAuth(db *common.DB) echo.MiddlewareFunc {
 			return keyAuthValidator(auth, ctx, db)
 		},
 		ErrorHandler: func(err error, c echo.Context) error {
-			middlewareLogger.Error(
+			logMiddleware.Error(
 				"KeyAuth error: %v, Method: %#v, Path: %#v, RealID: %#v",
 				err, c.Request().Method, c.Request().URL.Path, c.RealIP(),
 			)
@@ -108,7 +109,7 @@ func keyAuthValidator(auth string, ctx echo.Context, db *common.DB) (bool, error
 
 	user, err := validateUserFromCookie(ctx, db)
 	if err != nil {
-		middlewareLogger.Warn(
+		logMiddleware.Warn(
 			"Validate user from cookie failed: %v, RealIP: %#v",
 			err, realIP,
 		)
@@ -134,7 +135,7 @@ func keyAuthValidator(auth string, ctx echo.Context, db *common.DB) (bool, error
 		user = foundUser
 	}
 
-	middlewareLogger.Debug(
+	logMiddleware.Debug(
 		"API-Key auth successful for user: %#v, RealIP: %#v",
 		user.Name, realIP,
 	)
@@ -179,7 +180,7 @@ func validateUserFromCookie(ctx echo.Context, db *common.DB) (*shared.User, erro
 		// Try to update cookie with lock
 		merr = db.User.Cookie.Update(cookie)
 		if merr != nil {
-			middlewareLogger.Error(
+			logMiddleware.Error(
 				"Failed to update cookie: %v, UserName: %#v, RealIP: %#v",
 				merr, user.Name, realIP,
 			)

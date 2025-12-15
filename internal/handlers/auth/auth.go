@@ -10,6 +10,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/auth/templates"
 	"github.com/knackwurstking/pg-press/internal/helper"
+	"github.com/knackwurstking/pg-press/internal/logger"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 
@@ -24,14 +25,14 @@ const (
 )
 
 type Handler struct {
-	DB     *common.DB
-	Logger *ui.Logger
+	DB  *common.DB
+	Log *ui.Logger
 }
 
 func NewHandler(db *common.DB) *Handler {
 	return &Handler{
-		DB:     db,
-		Logger: env.NewLogger("handler: auth"),
+		DB:  db,
+		Log: logger.New("handler: auth"),
 	}
 }
 
@@ -44,7 +45,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 }
 
 func (h *Handler) GetLoginPage(c echo.Context) *echo.HTTPError {
-	h.Logger.Debug("Login page requested from IP: %#v", c.RealIP())
+	h.Log.Debug("Login page requested from IP: %#v", c.RealIP())
 
 	t := templates.Page(
 		templates.PageProps{
@@ -63,7 +64,7 @@ func (h *Handler) GetLoginPage(c echo.Context) *echo.HTTPError {
 }
 
 func (h *Handler) PostLoginPage(c echo.Context) *echo.HTTPError {
-	h.Logger.Debug("Login attempt from IP: %#v", c.RealIP())
+	h.Log.Debug("Login attempt from IP: %#v", c.RealIP())
 
 	apiKey := c.FormValue("api-key")
 
@@ -88,12 +89,12 @@ func (h *Handler) PostLoginPage(c echo.Context) *echo.HTTPError {
 }
 
 func (h *Handler) GetLogout(c echo.Context) *echo.HTTPError {
-	h.Logger.Debug("Logout attempt from IP: %#v", c.RealIP())
+	h.Log.Debug("Logout attempt from IP: %#v", c.RealIP())
 
 	if cookie, err := c.Cookie(CookieName); err == nil {
 		merr := h.DB.User.Cookie.Delete(cookie.Value)
 		if merr != nil {
-			h.Logger.Warn("Failed to delete cookie from database: %v", merr)
+			h.Log.Warn("Failed to delete cookie from database: %v", merr)
 		}
 	}
 
@@ -115,7 +116,7 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) *errors.Ma
 
 	merr = h.clearExistingSession(ctx)
 	if merr != nil {
-		h.Logger.Warn("Failed to clear existing session: %v", merr)
+		h.Log.Warn("Failed to clear existing session: %v", merr)
 	}
 
 	merr = h.createSession(ctx, user.ID)
@@ -124,7 +125,7 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) *errors.Ma
 	}
 
 	if user.IsAdmin() {
-		h.Logger.Info("Administrator login successful: %#v, from ID: %#v", user.Name, ctx.RealIP())
+		h.Log.Info("Administrator login successful: %#v, from ID: %#v", user.Name, ctx.RealIP())
 	}
 
 	return nil

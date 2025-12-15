@@ -4,10 +4,8 @@ import (
 	"database/sql"
 	"sync"
 
-	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/ui/ui-templ"
 )
 
 const (
@@ -56,24 +54,18 @@ const (
 
 type PressRegenerationService struct {
 	*shared.BaseService
-	Logger *ui.Logger
 
 	mx *sync.Mutex `json:"-"`
 }
 
 func NewPressRegenerationService(c *shared.Config) *PressRegenerationService {
 	return &PressRegenerationService{
-		BaseService: &shared.BaseService{
-			Config: c,
-		},
-		Logger: env.NewLogger("service: press-regeneration"),
-
-		mx: &sync.Mutex{},
+		BaseService: shared.NewBaseService(c, "PressRegeneration"),
+		mx:          &sync.Mutex{},
 	}
 }
 
 func (s *PressRegenerationService) Setup() *errors.MasterError {
-	s.Logger.Debug("Setting up PressRegenerationService: %#v, %#v", DBName, s.DatabaseLocation)
 	return s.BaseService.Setup(DBName, SQLCreatePressRegenerationTable)
 }
 

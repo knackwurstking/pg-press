@@ -4,10 +4,8 @@ import (
 	"database/sql"
 	"sync"
 
-	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/ui/ui-templ"
 )
 
 const (
@@ -54,24 +52,18 @@ const (
 
 type CookieService struct {
 	*shared.BaseService
-	Logger *ui.Logger
 
 	mx *sync.Mutex `json:"-"`
 }
 
 func NewCookieService(c *shared.Config) *CookieService {
 	return &CookieService{
-		BaseService: &shared.BaseService{
-			Config: c,
-		},
-		Logger: env.NewLogger("service: cookie"),
-
-		mx: &sync.Mutex{},
+		BaseService: shared.NewBaseService(c, "Cookie"),
+		mx:          &sync.Mutex{},
 	}
 }
 
 func (s *CookieService) Setup() *errors.MasterError {
-	s.Logger.Debug("Setting up CookieService: %#v, %#v", DBName, s.DatabaseLocation)
 	return s.BaseService.Setup(DBName, SQLCreateCookieTable)
 }
 

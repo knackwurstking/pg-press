@@ -4,10 +4,8 @@ import (
 	"database/sql"
 	"sync"
 
-	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/ui/ui-templ"
 )
 
 const (
@@ -51,24 +49,18 @@ const (
 
 type UserService struct {
 	*shared.BaseService
-	Logger *ui.Logger
 
 	mx *sync.Mutex `json:"-"`
 }
 
 func NewUserService(c *shared.Config) *UserService {
 	return &UserService{
-		BaseService: &shared.BaseService{
-			Config: c,
-		},
-		Logger: env.NewLogger("service: user"),
-
-		mx: &sync.Mutex{},
+		BaseService: shared.NewBaseService(c, "User"),
+		mx:          &sync.Mutex{},
 	}
 }
 
 func (s *UserService) Setup() *errors.MasterError {
-	s.Logger.Debug("Setting up UserService: %#v, %#v", DBName, s.DatabaseLocation)
 	return s.BaseService.Setup(DBName, SQLCreateUserTable)
 }
 

@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/SuperPaintman/nice/cli"
-	"github.com/knackwurstking/pg-press/internal/env"
+	"github.com/knackwurstking/pg-press/internal/logger"
 	ui "github.com/knackwurstking/ui/ui-templ"
 )
 
@@ -20,11 +20,11 @@ const (
 
 var (
 	configPath string
-	logger     *ui.Logger
+	log        *ui.Logger
 )
 
 func init() {
-	logger = env.NewLogger("main")
+	log = logger.New("main")
 
 	p, err := os.UserConfigDir()
 	if err != nil {

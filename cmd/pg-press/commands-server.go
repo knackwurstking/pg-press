@@ -34,7 +34,7 @@ func serverCommand() cli.Command {
 				cli.Usage("Set server address in format <host>:<port> (e.g., localhost:8080)"))
 
 			return func(cmd *cli.Command) error {
-				db, err := openDB(*customDBPath, true)
+				db, err := openDB(*customDBPath)
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "Error opening database: %v\n", err)
 					return err
@@ -83,10 +83,10 @@ func setupRouter(e *echo.Echo, db *common.DB, prefix string) {
  ******************************************************************************/
 
 func startServer(e *echo.Echo, address string) {
-	logger.Info("Starting HTTP server at %#v", address)
+	log.Info("Starting HTTP server at %#v", address)
 
 	if err := e.Start(address); err != nil {
-		logger.Error("Failed to start server: %v", err)
+		log.Error("Failed to start server: %v", err)
 		os.Exit(exitCodeServerStart)
 	}
 }

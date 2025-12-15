@@ -5,6 +5,7 @@ import (
 
 	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/env"
+	"github.com/knackwurstking/pg-press/internal/logger"
 
 	ui "github.com/knackwurstking/ui/ui-templ"
 
@@ -12,14 +13,14 @@ import (
 )
 
 type Handler struct {
-	DB     *common.DB
-	Logger *ui.Logger
+	DB  *common.DB
+	Log *ui.Logger
 }
 
 func NewHandler(db *common.DB) *Handler {
 	return &Handler{
-		DB:     db,
-		Logger: env.NewLogger("handler: dialogs"),
+		DB:  db,
+		Log: logger.New("handler: dialogs"),
 	}
 }
 

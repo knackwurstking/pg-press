@@ -18,12 +18,9 @@ type SessionService struct {
 
 func NewSessionService(c *shared.Config) *SessionService {
 	return &SessionService{
-		BaseService: &shared.BaseService{
-			Config: c,
-		},
-
-		sessions: make(map[shared.EntityID]*shared.Session),
-		mx:       &sync.Mutex{},
+		BaseService: shared.NewBaseService(c, "Session"),
+		sessions:    make(map[shared.EntityID]*shared.Session),
+		mx:          &sync.Mutex{},
 	}
 }
 

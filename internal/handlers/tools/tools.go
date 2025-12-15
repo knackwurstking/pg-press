@@ -8,6 +8,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/tools/templates"
 	"github.com/knackwurstking/pg-press/internal/helper"
+	"github.com/knackwurstking/pg-press/internal/logger"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 
@@ -17,14 +18,14 @@ import (
 )
 
 type Handler struct {
-	DB     *common.DB
-	Logger *ui.Logger
+	DB  *common.DB
+	Log *ui.Logger
 }
 
 func NewHandler(db *common.DB) *Handler {
 	return &Handler{
-		DB:     db,
-		Logger: env.NewLogger("handler: tools"),
+		DB:  db,
+		Log: logger.New("handler: tools"),
 	}
 }
 
@@ -66,7 +67,7 @@ func (h *Handler) HTMXDeleteTool(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	h.Logger.Debug("Deleted tool with ID: %#v", toolID)
+	h.Log.Debug("Deleted tool with ID: %#v", toolID)
 
 	urlb.SetHXTrigger(c, "tools-tab")
 

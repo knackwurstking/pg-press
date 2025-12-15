@@ -10,6 +10,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/profile/templates"
 	"github.com/knackwurstking/pg-press/internal/helper"
+	"github.com/knackwurstking/pg-press/internal/logger"
 	"github.com/knackwurstking/pg-press/internal/shared"
 
 	ui "github.com/knackwurstking/ui/ui-templ"
@@ -18,14 +19,14 @@ import (
 )
 
 type Handler struct {
-	DB     *common.DB
-	Logger *ui.Logger
+	DB  *common.DB
+	Log *ui.Logger
 }
 
 func NewHandler(db *common.DB) *Handler {
 	return &Handler{
-		DB:     db,
-		Logger: env.NewLogger("handler: profile"),
+		DB:  db,
+		Log: logger.New("handler: profile"),
 	}
 }
 
@@ -103,7 +104,7 @@ func (h *Handler) handleUserNameChange(c echo.Context, user *shared.User) *error
 	if merr != nil {
 		return merr
 	}
-	h.Logger.Info("User %#v changed their name to %#v\n", user.Name, userName)
+	h.Log.Info("User %#v changed their name to %#v\n", user.Name, userName)
 
 	return nil
 }

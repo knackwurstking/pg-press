@@ -5,8 +5,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/logger"
 	"github.com/knackwurstking/pg-press/internal/services/note"
 	"github.com/knackwurstking/pg-press/internal/services/press"
 	"github.com/knackwurstking/pg-press/internal/services/tool"
@@ -18,11 +18,11 @@ import (
 )
 
 var (
-	logger *ui.Logger
+	log *ui.Logger
 )
 
 func init() {
-	logger = env.NewLogger("common")
+	log = logger.New("common")
 }
 
 // DB holds and initializes all the services required
@@ -259,6 +259,6 @@ func closeServices(services ...closeServicesProps) {
 	close(errCh)
 
 	for err := range errCh {
-		logger.Error("Failed to close database service: %v", err)
+		log.Error("Failed to close database service: %v", err)
 	}
 }

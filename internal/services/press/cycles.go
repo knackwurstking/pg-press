@@ -4,10 +4,8 @@ import (
 	"database/sql"
 	"sync"
 
-	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/ui/ui-templ"
 )
 
 const (
@@ -51,24 +49,18 @@ const (
 
 type CycleService struct {
 	*shared.BaseService
-	Logger *ui.Logger
 
 	mx *sync.Mutex `json:"-"`
 }
 
 func NewCycleService(c *shared.Config) *CycleService {
 	return &CycleService{
-		BaseService: &shared.BaseService{
-			Config: c,
-		},
-		Logger: env.NewLogger("service: cycle"),
-
-		mx: &sync.Mutex{},
+		BaseService: shared.NewBaseService(c, "Cycle"),
+		mx:          &sync.Mutex{},
 	}
 }
 
 func (s *CycleService) Setup() *errors.MasterError {
-	s.Logger.Debug("Setting up CycleService: %#v, %#v", DBName, s.DatabaseLocation)
 	return s.BaseService.Setup(DBName, SQLCreateCycleTable)
 }
 

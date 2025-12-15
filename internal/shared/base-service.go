@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/logger"
+	"github.com/knackwurstking/ui/ui-templ"
 )
 
 type Config struct {
@@ -18,7 +20,18 @@ type Config struct {
 type BaseService struct {
 	*Config `json:"config"`
 
-	db *sql.DB `json:"-"`
+	Log *ui.Logger `json:"-"`
+
+	serviceName string  `json:"-"`
+	db          *sql.DB `json:"-"`
+}
+
+func NewBaseService(c *Config, serviceName string) *BaseService {
+	return &BaseService{
+		Config:      c,
+		Log:         logger.New("service: " + serviceName),
+		serviceName: serviceName,
+	}
 }
 
 func (s *BaseService) DB() *sql.DB {
@@ -26,6 +39,10 @@ func (s *BaseService) DB() *sql.DB {
 }
 
 func (bs *BaseService) Setup(dbName, tableCreationQuery string) *errors.MasterError {
+	if bs.Log != nil {
+		logger.ServiceSetup(bs.Log, dbName, bs.DatabaseLocation)
+	}
+
 	if bs.db != nil {
 		return nil
 	}
