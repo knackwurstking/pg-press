@@ -11,7 +11,3 @@ func New(group string) *ui.Logger {
 	}
 	return ui.NewLogger(group)
 }
-
-func ServiceSetup(l *ui.Logger, dbName, databaseLocation string) {
-	l.Debug("Service setup: [name: %s, path: %s]", dbName, databaseLocation)
-}

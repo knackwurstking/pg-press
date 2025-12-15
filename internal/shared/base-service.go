@@ -40,7 +40,7 @@ func (s *BaseService) DB() *sql.DB {
 
 func (bs *BaseService) Setup(dbName, tableCreationQuery string) *errors.MasterError {
 	if bs.Log != nil {
-		logger.ServiceSetup(bs.Log, dbName, bs.DatabaseLocation)
+		bs.Log.Debug("Service setup: [name: %s, path: %s]", dbName, bs.DatabaseLocation)
 	}
 
 	if bs.db != nil {
