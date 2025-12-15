@@ -2,12 +2,12 @@ package press
 
 import (
 	"database/sql"
-	"log"
 	"sync"
 
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/ui/ui-templ"
 )
 
 const DBName string = "press"
@@ -62,7 +62,7 @@ const (
 
 type PressService struct {
 	*shared.BaseService
-	Logger *log.Logger
+	Logger *ui.Logger
 
 	mx *sync.Mutex `json:"-"`
 }
@@ -72,16 +72,14 @@ func NewPressService(c *shared.Config) *PressService {
 		BaseService: &shared.BaseService{
 			Config: c,
 		},
-		Logger: env.NewLogger(env.ANSIService + "service: press: " + env.ANSIReset),
+		Logger: env.NewLogger("service: press"),
 
 		mx: &sync.Mutex{},
 	}
 }
 
 func (s *PressService) Setup() *errors.MasterError {
-	if env.Verbose {
-		s.Logger.Printf(env.ANSIVerbose+"Setting up PressService: %s, %s"+env.ANSIReset, DBName, s.DatabaseLocation)
-	}
+	s.Logger.Debug("Setting up PressService: %#v, %#v", DBName, s.DatabaseLocation)
 	return s.BaseService.Setup(DBName, SQLCreatePressTable)
 }
 

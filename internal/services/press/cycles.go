@@ -2,12 +2,12 @@ package press
 
 import (
 	"database/sql"
-	"log"
 	"sync"
 
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/ui/ui-templ"
 )
 
 const (
@@ -51,7 +51,7 @@ const (
 
 type CycleService struct {
 	*shared.BaseService
-	Logger *log.Logger
+	Logger *ui.Logger
 
 	mx *sync.Mutex `json:"-"`
 }
@@ -61,16 +61,14 @@ func NewCycleService(c *shared.Config) *CycleService {
 		BaseService: &shared.BaseService{
 			Config: c,
 		},
-		Logger: env.NewLogger(env.ANSIService + "service: cycle: " + env.ANSIReset),
+		Logger: env.NewLogger("service: cycle"),
 
 		mx: &sync.Mutex{},
 	}
 }
 
 func (s *CycleService) Setup() *errors.MasterError {
-	if env.Verbose {
-		s.Logger.Printf(env.ANSIVerbose+"Setting up CycleService: %s, %s"+env.ANSIReset, DBName, s.DatabaseLocation)
-	}
+	s.Logger.Debug("Setting up CycleService: %#v, %#v", DBName, s.DatabaseLocation)
 	return s.BaseService.Setup(DBName, SQLCreateCycleTable)
 }
 

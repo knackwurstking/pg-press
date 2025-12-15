@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"slices"
 	"strings"
 	"time"
@@ -13,19 +12,20 @@ import (
 	"github.com/knackwurstking/pg-press/internal/handlers/auth"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	ui "github.com/knackwurstking/ui/ui-templ"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
 var (
-	middlewareLogger   *log.Logger
+	middlewareLogger   *ui.Logger
 	keyAuthFilesToSkip []string
 	pages              []string
 )
 
 func init() {
-	middlewareLogger = env.NewLogger(env.ANSIMiddleware + "middleware: " + env.ANSIReset)
+	middlewareLogger = env.NewLogger("middleware")
 
 	// NOTE: Used for updating cookies
 	pages = []string{
@@ -82,8 +82,8 @@ func middlewareKeyAuth(db *common.DB) echo.MiddlewareFunc {
 			return keyAuthValidator(auth, ctx, db)
 		},
 		ErrorHandler: func(err error, c echo.Context) error {
-			middlewareLogger.Printf(
-				env.ANSIRed+"KeyAuth error: %v, Method: %s, Path: %s, RealID: %s"+env.ANSIReset,
+			middlewareLogger.Error(
+				"KeyAuth error: %v, Method: %#v, Path: %#v, RealID: %#v",
 				err, c.Request().Method, c.Request().URL.Path, c.RealIP(),
 			)
 			merr := urlb.RedirectTo(c, urlb.UrlLogin("", nil).Page)
@@ -108,8 +108,8 @@ func keyAuthValidator(auth string, ctx echo.Context, db *common.DB) (bool, error
 
 	user, err := validateUserFromCookie(ctx, db)
 	if err != nil {
-		middlewareLogger.Printf(
-			env.ANSIRed+"Validate user from cookie failed: %v, RealIP: %s"+env.ANSIReset,
+		middlewareLogger.Warn(
+			"Validate user from cookie failed: %v, RealIP: %#v",
 			err, realIP,
 		)
 
@@ -134,12 +134,10 @@ func keyAuthValidator(auth string, ctx echo.Context, db *common.DB) (bool, error
 		user = foundUser
 	}
 
-	if env.Verbose {
-		middlewareLogger.Printf(
-			env.ANSIVerbose+"API-Key auth successful for user: %s, RealIP: %s"+env.ANSIReset,
-			user.Name, realIP+env.ANSIReset,
-		)
-	}
+	middlewareLogger.Debug(
+		"API-Key auth successful for user: %#v, RealIP: %#v",
+		user.Name, realIP,
+	)
 
 	ctx.Set("user", user)
 	return true, nil
@@ -181,8 +179,8 @@ func validateUserFromCookie(ctx echo.Context, db *common.DB) (*shared.User, erro
 		// Try to update cookie with lock
 		merr = db.User.Cookie.Update(cookie)
 		if merr != nil {
-			middlewareLogger.Printf(
-				env.ANSIRed+"Failed to update cookie: %v, UserName: %s, RealIP: %s"+env.ANSIReset,
+			middlewareLogger.Error(
+				"Failed to update cookie: %v, UserName: %#v, RealIP: %#v",
 				merr, user.Name, realIP,
 			)
 		}

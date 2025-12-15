@@ -34,15 +34,11 @@ func (h *Handler) GetToolDialog(c echo.Context) *echo.HTTPError {
 	if tool != nil {
 		t = templates.EditToolDialog(tool)
 		tName = "EditToolDialog"
-		if env.Verbose {
-			h.Logger.Printf(env.ANSIVerbose+"Rendering edit tool dialog: %s%s"+env.ANSIReset, env.ANSIBlue, tool.String())
-		}
+		h.Logger.Debug("Rendering edit tool dialog: %#v", tool.String())
 	} else {
 		t = templates.NewToolDialog()
 		tName = "NewToolDialog"
-		if env.Verbose {
-			h.Logger.Printf(env.ANSIVerbose + "Rendering new tool dialog" + env.ANSIReset)
-		}
+		h.Logger.Debug("Rendering new tool dialog...")
 	}
 
 	err := t.Render(c.Request().Context(), c.Response())
@@ -59,9 +55,7 @@ func (h *Handler) PostTool(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	if env.Verbose {
-		h.Logger.Printf(env.ANSIVerbose+"Creating new tool: %s%s"+env.ANSIReset, env.ANSIBlue, tool.String())
-	}
+	h.Logger.Debug("Creating new tool: %#v", tool.String())
 
 	merr = h.DB.Tool.Tool.Create(tool)
 	if merr != nil {
@@ -92,32 +86,25 @@ func (h *Handler) PutTool(c echo.Context) *echo.HTTPError {
 	}
 	tool.ID = toolID // Just to be sure
 
-	if env.Verbose {
-		h.Logger.Printf(env.ANSIVerbose+"Updating tool: %s"+env.ANSIReset, tool.String())
-	}
+	h.Logger.Debug("Updating tool: %#v", tool.String())
 
 	merr = h.DB.Tool.Tool.Update(tool)
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	// TODO: Continue here...
-	merr = h.registry.Feeds.Add(title, content, user.TelegramID)
-	if merr != nil {
-		slog.Warn("Failed to create feed for tool update", "error", merr)
-	}
-
 	// Set HX headers
-	utils.SetHXTrigger(c, env.HXGlobalTrigger)
+	urlb.SetHXRedirect(c, urlb.UrlTool(tool.ID, 0, 0).Page)
 
-	utils.SetHXAfterSettle(c, map[string]any{
-		"toolUpdated": map[string]string{
-			"pageTitle": fmt.Sprintf("PG Presse | %s %s",
-				tool.String(), tool.Position.GermanString()),
-			"appBarTitle": fmt.Sprintf("%s %s", tool.String(),
-				tool.Position.GermanString()),
-		},
-	})
+	// TODO: Needs to be removed, just do a redirect to the same page to keep it simple
+	//utils.SetHXAfterSettle(c, map[string]any{
+	//	"toolUpdated": map[string]string{
+	//		"pageTitle": fmt.Sprintf("PG Presse | %s %s",
+	//			tool.String(), tool.Position.GermanString()),
+	//		"appBarTitle": fmt.Sprintf("%s %s", tool.String(),
+	//			tool.Position.GermanString()),
+	//	},
+	//})
 
 	return nil
 }

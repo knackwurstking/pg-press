@@ -2,12 +2,12 @@ package note
 
 import (
 	"database/sql"
-	"log"
 	"sync"
 
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/ui/ui-templ"
 )
 
 const DBName string = "note"
@@ -53,7 +53,7 @@ const (
 
 type NoteService struct {
 	*shared.BaseService
-	Logger *log.Logger
+	Logger *ui.Logger
 
 	mx *sync.Mutex `json:"-"`
 }
@@ -63,16 +63,14 @@ func NewNoteService(c *shared.Config) *NoteService {
 		BaseService: &shared.BaseService{
 			Config: c,
 		},
-		Logger: env.NewLogger(env.ANSIService + "service: note: " + env.ANSIReset),
+		Logger: env.NewLogger("service: note"),
 
 		mx: &sync.Mutex{},
 	}
 }
 
 func (s *NoteService) Setup() *errors.MasterError {
-	if env.Verbose {
-		s.Logger.Printf(env.ANSIVerbose+"Setting up NoteService: %s, %s"+env.ANSIReset, DBName, s.DatabaseLocation)
-	}
+	s.Logger.Debug("Setting up NoteService: %#v, %#v", DBName, s.DatabaseLocation)
 	return s.BaseService.Setup(DBName, SQLCreateNoteTable)
 }
 

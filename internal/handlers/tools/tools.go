@@ -1,7 +1,6 @@
 package tools
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/internal/common"
@@ -19,13 +18,13 @@ import (
 
 type Handler struct {
 	DB     *common.DB
-	Logger *log.Logger
+	Logger *ui.Logger
 }
 
 func NewHandler(db *common.DB) *Handler {
 	return &Handler{
 		DB:     db,
-		Logger: env.NewLogger(env.ANSIHandler + "handler: tools: " + env.ANSIReset),
+		Logger: env.NewLogger("handler: tools"),
 	}
 }
 
@@ -67,9 +66,7 @@ func (h *Handler) HTMXDeleteTool(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	if env.Verbose {
-		h.Logger.Printf(env.ANSIVerbose+"Deleted tool with ID: %s"+env.ANSIReset, toolID)
-	}
+	h.Logger.Debug("Deleted tool with ID: %#v", toolID)
 
 	urlb.SetHXTrigger(c, "tools-tab")
 

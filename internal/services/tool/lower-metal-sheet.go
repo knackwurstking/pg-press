@@ -2,12 +2,12 @@ package tool
 
 import (
 	"database/sql"
-	"log"
 	"sync"
 
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/ui/ui-templ"
 )
 
 const (
@@ -45,7 +45,7 @@ const (
 
 type LowerMetalSheetService struct {
 	*shared.BaseService
-	Logger *log.Logger
+	Logger *ui.Logger
 
 	mx *sync.Mutex `json:"-"`
 }
@@ -55,16 +55,14 @@ func NewLowerMetalSheetService(c *shared.Config) *LowerMetalSheetService {
 		BaseService: &shared.BaseService{
 			Config: c,
 		},
-		Logger: env.NewLogger(env.ANSIService + "service: lower-metal-sheet: " + env.ANSIReset),
+		Logger: env.NewLogger("service: lower-metal-sheet"),
 
 		mx: &sync.Mutex{},
 	}
 }
 
 func (s *LowerMetalSheetService) Setup() *errors.MasterError {
-	if env.Verbose {
-		s.Logger.Printf(env.ANSIVerbose+"Setting up LowerMetalSheetService: %s, %s"+env.ANSIReset, DBName, s.DatabaseLocation)
-	}
+	s.Logger.Debug("Setting up LowerMetalSheetService: %#v, %#v", DBName, s.DatabaseLocation)
 	return s.BaseService.Setup(DBName, SQLCreateMetalSheetTable)
 }
 

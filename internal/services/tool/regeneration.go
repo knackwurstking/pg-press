@@ -2,12 +2,12 @@ package tool
 
 import (
 	"database/sql"
-	"log"
 	"sync"
 
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/ui/ui-templ"
 )
 
 const (
@@ -56,7 +56,7 @@ const (
 
 type ToolRegenerationService struct {
 	*shared.BaseService
-	Logger *log.Logger
+	Logger *ui.Logger
 
 	mx *sync.Mutex `json:"-"`
 }
@@ -66,16 +66,14 @@ func NewToolRegenerationService(c *shared.Config) *ToolRegenerationService {
 		BaseService: &shared.BaseService{
 			Config: c,
 		},
-		Logger: env.NewLogger(env.ANSIService + "service: tool-regeneration: " + env.ANSIReset),
+		Logger: env.NewLogger("service: tool-regeneration"),
 
 		mx: &sync.Mutex{},
 	}
 }
 
 func (s *ToolRegenerationService) Setup() *errors.MasterError {
-	if env.Verbose {
-		s.Logger.Printf(env.ANSIVerbose+"Setting up ToolRegenerationService: %s, %s"+env.ANSIReset, DBName, s.DatabaseLocation)
-	}
+	s.Logger.Debug("Setting up ToolRegenerationService: %#v, %#v", DBName, s.DatabaseLocation)
 	return s.BaseService.Setup(DBName, SQLCreateToolRegenerationTable)
 }
 

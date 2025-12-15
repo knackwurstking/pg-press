@@ -2,7 +2,6 @@ package profile
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"slices"
 
@@ -20,13 +19,13 @@ import (
 
 type Handler struct {
 	DB     *common.DB
-	Logger *log.Logger
+	Logger *ui.Logger
 }
 
 func NewHandler(db *common.DB) *Handler {
 	return &Handler{
 		DB:     db,
-		Logger: env.NewLogger(env.ANSIHandler + "handler: profile: " + env.ANSIReset),
+		Logger: env.NewLogger("handler: profile"),
 	}
 }
 
@@ -104,7 +103,7 @@ func (h *Handler) handleUserNameChange(c echo.Context, user *shared.User) *error
 	if merr != nil {
 		return merr
 	}
-	h.Logger.Printf("User %s changed their name to %s\n", user.Name, userName)
+	h.Logger.Info("User %#v changed their name to %#v\n", user.Name, userName)
 
 	return nil
 }
