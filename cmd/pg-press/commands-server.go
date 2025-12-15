@@ -7,7 +7,6 @@ package main
 
 import (
 	"fmt"
-	"log/slog"
 	"os"
 
 	"github.com/knackwurstking/pg-press/internal/assets"
@@ -84,10 +83,10 @@ func setupRouter(e *echo.Echo, db *common.DB, prefix string) {
  ******************************************************************************/
 
 func startServer(e *echo.Echo, address string) {
-	slog.Info("Starting HTTP server", "address", address)
+	logger.Info("Starting HTTP server at %#v", address)
+
 	if err := e.Start(address); err != nil {
-		slog.Error("Server startup failed", "address", address, "error", err)
-		slog.Error("Common causes: port already in use, permission denied, invalid address format")
+		logger.Error("Failed to start server: %v", err)
 		os.Exit(exitCodeServerStart)
 	}
 }

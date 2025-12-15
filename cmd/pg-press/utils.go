@@ -1,8 +1,6 @@
 package main
 
 import (
-	"log/slog"
-
 	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/shared"
 
@@ -12,9 +10,7 @@ import (
 )
 
 func openDB(dbPath string, logging bool) (*common.DB, error) {
-	if logging {
-		slog.Info("Database opened", "path", dbPath)
-	}
+	logger.Info("Opening database: %#v", dbPath)
 
 	db := common.NewDB(&shared.Config{
 		DriverName:       "sqlite3",

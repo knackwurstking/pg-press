@@ -2,19 +2,28 @@ package common
 
 import (
 	"fmt"
-	"log/slog"
 	"strings"
 	"sync"
 
+	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/services/note"
 	"github.com/knackwurstking/pg-press/internal/services/press"
 	"github.com/knackwurstking/pg-press/internal/services/tool"
 	"github.com/knackwurstking/pg-press/internal/services/user"
 	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/ui/ui-templ"
 
 	_ "github.com/mattn/go-sqlite3"
 )
+
+var (
+	logger *ui.Logger
+)
+
+func init() {
+	logger = env.NewLogger("common")
+}
 
 // DB holds and initializes all the services required
 type DB struct {
@@ -250,6 +259,6 @@ func closeServices(services ...closeServicesProps) {
 	close(errCh)
 
 	for err := range errCh {
-		slog.Error("Failed to close database service(s)", "error", err)
+		logger.Error("Failed to close database service: %v", err)
 	}
 }
