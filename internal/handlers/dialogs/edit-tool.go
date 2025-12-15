@@ -1,18 +1,13 @@
 package dialogs
 
 import (
-	"fmt"
-	"log/slog"
-	"net/http"
 	"strconv"
 	"strings"
 
-	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
-	"github.com/knackwurstking/pg-press/internal/handler/dialogs/templates"
+	"github.com/knackwurstking/pg-press/internal/handlers/dialogs/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"github.com/knackwurstking/pg-press/models"
 
 	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
@@ -75,10 +70,9 @@ func (h *Handler) PutTool(c echo.Context) *echo.HTTPError {
 	}
 	toolID := shared.EntityID(id)
 
-	// TODO: Continue here...
-	tool, merr := GetToolDialogForm(c)
-	if merr != nil {
-		return merr.Echo()
+	tool, verr := GetToolDialogForm(c)
+	if verr != nil {
+		return verr.MasterError().Echo()
 	}
 	tool.ID = toolID // Just to be sure
 

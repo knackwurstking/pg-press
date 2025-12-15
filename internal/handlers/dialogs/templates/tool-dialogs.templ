@@ -2,7 +2,7 @@ package templates
 
 import (
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 
 	ui "github.com/knackwurstking/ui/ui-templ"
 )
@@ -10,7 +10,7 @@ import (
 templ NewToolDialog() {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           "POST",
-		Href:             utils.UrlDialogs().EditTool(0),
+		Href:             urlb.UrlDialogs().EditTool(0),
 		ID:               "tool-dialog",
 		SubmitButtonText: "Erstellen",
 	}) {
@@ -25,7 +25,7 @@ templ NewToolDialog() {
 templ EditToolDialog(tool *shared.Tool) {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           "PUT",
-		Href:             utils.UrlDialogs().EditTool(tool.ID),
+		Href:             urlb.UrlDialogs().EditTool(tool.ID),
 		ID:               "tool-edit-dialog",
 		SubmitButtonText: "Aktualisieren",
 	}) {
@@ -42,7 +42,7 @@ templ toolPosition(inputPosition shared.Slot) {
 		<select id="position" name="position" required>
 			<option
 				value=""
-				if inputPosition == "" {
+				if inputPosition == shared.SlotUnknown {
 					selected
 				}
 			>

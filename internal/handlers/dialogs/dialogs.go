@@ -26,9 +26,9 @@ func NewHandler(db *common.DB) *Handler {
 func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	ui.RegisterEchoRoutes(e, env.ServerPathPrefix, []*ui.EchoRoute{
 		// Edit cycle dialog
-		ui.NewEchoRoute(http.MethodGet, path+"/edit-cycle", h.GetEditCycle),
-		ui.NewEchoRoute(http.MethodPost, path+"/edit-cycle", h.PostEditCycle),
-		ui.NewEchoRoute(http.MethodPut, path+"/edit-cycle", h.PutEditCycle),
+		//ui.NewEchoRoute(http.MethodGet, path+"/edit-cycle", h.GetEditCycle),
+		//ui.NewEchoRoute(http.MethodPost, path+"/edit-cycle", h.PostEditCycle),
+		//ui.NewEchoRoute(http.MethodPut, path+"/edit-cycle", h.PutEditCycle),
 
 		// Edit tool dialog
 		ui.NewEchoRoute(http.MethodGet, path+"/edit-tool", h.GetToolDialog),
@@ -36,21 +36,21 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 		ui.NewEchoRoute(http.MethodPut, path+"/edit-tool", h.PutTool),
 
 		// Edit metal sheet dialog
-		ui.NewEchoRoute(http.MethodGet, path+"/edit-metal-sheet", h.GetEditMetalSheet),
-		ui.NewEchoRoute(http.MethodPost, path+"/edit-metal-sheet", h.PostEditMetalSheet),
-		ui.NewEchoRoute(http.MethodPut, path+"/edit-metal-sheet", h.PutEditMetalSheet),
+		//ui.NewEchoRoute(http.MethodGet, path+"/edit-metal-sheet", h.GetEditMetalSheet),
+		//ui.NewEchoRoute(http.MethodPost, path+"/edit-metal-sheet", h.PostEditMetalSheet),
+		//ui.NewEchoRoute(http.MethodPut, path+"/edit-metal-sheet", h.PutEditMetalSheet),
 
 		// Edit note dialog
-		ui.NewEchoRoute(http.MethodGet, path+"/edit-note", h.GetEditNote),
-		ui.NewEchoRoute(http.MethodPost, path+"/edit-note", h.PostEditNote),
-		ui.NewEchoRoute(http.MethodPut, path+"/edit-note", h.PutEditNote),
+		//ui.NewEchoRoute(http.MethodGet, path+"/edit-note", h.GetEditNote),
+		//ui.NewEchoRoute(http.MethodPost, path+"/edit-note", h.PostEditNote),
+		//ui.NewEchoRoute(http.MethodPut, path+"/edit-note", h.PutEditNote),
 
 		// Edit tool regeneration dialog
-		ui.NewEchoRoute(http.MethodGet, path+"/edit-tool-regeneration", h.GetEditToolRegeneration),
-		ui.NewEchoRoute(http.MethodPut, path+"/edit-tool-regeneration", h.PutEditToolRegeneration),
+		//ui.NewEchoRoute(http.MethodGet, path+"/edit-tool-regeneration", h.GetEditToolRegeneration),
+		//ui.NewEchoRoute(http.MethodPut, path+"/edit-tool-regeneration", h.PutEditToolRegeneration),
 
 		// Edit press regeneration dialog
-		ui.NewEchoRoute(http.MethodGet, path+"/edit-press-regeneration", h.GetEditPressRegeneration),
-		ui.NewEchoRoute(http.MethodPut, path+"/edit-press-regeneration", h.PutEditPressRegeneration),
+		//ui.NewEchoRoute(http.MethodGet, path+"/edit-press-regeneration", h.GetEditPressRegeneration),
+		//ui.NewEchoRoute(http.MethodPut, path+"/edit-press-regeneration", h.PutEditPressRegeneration),
 	})
 }
