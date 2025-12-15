@@ -15,19 +15,6 @@ const (
 	SlotUpperCassette
 )
 
-func (s Slot) String() string {
-	switch s {
-	case SlotUpper:
-		return "top"
-	case SlotLower:
-		return "bottom"
-	case SlotUpperCassette:
-		return "cassette"
-	default:
-		return "unknown"
-	}
-}
-
 func (s Slot) German() string {
 	switch s {
 	case SlotUpper:
@@ -92,13 +79,13 @@ func (bt *BaseTool) Clone() BaseTool {
 
 func (bt *BaseTool) String() string {
 	return fmt.Sprintf(
-		"BaseTool[ID=%d, Width=%d, Height=%d, Position=%s, Type=%s, Code=%s, "+
+		"BaseTool[ID=%d, Width=%d, Height=%d, Position=%d, Type=%s, Code=%s, "+
 			"CyclesOffset=%d, Cycles=%d, LastRegeneration=%d, Regenerating=%t, "+
 			"IsDead=%t]",
 		bt.ID,
 		bt.Width,
 		bt.Height,
-		bt.Position.String(),
+		bt.Position,
 		bt.Type,
 		bt.Code,
 		bt.CyclesOffset,

@@ -64,7 +64,6 @@ templ sectionCookies() {
 			hx-get={ urlb.UrlProfile("").Cookies }
 			hx-trigger="load"
 			hx-swap="outerHTML"
-			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 		></span>
 	</div>
 }

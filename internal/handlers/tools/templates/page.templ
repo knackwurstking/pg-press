@@ -52,7 +52,7 @@ templ Page(p PageProps) {
 					data-index="1"
 					class="tab secondary ghost"
 					hx-get={ urlb.UrlTools(0).SectionPress }
-					hx-trigger="loadTabContent, tools-tab"
+					hx-trigger="loadTabContent"
 					hx-target="#tab-content"
 					onclick="toggleTab(event)"
 				>Pressen</div>
@@ -71,7 +71,7 @@ templ Page(p PageProps) {
 				id="tab-content"
 				class="p w-full h-fit"
 				style="margin-top: 50px;"
-				hx-on::after-swap="filterToolsList(null, true)"
+				hx-on::after-request="filterToolsList(null, true)"
 			></div>
 		</main>
 	}

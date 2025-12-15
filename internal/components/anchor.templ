@@ -35,7 +35,6 @@ templ toolAnchorBadgesWithTotalCycles(tool *shared.Tool) {
 			hx-get={ urlb.UrlTool(tool.ID, 0, 0).TotalCycles }
 			hx-trigger="load"
 			hx-swap="innerHTML"
-			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 		></span>
 	</div>
 }

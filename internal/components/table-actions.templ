@@ -19,7 +19,6 @@ templ TableActions(options TableActionsOptions) {
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"
-				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 				title="Bearbeiten"
 				if options.EditAdminOnly && !options.User.IsAdmin() {
 					disabled
@@ -35,7 +34,6 @@ templ TableActions(options TableActionsOptions) {
 				hx-trigger="click"
 				hx-confirm="Diesen Eintrag löschen?"
 				hx-swap="none"
-				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 				title="Löschen"
 				if options.DeleteAdminOnly && !options.User.IsAdmin() {
 					disabled

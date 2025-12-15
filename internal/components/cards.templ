@@ -40,7 +40,6 @@ templ NoteCard(note *shared.Note, tools []*shared.Tool) {
 					hx-trigger="click"
 					hx-target="body"
 					hx-swap="beforeend"
-					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 					title="Notiz bearbeiten"
 				>
 					<i class="bi bi-pencil"></i>
@@ -50,7 +49,6 @@ templ NoteCard(note *shared.Note, tools []*shared.Tool) {
 					hx-delete={ urlb.UrlNotes(note.ID).Delete }
 					hx-trigger="click"
 					hx-confirm="Sind Sie sicher, dass Sie diese Notiz löschen möchten?"
-					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 					title="Notiz löschen"
 				>
 					<i class="bi bi-trash"></i>

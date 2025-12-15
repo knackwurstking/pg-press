@@ -20,7 +20,6 @@ templ AdminToolsSectionContent() {
 		hx-get={ urlb.UrlTools(0).AdminOverlappingTools }
 		hx-trigger="pageLoaded from:body"
 		hx-target="#tab-content"
-		hx-on::response-error="alert(event.detail.xhr.responseText)"
 	></span>
 	<div class="admin-overlapping-tools">
 		@components.NotFoundSectionText("Under Construction")

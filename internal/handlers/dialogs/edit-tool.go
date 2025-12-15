@@ -45,7 +45,7 @@ func (h *Handler) GetToolDialog(c echo.Context) *echo.HTTPError {
 }
 
 func (h *Handler) PostTool(c echo.Context) *echo.HTTPError {
-	tool, verr := GetToolDialogForm(c)
+	tool, verr := h.getToolDialogForm(c)
 	if verr != nil {
 		return verr.MasterError().Echo()
 	}
@@ -70,7 +70,7 @@ func (h *Handler) PutTool(c echo.Context) *echo.HTTPError {
 	}
 	toolID := shared.EntityID(id)
 
-	tool, verr := GetToolDialogForm(c)
+	tool, verr := h.getToolDialogForm(c)
 	if verr != nil {
 		return verr.MasterError().Echo()
 	}
@@ -99,7 +99,7 @@ func (h *Handler) PutTool(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func GetToolDialogForm(c echo.Context) (*shared.Tool, *errors.ValidationError) {
+func (h *Handler) getToolDialogForm(c echo.Context) (*shared.Tool, *errors.ValidationError) {
 	var (
 		vPosition = c.FormValue("position")
 		vWidth    = c.FormValue("width")
@@ -107,6 +107,9 @@ func GetToolDialogForm(c echo.Context) (*shared.Tool, *errors.ValidationError) {
 		vType     = strings.Trim(c.FormValue("type"), " ")
 		vCode     = strings.Trim(c.FormValue("code"), " ")
 	)
+
+	h.Log.Debug("Tool dialog form values: position=%s, width=%s, height=%s, type=%s, code=%s",
+		vPosition, vWidth, vHeight, vType, vCode)
 
 	// Need to convert the vPosition to an integer
 	position, err := strconv.Atoi(vPosition)

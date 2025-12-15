@@ -18,10 +18,12 @@ function filterToolsList(event = null, skipHistory = false) {
 		updateUrlQueryParam(query);
 	}
 
+	console.debug(`Filtering tools list with query: [${query}] [skipHistory=${skipHistory}]`);
+
 	targets.forEach((child) => {
-		child.style.display = query.every((value) =>
-			child.textContent.toLowerCase().includes(value),
-		)
+		child.style.display = query.every((value) => {
+			return child.textContent.toLowerCase().includes(value)
+		})
 			? "block"
 			: "none";
 	});

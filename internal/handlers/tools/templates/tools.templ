@@ -17,18 +17,16 @@ type SectionToolsProps struct {
 templ SectionTools(p SectionToolsProps) {
 	<span
 		hx-get={ urlb.UrlTools(0).SectionTools }
-		hx-trigger="pageLoaded from:body"
+		hx-trigger="tools-tab from:body"
 		hx-target="#tab-content"
-		hx-on::response-error="alert(event.detail.xhr.responseText)"
 	></span>
-	@sectionToolsFilter(p.Tools)
+	@inputFilterTools(p.Tools)
 	<div class="all-tools p" style="margin-top: 3.5rem;">
 		@components.ActionBar() {
 			<button
 				hx-get={ urlb.UrlDialogs().EditTool(0) }
 				hx-trigger="click"
 				hx-swap="beforeend"
-				hx-on::response-error="alert(event.detail.xhr.responseText)"
 				class="flex gap primary"
 			>
 				<i class="bi bi-plus-lg"></i>
@@ -41,7 +39,7 @@ templ SectionTools(p SectionToolsProps) {
 	</div>
 }
 
-templ sectionToolsFilter(tools []*shared.Tool) {
+templ inputFilterTools(tools []*shared.Tool) {
 	<div
 		class="flex gap-sm flex-wrap justify-evenly backdrop"
 		style="
