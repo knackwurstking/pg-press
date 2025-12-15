@@ -12,8 +12,6 @@ type SectionToolsProps struct {
 	User  *shared.User
 }
 
-// TODO:
-// - The trigger "pageLoaded from:body" needs to be removed and replaced with something more specific.
 templ SectionTools(p SectionToolsProps) {
 	<span
 		hx-get={ urlb.UrlTools(0).SectionTools }
@@ -23,14 +21,24 @@ templ SectionTools(p SectionToolsProps) {
 	@inputFilterTools(p.Tools)
 	<div class="all-tools p" style="margin-top: 3.5rem;">
 		@components.ActionBar() {
+			// TODO: Open the new cassette dialog instead
 			<button
 				hx-get={ urlb.UrlDialogs().EditTool(0) }
 				hx-trigger="click"
 				hx-swap="beforeend"
-				class="flex gap primary"
+				class="flex gap secondary small"
 			>
 				<i class="bi bi-plus-lg"></i>
-				<span>Erstellen</span>
+				<span>Kassette</span>
+			</button>
+			<button
+				hx-get={ urlb.UrlDialogs().EditTool(0) }
+				hx-trigger="click"
+				hx-swap="beforeend"
+				class="flex gap primary small"
+			>
+				<i class="bi bi-plus-lg"></i>
+				<span>Werkzeug</span>
 			</button>
 		}
 		<ul id="tools-list" class="flex flex-col gap p-0" style="list-style: none;">
@@ -68,12 +76,12 @@ templ ToolsList(tools []*shared.Tool, user *shared.User) {
 		if (t.Type == "Unbekannt" || t.Code == "Unbekannt") && !user.IsAdmin() {
 			{{ continue }}
 		}
-		@toolsListItem(t.ID, t)
+		@toolsListItem(t)
 	}
 }
 
-templ toolsListItem(toolID shared.EntityID, tool *shared.Tool) {
-	<li id={ fmt.Sprintf("tool-%d", toolID) } class="tool-item" style="display: none;">
+templ toolsListItem(tool *shared.Tool) {
+	<li id={ fmt.Sprintf("tool-%d", tool.ID) } class="tool-item" style="display: none;">
 		@components.ToolAnchor(tool, nil, nil, nil)
 	</li>
 }

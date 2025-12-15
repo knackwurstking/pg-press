@@ -13,6 +13,7 @@ const (
 )
 
 const (
+	// TODO: missing: position INTEGER NOT NULL,
 	SQLCreateToolTable string = `
 		CREATE TABLE IF NOT EXISTS tools (
 			id					INTEGER NOT NULL,
