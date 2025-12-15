@@ -71,7 +71,7 @@ func NewNoteService(c *shared.Config) *NoteService {
 
 func (s *NoteService) Setup() *errors.MasterError {
 	if env.Verbose {
-		s.Logger.Println("Setting up NoteService", DBName, s.DatabaseLocation)
+		s.Logger.Printf(env.ANSIVerbose+"Setting up NoteService: %s, %s"+env.ANSIReset, DBName, s.DatabaseLocation)
 	}
 	return s.BaseService.Setup(DBName, SQLCreateNoteTable)
 }

@@ -59,7 +59,7 @@ func NewUpperMetalSheetService(c *shared.Config) *UpperMetalSheetService {
 
 func (s *UpperMetalSheetService) Setup() *errors.MasterError {
 	if env.Verbose {
-		s.Logger.Println("Setting up UpperMetalSheetService", DBName, s.DatabaseLocation)
+		s.Logger.Printf(env.ANSIVerbose+"Setting up UpperMetalSheetService: %s, %s"+env.ANSIReset, DBName, s.DatabaseLocation)
 	}
 	return s.BaseService.Setup(DBName, SQLCreateMetalSheetTable)
 }

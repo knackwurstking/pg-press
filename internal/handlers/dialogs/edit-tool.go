@@ -73,53 +73,35 @@ func (h *Handler) PostTool(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-// TODO: Continue here...
 // PutTool handles updating an existing tool
 func (h *Handler) PutTool(c echo.Context) *echo.HTTPError {
-	slog.Info("Updating existing tool")
-
-	user, merr := utils.GetUserFromContext(c)
+	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	toolIDQuery, merr := utils.ParseQueryInt64(c, "id")
+	id, merr := shared.ParseQueryInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
-	toolID := models.ToolID(toolIDQuery)
+	toolID := shared.EntityID(id)
 
-	formData, merr := GetEditToolFormData(c)
+	tool, merr := GetToolDialogForm(c)
 	if merr != nil {
 		return merr.Echo()
 	}
+	tool.ID = toolID // Just to be sure
 
-	tool, merr := h.registry.Tools.Get(toolID)
-	if merr != nil {
-		return merr.Echo()
+	if env.Verbose {
+		h.Logger.Println(env.ANSIVerbose+"Updating tool:", tool.String()+env.ANSIReset)
 	}
 
-	tool.Press = formData.Press
-	tool.Position = formData.Position
-	tool.Format = formData.Format
-	tool.Code = formData.Code
-	tool.Type = formData.Type
-
-	merr = h.registry.Tools.Update(tool, user)
+	merr = h.DB.Tool.Tool.Update(tool)
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	// Create feed entry
-	title := "Werkzeug aktualisiert"
-
-	content := fmt.Sprintf("Werkzeug: %s\nTyp: %s\nCode: %s\nPosition: %s",
-		tool.String(), tool.Type, tool.Code, string(tool.Position))
-
-	if tool.Press != nil {
-		content += fmt.Sprintf("\nPresse: %d", *tool.Press)
-	}
-
+	// TODO: Continue here...
 	merr = h.registry.Feeds.Add(title, content, user.TelegramID)
 	if merr != nil {
 		slog.Warn("Failed to create feed for tool update", "error", merr)

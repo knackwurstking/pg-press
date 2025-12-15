@@ -46,7 +46,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 
 func (h *Handler) GetLoginPage(c echo.Context) *echo.HTTPError {
 	if env.Verbose {
-		h.Logger.Println("Login page requested from IP:", c.RealIP())
+		h.Logger.Println(env.ANSIVerbose+"Login page requested from IP:", c.RealIP(), env.ANSIReset)
 	}
 
 	t := templates.Page(
@@ -67,7 +67,7 @@ func (h *Handler) GetLoginPage(c echo.Context) *echo.HTTPError {
 
 func (h *Handler) PostLoginPage(c echo.Context) *echo.HTTPError {
 	if env.Verbose {
-		h.Logger.Println("Login attempt from IP:", c.RealIP())
+		h.Logger.Println(env.ANSIVerbose+"Login attempt from IP:", c.RealIP()+env.ANSIReset)
 	}
 
 	apiKey := c.FormValue("api-key")
@@ -94,7 +94,7 @@ func (h *Handler) PostLoginPage(c echo.Context) *echo.HTTPError {
 
 func (h *Handler) GetLogout(c echo.Context) *echo.HTTPError {
 	if env.Verbose {
-		h.Logger.Println("Logout attempt from IP:", c.RealIP())
+		h.Logger.Println(env.ANSIVerbose+"Logout attempt from IP:", c.RealIP()+env.ANSIReset)
 	}
 
 	if cookie, err := c.Cookie(CookieName); err == nil {

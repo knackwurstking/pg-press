@@ -80,7 +80,7 @@ func NewPressService(c *shared.Config) *PressService {
 
 func (s *PressService) Setup() *errors.MasterError {
 	if env.Verbose {
-		s.Logger.Println("Setting up PressService", DBName, s.DatabaseLocation)
+		s.Logger.Printf(env.ANSIVerbose+"Setting up PressService: %s, %s"+env.ANSIReset, DBName, s.DatabaseLocation)
 	}
 	return s.BaseService.Setup(DBName, SQLCreatePressTable)
 }

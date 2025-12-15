@@ -63,7 +63,7 @@ func NewLowerMetalSheetService(c *shared.Config) *LowerMetalSheetService {
 
 func (s *LowerMetalSheetService) Setup() *errors.MasterError {
 	if env.Verbose {
-		s.Logger.Println("Setting up LowerMetalSheetService", DBName, s.DatabaseLocation)
+		s.Logger.Printf(env.ANSIVerbose+"Setting up LowerMetalSheetService: %s, %s"+env.ANSIReset, DBName, s.DatabaseLocation)
 	}
 	return s.BaseService.Setup(DBName, SQLCreateMetalSheetTable)
 }

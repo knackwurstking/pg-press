@@ -69,7 +69,7 @@ func NewCycleService(c *shared.Config) *CycleService {
 
 func (s *CycleService) Setup() *errors.MasterError {
 	if env.Verbose {
-		s.Logger.Println("Setting up CycleService", DBName, s.DatabaseLocation)
+		s.Logger.Printf(env.ANSIVerbose+"Setting up CycleService: %s, %s"+env.ANSIReset, DBName, s.DatabaseLocation)
 	}
 	return s.BaseService.Setup(DBName, SQLCreateCycleTable)
 }

@@ -74,7 +74,7 @@ func NewPressRegenerationService(c *shared.Config) *PressRegenerationService {
 
 func (s *PressRegenerationService) Setup() *errors.MasterError {
 	if env.Verbose {
-		s.Logger.Println("Setting up PressRegenerationService", DBName, s.DatabaseLocation)
+		s.Logger.Printf(env.ANSIVerbose+"Setting up PressRegenerationService: %s, %s"+env.ANSIReset, DBName, s.DatabaseLocation)
 	}
 	return s.BaseService.Setup(DBName, SQLCreatePressRegenerationTable)
 }

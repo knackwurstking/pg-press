@@ -137,8 +137,8 @@ func keyAuthValidator(auth string, ctx echo.Context, db *common.DB) (bool, error
 
 	if env.Verbose {
 		middlewareLogger.Println(
-			"API key auth successful for user:", user.Name,
-			", RealIP:", realIP,
+			env.ANSIVerbose+"API key auth successful for user:", user.Name,
+			", RealIP:", realIP+env.ANSIReset,
 		)
 	}
 
