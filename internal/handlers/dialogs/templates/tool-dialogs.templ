@@ -15,8 +15,8 @@ templ NewToolDialog() {
 		SubmitButtonText: "Erstellen",
 	}) {
 		{{ tool := &shared.Tool{} }}
-		@toolPositionAndPressSelection(tool.Position, tool.Press)
-		@toolFormat(tool.Format.Width, tool.Format.Height)
+		@toolPosition(tool.Position)
+		@toolFormat(tool.Width, tool.Height)
 		@toolType(tool.Type)
 		@toolCode(tool.Code)
 	}
@@ -29,106 +29,50 @@ templ EditToolDialog(tool *shared.Tool) {
 		ID:               "tool-edit-dialog",
 		SubmitButtonText: "Aktualisieren",
 	}) {
-		@toolPositionAndPressSelection(tool.Position, tool.Press)
-		@toolFormat(tool.Format.Width, tool.Format.Height)
+		@toolPosition(tool.Position)
+		@toolFormat(tool.Width, tool.Height)
 		@toolType(tool.Type)
 		@toolCode(tool.Code)
 	}
 }
 
-templ toolPositionAndPressSelection(inputPosition shared.Position, inputPressSelection *shared.PressNumber) {
+templ toolPosition(inputPosition shared.Slot) {
 	<div class="flex flex-row gap flex-wrap justify-between items-center">
-		<div class="flex flex-col gap-0">
-			<label for="position">Position</label>
-			<select id="position" name="position" required>
-				<option
-					value=""
-					if inputPosition == "" {
-						selected
-					}
-				>
-					Position auswählen
-				</option>
-				<option
-					value={ shared.SlotUpper }
-					if inputPosition == shared.SlotUpper {
-						selected
-					}
-				>
-					Oberteil
-				</option>
-				<option
-					value={ shared.SlotLower }
-					if inputPosition == shared.SlotLower {
-						selected
-					}
-				>
-					Unterteil
-				</option>
-				<option
-					value={ shared.SlotUpperCassette }
-					if inputPosition == shared.SlotUpperCassette {
-						selected
-					}
-				>
-					Kassette
-				</option>
-			</select>
-		</div>
-		<div class="flex flex-col gap-0 w-fit">
-			<label for="pressSelection">Presse</label>
-			{{ validInputPressSelection := inputPressSelection.IsValid() }}
-			<select id="pressSelection" name="press-selection">
-				<option
-					value=""
-					if ! {
-						selected
-					}
-				>
-					Nicht Eingebaut
-				</option>
-				<option
-					value="0"
-					if validInputPressSelection && *inputPressSelection == 0 {
-						selected
-					}
-				>
-					Presse 0
-				</option>
-				<option
-					value="2"
-					if validInputPressSelection && *inputPressSelection == 2 {
-						selected
-					}
-				>
-					Presse 2
-				</option>
-				<option
-					value="3"
-					if validInputPressSelection && *inputPressSelection == 3 {
-						selected
-					}
-				>
-					Presse 3
-				</option>
-				<option
-					value="4"
-					if validInputPressSelection && *inputPressSelection == 4 {
-						selected
-					}
-				>
-					Presse 4
-				</option>
-				<option
-					value="5"
-					if validInputPressSelection && *inputPressSelection == 5 {
-						selected
-					}
-				>
-					Presse 5
-				</option>
-			</select>
-		</div>
+		<label for="position">Position</label>
+		<select id="position" name="position" required>
+			<option
+				value=""
+				if inputPosition == "" {
+					selected
+				}
+			>
+				Position auswählen
+			</option>
+			<option
+				value={ shared.SlotUpper }
+				if inputPosition == shared.SlotUpper {
+					selected
+				}
+			>
+				Oberteil
+			</option>
+			<option
+				value={ shared.SlotLower }
+				if inputPosition == shared.SlotLower {
+					selected
+				}
+			>
+				Unterteil
+			</option>
+			<option
+				value={ shared.SlotUpperCassette }
+				if inputPosition == shared.SlotUpperCassette {
+					selected
+				}
+			>
+				Kassette
+			</option>
+		</select>
 	</div>
 }
 

@@ -50,14 +50,14 @@ func (h *Handler) GetToolDialog(c echo.Context) *echo.HTTPError {
 }
 
 func (h *Handler) PostTool(c echo.Context) *echo.HTTPError {
-	tool, merr := GetToolDialogForm(c)
-	if merr != nil {
-		return merr.Echo()
+	tool, verr := GetToolDialogForm(c)
+	if verr != nil {
+		return verr.MasterError().Echo()
 	}
 
 	h.Logger.Debug("Creating new tool: %#v", tool.String())
 
-	merr = h.DB.Tool.Tool.Create(tool)
+	merr := h.DB.Tool.Tool.Create(tool)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -69,17 +69,13 @@ func (h *Handler) PostTool(c echo.Context) *echo.HTTPError {
 
 // PutTool handles updating an existing tool
 func (h *Handler) PutTool(c echo.Context) *echo.HTTPError {
-	user, merr := shared.GetUserFromContext(c)
-	if merr != nil {
-		return merr.Echo()
-	}
-
 	id, merr := shared.ParseQueryInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
 	toolID := shared.EntityID(id)
 
+	// TODO: Continue here...
 	tool, merr := GetToolDialogForm(c)
 	if merr != nil {
 		return merr.Echo()
@@ -109,65 +105,60 @@ func (h *Handler) PutTool(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-// TODO: This needs to be updated, ex.: the position needs to be replaced with the new slot logic
-// TODO: Press selection needs to be kicked, the press page will handle that exclusively
-func GetToolDialogForm(c echo.Context) (*shared.Tool, *errors.MasterError) {
-	positionStr := c.FormValue("position")
-	position := models.Position(positionStr)
+func GetToolDialogForm(c echo.Context) (*shared.Tool, *errors.ValidationError) {
+	var (
+		vPosition = c.FormValue("position")
+		vWidth    = c.FormValue("width")
+		vHeight   = c.FormValue("height")
+		vType     = strings.Trim(c.FormValue("type"), " ")
+		vCode     = strings.Trim(c.FormValue("code"), " ")
+	)
 
-	switch position {
-	case models.PositionTop, models.PositionTopCassette, models.PositionBottom:
-		// Valid position
+	// Need to convert the vPosition to an integer
+	position, err := strconv.Atoi(vPosition)
+	if err != nil {
+		return nil, errors.NewValidationError("invalid position: %s", vPosition)
+	}
+
+	// Check and set position
+	switch shared.Slot(position) {
+	case shared.SlotUpper, shared.SlotLower:
 	default:
-		return nil, errors.NewMasterError(
-			fmt.Errorf("invalid position: %s", positionStr),
-			http.StatusBadRequest,
-		)
+		return nil, errors.NewValidationError("invalid position: %s", vPosition)
 	}
 
-	data := &ToolDialogForm{Position: position}
-
-	// Parse width
-	if widthStr := c.FormValue("width"); widthStr != "" {
-		width, err := strconv.Atoi(widthStr)
-		if err != nil {
-			return nil, errors.NewMasterError(err, http.StatusBadRequest)
-		}
-		data.Format.Width = width
+	// Convert vWidth and vHeight to integers
+	width, err := strconv.Atoi(vWidth)
+	if err != nil {
+		return nil, errors.NewValidationError("invalid width: %s", vWidth)
+	}
+	height, err := strconv.Atoi(vHeight)
+	if err != nil {
+		return nil, errors.NewValidationError("invalid height: %s", vHeight)
 	}
 
-	// Parse height
-	if heightStr := c.FormValue("height"); heightStr != "" {
-		height, err := strconv.Atoi(heightStr)
-		if err != nil {
-			return nil, errors.NewMasterError(err, http.StatusBadRequest)
-		}
-		data.Format.Height = height
+	// Type and Code have to be set
+	if vType == "" {
+		return nil, errors.NewValidationError("type is required")
+	}
+	if vCode == "" {
+		return nil, errors.NewValidationError("code is required")
 	}
 
-	// Parse type (with length limit)
-	data.Type = strings.TrimSpace(c.FormValue("type"))
-	if len(data.Type) > 25 {
-		return nil, errors.NewMasterError(
-			fmt.Errorf("type must be 25 characters or less"),
-			http.StatusBadRequest,
-		)
+	tool := &shared.Tool{
+		BaseTool: shared.BaseTool{
+			Width:        width,
+			Height:       height,
+			Position:     shared.Slot(position),
+			Type:         vType,
+			Code:         vCode,
+			CyclesOffset: 0, // TODO: Maybe update the dialog to allow changing this?
+		},
 	}
 
-	// Parse code (required, with length limit)
-	data.Code = strings.TrimSpace(c.FormValue("code"))
-	if data.Code == "" {
-		return nil, errors.NewMasterError(
-			fmt.Errorf("code is required"),
-			http.StatusBadRequest,
-		)
-	}
-	if len(data.Code) > 25 {
-		return nil, errors.NewMasterError(
-			fmt.Errorf("code must be 25 characters or less"),
-			http.StatusBadRequest,
-		)
+	if verr := tool.Validate(); verr != nil {
+		return tool, verr
 	}
 
-	return data, nil
+	return tool, nil
 }
