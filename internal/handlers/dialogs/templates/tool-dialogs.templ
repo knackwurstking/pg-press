@@ -37,54 +37,48 @@ templ EditToolDialog(tool *shared.Tool) {
 }
 
 templ toolPosition(inputPosition shared.Slot) {
-	<div class="flex flex-row gap flex-wrap justify-between items-center">
-		<label for="position">Position</label>
-		<select id="position" name="position" required>
-			<option
-				value=""
-				if inputPosition == shared.SlotUnknown {
-					selected
-				}
-			>
-				Position auswählen
-			</option>
-			<option
-				value={ shared.SlotUpper }
-				if inputPosition == shared.SlotUpper {
-					selected
-				}
-			>
-				Oberteil
-			</option>
-			<option
-				value={ shared.SlotLower }
-				if inputPosition == shared.SlotLower {
-					selected
-				}
-			>
-				Unterteil
-			</option>
-			<option
-				value={ shared.SlotUpperCassette }
-				if inputPosition == shared.SlotUpperCassette {
-					selected
-				}
-			>
-				Kassette
-			</option>
-		</select>
+	<div class="flex flex-row gap">
+		<span class="flex flex-col gap-0 items-start">
+			<label for="position">Position</label>
+			<select id="position" name="position" required>
+				<option
+					value=""
+					if inputPosition == shared.SlotUnknown {
+						selected
+					}
+				>
+					Position auswählen
+				</option>
+				<option
+					value={ shared.SlotUpper }
+					if inputPosition == shared.SlotUpper {
+						selected
+					}
+				>
+					Oberteil
+				</option>
+				<option
+					value={ shared.SlotLower }
+					if inputPosition == shared.SlotLower {
+						selected
+					}
+				>
+					Unterteil
+				</option>
+			</select>
+		</span>
 	</div>
 }
 
 templ toolFormat(inputWidth int, inputHeight int) {
-	<div class="flex flex-col gap-0">
+	<div class="flex flex-col gap-0 items-start w-full">
 		<label>Format</label>
 		<div class="flex gap-sm">
 			<input
 				type="number"
 				id="width"
-				name="width"
 				class="w-full"
+				name="width"
 				placeholder="z.B. 120"
 				if inputWidth != 0 {
 					value={ inputWidth }
@@ -95,8 +89,8 @@ templ toolFormat(inputWidth int, inputHeight int) {
 			<input
 				type="number"
 				id="height"
-				name="height"
 				class="w-full"
+				name="height"
 				placeholder="z.B. 60"
 				if inputHeight != 0 {
 					value={ inputHeight }
@@ -108,24 +102,27 @@ templ toolFormat(inputWidth int, inputHeight int) {
 }
 
 templ toolType(inputType string) {
-	<div class="flex flex-col gap-0">
+	<div class="flex flex-col gap-0 items-start w-full">
 		<label for="type">Typ</label>
 		<input
 			type="text"
 			id="type"
+			class="w-full"
 			name="type"
 			placeholder="z.B. MASS, FC, GTC"
 			value={ inputType }
+			required
 		/>
 	</div>
 }
 
 templ toolCode(inputCode string) {
-	<div class="flex flex-col gap-0">
+	<div class="flex flex-col gap-0 items-start w-full">
 		<label for="code">Code</label>
 		<input
 			type="text"
 			id="code"
+			class="w-full"
 			name="code"
 			placeholder="z.B. G01, G02, XXL01, 3573"
 			value={ inputCode }
