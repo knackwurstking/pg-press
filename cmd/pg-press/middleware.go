@@ -82,11 +82,9 @@ func middlewareKeyAuth(db *common.DB) echo.MiddlewareFunc {
 			return keyAuthValidator(auth, ctx, db)
 		},
 		ErrorHandler: func(err error, c echo.Context) error {
-			middlewareLogger.Println(
-				"KeyAuth error:", err,
-				", Method:", c.Request().Method,
-				", Path:", c.Request().URL.Path,
-				", RealIP:", c.RealIP(),
+			middlewareLogger.Printf(
+				env.ANSIRed+"KeyAuth error: %v, Method: %s, Path: %s, RealID: %s"+env.ANSIReset,
+				err, c.Request().Method, c.Request().URL.Path, c.RealIP(),
 			)
 			merr := urlb.RedirectTo(c, urlb.UrlLogin("", nil).Page)
 			if merr != nil {
@@ -110,10 +108,11 @@ func keyAuthValidator(auth string, ctx echo.Context, db *common.DB) (bool, error
 
 	user, err := validateUserFromCookie(ctx, db)
 	if err != nil {
-		middlewareLogger.Println(
-			"Validate user from cookie failed:", err,
-			", RealIP:", realIP,
+		middlewareLogger.Printf(
+			env.ANSIRed+"Validate user from cookie failed: %v, RealIP: %s"+env.ANSIReset,
+			err, realIP,
 		)
+
 		// Try to get user directly from the API key
 		users, merr := db.User.User.List()
 		if merr != nil {
@@ -136,9 +135,9 @@ func keyAuthValidator(auth string, ctx echo.Context, db *common.DB) (bool, error
 	}
 
 	if env.Verbose {
-		middlewareLogger.Println(
-			env.ANSIVerbose+"API key auth successful for user:", user.Name,
-			", RealIP:", realIP+env.ANSIReset,
+		middlewareLogger.Printf(
+			env.ANSIVerbose+"API-Key auth successful for user: %s, RealIP: %s"+env.ANSIReset,
+			user.Name, realIP+env.ANSIReset,
 		)
 	}
 
@@ -182,10 +181,9 @@ func validateUserFromCookie(ctx echo.Context, db *common.DB) (*shared.User, erro
 		// Try to update cookie with lock
 		merr = db.User.Cookie.Update(cookie)
 		if merr != nil {
-			middlewareLogger.Println(
-				"Failed to update cookie with lock:", merr,
-				", UserName:", user.Name,
-				", RealIP:", realIP,
+			middlewareLogger.Printf(
+				env.ANSIRed+"Failed to update cookie: %v, UserName: %s, RealIP: %s"+env.ANSIReset,
+				merr, user.Name, realIP,
 			)
 		}
 	}

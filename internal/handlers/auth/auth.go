@@ -46,7 +46,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 
 func (h *Handler) GetLoginPage(c echo.Context) *echo.HTTPError {
 	if env.Verbose {
-		h.Logger.Println(env.ANSIVerbose+"Login page requested from IP:", c.RealIP(), env.ANSIReset)
+		h.Logger.Printf(env.ANSIVerbose+"Login page requested from IP: %s"+env.ANSIReset, c.RealIP())
 	}
 
 	t := templates.Page(
@@ -67,7 +67,7 @@ func (h *Handler) GetLoginPage(c echo.Context) *echo.HTTPError {
 
 func (h *Handler) PostLoginPage(c echo.Context) *echo.HTTPError {
 	if env.Verbose {
-		h.Logger.Println(env.ANSIVerbose+"Login attempt from IP:", c.RealIP()+env.ANSIReset)
+		h.Logger.Printf(env.ANSIVerbose+"Login attempt from IP: %s"+env.ANSIReset, c.RealIP())
 	}
 
 	apiKey := c.FormValue("api-key")
@@ -94,13 +94,13 @@ func (h *Handler) PostLoginPage(c echo.Context) *echo.HTTPError {
 
 func (h *Handler) GetLogout(c echo.Context) *echo.HTTPError {
 	if env.Verbose {
-		h.Logger.Println(env.ANSIVerbose+"Logout attempt from IP:", c.RealIP()+env.ANSIReset)
+		h.Logger.Printf(env.ANSIVerbose+"Logout attempt from IP: %s"+env.ANSIReset, c.RealIP())
 	}
 
 	if cookie, err := c.Cookie(CookieName); err == nil {
 		merr := h.DB.User.Cookie.Delete(cookie.Value)
 		if merr != nil {
-			h.Logger.Println("Failed to delete cookie from database:", merr)
+			h.Logger.Printf(env.ANSIRed+"Failed to delete cookie from database: %v"+env.ANSIReset, merr)
 		}
 	}
 
@@ -122,7 +122,7 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) *errors.Ma
 
 	merr = h.clearExistingSession(ctx)
 	if merr != nil {
-		h.Logger.Println("Failed to clear existing session:", merr)
+		h.Logger.Printf(env.ANSIRed+"Failed to clear existing session: %v"+env.ANSIReset, merr)
 	}
 
 	merr = h.createSession(ctx, user.ID)
@@ -131,7 +131,7 @@ func (h *Handler) processApiKeyLogin(apiKey string, ctx echo.Context) *errors.Ma
 	}
 
 	if user.IsAdmin() {
-		h.Logger.Println("Administrator login successful:", user.Name, "from IP:", ctx.RealIP())
+		h.Logger.Printf(env.ANSIRed+"Administrator login successful: %s, from ID: %s"+env.ANSIReset, user.Name, ctx.RealIP())
 	}
 
 	return nil

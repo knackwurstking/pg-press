@@ -35,13 +35,13 @@ func (h *Handler) GetToolDialog(c echo.Context) *echo.HTTPError {
 		t = templates.EditToolDialog(tool)
 		tName = "EditToolDialog"
 		if env.Verbose {
-			h.Logger.Println(env.ANSIVerbose+"Rendering edit tool dialog:", env.ANSIBlue+tool.String()+env.ANSIReset)
+			h.Logger.Printf(env.ANSIVerbose+"Rendering edit tool dialog: %s%s"+env.ANSIReset, env.ANSIBlue, tool.String())
 		}
 	} else {
 		t = templates.NewToolDialog()
 		tName = "NewToolDialog"
 		if env.Verbose {
-			h.Logger.Println(env.ANSIVerbose + "Rendering new tool dialog" + env.ANSIReset)
+			h.Logger.Printf(env.ANSIVerbose + "Rendering new tool dialog" + env.ANSIReset)
 		}
 	}
 
@@ -60,7 +60,7 @@ func (h *Handler) PostTool(c echo.Context) *echo.HTTPError {
 	}
 
 	if env.Verbose {
-		h.Logger.Println(env.ANSIVerbose+"Creating new tool:", tool.String()+env.ANSIReset)
+		h.Logger.Printf(env.ANSIVerbose+"Creating new tool: %s%s"+env.ANSIReset, env.ANSIBlue, tool.String())
 	}
 
 	merr = h.DB.Tool.Tool.Create(tool)
@@ -93,7 +93,7 @@ func (h *Handler) PutTool(c echo.Context) *echo.HTTPError {
 	tool.ID = toolID // Just to be sure
 
 	if env.Verbose {
-		h.Logger.Println(env.ANSIVerbose+"Updating tool:", tool.String()+env.ANSIReset)
+		h.Logger.Printf(env.ANSIVerbose+"Updating tool: %s"+env.ANSIReset, tool.String())
 	}
 
 	merr = h.DB.Tool.Tool.Update(tool)

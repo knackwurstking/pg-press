@@ -68,7 +68,7 @@ func (h *Handler) HTMXDeleteTool(c echo.Context) *echo.HTTPError {
 	}
 
 	if env.Verbose {
-		h.Logger.Println(env.ANSIVerbose+"Deleted tool with ID:", toolID, env.ANSIReset)
+		h.Logger.Printf(env.ANSIVerbose+"Deleted tool with ID: %s"+env.ANSIReset, toolID)
 	}
 
 	urlb.SetHXTrigger(c, "tools-tab")
