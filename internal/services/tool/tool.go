@@ -13,10 +13,10 @@ const (
 )
 
 const (
-	// TODO: missing: position INTEGER NOT NULL,
 	SQLCreateToolTable string = `
 		CREATE TABLE IF NOT EXISTS tools (
 			id					INTEGER NOT NULL,
+			position 				INTEGER NOT NULL,
 			width 				INTEGER NOT NULL,
 			height 				INTEGER NOT NULL,
 			type 				TEXT NOT NULL,
@@ -32,17 +32,18 @@ const (
 		);
 	`
 	SQLCreateTool string = `
-	INSERT INTO tools (width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, cassette)
-		VALUES (:width, :height, :type, :code, :cycles_offset, :cycles, :last_regeneration, :regenerating, :is_dead, :cassette);
+	INSERT INTO tools (position, width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, cassette)
+		VALUES (:position, :width, :height, :type, :code, :cycles_offset, :cycles, :last_regeneration, :regenerating, :is_dead, :cassette);
 	`
 	SQLGetToolByID string = `
-		SELECT id, width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, cassette
+		SELECT id, position, width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, cassette
 		FROM tools
 		WHERE id = :id;
 	`
 	SQLUpdateTool string = `
 		UPDATE tools
-		SET width = :width,
+		SET position = :position,
+			width = :width,
 			height = :height,
 			type = :type,
 			code = :code,
@@ -50,7 +51,7 @@ const (
 			cycles = :cycles,
 			last_regeneration = :last_regeneration,
 			regenerating = :regenerating,
-			is_dead = :is_dead
+			is_dead = :is_dead,
 			cassette = :cassette
 		WHERE id = :id;
 	`
@@ -60,7 +61,7 @@ const (
 		WHERE id = :id;
 	`
 	SQLListTools string = `
-		SELECT id, width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, cassette
+		SELECT id, position, width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, cassette
 		FROM tools;
 	`
 )
@@ -92,6 +93,7 @@ func (s *ToolService) Create(entity *shared.Tool) *errors.MasterError {
 	defer s.mx.Unlock()
 
 	r, err := s.DB().Exec(SQLCreateTool,
+		sql.Named("position", entity.Position),
 		sql.Named("width", entity.Width),
 		sql.Named("height", entity.Height),
 		sql.Named("type", entity.Type),
@@ -138,6 +140,7 @@ func (s *ToolService) GetByID(id shared.EntityID) (*shared.Tool, *errors.MasterE
 	var t = &shared.Tool{}
 	err := r.Scan(
 		&t.ID,
+		&t.Position,
 		&t.Width,
 		&t.Height,
 		&t.Type,
@@ -167,6 +170,7 @@ func (s *ToolService) Update(entity *shared.Tool) *errors.MasterError {
 
 	_, err := s.DB().Exec(SQLUpdateTool,
 		sql.Named("id", entity.ID),
+		sql.Named("position", entity.Position),
 		sql.Named("width", entity.Width),
 		sql.Named("height", entity.Height),
 		sql.Named("type", entity.Type),
@@ -214,6 +218,7 @@ func (s *ToolService) List() ([]*shared.Tool, *errors.MasterError) {
 		t := &shared.Tool{}
 		err := rows.Scan(
 			&t.ID,
+			&t.Position,
 			&t.Width,
 			&t.Height,
 			&t.Type,
