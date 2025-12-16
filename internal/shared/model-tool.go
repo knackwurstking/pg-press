@@ -9,6 +9,9 @@ import (
 type Slot int
 
 const (
+	ToolCyclesWarning int64 = 800000
+	ToolCyclesError   int64 = 1000000
+
 	SlotUnknown Slot = iota
 	SlotUpper
 	SlotLower
