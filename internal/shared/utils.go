@@ -50,8 +50,6 @@ func GetUserFromContext(c echo.Context) (*User, *errors.MasterError) {
  * Echo Parse Utils
  ******************************************************************************/
 
-// TODO: Add echo parse utilities
-
 // ParseQueryBool parses a boolean query parameter from the request
 func ParseQueryBool(c echo.Context, paramName string) bool {
 	value := c.QueryParam(paramName)

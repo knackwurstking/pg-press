@@ -40,3 +40,32 @@ templ ToolStateBadge(tool *shared.Tool, pressNumber shared.PressNumber) {
 		}
 	}
 }
+
+templ CassetteStateBadge(cassette *shared.Cassette, boundToTool *shared.Tool) {
+	{{
+		var (
+			text  string
+			color string
+		)
+		if cassette.Regenerating {
+			text = "Regenerierung"
+			color = "warning"
+		} else if cassette.IsDead {
+			text = "RIP"
+			color = "destructive"
+		} else {
+			text = "Verfügbar"
+			color = "info"
+		}
+	}}
+	@SmallBadge(color) {
+		if boundToTool != nil {
+			<span class="flex flex-col gap-0 justify-center items-center">
+				<span class="text-bold">Gebunden</span>
+				<span>an Werkzeug { boundToTool.String() }</span>
+			</span>
+		} else {
+			{ text }
+		}
+	}
+}

@@ -68,7 +68,7 @@ templ NoteCard(note *shared.Note, tools []*shared.Tool) {
 							for _, tool := range tools {
 								if tool.ID == shared.EntityID(linked.ID) {
 									<a
-										href={ urlb.UrlTool(tool.ID, 0, 0).Page }
+										href={ urlb.UrlTool(tool.ID, 0, 0, 0).Page }
 										class="tool-link"
 									>
 										{ fmt.Sprintf(

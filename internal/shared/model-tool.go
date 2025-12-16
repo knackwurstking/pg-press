@@ -103,6 +103,10 @@ type Tool struct {
 	Cassette EntityID `json:"cassette"` // Cassette indicates the cassette ID this tool belongs to (if any)
 }
 
+func (t *Tool) German() string {
+	return fmt.Sprintf("%dx%d %s %s", t.Width, t.Height, t.Type, t.Code)
+}
+
 // Validate checks if the tool data is valid
 func (t *Tool) Validate() *errors.ValidationError {
 	if verr := t.BaseTool.Validate(); verr != nil {
@@ -136,6 +140,16 @@ type Cassette struct {
 	BaseTool
 	MinThickness float32 `json:"min_thickness"` // required
 	MaxThickness float32 `json:"max_thickness"` // required
+}
+
+func (c *Cassette) German() string {
+	return fmt.Sprintf("%dx%d %s %s %.1fmm-%.1fmm",
+		c.Width, c.Height,
+		c.Type,
+		c.Code,
+		c.MinThickness,
+		c.MaxThickness,
+	)
 }
 
 func (c *Cassette) Validate() *errors.ValidationError {

@@ -29,7 +29,7 @@ func serverCommand() cli.Command {
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
 			customDBPath := createDBPathOption(cmd)
 
-			cli.StringVar(cmd, &env.ServerAddress, "addr",
+			_ = cli.StringVar(cmd, &env.ServerAddress, "addr",
 				cli.WithShort("a"),
 				cli.Usage("Set server address in format <host>:<port> (e.g., localhost:8080)"))
 

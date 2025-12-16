@@ -41,7 +41,7 @@ templ Page(p PageProps) {
 					<div
 						data-index="0"
 						class="tab secondary ghost"
-						hx-get={ urlb.UrlTools(0).AdminOverlappingTools }
+						hx-get={ urlb.UrlTools(0, 0).AdminOverlappingTools }
 						hx-trigger="loadTabContent"
 						hx-target="#tab-content"
 						onclick="toggleTab(event)"
@@ -51,7 +51,7 @@ templ Page(p PageProps) {
 				<div
 					data-index="1"
 					class="tab secondary ghost"
-					hx-get={ urlb.UrlTools(0).SectionPress }
+					hx-get={ urlb.UrlTools(0, 0).SectionPress }
 					hx-trigger="loadTabContent"
 					hx-target="#tab-content"
 					onclick="toggleTab(event)"
@@ -60,7 +60,7 @@ templ Page(p PageProps) {
 				<div
 					data-index="2"
 					class="tab secondary ghost"
-					hx-get={ urlb.UrlTools(0).SectionTools }
+					hx-get={ urlb.UrlTools(0, 0).SectionTools }
 					hx-trigger="loadTabContent"
 					hx-target="#tab-content"
 					onclick="toggleTab(event)"

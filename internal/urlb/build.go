@@ -165,7 +165,7 @@ func UrlTroubleReports(trID shared.EntityID, aID shared.EntityID, modificationTi
 }
 
 // UrlTools constructs tools URLs
-func UrlTools(toolID shared.EntityID) (url struct {
+func UrlTools(toolID, cassetteID shared.EntityID) (url struct {
 	Page                  templ.SafeURL
 	Delete                templ.SafeURL
 	MarkDead              templ.SafeURL
@@ -176,6 +176,9 @@ func UrlTools(toolID shared.EntityID) (url struct {
 	params := map[string]string{}
 	if toolID != 0 {
 		params["id"] = fmt.Sprintf("%d", toolID)
+	}
+	if cassetteID != 0 {
+		params["is_cassette"] = "true"
 	}
 
 	url.Page = BuildURL("/tools")
@@ -189,7 +192,7 @@ func UrlTools(toolID shared.EntityID) (url struct {
 }
 
 // UrlTool constructs tool URLs
-func UrlTool(toolID shared.EntityID, toolRegenerationID shared.EntityID, cycleID shared.EntityID) (url struct {
+func UrlTool(toolID, cassetteID, toolRegenerationID, cycleID shared.EntityID) (url struct {
 	Page               templ.SafeURL
 	DeleteRegeneration templ.SafeURL
 	StatusEdit         templ.SafeURL
@@ -203,7 +206,22 @@ func UrlTool(toolID shared.EntityID, toolRegenerationID shared.EntityID, cycleID
 	Bind               templ.SafeURL
 	UnBind             templ.SafeURL
 }) {
-	url.Page = BuildURL(fmt.Sprintf("/tool/%d", toolID))
+	if toolID != 0 && cassetteID != 0 {
+		panic("toolID and cassetteID cannot both be non-zero")
+	}
+	if toolID == 0 && cassetteID == 0 {
+		panic("either toolID or cassetteID must be non-zero")
+	}
+
+	if toolID != 0 {
+		url.Page = BuildURL(fmt.Sprintf("/tool/%d", toolID))
+	}
+
+	if cassetteID != 0 {
+		url.Page = BuildURLWithParams(fmt.Sprintf("/tool/%d", cassetteID), map[string]string{
+			"is_cassette": "true",
+		})
+	}
 
 	{
 		params := map[string]string{}

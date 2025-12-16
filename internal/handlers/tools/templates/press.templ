@@ -11,11 +11,10 @@ type SectionPressProps struct {
 	PressUtilizations map[shared.PressNumber]*shared.PressUtilization
 }
 
-// TODO:
-// - The trigger "pageLoaded from:body" needs to be removed and replaced with something more specific.
+// TODO: The trigger "pageLoaded from:body" needs to be removed and replaced with something more specific.
 templ SectionPress(p SectionPressProps) {
 	<span
-		hx-get={ urlb.UrlTools(0).SectionPress }
+		hx-get={ urlb.UrlTools(0, 0).SectionPress }
 		hx-trigger="pageLoaded from:body"
 		hx-target="#tab-content"
 	></span>

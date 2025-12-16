@@ -69,6 +69,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	})
 }
 
+// TODO: Check for the optional "is_cassette" boolean query parameter
 func (h *Handler) GetToolPage(c echo.Context) error {
 	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {

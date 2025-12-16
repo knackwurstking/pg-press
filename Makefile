@@ -33,7 +33,8 @@ test:
 	go test -v ./...
 
 lint:
-	find . -name '*.go' | xargs -- gopls check -severity=hint 
+	#find . -name '*.go' | xargs -- gopls check -severity=hint 
+	golangci-lint run 
 
 run: generate
 	SERVER_PATH_PREFIX=${SERVER_PATH_PREFIX} \

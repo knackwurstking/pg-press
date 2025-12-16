@@ -3,24 +3,34 @@ package components
 import "github.com/knackwurstking/pg-press/internal/urlb"
 import "github.com/knackwurstking/pg-press/internal/shared"
 
-// TODO: Just create a cassette anchor component, Notes not implemented yet
-templ ToolAnchor(tool *shared.Tool, cassette *shared.Cassette, notes []any, regenerations []*shared.ToolRegeneration) {
+// -----------------------------------------------------------------------------
+// Tool Anchor
+// -----------------------------------------------------------------------------
+
+type ToolAnchorProps struct {
+	Tool               *shared.Tool     // Required
+	Cassette           *shared.Cassette // Optional
+	NotesCount         int              // Optional
+	RegenerationsCount int              // Optional
+}
+
+templ ToolAnchor(p ToolAnchorProps) {
 	<a
 		role="button"
 		class="muted flex justify-between items-center p"
-		href={ urlb.UrlTool(tool.ID, 0, 0).Page }
+		href={ urlb.UrlTool(p.Tool.ID, 0, 0, 0).Page }
 	>
 		<div class="flex flex-col gap-sm justify-between w-full">
 			<span class="text-semibold">
-				{ tool.Width }x{ tool.Height } { tool.Type } { tool.Code }
+				{ p.Tool.German() }
 			</span>
-			@toolAnchorBadgesWithTotalCycles(tool)
-			@toolAnchorBindingsList(tool, cassette)
+			@toolAnchorBadgesWithTotalCycles(p.Tool)
+			@toolAnchorBinding(p.Cassette)
 		</div>
 		<div class="flex flex-col gap justify-between items-center">
 			<i class="bi bi-chevron-right"></i>
 		</div>
-		@toolAnchorCounts(notes, regenerations)
+		@toolAnchorCounts(p.NotesCount, p.RegenerationsCount)
 	</a>
 }
 
@@ -32,29 +42,29 @@ templ toolAnchorBadgesWithTotalCycles(tool *shared.Tool) {
 		@ToolStateBadge(tool, -1)
 		<span
 			class="total-cycles-container flex justify-end items-center w-full pr text-sm"
-			hx-get={ urlb.UrlTool(tool.ID, 0, 0).TotalCycles }
+			hx-get={ urlb.UrlTool(tool.ID, 0, 0, 0).TotalCycles }
 			hx-trigger="load"
 			hx-swap="innerHTML"
 		></span>
 	</div>
 }
 
-templ toolAnchorBindingsList(tool *shared.Tool, cassette *shared.Cassette) {
-	if tool.Cassette > 0 && cassette != nil {
-		<div class="text-sm italic info ghost">
-			<i class="text-xs">
-				Kassette: { cassette.MinThickness }mm -> { cassette.MaxThickness }mm
-			</i>
-		</div>
+templ toolAnchorBinding(cassette *shared.Cassette) {
+	if cassette == nil {
+		{{ return }}
 	}
+	<div class="text-sm italic info ghost">
+		<i class="text-xs">
+			Kassette: { cassette.MinThickness }mm -> { cassette.MaxThickness }mm
+		</i>
+	</div>
 }
 
-templ toolAnchorCounts(notes []any, regenerations []*shared.ToolRegeneration) {
+templ toolAnchorCounts(notesCount, regenerationsCount int) {
 	<span
 		class="flex justify-end items-center gap-sm text-xs"
 		style="position: absolute; top: 0.15rem; right: 0.25rem;"
 	>
-		{{ notesCount := len(notes) }}
 		if notesCount > 0 {
 			<span class="info ghost">
 				<i class="bi bi-info-circle"></i>
@@ -63,7 +73,87 @@ templ toolAnchorCounts(notes []any, regenerations []*shared.ToolRegeneration) {
 				</span>
 			</span>
 		}
-		{{ regenerationsCount := len(regenerations) }}
+		if regenerationsCount > 0 {
+			<span class="warning ghost">
+				<i class="bi bi-arrow-repeat"></i>
+				<span>
+					{ regenerationsCount }
+				</span>
+			</span>
+		}
+	</span>
+}
+
+// -----------------------------------------------------------------------------
+// Cassette Anchor
+// -----------------------------------------------------------------------------
+
+type CassetteAnchorProps struct {
+	Cassette           *shared.Cassette // Required
+	Tool               *shared.Tool     // Optional
+	NotesCount         int              // Optional
+	RegenerationsCount int              // Optional
+}
+
+templ CassetteAnchor(p CassetteAnchorProps) {
+	<a
+		role="button"
+		class="muted flex justify-between items-center p"
+		href={ urlb.UrlTool(0, p.Cassette.ID, 0, 0).Page }
+	>
+		<div class="flex flex-col gap-sm justify-between w-full">
+			<span class="text-semibold">
+				{ p.Cassette.German() }
+			</span>
+			@cassetteAnchorBadgesWithTotalCycles(p.Cassette, p.Tool)
+			@cassetteAnchorBinding(p.Tool)
+		</div>
+		<div class="flex flex-col gap justify-between items-center">
+			<i class="bi bi-chevron-right"></i>
+		</div>
+		@cassetteAnchorCounts(p.NotesCount, p.RegenerationsCount)
+	</a>
+}
+
+templ cassetteAnchorBadgesWithTotalCycles(cassette *shared.Cassette, boundToTool *shared.Tool) {
+	<div class="flex gap justify-start items-center w-full">
+		@SmallBadge("primary", "text-bold") {
+			{ cassette.Position.German() }
+		}
+		@CassetteStateBadge(cassette, boundToTool)
+		<span
+			class="total-cycles-container flex justify-end items-center w-full pr text-sm"
+			hx-get={ urlb.UrlTool(0, cassette.ID, 0, 0).TotalCycles }
+			hx-trigger="load"
+			hx-swap="innerHTML"
+		></span>
+	</div>
+}
+
+templ cassetteAnchorBinding(tool *shared.Tool) {
+	if tool == nil {
+		{{ return }}
+	}
+	<div class="text-sm italic info ghost">
+		<i class="text-xs">
+			Gebunden an Werkzeug: { tool.Width }x{ tool.Height } { tool.Type } { tool.Code }
+		</i>
+	</div>
+}
+
+templ cassetteAnchorCounts(notesCount, regenerationsCount int) {
+	<span
+		class="flex justify-end items-center gap-sm text-xs"
+		style="position: absolute; top: 0.15rem; right: 0.25rem;"
+	>
+		if notesCount > 0 {
+			<span class="info ghost">
+				<i class="bi bi-info-circle"></i>
+				<span>
+					{ notesCount }
+				</span>
+			</span>
+		}
 		if regenerationsCount > 0 {
 			<span class="warning ghost">
 				<i class="bi bi-arrow-repeat"></i>

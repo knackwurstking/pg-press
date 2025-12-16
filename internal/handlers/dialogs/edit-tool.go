@@ -84,17 +84,7 @@ func (h *Handler) PutTool(c echo.Context) *echo.HTTPError {
 	}
 
 	// Set HX headers
-	urlb.SetHXRedirect(c, urlb.UrlTool(tool.ID, 0, 0).Page)
-
-	// TODO: Needs to be removed, just do a redirect to the same page to keep it simple
-	//utils.SetHXAfterSettle(c, map[string]any{
-	//	"toolUpdated": map[string]string{
-	//		"pageTitle": fmt.Sprintf("PG Presse | %s %s",
-	//			tool.String(), tool.Position.GermanString()),
-	//		"appBarTitle": fmt.Sprintf("%s %s", tool.String(),
-	//			tool.Position.GermanString()),
-	//	},
-	//})
+	urlb.SetHXRedirect(c, urlb.UrlTool(tool.ID, 0, 0, 0).Page)
 
 	return nil
 }
