@@ -38,7 +38,7 @@ func showUserCommand() cli.Command {
 			telegramIDArg := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(r *common.DB) error {
+				return withDBOperation(*customDBPath, func(r *common.DB) error {
 					telegramID := shared.TelegramID(*telegramIDArg)
 
 					user, merr := r.User.User.GetByID(telegramID)
@@ -96,7 +96,7 @@ func addUserCommand() cli.Command {
 			apiKey := cli.StringArg(cmd, "api-key", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(r *common.DB) error {
+				return withDBOperation(*customDBPath, func(r *common.DB) error {
 					telegramID := shared.TelegramID(*telegramIDArg)
 
 					user := &shared.User{
@@ -123,7 +123,7 @@ func removeUserCommand() cli.Command {
 			telegramIDArg := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(r *common.DB) error {
+				return withDBOperation(*customDBPath, func(r *common.DB) error {
 					return r.User.User.Delete(shared.TelegramID(*telegramIDArg))
 				})
 			}
@@ -141,7 +141,7 @@ func modUserCommand() cli.Command {
 			telegramID := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(r *common.DB) error {
+				return withDBOperation(*customDBPath, func(r *common.DB) error {
 					user, err := r.User.User.GetByID(shared.TelegramID(*telegramID))
 					if err != nil {
 						return err

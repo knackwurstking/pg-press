@@ -31,7 +31,7 @@ func listCyclesAllCommand() cli.Command {
 			argPressNumber := cli.Int64Arg(cmd, "press-number", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(argCustomDBPath, func(db *common.DB) error {
+				return withDBOperation(*argCustomDBPath, func(db *common.DB) error {
 					// Validate press number
 					pressNumber := shared.PressNumber(*argPressNumber)
 					if !pressNumber.IsValid() {
@@ -97,7 +97,7 @@ func deleteCycleCommand() cli.Command {
 			cycleIDArg := cli.Int64Arg(cmd, "cycle-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(db *common.DB) error {
+				return withDBOperation(*customDBPath, func(db *common.DB) error {
 					// Delete cycle
 					err := db.Press.Cycle.Delete(shared.EntityID(*cycleIDArg))
 					if err != nil {

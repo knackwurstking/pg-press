@@ -15,6 +15,7 @@ import (
 type Config struct {
 	DriverName       string `json:"driver_name"`
 	DatabaseLocation string `json:"database_location"`
+	CreateMode       bool   `json:"create_mode"`
 }
 
 type BaseService struct {
@@ -53,9 +54,14 @@ func (bs *BaseService) Setup(dbName, tableCreationQuery string) *errors.MasterEr
 		return errors.NewMasterError(err, 0)
 	}
 
+	mode := "rw"
+	if bs.CreateMode {
+		mode = "rwc"
+	}
+
 	path := fmt.Sprintf(
-		"file:%s.sqlite?cache=shared&mode=rwc&_journal=WAL&_sync=0",
-		filepath.Join(bs.DatabaseLocation, dbName),
+		"file:%s.sqlite?cache=shared&mode=%s&_journal=WAL&_sync=0",
+		filepath.Join(bs.DatabaseLocation, dbName), mode,
 	)
 	bs.db, err = sql.Open(bs.DriverName, path)
 	if err != nil {

@@ -9,12 +9,13 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func openDB(dbPath string) (*common.DB, error) {
+func openDB(dbPath string, createMode bool) (*common.DB, error) {
 	log.Debug("Opening database: %#v", dbPath)
 
 	db := common.NewDB(&shared.Config{
 		DriverName:       "sqlite3",
 		DatabaseLocation: dbPath,
+		CreateMode:       createMode,
 	})
 
 	return db, db.Setup()
@@ -40,15 +41,15 @@ func createSimpleCommand(name, usage string, action func(*common.DB) error) cli.
 			customDBPath := createDBPathOption(cmd)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, action)
+				return withDBOperation(*customDBPath, action)
 			}
 		}),
 	}
 }
 
 // withDBOperation is a helper that handles common database operations
-func withDBOperation(customDBPath *string, operation func(*common.DB) error) error {
-	r, err := openDB(*customDBPath)
+func withDBOperation(customDBPath string, operation func(*common.DB) error) error {
+	r, err := openDB(customDBPath, false)
 	if err != nil {
 		return err
 	}

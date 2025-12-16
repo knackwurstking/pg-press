@@ -27,7 +27,7 @@ func removeCookiesCommand() cli.Command {
 				cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(r *common.DB) error {
+				return withDBOperation(*customDBPath, func(r *common.DB) error {
 					var err error
 					if *useApiKey {
 						// Get users, we need to find the user ID for the api key
@@ -93,7 +93,7 @@ func autoCleanCookiesCommand() cli.Command {
 			argTelegramIDArg := cli.Int64(cmd, "user", cli.WithShort("u"), cli.Optional)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(argCustomDBPath, func(db *common.DB) error {
+				return withDBOperation(*argCustomDBPath, func(db *common.DB) error {
 					telegramID := shared.TelegramID(*argTelegramIDArg)
 
 					// Clean up cookies for a specific telegram user

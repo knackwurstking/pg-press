@@ -42,7 +42,7 @@ func listToolsCommand() cli.Command {
 				cli.Optional)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(r *common.DB) error {
+				return withDBOperation(*customDBPath, func(r *common.DB) error {
 					// Get all tools from database
 					tools, merr := r.Tool.Tool.List()
 					if merr != nil {
@@ -175,7 +175,7 @@ func markDeadCommand() cli.Command {
 			toolIDArg := cli.Int64Arg(cmd, "tool-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(r *common.DB) error {
+				return withDBOperation(*customDBPath, func(r *common.DB) error {
 					toolID := shared.EntityID(*toolIDArg)
 
 					// Get tool first to check if it exists
@@ -213,7 +213,7 @@ func reviveDeadToolCommand() cli.Command {
 			toolIDArg := cli.Int64Arg(cmd, "tool-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(r *common.DB) error {
+				return withDBOperation(*customDBPath, func(r *common.DB) error {
 					toolID := shared.EntityID(*toolIDArg)
 
 					// Get tool first to check if it exists
@@ -251,7 +251,7 @@ func deleteToolCommand() cli.Command {
 			toolIDArg := cli.Int64Arg(cmd, "tool-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(r *common.DB) error {
+				return withDBOperation(*customDBPath, func(r *common.DB) error {
 					toolID := shared.EntityID(*toolIDArg)
 
 					// Get tool first to check if it exists and show info
@@ -324,7 +324,7 @@ func listCyclesCommand() cli.Command {
 			toolIDArg := cli.Int64Arg(cmd, "tool-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(r *common.DB) error {
+				return withDBOperation(*customDBPath, func(r *common.DB) error {
 					toolID := shared.EntityID(*toolIDArg)
 
 					// Get tool first to check if it exists and show info
@@ -470,7 +470,7 @@ func listRegenerationsCommand() cli.Command {
 			toolIDArg := cli.Int64Arg(cmd, "tool-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(customDBPath, func(db *common.DB) error {
+				return withDBOperation(*customDBPath, func(db *common.DB) error {
 					toolID := shared.EntityID(*toolIDArg)
 
 					// Get tool first to check if it exists and show info
