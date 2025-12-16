@@ -9,6 +9,8 @@ import (
 )
 
 const (
+	// TODO: Need to add a rule to make id for position unique
+	// ex: UNIQUE(tool_id, position), no clue how to do that with SQL
 	SQLCreateToolRegenerationTable string = `
 		CREATE TABLE IF NOT EXISTS tool_regenerations (
 			id 		INTEGER NOT NULL,
@@ -16,18 +18,19 @@ const (
 			start 	INTEGER NOT NULL,
 			stop 	INTEGER NOT NULL,
 			cycles 	INTEGER NOT NULL,
+			position INTEGER NOT NULL,
 
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
 	`
 
 	SQLCreateToolRegeneration string = `
-		INSERT INTO tool_regenerations (tool_id, start, stop, cycles)
-		VALUES (:tool_id, :start, :stop, :cycles);
+		INSERT INTO tool_regenerations (tool_id, start, stop, cycles, position)
+		VALUES (:tool_id, :start, :stop, :cycles, :position);
 	`
 
 	SQLGetToolRegenerationByID string = `
-		SELECT id, tool_id, start, stop, cycles
+		SELECT id, tool_id, start, stop, cycles, position
 		FROM tool_regenerations
 		WHERE id = :id;
 	`
@@ -37,7 +40,8 @@ const (
 		SET tool_id = :tool_id,
 			start = :start,
 			stop = :stop,
-			cycles = :cycles
+			cycles = :cycles,
+			position = :position
 		WHERE id = :id;
 	`
 
@@ -47,7 +51,7 @@ const (
 	`
 
 	SQLListToolRegenerations string = `
-		SELECT id, tool_id, start, stop, cycles
+		SELECT id, tool_id, start, stop, cycles, position
 		FROM tool_regenerations;
 	`
 )
@@ -83,6 +87,7 @@ func (s *ToolRegenerationService) Create(entity *shared.ToolRegeneration) *error
 		sql.Named("start", entity.Start),
 		sql.Named("stop", entity.Stop),
 		sql.Named("cycles", entity.Cycles),
+		sql.Named("position", entity.Position),
 	)
 	if err != nil {
 		return errors.NewMasterError(err, 0)
@@ -117,6 +122,7 @@ func (s *ToolRegenerationService) Update(entity *shared.ToolRegeneration) *error
 		sql.Named("start", entity.Start),
 		sql.Named("stop", entity.Stop),
 		sql.Named("cycles", entity.Cycles),
+		sql.Named("position", entity.Position),
 		sql.Named("id", entity.ID),
 	)
 	if err != nil {
@@ -146,6 +152,7 @@ func (s *ToolRegenerationService) GetByID(id shared.EntityID) (*shared.ToolRegen
 		&tr.Start,
 		&tr.Stop,
 		&tr.Cycles,
+		&tr.Position,
 	)
 	if err != nil {
 		return tr, errors.NewMasterError(err, 0)
@@ -173,6 +180,7 @@ func (s *ToolRegenerationService) List() ([]*shared.ToolRegeneration, *errors.Ma
 			&tr.Start,
 			&tr.Stop,
 			&tr.Cycles,
+			&tr.Position,
 		)
 		if err != nil {
 			return nil, errors.NewMasterError(err, 0)
