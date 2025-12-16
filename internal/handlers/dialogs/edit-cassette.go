@@ -91,7 +91,6 @@ func (h *Handler) PutCassette(c echo.Context) *echo.HTTPError {
 
 func (h *Handler) getCassetteDialogForm(c echo.Context) (*shared.Cassette, *errors.ValidationError) {
 	var (
-		vPosition     = c.FormValue("position")
 		vWidth        = c.FormValue("width")
 		vHeight       = c.FormValue("height")
 		vType         = strings.Trim(c.FormValue("type"), " ")
@@ -100,21 +99,8 @@ func (h *Handler) getCassetteDialogForm(c echo.Context) (*shared.Cassette, *erro
 		vMaxThickness = c.FormValue("max_thickness")
 	)
 
-	h.Log.Debug("Cassette dialog form values: position=%s, width=%s, height=%s, type=%s, code=%s, min_thickness=%s, max_thickness=%s",
-		vPosition, vWidth, vHeight, vType, vCode, vMinThickness, vMaxThickness)
-
-	// Need to convert the vPosition to an integer
-	position, err := strconv.Atoi(vPosition)
-	if err != nil {
-		return nil, errors.NewValidationError("invalid position: %s", vPosition)
-	}
-
-	// Check and set position
-	switch shared.Slot(position) {
-	case shared.SlotUpper, shared.SlotLower, shared.SlotUpperCassette:
-	default:
-		return nil, errors.NewValidationError("invalid position: %s", vPosition)
-	}
+	h.Log.Debug("Cassette dialog form values: width=%s, height=%s, type=%s, code=%s, min_thickness=%s, max_thickness=%s",
+		vWidth, vHeight, vType, vCode, vMinThickness, vMaxThickness)
 
 	// Convert vWidth and vHeight to integers
 	width, err := strconv.Atoi(vWidth)
@@ -148,7 +134,7 @@ func (h *Handler) getCassetteDialogForm(c echo.Context) (*shared.Cassette, *erro
 		BaseTool: shared.BaseTool{
 			Width:        width,
 			Height:       height,
-			Position:     shared.Slot(position),
+			Position:     shared.SlotUpperCassette,
 			Type:         vType,
 			Code:         vCode,
 			CyclesOffset: 0, // TODO: Maybe update the dialog to allow changing this?

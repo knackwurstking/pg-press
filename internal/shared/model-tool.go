@@ -117,6 +117,10 @@ func (t *Tool) Validate() *errors.ValidationError {
 		return errors.NewValidationError("Tool cassette ID cannot be negative")
 	}
 
+	if t.Position != SlotUpper && t.Position != SlotLower {
+		return errors.NewValidationError("Tool position must be either upper or lower")
+	}
+
 	return nil
 }
 
@@ -165,6 +169,10 @@ func (c *Cassette) Validate() *errors.ValidationError {
 	}
 	if c.MaxThickness < c.MinThickness {
 		return errors.NewValidationError("Cassette max_thickness cannot be less than min_thickness")
+	}
+
+	if c.Position != SlotUpperCassette {
+		return errors.NewValidationError("Cassette position must be upper cassette")
 	}
 
 	return nil
