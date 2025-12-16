@@ -5,6 +5,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"strings"
 )
 
 type SectionToolsProps struct {
@@ -73,13 +74,12 @@ templ actionBarContent() {
 	</button>
 }
 
-// TODO: The action bar should be separate cassette tools, maybe with a details element
-templ ToolsList(tools []*shared.Tool, user *shared.User) {
+templ ToolsList(tools []*shared.Tool, cassettes []*shared.Cassette, user *shared.User) {
 	<details>
 		<summary>Operteile / Unterteile</summary>
 		for _, t := range tools {
 			// NOTE: This is just a provisorium
-			if (t.Type == "Unbekannt" || t.Code == "Unbekannt") && !user.IsAdmin() {
+			if (strings.ToLower(t.Type) == "unbekannt" || strings.ToLower(t.Code) == "unbekannt") && !user.IsAdmin() {
 				{{ continue }}
 			}
 			@toolsListItem(t)
@@ -87,6 +87,7 @@ templ ToolsList(tools []*shared.Tool, user *shared.User) {
 	</details>
 	<details>
 		<summary>Kassetten</summary>
+		// TODO: Render cassette tools here...
 	</details>
 }
 
