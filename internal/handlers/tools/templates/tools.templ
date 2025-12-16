@@ -53,9 +53,8 @@ templ inputFilterTools(tools []*shared.Tool) {
 }
 
 templ actionBarContent() {
-	// TODO: Open the new cassette dialog instead
 	<button
-		hx-get={ urlb.UrlDialogs().EditTool(0) }
+		hx-get={ urlb.UrlDialogs().EditCassette(0) }
 		hx-trigger="click"
 		hx-swap="beforeend"
 		class="flex gap secondary small"
