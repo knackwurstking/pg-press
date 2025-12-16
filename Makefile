@@ -106,26 +106,26 @@ macos-install:
 	echo "$$LAUNCHCTL_PLIST" > $(SERVICE_FILE)
 	@echo "$(BINARY_NAME) installed successfully"
 
-macos-start-service:
+macos-service-load:
 	@echo "Starting $(BINARY_NAME) service..."
 	launchctl load -w $(SERVICE_FILE)
 	launchctl start com.$(BINARY_NAME)
 
-macos-stop-service:
+macos-service-unload:
 	@echo "Stopping $(BINARY_NAME) service..."
 	launchctl stop com.$(BINARY_NAME) || exit 0
 	launchctl unload -w $(SERVICE_FILE)
 
-macos-restart-service:
+macos-service-restart:
 	@echo "Restarting $(BINARY_NAME) service..."
 	make macos-stop-service || exit 0
 	make macos-start-service
 
-macos-print-service:
+macos-service-print:
 	@echo "$(BINARY_NAME) service information:"
 	launchctl print gui/$(shell id -u)/com.$(BINARY_NAME) || echo "Service not loaded or running"
 
-macos-watch-service:
+macos-service-watch:
 	@echo "$(BINARY_NAME) watch server logs @ \"$(LOG_FILE)\":"
 	if [ -f "$(LOG_FILE)" ]; then \
 		echo "Watching logs... Press Ctrl+C to stop"; \
