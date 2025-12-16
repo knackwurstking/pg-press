@@ -25,9 +25,9 @@ templ SectionTools(p SectionToolsProps) {
 		@components.ActionBar() {
 			@actionBarContent()
 		}
-		<ul id="tools-list" class="flex flex-col gap p-0" style="list-style: none;">
+		<div id="lists-container" class="flex flex-col gap p-0">
 			@ToolsList(p)
-		</ul>
+		</div>
 	</div>
 }
 
@@ -78,23 +78,27 @@ templ actionBarContent() {
 templ ToolsList(p SectionToolsProps) {
 	<details>
 		<summary>Operteile / Unterteile</summary>
-		for _, t := range p.Tools {
-			// NOTE: This is just a provisorium
-			if (strings.ToLower(t.Type) == "unbekannt" || strings.ToLower(t.Code) == "unbekannt") && !p.User.IsAdmin() {
-				{{ continue }}
+		<ul id="tools-list" class="flex flex-col gap p-0" style="list-style: none;">
+			for _, t := range p.Tools {
+				// NOTE: This is just a provisorium
+				if (strings.ToLower(t.Type) == "unbekannt" || strings.ToLower(t.Code) == "unbekannt") && !p.User.IsAdmin() {
+					{{ continue }}
+				}
+				<li id={ fmt.Sprintf("tool-%d", t.ID) } class="tool-item" style="display: none;">
+					@components.ToolAnchor(components.ToolAnchorProps{Tool: t})
+				</li>
 			}
-			<li id={ fmt.Sprintf("tool-%d", t.ID) } class="tool-item" style="display: none;">
-				@components.ToolAnchor(components.ToolAnchorProps{Tool: t})
-			</li>
-		}
+		</ul>
 	</details>
 	<details>
 		<summary>Kassetten</summary>
-		for _, c := range p.Cassettes {
-			<li id={ fmt.Sprintf("cassette-%d", c.ID) } class="tool-item" style="display: none;">
-				@components.CassetteAnchor(components.CassetteAnchorProps{Cassette: c})
-			</li>
-		}
+		<ul id="cassettes-list" class="flex flex-col gap p-0" style="list-style: none;">
+			for _, c := range p.Cassettes {
+				<li id={ fmt.Sprintf("cassette-%d", c.ID) } class="tool-item" style="display: none;">
+					@components.CassetteAnchor(components.CassetteAnchorProps{Cassette: c})
+				</li>
+			}
+		</ul>
 	</details>
 }
 
