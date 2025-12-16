@@ -7,7 +7,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
-templ OOBCyclesSection(oob bool, id shared.EntityID, isTool bool, cyclesProps *CyclesProps) {
+templ OOBCyclesSection(oob bool, id shared.EntityID, isTool bool, cyclesProps *CyclesSectionProps) {
 	{{
 		hxGet := ""
 		if isTool {
@@ -25,7 +25,7 @@ templ OOBCyclesSection(oob bool, id shared.EntityID, isTool bool, cyclesProps *C
 		"hx-on:htmx:response-error": "alert(event.detail.xhr.responseText)",
 	}) {
 		if cyclesProps != nil {
-			@Cycles(*cyclesProps)
+			@CyclesSection(*cyclesProps)
 		} else {
 			@components.Spinner()
 		}

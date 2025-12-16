@@ -134,7 +134,7 @@ templ cyclesTable(tool *shared.Tool, toolCycles []*shared.Cycle, lastRegeneratio
 		@components.SectionTitle(components.SectionTitleLevelSub, "Pressennutzungsverlauf") {
 			<button
 				class="icon secondary small flex"
-				hx-get={ urlb.UrlDialogs().EditCycle(0, tool.ID, nil) }
+				hx-get={ urlb.UrlDialogs().EditCycle(0, tool.ID, false) }
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"
@@ -167,6 +167,7 @@ templ cyclesTable(tool *shared.Tool, toolCycles []*shared.Cycle, lastRegeneratio
 						<th name="start">Start</th>
 						<th name="stop">Stop</th>
 						<th name="total">Zyklen</th>
+						<th name="total">Zyklen (Teil)</th>
 						<th></th>
 					</tr>
 				</thead>
@@ -179,7 +180,7 @@ templ cyclesTable(tool *shared.Tool, toolCycles []*shared.Cycle, lastRegeneratio
 						</tr>
 					} else {
 						for _, cycle := range toolCycles {
-							@cycleTableRow(cycle, lastRegeneration)
+							@cycleTableRow(cycle, lastRegeneration, user)
 						}
 					}
 				</tbody>
@@ -188,7 +189,7 @@ templ cyclesTable(tool *shared.Tool, toolCycles []*shared.Cycle, lastRegeneratio
 	}
 }
 
-templ cycleTableRow(cycle *shared.Cycle, lastRegeneration *shared.ToolRegeneration) {
+templ cycleTableRow(cycle *shared.Cycle, lastRegeneration *shared.ToolRegeneration, user *shared.User) {
 	<tr
 		if lastRegeneration.Start >= cycle.Stop {
 			style="color: var(--ui-muted);"
@@ -208,11 +209,11 @@ templ cycleTableRow(cycle *shared.Cycle, lastRegeneration *shared.ToolRegenerati
 		</td>
 		<td>
 			@components.TableActions(components.TableActionsOptions{
-				EditHref:        utils.UrlDialogs().EditCycle(cycle.ID, props.Tool.ID, nil),
+				EditHref:        urlb.UrlDialogs().EditCycle(cycle.ID, cycle.ToolID, false),
 				EditAdminOnly:   true,
-				DeleteHref:      utils.UrlTool(props.Tool.ID, 0, cycle.ID).CycleDelete,
+				DeleteHref:      urlb.UrlTool(0, 0, 0, cycle.ID).CycleDelete,
 				DeleteAdminOnly: true,
-				User:            props.User,
+				User:            user,
 			})
 		</td>
 	</tr>

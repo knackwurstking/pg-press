@@ -291,7 +291,7 @@ func UrlPressRegeneration(press shared.PressNumber, pressRegenerationID shared.E
 
 // UrlDialogs constructs dialog URLs
 func UrlDialogs() (url struct {
-	EditCycle             func(cycleID shared.EntityID, toolID shared.EntityID, toolChangeMode *bool) templ.SafeURL
+	EditCycle             func(cycleID shared.EntityID, toolID shared.EntityID, toolChangeMode bool) templ.SafeURL
 	EditTool              func(toolID shared.EntityID) templ.SafeURL
 	EditCassette          func(cassetteID shared.EntityID) templ.SafeURL
 	EditMetalSheet        func(metalSheetID shared.EntityID, toolID shared.EntityID) templ.SafeURL
@@ -311,7 +311,7 @@ func UrlDialogs() (url struct {
 }
 
 // urlEditCycleDialog constructs edit cycle dialog URL
-func urlEditCycleDialog(cycleID shared.EntityID, toolID shared.EntityID, toolChangeMode *bool) templ.SafeURL {
+func urlEditCycleDialog(cycleID shared.EntityID, toolID shared.EntityID, toolChangeMode bool) templ.SafeURL {
 	params := map[string]string{}
 	if cycleID != 0 {
 		params["id"] = fmt.Sprintf("%d", cycleID)
@@ -319,8 +319,8 @@ func urlEditCycleDialog(cycleID shared.EntityID, toolID shared.EntityID, toolCha
 	if toolID != 0 {
 		params["tool_id"] = fmt.Sprintf("%d", toolID)
 	}
-	if toolChangeMode != nil {
-		params["tool_change_mode"] = fmt.Sprintf("%t", *toolChangeMode)
+	if toolChangeMode {
+		params["tool_change_mode"] = "true"
 	}
 
 	return BuildURLWithParams("/dialog/edit-cycle", params)

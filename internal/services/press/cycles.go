@@ -1,4 +1,3 @@
-// TODO: Rename "cycles" to "partial_cycles" and calculate the models cycles field from press_cycles
 package press
 
 import (

@@ -3,6 +3,7 @@ package templates
 import (
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
 type BindingSectionProps struct {
@@ -22,13 +23,13 @@ templ BindingSection(props BindingSectionProps) {
 		>
 			<select
 				id="tool-binding-select"
-				hx-patch={ utils.UrlTool(props.Tool.ID, 0, 0).Bind }
+				hx-patch={ urlb.UrlTool(props.Tool.ID, 0, 0, 0).Bind }
 				hx-vals="js:{target_id: event.target.value}"
 				hx-trigger="change"
 				hx-target="#binding-section"
 				hx-swap="outerHTML"
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
-				if props.Tool.Binding != nil {
+				if props.Tool.Cassette > 0 {
 					disabled
 				}
 			>
@@ -53,7 +54,7 @@ templ BindingSection(props BindingSectionProps) {
 			</select>
 			<button
 				class="small ghost destructive"
-				hx-patch={ utils.UrlTool(props.Tool.ID, 0, 0).UnBind }
+				hx-patch={ urlb.UrlTool(props.Tool.ID, 0, 0, 0).UnBind }
 				hx-trigger="click"
 				hx-target="#binding-section"
 				hx-swap="outerHTML"
