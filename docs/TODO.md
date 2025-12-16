@@ -48,9 +48,10 @@ Fix all handler and templates
 - [x] auth
 - [x] profile
 - [x] tools
-- [ ] dialogs
+- [-] dialogs
     - [x] tool dialog (new/edit)
-    - [-] cassette dialog (new/edit)
+    - [x] cassette dialog (new/edit)
+- [ ] tool
 
 ## Recommended Improvements
 
