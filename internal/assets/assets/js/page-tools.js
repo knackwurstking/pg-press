@@ -25,6 +25,9 @@ function filterToolsList(event = null, skipHistory = false) {
 		document.querySelectorAll("#lists-container details").forEach(detail => {
 			detail.open = false;
 		});
+
+		// Update counters when clearing filter
+		updateCounters();
 		return;
 	}
 
@@ -38,6 +41,9 @@ function filterToolsList(event = null, skipHistory = false) {
 
 	// Auto-open details that contain matching items
 	autoOpenDetails();
+
+	// Update counters after filtering
+	updateCounters();
 }
 
 function autoOpenDetails() {
@@ -242,6 +248,40 @@ function toggleTab(event) {
 	currentTab.dispatchEvent(new Event("loadTabContent"));
 
 	localStorage.setItem("last-active-tab", currentTab.dataset.index);
+}
+
+function updateCounters() {
+	// Update tools counter
+	const toolsDetails = document.querySelector('#tools-details');
+	const toolsItems = document.querySelectorAll('#tools-details .tool-item');
+	const visibleToolsCount = Array.from(toolsItems).filter(item => item.style.display !== 'none').length;
+
+	if (toolsDetails) {
+		const toolsSummary = toolsDetails.querySelector('summary');
+		if (toolsSummary) {
+			toolsSummary.textContent = visibleToolsCount === 1
+				? '1 Werkzeug'
+				: `${visibleToolsCount} Werkzeuge`;
+		}
+	} else {
+		console.warn('Tools details element not found for counter update.');
+	}
+
+	// Update cassettes counter
+	const cassettesDetails = document.querySelector('#cassettes-details');
+	const cassettesItems = document.querySelectorAll('#cassettes-details .tool-item');
+	const visibleCassettesCount = Array.from(cassettesItems).filter(item => item.style.display !== 'none').length;
+
+	if (cassettesDetails) {
+		const cassettesSummary = cassettesDetails.querySelector('summary');
+		if (cassettesSummary) {
+			cassettesSummary.textContent = visibleCassettesCount === 1
+				? '1 Kassette'
+				: `${visibleCassettesCount} Kassetten`;
+		}
+	} else {
+		console.warn('Cassettes details element not found for counter update.');
+	}
 }
 
 document.addEventListener("DOMContentLoaded", () => {

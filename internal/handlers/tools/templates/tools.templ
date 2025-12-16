@@ -76,7 +76,7 @@ templ actionBarContent() {
 }
 
 templ ToolsList(p SectionToolsProps) {
-	<details>
+	<details id="tools-details">
 		<summary>
 			if len(p.Tools) == 1 {
 				1 Werkzeug
@@ -96,7 +96,7 @@ templ ToolsList(p SectionToolsProps) {
 			}
 		</ul>
 	</details>
-	<details>
+	<details id="cassettes-details">
 		<summary>
 			if len(p.Cassettes) == 1 {
 				1 Kassette
