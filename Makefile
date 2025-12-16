@@ -48,7 +48,7 @@ dev:
 	mkdir -p data
 	export VERBOSE=true && \
 	export SERVER_PATH_PREFIX=${SERVER_PATH_PREFIX} && \
-	gow -e=go,json,html,js,css -r run ./cmd/${BINARY_NAME} server --addr ${SERVER_ADDR_DEV} --db data/dev.db
+	gow -e=go,json,html,js,css -r run ./cmd/${BINARY_NAME} server --addr ${SERVER_ADDR_DEV} --db data/
 
 build:
 	go build -v -o ./bin/${BINARY_NAME} ./cmd/${BINARY_NAME}
