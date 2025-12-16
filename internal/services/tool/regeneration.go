@@ -9,8 +9,6 @@ import (
 )
 
 const (
-	// TODO: Need to add a rule to make id for position unique
-	// ex: UNIQUE(tool_id, position), no clue how to do that with SQL
 	SQLCreateToolRegenerationTable string = `
 		CREATE TABLE IF NOT EXISTS tool_regenerations (
 			id 		INTEGER NOT NULL,
