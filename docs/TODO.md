@@ -4,12 +4,6 @@
 
 - [ ] Attachment model missing
 
-## Helper functions for services
-
-- press
-- tool
-- user
-
 ## Services
 
 - note
@@ -58,7 +52,6 @@ Fix all handler and templates
     - [x] tool dialog (new/edit)
     - [-] cassette dialog (new/edit)
 
-
 ## Recommended Improvements
 
 ### 1. **Complete Refactoring Tasks**
@@ -70,10 +63,10 @@ Fix all handler and templates
 - [ ] Update README to better describe the application's purpose and functionality
 
 ### 3. **Performance Optimization**
-- ~Implement database connection pooling if not already done~
-- Add caching mechanisms where appropriate
-- Optimize queries in services
+- [ ] ~Implement database connection pooling if not already done~
+- [ ] Add caching mechanisms where appropriate
+- [ ] Optimize queries in services
 
 ### 4. **Security Considerations**
-- Ensure proper input validation and sanitization
-- Check for potential SQL injection vulnerabilities
+- [ ] Ensure proper input validation and sanitization
+- [ ] Check for potential SQL injection vulnerabilities
