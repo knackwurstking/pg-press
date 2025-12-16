@@ -92,7 +92,7 @@ func (db *DB) Setup() error {
 	}
 
 	if len(errs) > 0 {
-		return fmt.Errorf("\n%s", strings.Join(errs, "\n"))
+		return fmt.Errorf("%s", strings.Join(errs, "\n"))
 	}
 
 	return nil
