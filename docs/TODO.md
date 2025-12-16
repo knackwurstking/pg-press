@@ -55,4 +55,25 @@ Fix all handler and templates
 - [x] profile
 - [x] tools
 - [ ] dialogs
-    - [-] tool dialog (new/edit)
+    - [x] tool dialog (new/edit)
+    - [-] cassette dialog (new/edit)
+
+
+## Recommended Improvements
+
+### 1. **Complete Refactoring Tasks**
+- [ ] Finish all renaming tasks in `docs/TODO.md`
+- [ ] Standardize naming conventions across models and services
+- [ ] Implement missing attachment model functionality
+
+### 2. **Documentation and Maintenance**
+- [ ] Update README to better describe the application's purpose and functionality
+
+### 3. **Performance Optimization**
+- ~Implement database connection pooling if not already done~
+- Add caching mechanisms where appropriate
+- Optimize queries in services
+
+### 4. **Security Considerations**
+- Ensure proper input validation and sanitization
+- Check for potential SQL injection vulnerabilities
