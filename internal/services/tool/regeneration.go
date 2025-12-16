@@ -20,7 +20,8 @@ const (
 			cycles 	INTEGER NOT NULL,
 			position INTEGER NOT NULL,
 
-			PRIMARY KEY("id" AUTOINCREMENT)
+			PRIMARY KEY("id" AUTOINCREMENT),
+			UNIQUE(tool_id, position)
 		);
 	`
 
