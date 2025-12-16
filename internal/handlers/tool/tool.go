@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/a-h/templ"
 	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
@@ -15,6 +14,7 @@ import (
 
 	ui "github.com/knackwurstking/ui/ui-templ"
 
+	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 )
 

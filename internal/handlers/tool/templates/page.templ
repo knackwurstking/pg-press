@@ -1,0 +1,113 @@
+package templates
+
+import (
+	"fmt"
+	"slices"
+
+	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
+)
+
+type PageProps struct {
+	Title    string
+	ID       shared.EntityID // ID of the tool or cassette
+	Position shared.Slot     // Position (slot type) of the tool or cassette
+	User     *shared.User
+}
+
+templ Page(p *PageProps) {
+	{{
+		pageTitle := fmt.Sprintf("PG Presse | %s", p.Title)
+		appBarTitle := fmt.Sprintf("%s", p.Title)
+	}}
+	@components.Layout(
+		components.LayoutProps{
+			PageTitle:   pageTitle,
+			AppBarTitle: appBarTitle,
+			NavContent:  components.StandardNavContent(),
+		},
+	) {
+		{{
+			if slices.Contains([]shared.Slot{shared.SlotUpper, shared.SlotLower, shared.SlotUpperCassette}, p.Position) {
+				panic(fmt.Sprintf("Invalid position for action bar: %v", p.Position))
+			}
+			isTool := p.Position == shared.SlotUpper || p.Position == shared.SlotLower
+		}}
+		<main class="container fluid flex flex-col gap">
+			@components.ActionBar() {
+				@actionBarContent(p.ID, isTool, p.User)
+			}
+			{{
+				hxGet := ""
+				if isTool {
+					hxGet = string(urlb.UrlTool(p.ID, 0, 0, 0).Notes)
+				} else {
+					hxGet = string(urlb.UrlTool(0, p.ID, 0, 0).Notes)
+				}
+			}}
+			@components.Section(templ.Attributes{
+				"id":                        "notes-section",
+				"hx-get":                    hxGet,
+				"hx-trigger":                "load, pageLoaded from:body",
+				"hx-swap":                   "innerHTML",
+				"hx-on:htmx:response-error": "alert(event.detail.xhr.responseText)",
+			}) {
+				@components.Spinner()
+			}
+			{{
+				if isTool {
+					hxGet = string(urlb.UrlTool(p.ID, 0, 0, 0).MetalSheets)
+				} else {
+					hxGet = string(urlb.UrlTool(0, p.ID, 0, 0).MetalSheets)
+				}
+			}}
+			if isTool {
+				@components.Section(templ.Attributes{
+					"id":                        "metal-sheets-section",
+					"hx-get":                    hxGet,
+					"hx-trigger":                "load, pageLoaded from:body",
+					"hx-swap":                   "innerHTML",
+					"hx-on:htmx:response-error": "alert(event.detail.xhr.responseText)",
+				}) {
+					@components.Spinner()
+				}
+			}
+			@OOBCyclesSection(false, p.ID, isTool, nil)
+		</main>
+	}
+}
+
+templ actionBarContent(id shared.EntityID, isTool bool, user *shared.User) {
+	if user.IsAdmin() {
+		<button
+			class="destructive flex gap"
+			if isTool {
+				hx-patch={ urlb.UrlTools(id, 0).MarkDead }
+			} else {
+				hx-patch={ urlb.UrlTools(0, id).MarkDead }
+			}
+			hx-trigger="click"
+			hx-confirm="Sind Sie sicher, dass Sie dieses Werkzeug löschen möchten?"
+			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+		>
+			<i class="bi bi-trash"></i>
+			Löschen
+		</button>
+	}
+	<button
+		class="primary flex gap"
+		if isTool {
+			hx-get={ urlb.UrlDialogs().EditTool(id) }
+		} else {
+			hx-get={ urlb.UrlDialogs().EditCassette(id) }
+		}
+		hx-trigger="click"
+		hx-target="body"
+		hx-swap="beforeend"
+		hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+	>
+		<i class="bi bi-pencil"></i>
+		Bearbeiten
+	</button>
+}

@@ -3,13 +3,22 @@ package templates
 import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/internal/components"
-	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
-templ OOBCyclesSection(oob bool, toolID models.ToolID, cyclesProps *CyclesProps) {
+templ OOBCyclesSection(oob bool, id shared.EntityID, isTool bool, cyclesProps *CyclesProps) {
+	{{
+		hxGet := ""
+		if isTool {
+			hxGet = string(urlb.UrlTool(id, 0, 0, 0).Cycles)
+		} else {
+			hxGet = string(urlb.UrlTool(0, id, 0, 0).Cycles)
+		}
+	}}
 	@components.Section(templ.Attributes{
 		"id":                        "cycles-section",
-		"hx-get":                    string(utils.UrlTool(toolID, 0, 0).Cycles),
+		"hx-get":                    hxGet,
 		"hx-trigger":                "load, pageLoaded from:body",
 		"hx-swap":                   "innerHTML",
 		"hx-swap-oob":               fmt.Sprintf("%t", oob),

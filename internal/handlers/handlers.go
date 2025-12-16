@@ -6,21 +6,23 @@ import (
 	"github.com/knackwurstking/pg-press/internal/handlers/dialogs"
 	"github.com/knackwurstking/pg-press/internal/handlers/home"
 	"github.com/knackwurstking/pg-press/internal/handlers/profile"
+	"github.com/knackwurstking/pg-press/internal/handlers/tool"
 	"github.com/knackwurstking/pg-press/internal/handlers/tools"
 
 	"github.com/labstack/echo/v4"
 )
 
-func RegisterAll(r *common.DB, e *echo.Echo) {
+func RegisterAll(db *common.DB, e *echo.Echo) {
 	registers := []struct {
 		handler func(e *echo.Echo, path string)
 		subPath string
 	}{
-		{handler: home.NewHandler(r).RegisterRoutes, subPath: ""},
-		{handler: auth.NewHandler(r).RegisterRoutes, subPath: ""},
-		{handler: profile.NewHandler(r).RegisterRoutes, subPath: "/profile"},
-		{handler: tools.NewHandler(r).RegisterRoutes, subPath: "/tools"},
-		{handler: dialogs.NewHandler(r).RegisterRoutes, subPath: "/dialog"},
+		{handler: home.NewHandler(db).RegisterRoutes, subPath: ""},
+		{handler: auth.NewHandler(db).RegisterRoutes, subPath: ""},
+		{handler: profile.NewHandler(db).RegisterRoutes, subPath: "/profile"},
+		{handler: tools.NewHandler(db).RegisterRoutes, subPath: "/tools"},
+		{handler: dialogs.NewHandler(db).RegisterRoutes, subPath: "/dialog"},
+		{handler: tool.NewHandler(db).RegisterRoutes, subPath: "/tool"},
 	}
 	for _, reg := range registers {
 		reg.handler(e, reg.subPath)
@@ -34,7 +36,6 @@ func RegisterAll(r *common.DB, e *echo.Echo) {
 	//metalsheets.NewHandler(r).RegisterRoutes(e, "/metal-sheets")
 	//umbau.NewHandler(r).RegisterRoutes(e, "/umbau")
 	//troublereports.NewHandler(r).RegisterRoutes(e, "/trouble-reports")
-	//tool.NewHandler(r).RegisterRoutes(e, "/tool")
 	//press.NewHandler(r).RegisterRoutes(e, "/press")
 	//pressregenerations.NewHandler(r).RegisterRoutes(e, "/press-regeneration")
 }
