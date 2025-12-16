@@ -35,7 +35,11 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 		ui.NewEchoRoute(http.MethodGet, path+"/edit-tool", h.GetToolDialog),
 		ui.NewEchoRoute(http.MethodPost, path+"/edit-tool", h.PostTool),
 		ui.NewEchoRoute(http.MethodPut, path+"/edit-tool", h.PutTool),
+
 		// TODO: Add a cassette dialog handler for edit/new, just like tools but for cassettes
+		ui.NewEchoRoute(http.MethodGet, path+"/edit-cassette", h.GetCassetteDialog),
+		ui.NewEchoRoute(http.MethodPost, path+"/edit-cassette", h.PostCassette),
+		ui.NewEchoRoute(http.MethodPut, path+"/edit-cassette", h.PutCassette),
 
 		// Edit metal sheet dialog
 		//ui.NewEchoRoute(http.MethodGet, path+"/edit-metal-sheet", h.GetEditMetalSheet),

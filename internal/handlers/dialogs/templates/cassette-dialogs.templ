@@ -1,0 +1,30 @@
+package templates
+
+import (
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
+
+	ui "github.com/knackwurstking/ui/ui-templ"
+)
+
+templ NewCassetteDialog() {
+	@ui.Dialog(ui.DialogOptions{
+		Method:           "POST",
+		Href:             urlb.UrlDialogs().EditTool(0),
+		ID:               "tool-dialog",
+		SubmitButtonText: "Erstellen",
+	}) {
+		// TODO: ...
+	}
+}
+
+templ EditCassetteDialog(tool *shared.Tool) {
+	@ui.Dialog(ui.DialogOptions{
+		Method:           "PUT",
+		Href:             urlb.UrlDialogs().EditTool(tool.ID),
+		ID:               "tool-edit-dialog",
+		SubmitButtonText: "Aktualisieren",
+	}) {
+		// TODO: ...
+	}
+}
