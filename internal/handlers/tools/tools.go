@@ -138,6 +138,7 @@ func (h *Handler) HTMXGetAdminOverlappingTools(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
+// TODO: Get cassettes from the db and pass to the template
 func (h *Handler) renderSectionTools(c echo.Context) *echo.HTTPError {
 	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
