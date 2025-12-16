@@ -2,144 +2,145 @@ package templates
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pg-press/env"
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
-type CyclesProps struct {
-	User            *models.User
-	Tool            *models.ResolvedTool
-	ToolsForBinding []*models.Tool
-	ToolPosition    string
-	TotalCycles     int64
-	Cycles          []*models.Cycle
-	Regenerations   []*models.ResolvedToolRegeneration
+type CyclesSectionProps struct {
+	Tool              *shared.Tool
+	ToolCycles        []*shared.Cycle
+	ActivePressNumber shared.PressNumber
+	BindableCassettes []*shared.Cassette
+	Regenerations     []*shared.ToolRegeneration
+	User              *shared.User
 }
 
-templ Cycles(props CyclesProps) {
+templ CyclesSection(p CyclesSectionProps) {
 	@components.SectionTitle(components.SectionTitleLevelMain, "Werkzeugnutzung & Zyklen")
 	<div class="flex flex-col gap">
-		@toolStatusSection(props)
+		@components.Section(templ.Attributes{
+			"id": "tool-status-section",
+		}) {
+			@components.SectionTitle(components.SectionTitleLevelSub, "Aktueller Status")
+			@toolStatus(p.Tool, p.BindableCassettes, p.ActivePressNumber, p.User)
+		}
 		// For now tool cycles for top cassette tools are ignored
-		@regenerationsSection(props)
-		@cyclesSection(props)
+		@regenerations(p.Regenerations, p.User)
+		{{
+			var lastRegeneration *shared.ToolRegeneration
+			if len(p.Regenerations) > 0 {
+				lastRegeneration = p.Regenerations[0]
+			}
+		}}
+		@cyclesTable(p.Tool, p.ToolCycles, lastRegeneration, p.User)
 	</div>
 }
 
-templ toolStatusSection(props CyclesProps) {
-	@components.Section(templ.Attributes{
-		"id": "tool-status-section",
-	}) {
-		@components.SectionTitle(components.SectionTitleLevelSub, "Aktueller Status")
-		@toolStatus(props.Tool, props.ToolsForBinding, props.User)
-	}
-}
-
-templ toolStatus(tool *models.ResolvedTool, toolsForBinding []*models.Tool, user *models.User) {
+templ toolStatus(tool *shared.Tool, bindableCassettes []*shared.Cassette, activePressNumber shared.PressNumber, user *shared.User) {
 	<div class="flex flex-col gap">
 		<span class="flex gap-lg">
-			@ToolStatusEdit(&ToolStatusEditProps{
-				Tool:              tool.Tool,
+			@RegenerationEdit(&RegenerationEditProps{
+				Tool:              tool,
+				Cassette:          nil,
+				ActivePressNumber: activePressNumber,
+				Editable:          false,
 				UserHasPermission: user.IsAdmin(),
 			})
-			if tool.IsActive() {
+			if activePressNumber.IsValid() {
 				<a
 					role="button"
 					class="small ghost flex gap"
-					href={ utils.UrlPress(*tool.Press).Page }
+					href={ urlb.UrlPress(activePressNumber).Page }
 					title="Zur Pressenübersicht"
 				>
 					<i class="bi bi-arrow-right"></i>
-					Presse { fmt.Sprintf("%d", *tool.Press) }
+					Presse { fmt.Sprintf("%d", activePressNumber) }
 				</a>
 			}
 		</span>
-		if tool.IsBindable() {
+		if tool.Position == shared.SlotUpper {
 			@BindingSection(BindingSectionProps{
-				Tool:            tool,
-				ToolsForBinding: toolsForBinding,
-				IsAdmin:         user.IsAdmin(),
+				Tool:                tool,
+				CassettesForBinding: bindableCassettes,
+				IsAdmin:             user.IsAdmin(),
 			})
 		}
 	</div>
 }
 
-templ regenerationsSection(props CyclesProps) {
+templ regenerations(regenerations []*shared.ToolRegeneration, u *shared.User) {
 	@components.Section(templ.Attributes{
 		"id": "regenerations-section",
 	}) {
 		@components.SectionTitle(components.SectionTitleLevelSub, "Regenerationen")
-		if len(props.Regenerations) == 0 {
+		if len(regenerations) == 0 {
 			<span class="flex justify-center items-center">
 				<i><small>Keine Regenerationen verzeichnet für dieses Werkzeug</small></i>
 			</span>
 		} else {
-			@regenerationsTable(props.Regenerations, props.User)
+			<figure class="w-full overflow-x-scroll">
+				<table title="Regenerationen">
+					<thead>
+						<tr>
+							<th name="start">Start</th>
+							<th name="stop">Stop</th>
+							<th name="actions"></th>
+						</tr>
+					</thead>
+					<tbody>
+						if len(regenerations) == 0 {
+							<tr>
+								<td colspan="3" class="text-center">
+									<i><small>Keine Regenerationen verzeichnet</small></i>
+								</td>
+							</tr>
+						} else {
+							for _, r := range regenerations {
+								@regenerationsTableRow(r, u)
+							}
+						}
+					</tbody>
+				</table>
+			</figure>
 		}
 	}
 }
 
-templ regenerationsTable(regenerations []*models.ResolvedToolRegeneration, user *models.User) {
-	<figure class="w-full overflow-x-scroll">
-		<table title="Regenerationen">
-			<thead>
-				<tr>
-					<th name="date">Datum</th>
-					<th name="reason">Bemerkung</th>
-					<th name="actions"></th>
-				</tr>
-			</thead>
-			<tbody>
-				if len(regenerations) == 0 {
-					<tr>
-						<td colspan="3" class="text-center">
-							<i><small>Keine Regenerationen verzeichnet</small></i>
-						</td>
-					</tr>
-				} else {
-					@regenerationsTableRows(regenerations, user)
-				}
-			</tbody>
-		</table>
-	</figure>
+templ regenerationsTableRow(r *shared.ToolRegeneration, u *shared.User) {
+	<tr>
+		<td>
+			<span>{ r.Start.FormatDate() }</span>
+		</td>
+		<td>
+			<span>{ r.Stop.FormatDate() }</span>
+		</td>
+		<td>
+			@components.TableActions(components.TableActionsOptions{
+				EditHref:        urlb.UrlDialogs().EditToolRegeneration(r.ID),
+				EditAdminOnly:   false,
+				DeleteHref:      urlb.UrlTool(r.ToolID, 0, r.ID, 0).DeleteRegeneration,
+				DeleteAdminOnly: true,
+				User:            u,
+			})
+		</td>
+	</tr>
 }
 
-templ regenerationsTableRows(regenerations []*models.ResolvedToolRegeneration, user *models.User) {
-	for _, regen := range regenerations {
-		<tr>
-			<td>
-				<span>{ regen.GetCycle().Date.Format(env.DateFormat) }</span>
-			</td>
-			<td>
-				<span>{ regen.Reason }</span>
-			</td>
-			<td>
-				@components.TableActions(components.TableActionsOptions{
-					EditHref:        utils.UrlDialogs().EditToolRegeneration(regen.ID),
-					EditAdminOnly:   false,
-					DeleteHref:      utils.UrlTool(regen.GetTool().ID, regen.ID, 0).DeleteRegeneration,
-					DeleteAdminOnly: true,
-					User:            user,
-				})
-			</td>
-		</tr>
-	}
-}
-
-templ cyclesSection(props CyclesProps) {
+templ cyclesTable(tool *shared.Tool, toolCycles []*shared.Cycle, lastRegeneration *shared.ToolRegeneration, user *shared.User) {
 	@components.Section(templ.Attributes{
 		"id": "cycles-section",
 	}) {
 		@components.SectionTitle(components.SectionTitleLevelSub, "Pressennutzungsverlauf") {
 			<button
 				class="icon secondary small flex"
-				hx-get={ utils.UrlDialogs().EditCycle(0, props.Tool.ID, nil) }
+				hx-get={ urlb.UrlDialogs().EditCycle(0, tool.ID, nil) }
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 				title="Neuen Eintrag hinzufügen"
-				if !props.User.IsAdmin() {
+				if !user.IsAdmin() {
 					disabled
 				}
 			>
@@ -148,62 +149,48 @@ templ cyclesSection(props CyclesProps) {
 		}
 		@components.Section(nil) {
 			<h6 class="mb">
-				Gesamtzyklen für "{ fmt.Sprintf("%s %s %s", props.Tool.Format.String(), props.Tool.Code, props.Tool.Type) }":
+				Gesamtzyklen für "{ tool.German() }":
 			</h6>
 			<span>
-				@TotalCycles(props.TotalCycles, true)
+				@TotalCycles(tool.Cycles, true)
 			</span>
 		}
-		@cyclesTable(props)
+		<figure class="w-full overflow-x-scroll">
+			<table
+				name="tool-cycles-table"
+				class="table borderless compact"
+				title="Zyklusverlauf"
+			>
+				<thead>
+					<tr>
+						<th name="press">Presse</th>
+						<th name="start">Start</th>
+						<th name="stop">Stop</th>
+						<th name="total">Zyklen</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					if len(toolCycles) == 0 {
+						<tr>
+							<td colspan="5" class="text-center">
+								<i><small>Kein Pressenverlauf verfügbar</small></i>
+							</td>
+						</tr>
+					} else {
+						for _, cycle := range toolCycles {
+							@cycleTableRow(cycle, lastRegeneration)
+						}
+					}
+				</tbody>
+			</table>
+		</figure>
 	}
 }
 
-templ cyclesTable(props CyclesProps) {
-	<figure class="w-full overflow-x-scroll">
-		<table
-			name="tool-cycles-table"
-			class="table borderless compact"
-			title="Zyklusverlauf"
-		>
-			<thead>
-				<tr>
-					<th name="press">Presse</th>
-					<th name="date">Datum</th>
-					<th name="total">Gesamtzyklen</th>
-					<th name="partial">Teilzyklen (berechnet)</th>
-					<th></th>
-				</tr>
-			</thead>
-			<tbody>
-				if len(props.Cycles) == 0 {
-					<tr>
-						<td colspan="5" class="text-center">
-							<i><small>Kein Pressenverlauf verfügbar</small></i>
-						</td>
-					</tr>
-				} else {
-					{{
-						var lastRegeneration *models.ResolvedToolRegeneration
-						if len(props.Regenerations) > 0 {
-							lastRegeneration = props.Regenerations[0]
-						}
-					}}
-					for _, cycle := range props.Cycles {
-						@cycleRowWithPartialCalc(cycle, lastRegeneration, props)
-					}
-				}
-			</tbody>
-		</table>
-	</figure>
-}
-
-templ cycleRowWithPartialCalc(
-	cycle *models.Cycle,
-	lastRegeneration *models.ResolvedToolRegeneration,
-	props CyclesProps,
-) {
+templ cycleTableRow(cycle *shared.Cycle, lastRegeneration *shared.ToolRegeneration) {
 	<tr
-		if lastRegeneration != nil && lastRegeneration.CycleID == cycle.ID {
+		if lastRegeneration.Start >= cycle.Stop {
 			style="color: var(--ui-muted);"
 		}
 	>
@@ -211,15 +198,13 @@ templ cycleRowWithPartialCalc(
 			<span>{ fmt.Sprintf("%d", cycle.PressNumber) }</span>
 		</td>
 		<td>
-			<span class="text-sm">{ cycle.Date.Format(env.DateFormat) }</span>
+			<span class="text-sm">{ cycle.Start.FormatDate() }</span>
 		</td>
 		<td>
-			{ fmt.Sprintf("%d", cycle.TotalCycles) }
+			<span class="text-sm">{ cycle.Stop.FormatDate() }</span>
 		</td>
 		<td>
-			<span title="Berechnet: Gesamtzyklen - Gesamtzyklen des letzten Eintrags">
-				{ fmt.Sprintf("%d", cycle.PartialCycles) }
-			</span>
+			{ fmt.Sprintf("%d", cycle.Cycles) }
 		</td>
 		<td>
 			@components.TableActions(components.TableActionsOptions{

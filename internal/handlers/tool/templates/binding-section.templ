@@ -6,9 +6,9 @@ import (
 )
 
 type BindingSectionProps struct {
-	Tool            *shared.Tool
-	ToolsForBinding []*shared.Tool
-	IsAdmin         bool
+	Tool                *shared.Tool
+	CassettesForBinding []*shared.Cassette
+	IsAdmin             bool
 }
 
 templ BindingSection(props BindingSectionProps) {
