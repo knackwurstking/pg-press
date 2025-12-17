@@ -5,12 +5,11 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"github.com/knackwurstking/pg-press/models"
 )
 
 type RegenerationEditProps struct {
-	Tool              *models.Tool
-	Cassette          *models.Cassette
+	Tool              *shared.Tool
+	Cassette          *shared.Cassette
 	ActivePressNumber shared.PressNumber
 	Editable          bool
 	UserHasPermission bool
