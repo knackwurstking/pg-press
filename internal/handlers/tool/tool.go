@@ -140,7 +140,7 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) *echo.HTTPError {
 	}
 
 	// Bind tool to target, this will get an error if target already has a binding
-	merr = helper.BindCassetteToTool(h.db, cassette.ID, tool.ID)
+	merr = helper.BindCassetteToTool(h.db, tool.ID, cassette.ID)
 	if merr != nil {
 		return merr.Echo()
 	}

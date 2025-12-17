@@ -1,6 +1,8 @@
 package helper
 
 import (
+	"sync"
+
 	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -70,4 +72,31 @@ func ListAvailableCassettesForBinding(db *common.DB, toolID shared.EntityID) ([]
 	return cassettes[:i], nil
 }
 
-// TODO: BindCassetteToTool
+var bindingMutex = &sync.Mutex{}
+
+func BindCassetteToTool(db *common.DB, toolID, cassetteID shared.EntityID) *errors.MasterError {
+	// First, check if cassette exists
+	_, merr := db.Tool.Cassette.GetByID(cassetteID)
+	if merr != nil {
+		return merr
+	}
+
+	bindingMutex.Lock()
+	defer bindingMutex.Unlock()
+
+	tool, merr := db.Tool.Tool.GetByID(toolID)
+	if merr != nil {
+		return merr
+	}
+	if tool.Cassette > 0 {
+		return errors.NewValidationError("tool already has a cassette bound").MasterError()
+	}
+
+	tool.Cassette = cassetteID
+	merr = db.Tool.Tool.Update(tool)
+	if merr != nil {
+		return merr
+	}
+
+	return nil
+}
