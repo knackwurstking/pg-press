@@ -1,4 +1,3 @@
-// Cycle represents a press cycle record with tool_id and position
 package shared
 
 import (
