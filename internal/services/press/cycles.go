@@ -16,7 +16,7 @@ const (
 			tool_id      INTEGER NOT NULL,
 			position     INTEGER NOT NULL,
 			press_number INTEGER NOT NULL,
-			cycles       INTEGER NOT NULL,
+			cycles       INTEGER NOT NULL, -- Cycles at stop time
 			start        INTEGER NOT NULL,
 			stop         INTEGER NOT NULL,
 
