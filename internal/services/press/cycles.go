@@ -13,26 +13,31 @@ const (
 	SQLCreateCycleTable string = `
 		CREATE TABLE IF NOT EXISTS press_cycles (
 			id           INTEGER NOT NULL,
+			tool_id      INTEGER NOT NULL,
+			position     INTEGER NOT NULL,
 			press_number INTEGER NOT NULL,
 			cycles       INTEGER NOT NULL,
 			start        INTEGER NOT NULL,
 			stop         INTEGER NOT NULL,
 
-			PRIMARY KEY("id")
+			PRIMARY KEY("id"),
+			UNIQUE(tool_id, position)
 		);
 	`
 	SQLCreateCycle string = `
-		INSERT INTO press_cycles (press_number, cycles, start, stop)
-		VALUES (:press_number, :cycles, :start, :stop);
+		INSERT INTO press_cycles (tool_id, position, press_number, cycles, start, stop)
+		VALUES (:tool_id, :position, :press_number, :cycles, :start, :stop);
 	`
 	SQLGetCycleByID string = `
-		SELECT id, press_number, cycles, start, stop
+		SELECT id, tool_id, position, press_number, cycles, start, stop
 		FROM press_cycles
 		WHERE id = :id;
 	`
 	SQLUpdateCycle string = `
 		UPDATE press_cycles
-		SET press_number = :press_number,
+		SET tool_id      = :tool_id,
+			position     = :position,
+			press_number = :press_number,
 			cycles       = :cycles,
 			start        = :start,
 			stop         = :stop
@@ -43,7 +48,7 @@ const (
 		WHERE id = :id;
 	`
 	SQLListCycles string = `
-		SELECT id, press_number, cycles, start, stop
+		SELECT id, tool_id, position, press_number, cycles, start, stop
 		FROM press_cycles;
 	`
 )
@@ -75,6 +80,8 @@ func (s *CycleService) Create(entity *shared.Cycle) *errors.MasterError {
 	defer s.mx.Unlock()
 
 	r, err := s.DB().Exec(SQLCreateCycle,
+		sql.Named("tool_id", entity.ToolID),
+		sql.Named("position", entity.Position),
 		sql.Named("press_number", entity.PressNumber),
 		sql.Named("cycles", entity.Cycles),
 		sql.Named("start", entity.Start),
@@ -110,6 +117,8 @@ func (s *CycleService) Update(entity *shared.Cycle) *errors.MasterError {
 
 	_, err := s.DB().Exec(SQLUpdateCycle,
 		sql.Named("id", entity.ID),
+		sql.Named("tool_id", entity.ToolID),
+		sql.Named("position", entity.Position),
 		sql.Named("press_number", entity.PressNumber),
 		sql.Named("cycles", entity.Cycles),
 		sql.Named("start", entity.Start),
@@ -138,6 +147,8 @@ func (s *CycleService) GetByID(id shared.EntityID) (*shared.Cycle, *errors.Maste
 	var c = &shared.Cycle{}
 	err := r.Scan(
 		&c.ID,
+		&c.ToolID,
+		&c.Position,
 		&c.PressNumber,
 		&c.Cycles,
 		&c.Start,
@@ -165,6 +176,8 @@ func (s *CycleService) List() ([]*shared.Cycle, *errors.MasterError) {
 		c := &shared.Cycle{}
 		err := rows.Scan(
 			&c.ID,
+			&c.ToolID,
+			&c.Position,
 			&c.PressNumber,
 			&c.Cycles,
 			&c.Start,
