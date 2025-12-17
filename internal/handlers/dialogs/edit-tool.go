@@ -84,7 +84,7 @@ func (h *Handler) PutTool(c echo.Context) *echo.HTTPError {
 	}
 
 	// Set HX headers
-	urlb.SetHXRedirect(c, urlb.UrlTool(tool.ID, 0, 0, 0).Page)
+	urlb.SetHXRedirect(c, urlb.UrlTool(tool.ID, 0, 0).Page)
 
 	return nil
 }

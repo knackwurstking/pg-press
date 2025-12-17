@@ -12,6 +12,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/handlers/tool/templates"
 	"github.com/knackwurstking/pg-press/internal/helper"
 	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 
 	ui "github.com/knackwurstking/ui/ui-templ"
 
@@ -198,12 +199,12 @@ func (h *Handler) HTMXDeleteToolCycle(c echo.Context) *echo.HTTPError {
 	}
 	cycleID := shared.EntityID(id)
 
-	merr = h.registry.PressCycles.Delete(cycleID)
+	merr = h.db.Press.Cycle.Delete(cycleID)
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	utils.SetHXTrigger(c, env.HXGlobalTrigger)
+	urlb.SetHXTrigger(c, "reload-cycles-section")
 
 	return nil
 }
@@ -216,6 +217,7 @@ func (h *Handler) HTMXGetToolMetalSheets(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
+	// TODO: Continue here - fetch metal sheets for tool
 	toolID, merr := h.getToolIDFromParam(c)
 	if merr != nil {
 		return merr.Echo()

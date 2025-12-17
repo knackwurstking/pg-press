@@ -19,7 +19,7 @@ templ CyclesSection(oob bool, id shared.EntityID, isTool bool) {
 	@components.Section(templ.Attributes{
 		"id":                        "cycles-section",
 		"hx-get":                    hxGet,
-		"hx-trigger":                "load, pageLoaded from:body",
+		"hx-trigger":                "load, reload-cycles-section from:body",
 		"hx-swap":                   "innerHTML",
 		"hx-swap-oob":               fmt.Sprintf("%t", oob),
 		"hx-on:htmx:response-error": "alert(event.detail.xhr.responseText)",
