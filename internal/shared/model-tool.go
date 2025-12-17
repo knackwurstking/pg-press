@@ -6,6 +6,15 @@ import (
 	"github.com/knackwurstking/pg-press/internal/errors"
 )
 
+const (
+	ToolCyclesWarning int64 = 800000
+	ToolCyclesError   int64 = 1000000
+)
+
+// -----------------------------------------------------------------------------
+// Slot type
+// -----------------------------------------------------------------------------
+
 type Slot int
 
 const (
@@ -13,11 +22,6 @@ const (
 	SlotUpper
 	SlotLower
 	SlotUpperCassette
-)
-
-const (
-	ToolCyclesWarning int64 = 800000
-	ToolCyclesError   int64 = 1000000
 )
 
 func (s Slot) German() string {
@@ -33,6 +37,10 @@ func (s Slot) German() string {
 	}
 }
 
+// -----------------------------------------------------------------------------
+// ModelTool interface
+// -----------------------------------------------------------------------------
+
 type ModelTool interface {
 	Validate() *errors.ValidationError
 	String() string
@@ -40,6 +48,10 @@ type ModelTool interface {
 	GetID() EntityID
 	IsCassette() bool
 }
+
+// -----------------------------------------------------------------------------
+// BaseTool
+// -----------------------------------------------------------------------------
 
 type BaseTool struct {
 	ID               EntityID `json:"id"`
@@ -121,6 +133,10 @@ func (bt *BaseTool) String() string {
 	)
 }
 
+// -----------------------------------------------------------------------------
+// Tool
+// -----------------------------------------------------------------------------
+
 // Tool represents a tool used in a press machine,
 // there are upper and lower tools. Each tool can have its own regeneration history.
 type Tool struct {
@@ -168,6 +184,10 @@ func (t *Tool) String() string {
 		t.Cassette,
 	)
 }
+
+// -----------------------------------------------------------------------------
+// Cassette
+// -----------------------------------------------------------------------------
 
 type Cassette struct {
 	BaseTool
@@ -227,6 +247,10 @@ func (c *Cassette) String() string {
 		c.MaxThickness,
 	)
 }
+
+// -----------------------------------------------------------------------------
+// Interface compliance checks
+// -----------------------------------------------------------------------------
 
 var (
 	_ ModelTool         = (*BaseTool)(nil)
