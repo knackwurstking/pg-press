@@ -2,7 +2,6 @@ package templates
 
 import (
 	"fmt"
-	"slices"
 
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -10,62 +9,43 @@ import (
 )
 
 type PageProps struct {
-	Title    string
-	ID       shared.EntityID // ID of the tool or cassette
-	Position shared.Slot     // Position needed for tool type detection (tool or cassette)
-	User     *shared.User
+	Tool shared.ModelTool // ID of the tool or cassette
+	User *shared.User
 }
 
 templ Page(p *PageProps) {
 	{{
-		pageTitle := fmt.Sprintf("PG Presse | %s", p.Title)
-		appBarTitle := fmt.Sprintf("%s", p.Title)
+		title := ""
+		if p.Tool.IsCassette() {
+			title = p.Tool.(*shared.Cassette).German()
+		} else {
+			title = p.Tool.(*shared.Tool).German()
+		}
 	}}
 	@components.Layout(
 		components.LayoutProps{
-			PageTitle:   pageTitle,
-			AppBarTitle: appBarTitle,
+			PageTitle:   fmt.Sprintf("PG Presse | %s", title),
+			AppBarTitle: fmt.Sprintf("%s", title),
 			NavContent:  components.StandardNavContent(),
 		},
 	) {
-		{{
-			if slices.Contains([]shared.Slot{shared.SlotUpper, shared.SlotLower, shared.SlotUpperCassette}, p.Position) {
-				panic(fmt.Sprintf("Invalid position for action bar: %v", p.Position))
-			}
-			isTool := p.Position == shared.SlotUpper || p.Position == shared.SlotLower
-		}}
 		<main class="container fluid flex flex-col gap">
 			@components.ActionBar() {
-				@actionBarContent(p.ID, isTool, p.User)
+				@actionBarContent(p.Tool, p.User)
 			}
-			{{
-				hxGet := ""
-				if isTool {
-					hxGet = string(urlb.UrlTool(p.ID, 0, 0, 0).Notes)
-				} else {
-					hxGet = string(urlb.UrlTool(0, p.ID, 0, 0).Notes)
-				}
-			}}
 			@components.Section(templ.Attributes{
 				"id":                        "notes-section",
-				"hx-get":                    hxGet,
+				"hx-get":                    string(urlb.UrlTool(p.Tool.GetID(), 0, 0).Notes),
 				"hx-trigger":                "load, pageLoaded from:body",
 				"hx-swap":                   "innerHTML",
 				"hx-on:htmx:response-error": "alert(event.detail.xhr.responseText)",
 			}) {
 				@components.Spinner()
 			}
-			{{
-				if isTool {
-					hxGet = string(urlb.UrlTool(p.ID, 0, 0, 0).MetalSheets)
-				} else {
-					hxGet = string(urlb.UrlTool(0, p.ID, 0, 0).MetalSheets)
-				}
-			}}
-			if isTool {
+			if !p.Tool.IsCassette() {
 				@components.Section(templ.Attributes{
 					"id":                        "metal-sheets-section",
-					"hx-get":                    hxGet,
+					"hx-get":                    string(urlb.UrlTool(p.Tool.GetID(), 0, 0).MetalSheets),
 					"hx-trigger":                "load, pageLoaded from:body",
 					"hx-swap":                   "innerHTML",
 					"hx-on:htmx:response-error": "alert(event.detail.xhr.responseText)",
@@ -73,20 +53,16 @@ templ Page(p *PageProps) {
 					@components.Spinner()
 				}
 			}
-			@CyclesSection(false, p.ID, isTool)
+			@CyclesSection(false, p.Tool.GetID(), !p.Tool.IsCassette())
 		</main>
 	}
 }
 
-templ actionBarContent(id shared.EntityID, isTool bool, user *shared.User) {
+templ actionBarContent(tool shared.ModelTool, user *shared.User) {
 	if user.IsAdmin() {
 		<button
 			class="destructive flex gap"
-			if isTool {
-				hx-patch={ urlb.UrlTools(id, 0).MarkDead }
-			} else {
-				hx-patch={ urlb.UrlTools(0, id).MarkDead }
-			}
+			hx-patch={ urlb.UrlTools(tool.GetID()).MarkDead }
 			hx-trigger="click"
 			hx-confirm="Sind Sie sicher, dass Sie dieses Werkzeug löschen möchten?"
 			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
@@ -97,10 +73,10 @@ templ actionBarContent(id shared.EntityID, isTool bool, user *shared.User) {
 	}
 	<button
 		class="primary flex gap"
-		if isTool {
-			hx-get={ urlb.UrlDialogs().EditTool(id) }
+		if tool.IsCassette() {
+			hx-get={ urlb.UrlDialogs().EditCassette(tool.GetID()) }
 		} else {
-			hx-get={ urlb.UrlDialogs().EditCassette(id) }
+			hx-get={ urlb.UrlDialogs().EditTool(tool.GetID()) }
 		}
 		hx-trigger="click"
 		hx-target="body"

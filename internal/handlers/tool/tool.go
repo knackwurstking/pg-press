@@ -15,7 +15,6 @@ import (
 
 	ui "github.com/knackwurstking/ui/ui-templ"
 
-	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 )
 
@@ -76,40 +75,26 @@ func (h *Handler) GetToolPage(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	id, merr := h.getToolIDFromParam(c)
+	id, merr := shared.ParseParamInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
-	isCassette := shared.ParseQueryBool(c, "is_cassette")
 
-	var (
-		title    string
-		toolID   shared.EntityID
-		position shared.Slot
-	)
-	if isCassette {
-		cassette, merr := h.db.Tool.Cassette.GetByID(id)
-		if merr != nil {
-			return merr.Echo()
+	var tool shared.ModelTool
+	tool, merr = h.db.Tool.Tool.GetByID(shared.EntityID(id))
+	if merr != nil {
+		if merr.Code == http.StatusNotFound {
+			tool, merr = h.db.Tool.Cassette.GetByID(shared.EntityID(id))
+			if merr != nil {
+				return merr.Echo()
+			}
 		}
-		title = cassette.German()
-		toolID = cassette.ID
-		position = cassette.Position
-	} else {
-		tool, merr := h.db.Tool.Tool.GetByID(toolID)
-		if merr != nil {
-			return merr.Echo()
-		}
-		title = tool.German()
-		toolID = tool.ID
-		position = tool.Position
+		return merr.Echo()
 	}
 
 	t := templates.Page(&templates.PageProps{
-		Title:    title,
-		ID:       id,
-		Position: position,
-		User:     user,
+		Tool: tool,
+		User: user,
 	})
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
@@ -454,11 +439,6 @@ func (h *Handler) HTMXDeleteRegeneration(c echo.Context) *echo.HTTPError {
 }
 
 func (h *Handler) HTMXGetStatusEdit(c echo.Context) *echo.HTTPError {
-	user, merr := shared.GetUserFromContext(c)
-	if merr != nil {
-		return merr.Echo()
-	}
-
 	idParam, merr := utils.ParseParamInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
@@ -470,21 +450,15 @@ func (h *Handler) HTMXGetStatusEdit(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	t := h.renderStatusComponent(tool, true, user)
-	err := t.Render(c.Request().Context(), c.Response())
-	if err != nil {
-		return errors.NewRenderError(err, "ToolStatusEdit")
+	eerr := h.renderRegenerationEdit(c, tool, true, nil)
+	if eerr != nil {
+		return eerr
 	}
 
 	return nil
 }
 
 func (h *Handler) HTMXGetStatusDisplay(c echo.Context) *echo.HTTPError {
-	user, merr := shared.GetUserFromContext(c)
-	if merr != nil {
-		return merr.Echo()
-	}
-
 	idParam, merr := utils.ParseParamInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
@@ -496,10 +470,9 @@ func (h *Handler) HTMXGetStatusDisplay(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	t := h.renderStatusComponent(tool, false, user)
-	err := t.Render(c.Request().Context(), c.Response())
-	if err != nil {
-		return errors.NewRenderError(err, "ToolStatusEdit")
+	eerr := h.renderRegenerationEdit(c, tool, false, nil)
+	if eerr != nil {
+		return eerr
 	}
 
 	return nil
@@ -582,10 +555,9 @@ func (h *Handler) HTMXUpdateToolStatus(c echo.Context) *echo.HTTPError {
 	}
 
 	// Render the updated status component
-	t := h.renderStatusComponent(updatedTool, false, user)
-	err := t.Render(c.Request().Context(), c.Response())
-	if err != nil {
-		return errors.NewRenderError(err, "ToolStatusEdit")
+	eerr := h.renderRegenerationEdit(c, updatedTool, false, user)
+	if eerr != nil {
+		return eerr
 	}
 
 	return h.renderCyclesSection(c, tool)
@@ -717,10 +689,24 @@ func (h *Handler) renderCyclesSectionContent(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func (h *Handler) renderStatusComponent(tool *models.Tool, editable bool, user *models.User) templ.Component {
-	return templates.ToolStatusEdit(&templates.ToolStatusEditProps{
+func (h *Handler) renderRegenerationEdit(c echo.Context, tool shared.ModelTool, editable bool, user *shared.User) *echo.HTTPError {
+	if user == nil {
+		var merr *errors.MasterError
+		user, merr = shared.GetUserFromContext(c)
+		if merr != nil {
+			return merr.Echo()
+		}
+	}
+
+	t := templates.RegenerationEdit(templates.RegenerationEditProps{
 		Tool:              tool,
+		ActivePressNumber: helper.GetPressNumberForTool(h.db, tool.GetID()),
 		Editable:          editable,
 		UserHasPermission: user.IsAdmin(),
 	})
+	err := t.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "ToolStatusEdit")
+	}
+	return nil
 }
