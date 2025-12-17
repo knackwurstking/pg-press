@@ -145,22 +145,7 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	cassetesForBinding, merr := helper.ListAvailableCassettesForBinding(h.db, tool.ID)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	// Render the template
-	t := templates.BindingSection(templates.BindingSectionProps{
-		Tool:                tool,
-		CassettesForBinding: cassetesForBinding,
-		IsAdmin:             user.IsAdmin(),
-	})
-	err = t.Render(c.Request().Context(), c.Response())
-	if err != nil {
-		return errors.NewRenderError(err, "BindingSection")
-	}
-	return nil
+	return h.renderBindingSection(c, tool, user)
 }
 
 func (h *Handler) HTMXPatchToolUnBinding(c echo.Context) *echo.HTTPError {
@@ -171,45 +156,16 @@ func (h *Handler) HTMXPatchToolUnBinding(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	toolID, merr := h.getToolIDFromParam(c)
+	id, merr := shared.ParseParamInt64(c, "id")
+	if merr != nil {
+		return merr.Echo()
+	}
+	merr = helper.UnbindCassetteFromTool(h.db, shared.EntityID(id))
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	merr = h.registry.Tools.UnBind(toolID)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	// Get tools for rendering the template
-	t, merr := h.registry.Tools.Get(toolID)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	rTool, merr := services.ResolveTool(h.registry, t)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	// Get tools for binding
-	toolsForBinding, merr := h.getToolsForBinding(rTool.Tool)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	// Render the template
-	te := templates.BindingSection(templates.BindingSectionProps{
-		Tool:            rTool,
-		ToolsForBinding: toolsForBinding,
-		IsAdmin:         user.IsAdmin(),
-	})
-	err := te.Render(c.Request().Context(), c.Response())
-	if err != nil {
-		return errors.NewRenderError(err, "BindingSection")
-	}
-
-	return nil
+	return h.renderBindingSection(c, nil, user)
 }
 
 func (h *Handler) GetCyclesSectionContent(c echo.Context) *echo.HTTPError {
@@ -217,34 +173,22 @@ func (h *Handler) GetCyclesSectionContent(c echo.Context) *echo.HTTPError {
 }
 
 func (h *Handler) HTMXGetToolTotalCycles(c echo.Context) *echo.HTTPError {
-	toolID, merr := h.getToolIDFromParam(c)
+	id, merr := shared.ParseParamInt64(c, "id")
+	if merr != nil {
+		return merr.Echo()
+	}
+	tool, merr := h.db.Tool.Tool.GetByID(shared.EntityID(id))
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	tool, merr := h.registry.Tools.Get(toolID)
-	if merr != nil {
-		return merr.Echo()
-	}
+	// TODO: Using helper function here for getting total cycles
 
-	// Get cycles for this specific tool
-	toolCycles, merr := h.registry.PressCycles.ListPressCyclesForTool(toolID)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	// Filter cycles by position
-	filteredCycles := models.FilterCyclesByToolPosition(tool.Position, toolCycles...)
-
-	// Get total cycles from filtered cycles
-	totalCycles := h.getTotalCycles(toolID, filteredCycles...)
-
-	t := templates.TotalCycles(totalCycles, utils.ParseQueryBool(c, "input"))
+	t := templates.TotalCycles(totalCycles, shared.ParseQueryBool(c, "input"))
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "TotalCycles")
 	}
-
 	return nil
 }
 
@@ -538,66 +482,6 @@ func (h *Handler) HTMXUpdateToolStatus(c echo.Context) *echo.HTTPError {
 	return h.renderCyclesSection(c, tool)
 }
 
-func (h *Handler) getTotalCycles(toolID models.ToolID, cycles ...*models.Cycle) int64 {
-	// Get regeneration for this tool
-	var startCycleID models.CycleID
-
-	if r, merr := h.registry.ToolRegenerations.GetLastRegeneration(toolID); merr == nil {
-		startCycleID = r.CycleID
-	} else {
-		if merr.Code != http.StatusNotFound {
-			slog.Warn("Failed to get the last regeneration data", "tool_id", toolID)
-		}
-	}
-
-	var totalCycles int64
-
-	for _, cycle := range cycles {
-		if cycle.ID == startCycleID {
-			break
-		}
-
-		totalCycles += cycle.PartialCycles
-	}
-
-	return totalCycles
-}
-
-func (h *Handler) getToolsForBinding(tool *models.Tool) ([]*models.Tool, *errors.MasterError) {
-	var filteredToolsForBinding []*models.Tool
-
-	if tool.Position != models.PositionTopCassette && tool.Position != models.PositionTop {
-		return filteredToolsForBinding, nil
-	}
-
-	// Get all tools
-	tools, merr := h.registry.Tools.List()
-	if merr != nil {
-		return nil, merr
-	}
-	// Filter tools for binding
-	for _, t := range tools {
-		if t.Format != tool.Format || t.IsBound() {
-			continue
-		}
-
-		if tool.Position == models.PositionTop {
-			if t.Position == models.PositionTopCassette {
-				filteredToolsForBinding = append(filteredToolsForBinding, t)
-			}
-
-			continue
-		}
-
-		// Else: position top cassette
-		if t.Position == models.PositionTop {
-			filteredToolsForBinding = append(filteredToolsForBinding, t)
-		}
-	}
-
-	return filteredToolsForBinding, nil
-}
-
 func (h *Handler) renderCyclesSection(c echo.Context, tool *shared.Tool) *echo.HTTPError {
 	// Render out-of-band swap for cycles section to trigger reload
 	t := templates.CyclesSection(true, tool.GetID(), !tool.IsCassette())
@@ -682,6 +566,25 @@ func (h *Handler) renderRegenerationEdit(c echo.Context, tool shared.ModelTool, 
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "ToolStatusEdit")
+	}
+	return nil
+}
+
+func (h *Handler) renderBindingSection(c echo.Context, tool *shared.Tool, user *shared.User) *echo.HTTPError {
+	cassettesForBinding, merr := helper.ListAvailableCassettesForBinding(h.db, tool.ID)
+	if merr != nil {
+		return merr.Echo()
+	}
+
+	// Render the template
+	t := templates.BindingSection(templates.BindingSectionProps{
+		Tool:                tool,
+		CassettesForBinding: cassettesForBinding,
+		IsAdmin:             user.IsAdmin(),
+	})
+	err := t.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "BindingSection")
 	}
 	return nil
 }

@@ -100,3 +100,24 @@ func BindCassetteToTool(db *common.DB, toolID, cassetteID shared.EntityID) *erro
 
 	return nil
 }
+
+func UnbindCassetteFromTool(db *common.DB, toolID shared.EntityID) *errors.MasterError {
+	bindingMutex.Lock()
+	defer bindingMutex.Unlock()
+
+	tool, merr := db.Tool.Tool.GetByID(toolID)
+	if merr != nil {
+		return merr
+	}
+	if tool.Cassette == 0 {
+		return errors.NewValidationError("tool has no cassette bound").MasterError()
+	}
+
+	tool.Cassette = 0
+	merr = db.Tool.Tool.Update(tool)
+	if merr != nil {
+		return merr
+	}
+
+	return nil
+}
