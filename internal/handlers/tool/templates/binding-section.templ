@@ -28,7 +28,6 @@ templ BindingSection(props BindingSectionProps) {
 				hx-trigger="change"
 				hx-target="#binding-section"
 				hx-swap="outerHTML"
-				hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
 				if props.Tool.Cassette > 0 {
 					disabled
 				}
@@ -36,7 +35,7 @@ templ BindingSection(props BindingSectionProps) {
 				<option
 					value=""
 					disabled
-					selected?={ props.Tool.Binding == nil }
+					selected?={ props.Tool.Cassette <= 0 }
 				>
 					if props.Tool.Position == shared.SlotUpper {
 						{ shared.SlotUpperCassette.German() }
@@ -45,11 +44,11 @@ templ BindingSection(props BindingSectionProps) {
 					}
 					Binden
 				</option>
-				for _, t := range props.ToolsForBinding {
+				for _, c := range props.CassettesForBinding {
 					<option
-						value={ t.ID }
-						selected?={ props.Tool.Binding != nil && t.ID == *props.Tool.Binding }
-					>{ t.Code } { t.Type }</option>
+						value={ c.ID }
+						selected?={ c.ID == props.Tool.Cassette }
+					>{ c.String() }</option>
 				}
 			</select>
 			<button
@@ -59,23 +58,31 @@ templ BindingSection(props BindingSectionProps) {
 				hx-target="#binding-section"
 				hx-swap="outerHTML"
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
-				if !props.Tool.IsBound() {
+				if props.Tool.Cassette > 0 {
 					disabled
 				}
 			>
 				Entbinden
 			</button>
 		</span>
-		if props.Tool.IsBound() {
+		if props.Tool.Cassette > 0 {
 			<span>
 				// Display the binding tool
-				{{ bindingTool := props.Tool.GetBindingTool() }}
+				{{
+					var bindingTool *shared.Cassette
+					for _, c := range props.CassettesForBinding {
+						if c.ID == props.Tool.Cassette {
+							bindingTool = c
+							break
+						}
+					}
+				}}
 				if bindingTool != nil {
-					@components.ToolAnchor(
-						bindingTool,
-						&components.ToolAnchorOptions{
-							EnableStatusBadge: false,
-						},
+					@components.CassetteAnchor(
+						components.CassetteAnchorProps{
+							Cassette: bindingTool,
+							Tool: props.Tool,
+						}
 					)
 				} else {
 					<!-- Binding tool not available -->

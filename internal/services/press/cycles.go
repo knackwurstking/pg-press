@@ -1,3 +1,4 @@
+// TODO: Tool identifier? UNIQUE(tool_id, position)...
 package press
 
 import (
