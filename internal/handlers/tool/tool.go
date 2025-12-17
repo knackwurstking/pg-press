@@ -683,8 +683,11 @@ func (h *Handler) renderCyclesSectionContent(c echo.Context) *echo.HTTPError {
 	// Get active press number for this tool, -1 if none
 	activePressNumber := helper.GetPressNumberForTool(h.db, toolID)
 
-	// TODO: Get bindable cassettes for this tool, if it is a tool and not a cassette
-	bindableCassettes := []*shared.Cassette{}
+	// Get bindable cassettes for this tool, if it is a tool and not a cassette
+	cassettesForBinding, merr := helper.GetAvailableCassettesForBinding(h.db, toolID)
+	if merr != nil {
+		return merr.Echo()
+	}
 
 	// Get regenerations for this tool
 	regenerations, merr := helper.GetRegenerationsForTool(h.db, toolID)
@@ -699,12 +702,12 @@ func (h *Handler) renderCyclesSectionContent(c echo.Context) *echo.HTTPError {
 	}
 
 	t := templates.CyclesSectionContent(templates.CyclesSectionContentProps{
-		Tool:              tool,
-		ToolCycles:        toolCycles,
-		ActivePressNumber: activePressNumber,
-		BindableCassettes: bindableCassettes,
-		Regenerations:     regenerations,
-		User:              user,
+		Tool:                tool,
+		ToolCycles:          toolCycles,
+		ActivePressNumber:   activePressNumber,
+		CassettesForBinding: cassettesForBinding,
+		Regenerations:       regenerations,
+		User:                user,
 	})
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {

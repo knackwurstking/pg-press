@@ -29,12 +29,12 @@ templ CyclesSection(oob bool, id shared.EntityID, isTool bool) {
 }
 
 type CyclesSectionContentProps struct {
-	Tool              shared.ModelTool
-	ToolCycles        []*shared.Cycle
-	ActivePressNumber shared.PressNumber
-	BindableCassettes []*shared.Cassette
-	Regenerations     []*shared.ToolRegeneration
-	User              *shared.User
+	Tool                shared.ModelTool
+	ToolCycles          []*shared.Cycle
+	ActivePressNumber   shared.PressNumber
+	CassettesForBinding []*shared.Cassette
+	Regenerations       []*shared.ToolRegeneration
+	User                *shared.User
 }
 
 templ CyclesSectionContent(p CyclesSectionContentProps) {
@@ -44,7 +44,7 @@ templ CyclesSectionContent(p CyclesSectionContentProps) {
 			"id": "tool-status-section",
 		}) {
 			@components.SectionTitle(components.SectionTitleLevelSub, "Aktueller Status")
-			@toolStatus(p.Tool, p.BindableCassettes, p.ActivePressNumber, p.User)
+			@toolStatus(p.Tool, p.CassettesForBinding, p.ActivePressNumber, p.User)
 		}
 		// For now tool cycles for top cassette tools are ignored
 		@regenerations(p.Regenerations, p.User)
@@ -58,12 +58,11 @@ templ CyclesSectionContent(p CyclesSectionContentProps) {
 	</div>
 }
 
-templ toolStatus(tool shared.ModelTool, bindableCassettes []*shared.Cassette, activePressNumber shared.PressNumber, user *shared.User) {
+templ toolStatus(tool shared.ModelTool, cassettesForBinding []*shared.Cassette, activePressNumber shared.PressNumber, user *shared.User) {
 	<div class="flex flex-col gap">
 		<span class="flex gap-lg">
-			@RegenerationEdit(&RegenerationEditProps{
+			@RegenerationEdit(RegenerationEditProps{
 				Tool:              tool,
-				Cassette:          nil,
 				ActivePressNumber: activePressNumber,
 				Editable:          false,
 				UserHasPermission: user.IsAdmin(),
@@ -80,10 +79,10 @@ templ toolStatus(tool shared.ModelTool, bindableCassettes []*shared.Cassette, ac
 				</a>
 			}
 		</span>
-		if tool.Position == shared.SlotUpper {
+		if !tool.IsCassette() && tool.GetBase().Position == shared.SlotUpper {
 			@BindingSection(BindingSectionProps{
-				Tool:                tool,
-				CassettesForBinding: bindableCassettes,
+				Tool:                tool.(*shared.Tool),
+				CassettesForBinding: cassettesForBinding,
 				IsAdmin:             user.IsAdmin(),
 			})
 		}
@@ -155,7 +154,7 @@ templ cyclesTable(tool shared.ModelTool, toolCycles []*shared.Cycle, lastRegener
 		@components.SectionTitle(components.SectionTitleLevelSub, "Pressennutzungsverlauf") {
 			<button
 				class="icon secondary small flex"
-				hx-get={ urlb.UrlDialogs().EditCycle(0, tool.ID, false) }
+				hx-get={ urlb.UrlDialogs().EditCycle(0, tool.GetID(), false) }
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"
@@ -170,10 +169,10 @@ templ cyclesTable(tool shared.ModelTool, toolCycles []*shared.Cycle, lastRegener
 		}
 		@components.Section(nil) {
 			<h6 class="mb">
-				Gesamtzyklen für "{ tool.German() }":
+				Gesamtzyklen:
 			</h6>
 			<span>
-				@TotalCycles(tool.Cycles, true)
+				@TotalCycles(tool.GetBase().Cycles, true)
 			</span>
 		}
 		<figure class="w-full overflow-x-scroll">

@@ -8,67 +8,40 @@ import (
 )
 
 type RegenerationEditProps struct {
-	Tool              *shared.Tool
-	Cassette          *shared.Cassette
+	Tool              shared.ModelTool
 	ActivePressNumber shared.PressNumber
 	Editable          bool
 	UserHasPermission bool
 }
 
-templ RegenerationEdit(p *RegenerationEditProps) {
-	{{
-		if (p.Tool == nil && p.Cassette == nil) || (p.Tool != nil && p.Cassette != nil) {
-			panic("RegenerationEdit requires either a Tool or a Cassette")
-		}
-
-		isTool := p.Tool != nil
-
-		var (
-			id shared.EntityID
-		)
-		if isTool {
-			id = p.Tool.ID
-		} else {
-			id = p.Cassette.ID
-		}
-	}}
+templ RegenerationEdit(p RegenerationEditProps) {
 	<div
-		id={ fmt.Sprintf("regeneration-edit-%d", id) }
+		id={ fmt.Sprintf("regeneration-edit-%d", p.Tool.GetID()) }
 		class="flex flex-col gap-sm"
 	>
 		if p.Editable {
-			if isTool {
-				@regenerationEditForm(p.Tool, nil, p.UserHasPermission)
-			} else {
-				@regenerationEditForm(nil, p.Cassette, p.UserHasPermission)
-			}
+			@regenerationEditForm(p.Tool, p.UserHasPermission)
 		} else {
-			if isTool {
-				@regenerationEditShowcase(p.Tool, nil, p.ActivePressNumber)
-			} else {
-				@regenerationEditShowcase(nil, p.Cassette, p.ActivePressNumber)
-			}
+			@regenerationEditShowcase(p.Tool, p.ActivePressNumber)
 		}
 	</div>
 }
 
-templ regenerationEditShowcase(tool *shared.Tool, cassette *shared.Cassette, activePressNumber shared.PressNumber) {
-	{{ isTool := tool != nil }}
+templ regenerationEditShowcase(tool shared.ModelTool, activePressNumber shared.PressNumber) {
 	<div class="flex items-center gap-lg">
-		if isTool {
-			@components.ToolStateBadge(tool, -1)
+		if tool.IsCassette() {
+			@components.CassetteStateBadge(tool.(*shared.Cassette), nil)
 		} else {
-			@components.CassetteStateBadge(cassette, nil)
+			@components.ToolStateBadge(tool.(*shared.Tool), -1)
 		}
 		{{
+			hxTarget := fmt.Sprintf("#regeneration-edit-%d", tool.GetID())
+
 			var hxGet templ.SafeURL
-			var hxTarget string
-			if isTool {
-				hxGet = urlb.UrlTool(tool.ID, 0, 0, 0).StatusEdit
-				hxTarget = fmt.Sprintf("#regeneration-edit-%d", tool.ID)
+			if tool.IsCassette() {
+				hxGet = urlb.UrlTool(0, tool.GetID(), 0, 0).StatusEdit
 			} else {
-				hxGet = urlb.UrlTool(0, cassette.ID, 0, 0).StatusEdit
-				hxTarget = fmt.Sprintf("#regeneration-edit-%d", cassette.ID)
+				hxGet = urlb.UrlTool(tool.GetID(), 0, 0, 0).StatusEdit
 			}
 		}}
 		<button
@@ -88,30 +61,25 @@ templ regenerationEditShowcase(tool *shared.Tool, cassette *shared.Cassette, act
 	</div>
 }
 
-templ regenerationEditForm(tool *shared.Tool, cassette *shared.Cassette, userHasPermission bool) {
-	{{ isTool := tool != nil }}
+templ regenerationEditForm(tool shared.ModelTool, userHasPermission bool) {
 	<div class="card p-sm flex flex-col gap-sm">
 		<div class="flex items-center gap-sm mb-sm">
-			if isTool {
-				@components.ToolStateBadge(tool, -1)
+			if tool.IsCassette() {
+				@components.CassetteStateBadge(tool.(*shared.Cassette), nil)
 			} else {
-				@components.CassetteStateBadge(cassette, nil)
+				@components.ToolStateBadge(tool.(*shared.Tool), -1)
 			}
 			<span class="text-sm text-muted">Regenerierung steuern</span>
 		</div>
 		<div class="flex flex-col gap-sm">
 			{{
-				var baseTool *shared.BaseTool
+				hxTarget := fmt.Sprintf("#regeneration-edit-%d", tool.GetID())
+
 				var hxPut templ.SafeURL
-				var hxTarget string
-				if isTool {
-					baseTool = &tool.BaseTool
-					hxPut = urlb.UrlTool(tool.ID, 0, 0, 0).Status
-					hxTarget = fmt.Sprintf("#regeneration-edit-%d", tool.ID)
+				if tool.IsCassette() {
+					hxPut = urlb.UrlTool(0, tool.GetID(), 0, 0).Status
 				} else {
-					baseTool = &cassette.BaseTool
-					hxPut = urlb.UrlTool(0, cassette.ID, 0, 0).Status
-					hxTarget = fmt.Sprintf("#regeneration-edit-%d", cassette.ID)
+					hxPut = urlb.UrlTool(tool.GetID(), 0, 0, 0).Status
 				}
 			}}
 			<form
@@ -119,15 +87,15 @@ templ regenerationEditForm(tool *shared.Tool, cassette *shared.Cassette, userHas
 				hx-target={ hxTarget }
 				hx-swap="outerHTML"
 			>
-				<input type="hidden" name="tool_id" value={ fmt.Sprintf("%d", baseTool.ID) }/>
-				if baseTool.Regenerating {
+				<input type="hidden" name="tool_id" value={ fmt.Sprintf("%d", tool.GetID()) }/>
+				if tool.GetBase().Regenerating {
 					<input type="hidden" name="status" value="regenerating"/>
 				} else {
 					<input type="hidden" name="status" value="active"/>
 				}
 				<button
 					type="submit"
-					if baseTool.Regenerating {
+					if tool.GetBase().Regenerating {
 						class="small success w-full m-0 flex gap"
 					} else {
 						class="small warning w-full m-0 flex gap"
@@ -137,20 +105,20 @@ templ regenerationEditForm(tool *shared.Tool, cassette *shared.Cassette, userHas
 					}
 				>
 					<i class="bi bi-arrow-clockwise"></i>
-					if baseTool.Regenerating {
+					if tool.GetBase().Regenerating {
 						Regenerierung stoppen
 					} else {
 						Regenerierung starten
 					}
 				</button>
 			</form>
-			if baseTool.Regenerating {
+			if tool.GetBase().Regenerating {
 				<form
 					hx-put={ hxPut }
 					hx-target={ hxTarget }
 					hx-swap="outerHTML"
 				>
-					<input type="hidden" name="tool_id" value={ fmt.Sprintf("%d", baseTool.ID) }/>
+					<input type="hidden" name="tool_id" value={ fmt.Sprintf("%d", tool.GetID()) }/>
 					<input type="hidden" name="status" value="abort"/>
 					<button
 						type="submit"
@@ -166,10 +134,10 @@ templ regenerationEditForm(tool *shared.Tool, cassette *shared.Cassette, userHas
 			}
 			{{
 				var hxGet templ.SafeURL
-				if isTool {
-					hxGet = urlb.UrlTool(tool.ID, 0, 0, 0).StatusDisplay
+				if tool.IsCassette() {
+					hxGet = urlb.UrlTool(0, tool.GetID(), 0, 0).StatusDisplay
 				} else {
-					hxGet = urlb.UrlTool(0, cassette.ID, 0, 0).StatusDisplay
+					hxGet = urlb.UrlTool(tool.GetID(), 0, 0, 0).StatusDisplay
 				}
 			}}
 			<button

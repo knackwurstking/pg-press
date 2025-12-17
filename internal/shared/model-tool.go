@@ -36,6 +36,7 @@ func (s Slot) German() string {
 type ModelTool interface {
 	Validate() *errors.ValidationError
 	String() string
+	GetBase() *BaseTool
 	GetID() EntityID
 	IsCassette() bool
 }
@@ -52,6 +53,10 @@ type BaseTool struct {
 	LastRegeneration EntityID `json:"last_regeneration,omitempty"`
 	Regenerating     bool     `json:"regenerating"` // A regeneration resets the cycles counter, including the offset, back to zero
 	IsDead           bool     `json:"is_dead"`      // IsDead indicates if the tool is dead/destroyed
+}
+
+func (bt *BaseTool) GetBase() *BaseTool {
+	return bt
 }
 
 func (bt *BaseTool) IsCassette() bool {

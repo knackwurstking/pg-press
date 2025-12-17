@@ -24,7 +24,9 @@ func ListDeadTools(db *common.DB) (tools []*shared.Tool, merr *errors.MasterErro
 	return tools[:n], nil
 }
 
-func GetRegenerationsForTool(db *common.DB, toolID shared.EntityID) (regenerations []*shared.ToolRegeneration, merr *errors.MasterError) {
+func GetRegenerationsForTool(db *common.DB, toolID shared.EntityID) (
+	regenerations []*shared.ToolRegeneration, merr *errors.MasterError,
+) {
 	regenerations, merr = db.Tool.Regeneration.List()
 	if merr != nil {
 		return nil, merr
@@ -41,4 +43,29 @@ func GetRegenerationsForTool(db *common.DB, toolID shared.EntityID) (regeneratio
 	}
 
 	return regenerations[:n], nil
+}
+
+func GetAvailableCassettesForBinding(db *common.DB, toolID shared.EntityID) ([]*shared.Cassette, *errors.MasterError) {
+	tool, merr := db.Tool.Tool.GetByID(toolID)
+	if merr != nil {
+		return nil, merr
+	}
+
+	cassettes, merr := db.Tool.Cassette.List()
+	if merr != nil {
+		return nil, merr
+	}
+
+	// Filter cassettes based on the tool width and height
+	i := 0
+	for _, c := range cassettes {
+		if c.IsDead || c.Width != tool.Width || c.Height != tool.Height {
+			continue
+		}
+
+		cassettes[i] = c
+		i++
+	}
+
+	return cassettes[:i], nil
 }
