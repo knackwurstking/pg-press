@@ -1,5 +1,3 @@
-// TODO: Merge the cassettes table into this tools table and add a special type "type" for detection, just like the metal sheets table
-// - one table and two services, jsut like the metal sheets (upper and lower)
 package tool
 
 import (
@@ -15,6 +13,7 @@ const (
 )
 
 const (
+	// TODO: Implement 3 new fields: min_thickness, max_thickness, model_type, update tool and cassette service methods
 	SQLCreateToolTable string = `
 		CREATE TABLE IF NOT EXISTS tools (
 			id					INTEGER NOT NULL,
@@ -29,6 +28,9 @@ const (
 			regenerating 		INTEGER NOT NULL DEFAULT 0,
 			is_dead 			INTEGER NOT NULL DEFAULT 0,
 			cassette			INTEGER NOT NULL DEFAULT 0,
+			min_thickness		REAL NOT NULL,
+			max_thickness		REAL NOT NULL,
+			model_type			TEXT NOT NULL, -- e.g.: "tool", "cassette"
 
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);

@@ -33,6 +33,13 @@ func (s Slot) German() string {
 	}
 }
 
+type ModelTool interface {
+	Validate() *errors.ValidationError
+	String() string
+	GetID() EntityID
+	IsCassette() bool
+}
+
 type BaseTool struct {
 	ID               EntityID `json:"id"`
 	Width            int      `json:"width"`         // Width defines the tile width this tool can press
@@ -45,6 +52,14 @@ type BaseTool struct {
 	LastRegeneration EntityID `json:"last_regeneration,omitempty"`
 	Regenerating     bool     `json:"regenerating"` // A regeneration resets the cycles counter, including the offset, back to zero
 	IsDead           bool     `json:"is_dead"`      // IsDead indicates if the tool is dead/destroyed
+}
+
+func (bt *BaseTool) IsCassette() bool {
+	return false
+}
+
+func (bt *BaseTool) GetID() EntityID {
+	return bt.ID
 }
 
 func (bt *BaseTool) Validate() *errors.ValidationError {
@@ -108,6 +123,10 @@ type Tool struct {
 	Cassette EntityID `json:"cassette"` // Cassette indicates the cassette ID this tool belongs to (if any)
 }
 
+func (t *Tool) IsCassette() bool {
+	return false
+}
+
 func (t *Tool) German() string {
 	return fmt.Sprintf("%dx%d %s %s", t.Width, t.Height, t.Type, t.Code)
 }
@@ -149,6 +168,10 @@ type Cassette struct {
 	BaseTool
 	MinThickness float32 `json:"min_thickness"` // required
 	MaxThickness float32 `json:"max_thickness"` // required
+}
+
+func (c *Cassette) IsCassette() bool {
+	return true
 }
 
 func (c *Cassette) German() string {
@@ -200,5 +223,10 @@ func (c *Cassette) String() string {
 	)
 }
 
-var _ Entity[*Tool] = (*Tool)(nil)
-var _ Entity[*Cassette] = (*Cassette)(nil)
+var (
+	_ ModelTool         = (*BaseTool)(nil)
+	_ ModelTool         = (*Tool)(nil)
+	_ ModelTool         = (*Cassette)(nil)
+	_ Entity[*Tool]     = (*Tool)(nil)
+	_ Entity[*Cassette] = (*Cassette)(nil)
+)

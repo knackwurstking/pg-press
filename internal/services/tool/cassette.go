@@ -9,27 +9,8 @@ import (
 )
 
 const (
-	SQLCreateCassetteTable string = `
-		CREATE TABLE IF NOT EXISTS cassettes (
-			id					INTEGER NOT NULL,
-			width 				INTEGER NOT NULL,
-			height 				INTEGER NOT NULL,
-			position 			INTEGER NOT NULL,
-			type 				TEXT NOT NULL,
-			code 				TEXT NOT NULL,
-			cycles_offset 		INTEGER NOT NULL DEFAULT 0,
-			cycles 				INTEGER NOT NULL DEFAULT 0,
-			last_regeneration 	INTEGER NOT NULL DEFAULT 0,
-			regenerating 		INTEGER NOT NULL DEFAULT 0,
-			is_dead 			INTEGER NOT NULL DEFAULT 0,
-			min_thickness		REAL NOT NULL,
-			max_thickness		REAL NOT NULL,
-
-			PRIMARY KEY("id" AUTOINCREMENT)
-		);
-	`
 	SQLCreateCassette string = `
-	INSERT INTO cassettes (width, height, position, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, min_thickness, max_thickness)
+		INSERT INTO cassettes (width, height, position, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, min_thickness, max_thickness)
 		VALUES (:width, :height, :position, :type, :code, :cycles_offset, :cycles, :last_regeneration, :regenerating, :is_dead, :min_thickness, :max_thickness);
 	`
 	SQLGetCassetteByID string = `
@@ -78,7 +59,7 @@ func NewCassetteService(c *shared.Config) *CassetteService {
 }
 
 func (s *CassetteService) Setup() *errors.MasterError {
-	return s.BaseService.Setup(DBName, SQLCreateCassetteTable)
+	return s.BaseService.Setup(DBName, SQLCreateToolTable)
 }
 
 func (s *CassetteService) Create(entity *shared.Cassette) *errors.MasterError {

@@ -10,6 +10,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/tool/templates"
+	"github.com/knackwurstking/pg-press/internal/helper"
 	"github.com/knackwurstking/pg-press/internal/shared"
 
 	ui "github.com/knackwurstking/ui/ui-templ"
@@ -53,7 +54,7 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 
 		// Cycles table rows
 		ui.NewEchoRoute(http.MethodGet,
-			path+"/:id/cycles", h.HTMXGetCycles),
+			path+"/:id/cycles", h.GetCyclesSectionContent),
 		ui.NewEchoRoute(http.MethodGet,
 			path+"/:id/total-cycles", h.HTMXGetToolTotalCycles),
 
@@ -251,20 +252,8 @@ func (h *Handler) HTMXPatchToolUnBinding(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func (h *Handler) HTMXGetCycles(c echo.Context) *echo.HTTPError {
-	// Render the template
-	cyclesProps, merr := h.buildCyclesProps(c)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	t := templates.Cycles(*cyclesProps)
-	err := t.Render(c.Request().Context(), c.Response())
-	if err != nil {
-		return errors.NewRenderError(err, "Cycles")
-	}
-
-	return nil
+func (h *Handler) GetCyclesSectionContent(c echo.Context) *echo.HTTPError {
+	return h.renderCyclesSectionContent(c)
 }
 
 func (h *Handler) HTMXGetToolTotalCycles(c echo.Context) *echo.HTTPError {
@@ -599,24 +588,7 @@ func (h *Handler) HTMXUpdateToolStatus(c echo.Context) *echo.HTTPError {
 		return errors.NewRenderError(err, "ToolStatusEdit")
 	}
 
-	// Render out-of-band swap for cycles section to trigger reload
-	cyclesProps, _ := h.buildCyclesProps(c)
-	t = templates.OOBCyclesSection(true, toolID, cyclesProps)
-	err = t.Render(c.Request().Context(), c.Response())
-	if err != nil {
-		slog.Error("Failed to render out-of-band cycles reload", "error", err)
-	}
-
-	return nil
-}
-
-func (h *Handler) getToolIDFromParam(c echo.Context) (shared.EntityID, *errors.MasterError) {
-	toolIDQuery, merr := utils.ParseParamInt64(c, "id")
-	if merr != nil {
-		return 0, merr
-	}
-
-	return models.ToolID(toolIDQuery), nil
+	return h.renderCyclesSection(c, tool)
 }
 
 func (h *Handler) getTotalCycles(toolID models.ToolID, cycles ...*models.Cycle) int64 {
@@ -679,66 +651,67 @@ func (h *Handler) getToolsForBinding(tool *models.Tool) ([]*models.Tool, *errors
 	return filteredToolsForBinding, nil
 }
 
-func (h *Handler) buildCyclesProps(c echo.Context) (*templates.CyclesProps, *errors.MasterError) {
+func (h *Handler) renderCyclesSection(c echo.Context, tool *shared.Tool) *echo.HTTPError {
+	// Render out-of-band swap for cycles section to trigger reload
+	t := templates.CyclesSection(true, tool.GetID(), !tool.IsCassette())
+	err := t.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "CyclesSection")
+	}
+	return nil
+}
+
+func (h *Handler) renderCyclesSectionContent(c echo.Context) *echo.HTTPError {
+	// Get tool from URL param "id"
+	id, merr := shared.ParseParamInt64(c, "id")
+	if merr != nil {
+		return merr.Echo()
+	}
+	toolID := shared.EntityID(id)
+
+	tool, merr := h.db.Tool.Tool.GetByID(toolID)
+	if merr != nil {
+		return merr.Echo()
+	}
+
+	// Get cycles for this specific tool
+	toolCycles, merr := helper.ListCyclesForTool(h.db, toolID)
+	if merr != nil {
+		return merr.Echo()
+	}
+
+	// Get active press number for this tool, -1 if none
+	activePressNumber := helper.GetPressNumberForTool(h.db, toolID)
+
+	// TODO: Get bindable cassettes for this tool, if it is a tool and not a cassette
+	bindableCassettes := []*shared.Cassette{}
+
+	// Get regenerations for this tool
+	regenerations, merr := helper.GetRegenerationsForTool(h.db, toolID)
+	if merr != nil {
+		return merr.Echo()
+	}
+
+	// Get user from context
 	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
-		return nil, merr
+		return merr.Echo()
 	}
 
-	toolID, merr := h.getToolIDFromParam(c)
-	if merr != nil {
-		return nil, merr
+	t := templates.CyclesSectionContent(templates.CyclesSectionContentProps{
+		Tool:              tool,
+		ToolCycles:        toolCycles,
+		ActivePressNumber: activePressNumber,
+		BindableCassettes: bindableCassettes,
+		Regenerations:     regenerations,
+		User:              user,
+	})
+	err := t.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "Cycles")
 	}
 
-	t, merr := h.registry.Tools.Get(toolID)
-	if merr != nil {
-		return nil, merr
-	}
-	tool, merr := services.ResolveTool(h.registry, t)
-	if merr != nil {
-		return nil, merr
-	}
-
-	var filteredCycles []*models.Cycle
-	cycles, merr := h.registry.PressCycles.ListPressCyclesForTool(toolID)
-	if merr != nil {
-		return nil, merr
-	}
-
-	filteredCycles = models.FilterCyclesByToolPosition(
-		tool.Position, cycles...)
-
-	var resolvedRegenerations []*models.ResolvedToolRegeneration
-	// Get (resolved) regeneration history for this tool
-	regenerations, merr := h.registry.ToolRegenerations.GetRegenerationHistory(toolID)
-	if merr != nil {
-		slog.Error("Failed to get tool regenerations", "tool", toolID, "error", merr)
-	}
-
-	// Resolve regenerations
-	for _, r := range regenerations {
-		rr, merr := services.ResolveToolRegeneration(h.registry, r)
-		if merr != nil {
-			return nil, merr
-		}
-
-		resolvedRegenerations = append(resolvedRegenerations, rr)
-	}
-
-	// Only get tools for binding if the tool has no binding
-	toolsForBinding, merr := h.getToolsForBinding(tool.Tool)
-	if merr != nil {
-		return nil, merr
-	}
-
-	return &templates.CyclesProps{
-		User:            user,
-		Tool:            tool,
-		ToolsForBinding: toolsForBinding,
-		TotalCycles:     h.getTotalCycles(toolID, filteredCycles...),
-		Cycles:          filteredCycles,
-		Regenerations:   resolvedRegenerations,
-	}, nil
+	return nil
 }
 
 func (h *Handler) renderStatusComponent(tool *models.Tool, editable bool, user *models.User) templ.Component {
