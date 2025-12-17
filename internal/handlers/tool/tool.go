@@ -177,12 +177,11 @@ func (h *Handler) HTMXGetToolTotalCycles(c echo.Context) *echo.HTTPError {
 	if merr != nil {
 		return merr.Echo()
 	}
-	tool, merr := h.db.Tool.Tool.GetByID(shared.EntityID(id))
+
+	totalCycles, merr := helper.GetTotalCyclesForTool(h.db, shared.EntityID(id))
 	if merr != nil {
 		return merr.Echo()
 	}
-
-	// TODO: Using helper function here for getting total cycles
 
 	t := templates.TotalCycles(totalCycles, shared.ParseQueryBool(c, "input"))
 	err := t.Render(c.Request().Context(), c.Response())
@@ -193,55 +192,16 @@ func (h *Handler) HTMXGetToolTotalCycles(c echo.Context) *echo.HTTPError {
 }
 
 func (h *Handler) HTMXDeleteToolCycle(c echo.Context) *echo.HTTPError {
-	slog.Info("Initiating cycle deletion operation")
-
-	user, merr := shared.GetUserFromContext(c)
+	id, merr := shared.ParseQueryInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
-
-	cycleIDQuery, merr := utils.ParseQueryInt64(c, "id")
-	if merr != nil {
-		return merr.Echo()
-	}
-	cycleID := models.CycleID(cycleIDQuery)
-
-	// Get cycle data before deletion for the feed
-	cycle, merr := h.registry.PressCycles.Get(cycleID)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	tool, merr := h.registry.Tools.Get(cycle.ToolID)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	// Check if there are any regenerations associated with this cycle
-	hasRegenerations, merr := h.registry.ToolRegenerations.HasRegenerationsForCycle(cycleID)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	if hasRegenerations {
-		return echo.NewHTTPError(
-			http.StatusBadRequest,
-			"Cannot delete cycle: it has associated regenerations. "+
-				"Please remove regenerations first.",
-		)
-	}
+	cycleID := shared.EntityID(id)
 
 	merr = h.registry.PressCycles.Delete(cycleID)
 	if merr != nil {
 		return merr.Echo()
 	}
-
-	// Create Feed
-	title := fmt.Sprintf("Zyklus gelöscht für %s", tool.String())
-	content := fmt.Sprintf("Presse: %d\nWerkzeug: %s\nGesamtzyklen: %d\nDatum: %s",
-		cycle.PressNumber, tool.String(), cycle.TotalCycles, cycle.Date.Format("2006-01-02 15:04:05"))
-
-	h.createFeed(title, content, user.TelegramID)
 
 	utils.SetHXTrigger(c, env.HXGlobalTrigger)
 
