@@ -45,7 +45,7 @@ func GetRegenerationsForTool(db *common.DB, toolID shared.EntityID) (
 	return regenerations[:n], nil
 }
 
-func GetAvailableCassettesForBinding(db *common.DB, toolID shared.EntityID) ([]*shared.Cassette, *errors.MasterError) {
+func ListAvailableCassettesForBinding(db *common.DB, toolID shared.EntityID) ([]*shared.Cassette, *errors.MasterError) {
 	tool, merr := db.Tool.Tool.GetByID(toolID)
 	if merr != nil {
 		return nil, merr
@@ -69,3 +69,5 @@ func GetAvailableCassettesForBinding(db *common.DB, toolID shared.EntityID) ([]*
 
 	return cassettes[:i], nil
 }
+
+// TODO: BindCassetteToTool

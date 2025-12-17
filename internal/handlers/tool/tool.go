@@ -105,24 +105,16 @@ func (h *Handler) GetToolPage(c echo.Context) *echo.HTTPError {
 }
 
 func (h *Handler) HTMXPatchToolBinding(c echo.Context) *echo.HTTPError {
-	slog.Info("Initiating tool binding operation")
-
 	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	toolID, merr := h.getToolIDFromParam(c)
+	id, merr := shared.ParseParamInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
-
-	t, merr := h.db.Tool.Tool.GetByID(toolID)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	rTool, merr := services.ResolveTool(h.registry, t)
+	tool, merr := h.db.Tool.Tool.GetByID(shared.EntityID(id))
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -135,56 +127,39 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) *echo.HTTPError {
 			fmt.Sprintf("failed to parse target_id: %#v", targetIDString),
 		)
 	}
-
-	targetIDParsed, err := strconv.ParseInt(targetIDString, 10, 64)
+	id, err := strconv.ParseInt(targetIDString, 10, 64)
 	if err != nil {
 		return echo.NewHTTPError(
 			http.StatusBadRequest,
 			"invalid target_id",
 		)
 	}
-	targetID := models.ToolID(targetIDParsed)
-
-	// Make sure to check for position first (target == top && toolID == cassette)
-	var (
-		cassette, target models.ToolID
-	)
-	if rTool.Position == models.PositionTopCassette {
-		cassette = rTool.ID
-		target = targetID
-	} else {
-		cassette = targetID // If this is not a cassette, the bind method will return an error
-		target = rTool.ID
-	}
-
-	// Bind tool to target, this will get an error if target already has a binding
-	merr = h.registry.Tools.Bind(cassette, target)
+	cassette, merr := h.db.Tool.Cassette.GetByID(shared.EntityID(id))
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	// Update tools binding, no need to re fetch this tools data from the database
-	rTool.Binding = &targetID
-	rTool, _ = services.ResolveTool(h.registry, rTool.Tool)
+	// Bind tool to target, this will get an error if target already has a binding
+	merr = helper.BindCassetteToTool(h.db, cassette.ID, tool.ID)
+	if merr != nil {
+		return merr.Echo()
+	}
 
-	// Get tools for binding
-	toolsForBinding, merr := h.getToolsForBinding(rTool.Tool)
+	cassetesForBinding, merr := helper.ListAvailableCassettesForBinding(h.db, tool.ID)
 	if merr != nil {
 		return merr.Echo()
 	}
 
 	// Render the template
-	te := templates.BindingSection(templates.BindingSectionProps{
-		Tool:            rTool,
-		ToolsForBinding: toolsForBinding,
-		IsAdmin:         user.IsAdmin(),
+	t := templates.BindingSection(templates.BindingSectionProps{
+		Tool:                tool,
+		CassettesForBinding: cassetesForBinding,
+		IsAdmin:             user.IsAdmin(),
 	})
-
-	err = te.Render(c.Request().Context(), c.Response())
+	err = t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "BindingSection")
 	}
-
 	return nil
 }
 
@@ -656,7 +631,7 @@ func (h *Handler) renderCyclesSectionContent(c echo.Context) *echo.HTTPError {
 	activePressNumber := helper.GetPressNumberForTool(h.db, toolID)
 
 	// Get bindable cassettes for this tool, if it is a tool and not a cassette
-	cassettesForBinding, merr := helper.GetAvailableCassettesForBinding(h.db, toolID)
+	cassettesForBinding, merr := helper.ListAvailableCassettesForBinding(h.db, toolID)
 	if merr != nil {
 		return merr.Echo()
 	}
