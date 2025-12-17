@@ -5,6 +5,7 @@ package press
 import (
 	"database/sql"
 	"sync"
+	"weak"
 
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -166,7 +167,7 @@ func (s *CycleService) GetByID(id shared.EntityID) (*shared.Cycle, *errors.Maste
 	}
 
 	// Calculate partial cycles for this cycle
-	c.PartialCycles = s.calculatePartialCycles(c)
+	c.PartialCycles = CalculatePartialCycles(s.DB(), c)
 
 	return c, nil
 }
@@ -197,7 +198,7 @@ func (s *CycleService) List() ([]*shared.Cycle, *errors.MasterError) {
 			return nil, errors.NewMasterError(err, 0)
 		}
 		// Calculate partial cycles for each cycle
-		c.PartialCycles = s.calculatePartialCycles(c)
+		c.PartialCycles = CalculatePartialCycles(s.DB(), c)
 		cycles = append(cycles, c)
 	}
 
@@ -222,15 +223,19 @@ func (s *CycleService) Delete(id shared.EntityID) *errors.MasterError {
 	return nil
 }
 
-// calculatePartialCycles calculates the partial cycles based on the time interval
+// -----------------------------------------------------------------------------
+// Service Specific Helper Functions
+// -----------------------------------------------------------------------------
+
+// CalculatePartialCycles calculates the partial cycles based on the time interval
 // This is a placeholder implementation that can be extended with actual cycle times
-func (s *CycleService) calculatePartialCycles(cycle *shared.Cycle) int64 {
+func CalculatePartialCycles(db *sql.DB, cycle *shared.Cycle) int64 {
 	currentCycles := cycle.PressCycles
 
 	// Now we need to get the total press cycles from the last known cycle before the start time of this cycle
 	var lastKnownCycles int64 = 0
 
-	row := s.DB().QueryRow(`
+	row := db.QueryRow(`
 		SELECT cycles
 		FROM press_cycles
 		WHERE press_number = ? AND stop <= ?
@@ -247,6 +252,10 @@ func (s *CycleService) calculatePartialCycles(cycle *shared.Cycle) int64 {
 	partial := currentCycles - lastKnownCycles
 	return partial
 }
+
+// -----------------------------------------------------------------------------
+// Interface Validations
+// -----------------------------------------------------------------------------
 
 // Service validation
 var _ shared.Service[*shared.Cycle, shared.EntityID] = (*CycleService)(nil)

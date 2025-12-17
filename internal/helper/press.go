@@ -1,10 +1,12 @@
 package helper
 
 import (
+	"database/sql"
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/services/press"
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
 
@@ -17,28 +19,26 @@ func GetPressNumberForTool(db *common.DB, toolID shared.EntityID) shared.PressNu
 	).Scan(&id)
 	if id > 0 {
 		db.Press.Press.DB().QueryRow(
-			`SELECT id FROM presses WHERE slot_up = ? OR slot_down = ?`,
-			id, id,
+			`SELECT id FROM presses WHERE slot_up = :tool_id OR slot_down = :tool_id`,
+			sql.Named("tool_id", id),
 		).Scan(&pressNumber)
 	}
 
 	return pressNumber
 }
 
-const (
-	SQLListCyclesForPress string = `
-		SELECT id, press_number, cycles, start, stop
-		FROM press_cycles
-		WHERE slot_up = :tool_id OR slot_down = :tool_id;
-	`
-)
-
 // ListCyclesForTool returns all cycles associated with a specific tool by finding
 // the press the tool is associated with and returning cycles for that press
-//
-// TODO: Need to calculate partial cycles based on time intervals before returning data
 func ListCyclesForTool(db *common.DB, toolID shared.EntityID) ([]*shared.Cycle, *errors.MasterError) {
-	rows, err := db.Press.Cycle.DB().Query(SQLListCyclesForPress, toolID)
+	rows, err := db.Press.Cycle.DB().Query(
+		`
+			SELECT id, tool_id, position, press_number, cycles, start, stop
+			FROM press_cycles
+			WHERE slot_up = :tool_id OR slot_down = :tool_id
+			ORDER BY press_number ASC, stop DESC;
+		`,
+		sql.Named("tool_id", toolID),
+	)
 	if err != nil {
 		return nil, errors.NewMasterError(err, 0)
 	}
@@ -57,6 +57,7 @@ func ListCyclesForTool(db *common.DB, toolID shared.EntityID) ([]*shared.Cycle, 
 		if err != nil {
 			return nil, errors.NewMasterError(err, 0)
 		}
+		c.PartialCycles = press.CalculatePartialCycles(db.Press.Cycle.DB(), c)
 		cycles = append(cycles, c)
 	}
 
@@ -65,6 +66,38 @@ func ListCyclesForTool(db *common.DB, toolID shared.EntityID) ([]*shared.Cycle, 
 	}
 
 	return cycles, nil
+}
+
+func GetTotalCyclesForTool(db *common.DB, toolID shared.EntityID) (int64, *errors.MasterError) {
+	var totalCycles int64 = 0
+
+	rows, err := db.Press.Cycle.DB().Query(
+		`
+			SELECT cycles
+			FROM press_cycles
+			WHERE slot_up = :tool_id OR slot_down = :tool_id;
+		`,
+		sql.Named("tool_id", toolID),
+	)
+	if err != nil {
+		return 0, errors.NewMasterError(err, 0)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var cycles int64
+		err := rows.Scan(&cycles)
+		if err != nil {
+			return 0, errors.NewMasterError(err, 0)
+		}
+		totalCycles += cycles
+	}
+
+	if err = rows.Err(); err != nil {
+		return 0, errors.NewMasterError(err, 0)
+	}
+
+	return totalCycles, nil
 }
 
 func GetPressUtilization(db *common.DB, pressNumber shared.PressNumber) (
