@@ -13,7 +13,6 @@ const (
 )
 
 const (
-	// TODO: Implement 3 new fields: min_thickness, max_thickness, model_type, update tool and cassette service methods
 	SQLCreateToolTable string = `
 		CREATE TABLE IF NOT EXISTS tools (
 			id					INTEGER NOT NULL,
@@ -36,13 +35,13 @@ const (
 		);
 	`
 	SQLCreateTool string = `
-	INSERT INTO tools (position, width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, cassette)
-		VALUES (:position, :width, :height, :type, :code, :cycles_offset, :cycles, :last_regeneration, :regenerating, :is_dead, :cassette);
+	INSERT INTO tools (position, width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, cassette, min_thickness, max_thickness, model_type)
+		VALUES (:position, :width, :height, :type, :code, :cycles_offset, :cycles, :last_regeneration, :regenerating, :is_dead, :cassette, :min_thickness, :max_thickness, 'tool');
 	`
 	SQLGetToolByID string = `
-		SELECT id, position, width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, cassette
+		SELECT id, position, width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, cassette, min_thickness, max_thickness
 		FROM tools
-		WHERE id = :id;
+		WHERE id = :id AND model_type = 'tool';
 	`
 	SQLUpdateTool string = `
 		UPDATE tools
@@ -56,17 +55,20 @@ const (
 			last_regeneration = :last_regeneration,
 			regenerating = :regenerating,
 			is_dead = :is_dead,
-			cassette = :cassette
-		WHERE id = :id;
+			cassette = :cassette,
+			min_thickness = :min_thickness,
+			max_thickness = :max_thickness,
+		WHERE id = :id AND model_type = 'tool';
 	`
 	SQLDeleteTool string = `
 		UPDATE tools
 		SET is_dead = 1
-		WHERE id = :id;
+		WHERE id = :id AND model_type = 'tool';
 	`
 	SQLListTools string = `
-		SELECT id, position, width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, cassette
-		FROM tools;
+		SELECT id, position, width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, cassette, min_thickness, max_thickness
+		FROM tools
+		WHERE model_type = 'tool';
 	`
 )
 

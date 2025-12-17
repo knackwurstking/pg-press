@@ -10,19 +10,19 @@ import (
 
 const (
 	SQLCreateCassette string = `
-		INSERT INTO cassettes (width, height, position, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, min_thickness, max_thickness)
-		VALUES (:width, :height, :position, :type, :code, :cycles_offset, :cycles, :last_regeneration, :regenerating, :is_dead, :min_thickness, :max_thickness);
+		INSERT INTO tools (position, width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, min_thickness, max_thickness, model_type)
+		VALUES (:position, :width, :height, :type, :code, :cycles_offset, :cycles, :last_regeneration, :regenerating, :is_dead, :min_thickness, :max_thickness, 'cassette');
 	`
 	SQLGetCassetteByID string = `
-		SELECT id, width, height, position, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, min_thickness, max_thickness
-		FROM cassettes
-		WHERE id = :id;
+		SELECT id, position, width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, min_thickness, max_thickness
+		FROM tools
+		WHERE id = :id AND model_type = 'cassette';
 	`
 	SQLUpdateCassette string = `
-		UPDATE cassettes
-		SET width = :width,
+		UPDATE tools
+		SET position = :position,
+			width = :width,
 			height = :height,
-			position = :position,
 			type = :type,
 			code = :code,
 			cycles_offset = :cycles_offset,
@@ -31,17 +31,18 @@ const (
 			regenerating = :regenerating,
 			is_dead = :is_dead,
 			min_thickness = :min_thickness,
-			max_thickness = :max_thickness
-		WHERE id = :id;
+			max_thickness = :max_thickness,
+		WHERE id = :id AND model_type = 'cassette';
 	`
 	SQLDeleteCassette string = `
-		UPDATE cassettes
+		UPDATE tools
 		SET is_dead = 1
-		WHERE id = :id;
+		WHERE id = :id AND model_type = 'cassette';
 	`
 	SQLListCassettes string = `
-		SELECT id, width, height, position, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, min_thickness, max_thickness
-		FROM cassettes;
+		SELECT id, position, width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, min_thickness, max_thickness
+		FROM tools
+		WHERE model_type = 'cassette';
 	`
 )
 
@@ -72,9 +73,9 @@ func (s *CassetteService) Create(entity *shared.Cassette) *errors.MasterError {
 	defer s.mx.Unlock()
 
 	r, err := s.DB().Exec(SQLCreateCassette,
+		sql.Named("position", entity.Position),
 		sql.Named("width", entity.Width),
 		sql.Named("height", entity.Height),
-		sql.Named("position", entity.Position),
 		sql.Named("type", entity.Type),
 		sql.Named("code", entity.Code),
 		sql.Named("cycles_offset", entity.CyclesOffset),
@@ -151,9 +152,9 @@ func (s *CassetteService) Update(entity *shared.Cassette) *errors.MasterError {
 
 	_, err := s.DB().Exec(SQLUpdateCassette,
 		sql.Named("id", entity.ID),
+		sql.Named("position", entity.Position),
 		sql.Named("width", entity.Width),
 		sql.Named("height", entity.Height),
-		sql.Named("position", entity.Position),
 		sql.Named("type", entity.Type),
 		sql.Named("code", entity.Code),
 		sql.Named("cycles_offset", entity.CyclesOffset),
