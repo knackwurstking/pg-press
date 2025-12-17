@@ -12,7 +12,7 @@ import (
 type PageProps struct {
 	Title    string
 	ID       shared.EntityID // ID of the tool or cassette
-	Position shared.Slot     // Position (slot type) of the tool or cassette
+	Position shared.Slot     // Position needed for tool type detection (tool or cassette)
 	User     *shared.User
 }
 

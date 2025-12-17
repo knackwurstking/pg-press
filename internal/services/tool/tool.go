@@ -1,3 +1,5 @@
+// TODO: Merge the cassettes table into this tools table and add a special type "type" for detection, just like the metal sheets table
+// - one table and two services, jsut like the metal sheets (upper and lower)
 package tool
 
 import (
@@ -16,7 +18,7 @@ const (
 	SQLCreateToolTable string = `
 		CREATE TABLE IF NOT EXISTS tools (
 			id					INTEGER NOT NULL,
-			position 				INTEGER NOT NULL,
+			position 			INTEGER NOT NULL,
 			width 				INTEGER NOT NULL,
 			height 				INTEGER NOT NULL,
 			type 				TEXT NOT NULL,

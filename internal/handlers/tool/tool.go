@@ -31,11 +31,11 @@ func NewHandler(db *common.DB) *Handler {
 func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	ui.RegisterEchoRoutes(e, env.ServerPathPrefix, []*ui.EchoRoute{
 		// Main Page
-		ui.NewEchoRoute(http.MethodGet, path+"/:id", h.GetToolPage),
+		ui.NewEchoRoute(http.MethodGet, path+"/:id", h.GetToolPage), // "is_cassette" defines the tool type
 
 		// Regenerations Table
 		ui.NewEchoRoute(http.MethodDelete,
-			path+"/:id/delete-regeneration", h.HTMXDeleteRegeneration),
+			path+"/:id/delete-regeneration", h.HTMXDeleteRegeneration), // "id" is regeneration ID
 
 		// Tool status and regenerations management
 		ui.NewEchoRoute(http.MethodGet,
@@ -69,28 +69,46 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	})
 }
 
-// TODO: Check for the optional "is_cassette" boolean query parameter
-func (h *Handler) GetToolPage(c echo.Context) error {
+func (h *Handler) GetToolPage(c echo.Context) *echo.HTTPError {
 	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	toolID, merr := h.getToolIDFromParam(c)
+	id, merr := h.getToolIDFromParam(c)
 	if merr != nil {
 		return merr.Echo()
 	}
+	isCassette := shared.ParseQueryBool(c, "is_cassette")
 
-	tool, merr := h.db.Tool.Tool.GetByID(toolID)
-	if merr != nil {
-		return merr.Echo()
+	var (
+		title    string
+		toolID   shared.EntityID
+		position shared.Slot
+	)
+	if isCassette {
+		cassette, merr := h.db.Tool.Cassette.GetByID(id)
+		if merr != nil {
+			return merr.Echo()
+		}
+		title = cassette.German()
+		toolID = cassette.ID
+		position = cassette.Position
+	} else {
+		tool, merr := h.db.Tool.Tool.GetByID(toolID)
+		if merr != nil {
+			return merr.Echo()
+		}
+		title = tool.German()
+		toolID = tool.ID
+		position = tool.Position
 	}
 
 	t := templates.Page(&templates.PageProps{
-		User:       user,
-		ToolString: tool.String(),
-		ToolID:     tool.ID,
-		Position:   tool.Position,
+		Title:    title,
+		ID:       id,
+		Position: position,
+		User:     user,
 	})
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
@@ -100,7 +118,7 @@ func (h *Handler) GetToolPage(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
+func (h *Handler) HTMXPatchToolBinding(c echo.Context) *echo.HTTPError {
 	slog.Info("Initiating tool binding operation")
 
 	user, merr := shared.GetUserFromContext(c)
@@ -184,7 +202,7 @@ func (h *Handler) HTMXPatchToolBinding(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) HTMXPatchToolUnBinding(c echo.Context) error {
+func (h *Handler) HTMXPatchToolUnBinding(c echo.Context) *echo.HTTPError {
 	slog.Info("Initiating tool unbinding operation")
 
 	user, merr := shared.GetUserFromContext(c)
@@ -233,7 +251,7 @@ func (h *Handler) HTMXPatchToolUnBinding(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) HTMXGetCycles(c echo.Context) error {
+func (h *Handler) HTMXGetCycles(c echo.Context) *echo.HTTPError {
 	// Render the template
 	cyclesProps, merr := h.buildCyclesProps(c)
 	if merr != nil {
@@ -249,7 +267,7 @@ func (h *Handler) HTMXGetCycles(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) HTMXGetToolTotalCycles(c echo.Context) error {
+func (h *Handler) HTMXGetToolTotalCycles(c echo.Context) *echo.HTTPError {
 	toolID, merr := h.getToolIDFromParam(c)
 	if merr != nil {
 		return merr.Echo()
@@ -281,7 +299,7 @@ func (h *Handler) HTMXGetToolTotalCycles(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) HTMXDeleteToolCycle(c echo.Context) error {
+func (h *Handler) HTMXDeleteToolCycle(c echo.Context) *echo.HTTPError {
 	slog.Info("Initiating cycle deletion operation")
 
 	user, merr := shared.GetUserFromContext(c)
@@ -337,7 +355,7 @@ func (h *Handler) HTMXDeleteToolCycle(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) HTMXGetToolMetalSheets(c echo.Context) error {
+func (h *Handler) HTMXGetToolMetalSheets(c echo.Context) *echo.HTTPError {
 	slog.Info("Retrieving metal sheet entries for tool")
 
 	user, merr := shared.GetUserFromContext(c)
@@ -372,7 +390,7 @@ func (h *Handler) HTMXGetToolMetalSheets(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) HTMXGetToolNotes(c echo.Context) error {
+func (h *Handler) HTMXGetToolNotes(c echo.Context) *echo.HTTPError {
 	toolID, merr := h.getToolIDFromParam(c)
 	if merr != nil {
 		return merr.Echo()
@@ -393,7 +411,7 @@ func (h *Handler) HTMXGetToolNotes(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) HTMXDeleteRegeneration(c echo.Context) error {
+func (h *Handler) HTMXDeleteRegeneration(c echo.Context) *echo.HTTPError {
 	slog.Info("Deleting tool regeneration entry")
 
 	user, merr := shared.GetUserFromContext(c)
@@ -446,7 +464,7 @@ func (h *Handler) HTMXDeleteRegeneration(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) HTMXGetStatusEdit(c echo.Context) error {
+func (h *Handler) HTMXGetStatusEdit(c echo.Context) *echo.HTTPError {
 	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
@@ -472,7 +490,7 @@ func (h *Handler) HTMXGetStatusEdit(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) HTMXGetStatusDisplay(c echo.Context) error {
+func (h *Handler) HTMXGetStatusDisplay(c echo.Context) *echo.HTTPError {
 	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
@@ -498,7 +516,7 @@ func (h *Handler) HTMXGetStatusDisplay(c echo.Context) error {
 	return nil
 }
 
-func (h *Handler) HTMXUpdateToolStatus(c echo.Context) error {
+func (h *Handler) HTMXUpdateToolStatus(c echo.Context) *echo.HTTPError {
 	slog.Info("Change the tool status")
 
 	user, merr := shared.GetUserFromContext(c)
@@ -729,11 +747,4 @@ func (h *Handler) renderStatusComponent(tool *models.Tool, editable bool, user *
 		Editable:          editable,
 		UserHasPermission: user.IsAdmin(),
 	})
-}
-
-func (h *Handler) createFeed(title, content string, userID models.TelegramID) {
-	merr := h.registry.Feeds.Add(title, content, userID)
-	if merr != nil {
-		slog.Warn("Failed to create feed", "error", merr)
-	}
 }
