@@ -11,7 +11,7 @@ import (
 const (
 	SQLCreateUpperMetalSheet string = `
 		INSERT INTO metal_sheets (tool_id, tile_height, value, type)
-		VALUES (:tool_id, :tile_height, :value, :type);
+		VALUES (:tool_id, :tile_height, :value, 'upper');
 	`
 	SQLGetUpperMetalSheetByID string = `
 		SELECT id, tool_id, tile_height, value
@@ -23,7 +23,7 @@ const (
 		SET tool_id = :tool_id,
 		    tile_height = :tile_height,
 		    value = :value,
-		    type = :type
+		    type = "upper"
 		WHERE id = :id;
 	`
 	SQLDeleteUpperMetalSheet string = `
@@ -124,7 +124,6 @@ func (s *UpperMetalSheetService) Create(entity *shared.UpperMetalSheet) *errors.
 		sql.Named("tool_id", entity.ToolID),
 		sql.Named("tile_height", entity.TileHeight),
 		sql.Named("value", entity.Value),
-		sql.Named("type", "upper"),
 	)
 	if err != nil {
 		return errors.NewMasterError(err, 0)
@@ -157,7 +156,6 @@ func (s *UpperMetalSheetService) Update(entity *shared.UpperMetalSheet) *errors.
 		sql.Named("tool_id", entity.ToolID),
 		sql.Named("tile_height", entity.TileHeight),
 		sql.Named("value", entity.Value),
-		sql.Named("type", "upper"),
 	)
 	if err != nil {
 		return errors.NewMasterError(err, 0)

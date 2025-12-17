@@ -123,9 +123,39 @@ func UnbindCassetteFromTool(db *common.DB, toolID shared.EntityID) *errors.Maste
 }
 
 func ListUpperMetalSheetsForTool(db *common.DB, toolID shared.EntityID) ([]*shared.UpperMetalSheet, *errors.MasterError) {
-	// TODO: Get upper metal sheets for tool
+	metalSheets, merr := db.Tool.UpperMetalSheet.List()
+	if merr != nil {
+		return metalSheets, merr
+	}
+
+	i := 0
+	for _, ms := range metalSheets {
+		if ms.ToolID != toolID {
+			continue
+		}
+
+		metalSheets[i] = ms
+		i++
+	}
+
+	return metalSheets[:i], nil
 }
 
 func ListLowerMetalSheetsForTool(db *common.DB, toolID shared.EntityID) ([]*shared.LowerMetalSheet, *errors.MasterError) {
-	// TOOD: Get lower metal sheets for tool
+	metalSheets, merr := db.Tool.LowerMetalSheet.List()
+	if merr != nil {
+		return metalSheets, merr
+	}
+
+	i := 0
+	for _, ms := range metalSheets {
+		if ms.ToolID != toolID {
+			continue
+		}
+
+		metalSheets[i] = ms
+		i++
+	}
+
+	return metalSheets[:i], nil
 }

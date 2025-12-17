@@ -11,7 +11,7 @@ import (
 const (
 	SQLCreateLowerMetalSheet string = `
 		INSERT INTO metal_sheets (tool_id, tile_height, value, type, marke_height, stf, stf_max, identifier)
-		VALUES (:tool_id, :tile_height, :value, :type, :marke_height, :stf, :stf_max, :identifier);
+		VALUES (:tool_id, :tile_height, :value, 'lower', :marke_height, :stf, :stf_max, :identifier);
 	`
 	SQLGetLowerMetalSheetByID string = `
 		SELECT id, tool_id, tile_height, value, marke_height, stf, stf_max, identifier
@@ -23,7 +23,7 @@ const (
 		SET tool_id = :tool_id,
 		    tile_height = :tile_height,
 		    value = :value,
-		    type = :type,
+		    type = 'lower',
 		    marke_height = :marke_height,
 		    stf = :stf,
 		    stf_max = :stf_max,
@@ -136,7 +136,6 @@ func (s *LowerMetalSheetService) Create(entity *shared.LowerMetalSheet) *errors.
 		sql.Named("tool_id", entity.ToolID),
 		sql.Named("tile_height", entity.TileHeight),
 		sql.Named("value", entity.Value),
-		sql.Named("type", "lower"),
 		sql.Named("marke_height", entity.MarkeHeight),
 		sql.Named("stf", entity.STF),
 		sql.Named("stf_max", entity.STFMax),
@@ -173,7 +172,6 @@ func (s *LowerMetalSheetService) Update(entity *shared.LowerMetalSheet) *errors.
 		sql.Named("tool_id", entity.ToolID),
 		sql.Named("tile_height", entity.TileHeight),
 		sql.Named("value", entity.Value),
-		sql.Named("type", "lower"),
 		sql.Named("marke_height", entity.MarkeHeight),
 		sql.Named("stf", entity.STF),
 		sql.Named("stf_max", entity.STFMax),
