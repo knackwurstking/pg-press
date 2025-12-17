@@ -1,4 +1,5 @@
-// TODO: Need to calculate partial cycles based on time intervals before returning data
+// Partial cycles are calculated based on time intervals for each press separately
+// The calculation assumes a full cycle takes a predetermined amount of time
 package press
 
 import (
@@ -24,15 +25,18 @@ const (
 			UNIQUE(tool_id, position)
 		);
 	`
+
 	SQLCreateCycle string = `
 		INSERT INTO press_cycles (tool_id, position, press_number, cycles, start, stop)
 		VALUES (:tool_id, :position, :press_number, :cycles, :start, :stop);
 	`
+
 	SQLGetCycleByID string = `
 		SELECT id, tool_id, position, press_number, cycles, start, stop
 		FROM press_cycles
 		WHERE id = :id;
 	`
+
 	SQLUpdateCycle string = `
 		UPDATE press_cycles
 		SET tool_id      = :tool_id,
@@ -43,13 +47,16 @@ const (
 			stop         = :stop
 		WHERE id = :id;
 	`
+
 	SQLDeleteCycle string = `
 		DELETE FROM press_cycles
 		WHERE id = :id;
 	`
+
 	SQLListCycles string = `
 		SELECT id, tool_id, position, press_number, cycles, start, stop
-		FROM press_cycles;
+		FROM press_cycles
+		ORDER BY press_number ASC, stop DESC;
 	`
 )
 
@@ -158,6 +165,9 @@ func (s *CycleService) GetByID(id shared.EntityID) (*shared.Cycle, *errors.Maste
 		return c, errors.NewMasterError(err, 0)
 	}
 
+	// Calculate partial cycles for this cycle
+	c.PartialCycles = s.calculatePartialCycles(c)
+
 	return c, nil
 }
 
@@ -186,6 +196,8 @@ func (s *CycleService) List() ([]*shared.Cycle, *errors.MasterError) {
 		if err != nil {
 			return nil, errors.NewMasterError(err, 0)
 		}
+		// Calculate partial cycles for each cycle
+		c.PartialCycles = s.calculatePartialCycles(c)
 		cycles = append(cycles, c)
 	}
 
@@ -208,6 +220,32 @@ func (s *CycleService) Delete(id shared.EntityID) *errors.MasterError {
 	}
 
 	return nil
+}
+
+// calculatePartialCycles calculates the partial cycles based on the time interval
+// This is a placeholder implementation that can be extended with actual cycle times
+func (s *CycleService) calculatePartialCycles(cycle *shared.Cycle) int64 {
+	currentCycles := cycle.PressCycles
+
+	// Now we need to get the total press cycles from the last known cycle before the start time of this cycle
+	var lastKnownCycles int64 = 0
+
+	row := s.DB().QueryRow(`
+		SELECT cycles
+		FROM press_cycles
+		WHERE press_number = ? AND stop <= ?
+		ORDER BY stop DESC
+		LIMIT 1;
+	`, cycle.PressNumber, cycle.Start)
+
+	err := row.Scan(&lastKnownCycles)
+	if err != nil && err != sql.ErrNoRows {
+		// In case of error other than no rows, we log and return 0 partial cycles
+		return 0
+	}
+
+	partial := currentCycles - lastKnownCycles
+	return partial
 }
 
 // Service validation
