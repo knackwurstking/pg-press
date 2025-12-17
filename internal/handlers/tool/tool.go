@@ -264,13 +264,12 @@ func (h *Handler) HTMXGetToolMetalSheets(c echo.Context) *echo.HTTPError {
 }
 
 func (h *Handler) HTMXGetToolNotes(c echo.Context) *echo.HTTPError {
-	toolID, merr := h.getToolIDFromParam(c)
+	id, merr := shared.ParseParamInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
-
-	// Get notes for this tool
-	notes, merr := h.registry.Notes.ListByLinked("tool", int64(toolID))
+	toolID := shared.EntityID(id)
+	notes, merr := helper.ListNotesForLinked(h.db, "tool", toolID)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -280,60 +279,25 @@ func (h *Handler) HTMXGetToolNotes(c echo.Context) *echo.HTTPError {
 	if err != nil {
 		return errors.NewRenderError(err, "Notes")
 	}
-
 	return nil
 }
 
 func (h *Handler) HTMXDeleteRegeneration(c echo.Context) *echo.HTTPError {
-	slog.Info("Deleting tool regeneration entry")
-
-	user, merr := shared.GetUserFromContext(c)
+	id, merr := shared.ParseQueryInt64(c, "id")
+	if merr != nil {
+		return merr.Echo()
+	}
+	regeneration, merr := h.db.Tool.Regeneration.GetByID(shared.EntityID(id))
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	id, merr := utils.ParseQueryInt64(c, "id")
-	if merr != nil {
-		return merr.Echo()
-	}
-	regenerationID := models.ToolRegenerationID(id)
-
-	r, merr := h.registry.ToolRegenerations.Get(regenerationID)
-	if merr != nil {
-		return merr.Echo()
-	}
-	regeneration, merr := services.ResolveToolRegeneration(h.registry, r)
+	merr = h.db.Tool.Regeneration.Delete(regeneration.ID)
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	merr = h.registry.ToolRegenerations.Delete(regeneration.ID)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	// Create Feed
-	title := "Werkzeug Regenerierung entfernt"
-	content := fmt.Sprintf(
-		"Tool: %s\nGebundener Zyklus: %s (Teil Zyklen: %d)",
-		regeneration.GetTool().String(),
-		regeneration.GetCycle().Date.Format(env.DateFormat),
-		regeneration.GetCycle().PartialCycles,
-	)
-	if regeneration.Reason != "" {
-		content += fmt.Sprintf("\nReason: %s", regeneration.Reason)
-	}
-	if regeneration.PerformedBy != nil {
-		user, err := h.registry.Users.Get(*regeneration.PerformedBy)
-		if err != nil {
-			slog.Warn("User not found", "error", err, "performed_by", regeneration.PerformedBy)
-		}
-		content += fmt.Sprintf("\nPerformed by: %s", user.Name)
-	}
-	h.createFeed(title, content, user.TelegramID)
-
-	utils.SetHXTrigger(c, env.HXGlobalTrigger)
-
+	urlb.SetHXTrigger(c, "reload-cycles-section")
 	return nil
 }
 
