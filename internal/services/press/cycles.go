@@ -1,3 +1,4 @@
+// TODO: Need to calculate partial cycles based on time intervals before returning data
 package press
 
 import (
@@ -82,7 +83,7 @@ func (s *CycleService) Create(entity *shared.Cycle) *errors.MasterError {
 		sql.Named("tool_id", entity.ToolID),
 		sql.Named("position", entity.Position),
 		sql.Named("press_number", entity.PressNumber),
-		sql.Named("cycles", entity.Cycles),
+		sql.Named("cycles", entity.PressCycles),
 		sql.Named("start", entity.Start),
 		sql.Named("stop", entity.Stop),
 	)
@@ -119,7 +120,7 @@ func (s *CycleService) Update(entity *shared.Cycle) *errors.MasterError {
 		sql.Named("tool_id", entity.ToolID),
 		sql.Named("position", entity.Position),
 		sql.Named("press_number", entity.PressNumber),
-		sql.Named("cycles", entity.Cycles),
+		sql.Named("cycles", entity.PressCycles),
 		sql.Named("start", entity.Start),
 		sql.Named("stop", entity.Stop),
 	)
@@ -149,7 +150,7 @@ func (s *CycleService) GetByID(id shared.EntityID) (*shared.Cycle, *errors.Maste
 		&c.ToolID,
 		&c.Position,
 		&c.PressNumber,
-		&c.Cycles,
+		&c.PressCycles,
 		&c.Start,
 		&c.Stop,
 	)
@@ -178,7 +179,7 @@ func (s *CycleService) List() ([]*shared.Cycle, *errors.MasterError) {
 			&c.ToolID,
 			&c.Position,
 			&c.PressNumber,
-			&c.Cycles,
+			&c.PressCycles,
 			&c.Start,
 			&c.Stop,
 		)

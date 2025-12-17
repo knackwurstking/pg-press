@@ -35,6 +35,8 @@ const (
 
 // ListCyclesForTool returns all cycles associated with a specific tool by finding
 // the press the tool is associated with and returning cycles for that press
+//
+// TODO: Need to calculate partial cycles based on time intervals before returning data
 func ListCyclesForTool(db *common.DB, toolID shared.EntityID) ([]*shared.Cycle, *errors.MasterError) {
 	rows, err := db.Press.Cycle.DB().Query(SQLListCyclesForPress, toolID)
 	if err != nil {
@@ -48,7 +50,7 @@ func ListCyclesForTool(db *common.DB, toolID shared.EntityID) ([]*shared.Cycle, 
 		err := rows.Scan(
 			&c.ID,
 			&c.PressNumber,
-			&c.Cycles,
+			&c.PressCycles,
 			&c.Start,
 			&c.Stop,
 		)
