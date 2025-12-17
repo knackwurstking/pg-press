@@ -121,3 +121,11 @@ func UnbindCassetteFromTool(db *common.DB, toolID shared.EntityID) *errors.Maste
 
 	return nil
 }
+
+func ListUpperMetalSheetsForTool(db *common.DB, toolID shared.EntityID) ([]*shared.UpperMetalSheet, *errors.MasterError) {
+	// TODO: Get upper metal sheets for tool
+}
+
+func ListLowerMetalSheetsForTool(db *common.DB, toolID shared.EntityID) ([]*shared.LowerMetalSheet, *errors.MasterError) {
+	// TOOD: Get lower metal sheets for tool
+}

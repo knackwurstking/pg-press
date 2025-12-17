@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/a-h/templ"
 	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
@@ -217,31 +218,48 @@ func (h *Handler) HTMXGetToolMetalSheets(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	// TODO: Continue here - fetch metal sheets for tool
-	toolID, merr := h.getToolIDFromParam(c)
+	id, merr := shared.ParseParamInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
-
-	tool, merr := h.registry.Tools.Get(toolID)
+	var tool shared.ModelTool
+	tool, merr = h.db.Tool.Tool.GetByID(shared.EntityID(id))
+	// If not found, try cassette
 	if merr != nil {
-		return merr.Echo()
+		if merr.Code == http.StatusNotFound {
+			tool, merr = h.db.Tool.Cassette.GetByID(shared.EntityID(id))
+			if merr != nil {
+				return merr.Echo()
+			}
+		} else {
+			return merr.Echo()
+		}
 	}
 
-	// Fetch metal sheets assigned to this tool
-	metalSheets, merr := h.registry.MetalSheets.ListByToolID(toolID)
-	if merr != nil {
-		// Log error but don't fail - metal sheets are supplementary data
-		slog.Error("Failed to fetch metal sheets", "error", merr, "user_name", user.Name)
-		metalSheets = []*models.MetalSheet{}
+	var t templ.Component
+
+	// Fetch metal sheets for tool
+	switch p := tool.GetBase().Position; p {
+	case shared.SlotUpper:
+		metalSheets, merr := helper.ListUpperMetalSheetsForTool(h.db, tool.GetID())
+		if merr != nil {
+			return merr.Echo()
+		}
+		t = templates.MetalSheetTableForUpperSlot(metalSheets, user)
+	case shared.SlotLower:
+		metalSheets, merr := helper.ListLowerMetalSheetsForTool(h.db, tool.GetID())
+		if merr != nil {
+			return merr.Echo()
+		}
+		t = templates.MetalSheetTableForLowerSlot(metalSheets, user)
+	default:
+		return echo.NewHTTPError(http.StatusBadRequest, "Tool is not supported for metal sheets")
 	}
 
-	t := templates.MetalSheets(user, metalSheets, tool)
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "MetalSheets")
 	}
-
 	return nil
 }
 
