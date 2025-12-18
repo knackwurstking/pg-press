@@ -1,60 +1,11 @@
-const idToolsFilter = "#tools-filter";
-const urlSearchParamName = "tools_filter";
-const storageKeyLastActiveTab = "last-active-tab";
-
-function filterToolsList(event = null, skipHistory = false) {
-	const target = event
-		? event.currentTarget
-		: document.querySelector(idToolsFilter);
-	if (!target) return;
-
-	const query = target.value
-		.toLowerCase()
-		.split(" ")
-		.filter((v) => !!v);
-	const targets = document.querySelectorAll(`#tools-list .tool-item`);
-
-	if (!skipHistory) {
-		updateUrlQueryParam(query);
-	}
-
-	console.debug(`Filtering tools list with query: [${query}] [skipHistory=${skipHistory}]`);
-
-	targets.forEach((child) => {
-		child.style.display = query.every((value) => {
-			return child.textContent.toLowerCase().includes(value)
-		})
-			? "block"
-			: "none";
-	});
-}
-
-function initFilterInputFromQuery() {
-	const urlParams = new URLSearchParams(window.location.search);
-	const query = urlParams.get(urlSearchParamName);
-	if (query) document.querySelector(idToolsFilter).value = query;
-}
-
-function updateUrlQueryParam(query) {
-	const urlParams = new URLSearchParams(window.location.search);
-	urlParams.set(urlSearchParamName, query.join(" "));
-	window.history.replaceState({}, "", `?${urlParams.toString()}`);
-}
-
-function toggleTab(event) {
-	document
-		.querySelectorAll(".tabs .tab")
-		.forEach((tab) => tab.classList.remove("active"));
-
-	currentTab = event.currentTarget;
-	currentTab.classList.add("active");
-	currentTab.dispatchEvent(new Event("loadTabContent"));
-
-	localStorage.setItem(storageKeyLastActiveTab, currentTab.dataset.index);
-}
+// ----------------------------------------------------------------------------
+// This file contains the JavaScript code for the Tools page.
+// It handles tab switching, filtering of tools, and preserving
+// the last active tab using localStorage.
+// ----------------------------------------------------------------------------
 
 document.addEventListener("DOMContentLoaded", () => {
-	let lastActiveTab = parseInt(localStorage.getItem(storageKeyLastActiveTab));
+	let lastActiveTab = parseInt(localStorage.getItem("last-active-tab"));
 
 	if (isNaN(lastActiveTab)) {
 		lastActiveTab = 1;
@@ -66,3 +17,104 @@ document.addEventListener("DOMContentLoaded", () => {
 		),
 	});
 });
+
+// ----------------------------------------------------------------------------
+// Tool Filtering
+// ----------------------------------------------------------------------------
+
+// Query id constants
+const idListsContainer = "lists-container";
+const idFilterInput = "tools-filter";
+
+// Query class constants
+const classToolItem = "tool-item";
+
+function initFilterInputFromQuery() {
+	const urlParams = new URLSearchParams(window.location.search);
+	const query = urlParams.get("tools_filter");
+	if (query) document.querySelector(`#${idFilterInput}`).value = query;
+}
+
+const detailsOpenStates = new Map();
+
+function filterToolsList(event = null, skipHistory = false) {
+	const target = event
+		? event.currentTarget
+		: document.querySelector(`#${idFilterInput}`);
+	if (!target) return;
+
+	const query = target.value
+		.toLowerCase()
+		.split(" ")
+		.filter((v) => !!v);
+	const targets = document.querySelectorAll(`#${idListsContainer} .${classToolItem}`);
+
+	if (!skipHistory) {
+		updateUrlQueryParam(query);
+	}
+
+	// Save details tag open states before filtering
+	if (query.length > 0 && detailsOpenStates.size === 0) {
+		document.querySelectorAll(`#${idListsContainer} details`).forEach((details) => {
+			detailsOpenStates.set(details, details.hasAttribute("open"));
+		});
+	}
+
+	if (query.length === 0) {
+		targets.forEach((child) => {
+			child.style.display = "block";
+		});
+
+		// Restore details tag open states
+		detailsOpenStates.forEach((isOpen, details) => {
+			if (isOpen) {
+				details.setAttribute("open", "true");
+			} else {
+				details.removeAttribute("open");
+			}
+		});
+		detailsOpenStates.clear();
+
+		return;
+	}
+
+	console.debug(`Filtering tools list with query: [${query}] [skipHistory=${skipHistory}]`);
+
+	matchingDetails = new Set();
+	targets.forEach((child) => {
+		const match = query.every((value) => child.textContent.toLowerCase().includes(value));
+		if (match) {
+			child.style.display = "block";
+			// If this item is inside a details tag, ensure it's open, query details tag from stack
+			child.closest("details")?.setAttribute("open", "true");
+			return;
+		}
+		child.style.display = "none";
+	});
+}
+
+function updateUrlQueryParam(query) {
+	const urlParams = new URLSearchParams(window.location.search);
+	urlParams.set("tool_filter", query.join(" "));
+	window.history.replaceState({}, "", `?${urlParams.toString()}`);
+}
+
+// ----------------------------------------------------------------------------
+// Tab Switching
+// ----------------------------------------------------------------------------
+
+let currentTab = null;
+
+function toggleTab(event) {
+	document
+		.querySelectorAll(".tabs .tab")
+		.forEach((tab) => tab.classList.remove("active"));
+
+	currentTab = event.currentTarget;
+	currentTab.classList.add("active");
+	currentTab.dispatchEvent(new Event("loadTabContent"));
+
+	localStorage.setItem("last-active-tab", currentTab.dataset.index);
+}
+
+
