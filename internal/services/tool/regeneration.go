@@ -37,7 +37,7 @@ const (
 		SET tool_id = :tool_id,
 			start = :start,
 			stop = :stop,
-			cycles = :cycles,
+			cycles = :cycles
 		WHERE id = :id;
 	`
 
@@ -47,7 +47,7 @@ const (
 	`
 
 	SQLListToolRegenerations string = `
-		SELECT id, tool_id, start, stop, cycles 
+		SELECT id, tool_id, start, stop, cycles
 		FROM tool_regenerations
 		ORDER BY start DESC;
 	`
@@ -70,8 +70,6 @@ func (s *ToolRegenerationService) Setup() *errors.MasterError {
 	return s.BaseService.Setup(DBName, SQLCreateToolRegenerationTable)
 }
 
-// TODO: Allow stop being zero, this marks an ongoing regeneration
-// TODO: Disallow adding new regeneration if one is ongoing for the same tool
 func (s *ToolRegenerationService) Create(entity *shared.ToolRegeneration) *errors.MasterError {
 	verr := entity.Validate()
 	if verr != nil {
@@ -80,6 +78,12 @@ func (s *ToolRegenerationService) Create(entity *shared.ToolRegeneration) *error
 
 	s.mx.Lock()
 	defer s.mx.Unlock()
+
+	// Check if there's already an ongoing regeneration for this tool (where stop = 0)
+	verr = s.checkOngoingRegeneration(entity)
+	if verr != nil {
+		return verr.MasterError()
+	}
 
 	r, err := s.DB().Exec(SQLCreateToolRegeneration,
 		sql.Named("tool_id", entity.ToolID),
@@ -201,6 +205,24 @@ func (s *ToolRegenerationService) Delete(id shared.EntityID) *errors.MasterError
 		return errors.NewMasterError(err, 0)
 	}
 
+	return nil
+}
+
+func (s *ToolRegenerationService) checkOngoingRegeneration(entity *shared.ToolRegeneration) *errors.ValidationError {
+	row := s.DB().QueryRow(
+		`
+			SELECT id FROM tool_regenerations
+			WHERE tool_id = :tool_id AND (stop = 0 OR stop > ?)
+			ORDER BY stop DESC
+			LIMIT 1;
+		`,
+		entity.Start,
+		sql.Named("tool_id", entity.ToolID),
+	)
+	if row != nil && row.Err() == nil && row.Err() != sql.ErrNoRows {
+		return errors.NewValidationError(
+			"there is already an ongoing regeneration for tool ID %v", entity.ToolID)
+	}
 	return nil
 }
 
