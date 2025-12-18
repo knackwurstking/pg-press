@@ -17,7 +17,7 @@ func renderToolsSection(c echo.Context) *echo.HTTPError {
 	var (
 		tools     []*shared.Tool
 		cassettes []*shared.Cassette
-		errCh     = make(chan *echo.HTTPError, 2)
+		errCh     = make(chan *echo.HTTPError, 4)
 	)
 
 	wg := &sync.WaitGroup{}
@@ -27,6 +27,7 @@ func renderToolsSection(c echo.Context) *echo.HTTPError {
 		tools, merr = DB.Tool.Tool.List()
 		if merr != nil {
 			errCh <- merr.Echo()
+			return
 		}
 		errCh <- nil
 	})
@@ -36,6 +37,7 @@ func renderToolsSection(c echo.Context) *echo.HTTPError {
 		cassettes, merr = DB.Tool.Cassette.List()
 		if merr != nil {
 			errCh <- merr.Echo()
+			return
 		}
 		errCh <- nil
 	})
@@ -46,14 +48,13 @@ func renderToolsSection(c echo.Context) *echo.HTTPError {
 		regenerations, merr := DB.Tool.Regeneration.List()
 		if merr != nil {
 			errCh <- merr.Echo()
+			return
 		}
-
 		for _, r := range regenerations {
 			if r.Stop == 0 {
 				isRegenerating[r.ToolID] = true
 			}
 		}
-
 		regenerationsCount = len(regenerations)
 		errCh <- nil
 	})
@@ -63,6 +64,7 @@ func renderToolsSection(c echo.Context) *echo.HTTPError {
 		notes, merr := DB.Note.Note.List()
 		if merr != nil {
 			errCh <- merr.Echo()
+			return
 		}
 		notesCount = len(notes)
 		errCh <- nil
