@@ -31,7 +31,7 @@ templ Page(p *PageProps) {
 	) {
 		<main class="container fluid flex flex-col gap">
 			@components.ActionBar() {
-				@actionBarContent(p.Tool, p.User)
+				@actionBarContent(p)
 			}
 			@components.Section(templ.Attributes{
 				"id":                        "notes-section",
@@ -58,11 +58,11 @@ templ Page(p *PageProps) {
 	}
 }
 
-templ actionBarContent(tool shared.ModelTool, user *shared.User) {
-	if user.IsAdmin() {
+templ actionBarContent(p *PageProps) {
+	if p.User.IsAdmin() {
 		<button
 			class="destructive flex gap"
-			hx-patch={ urlb.UrlTools(tool.GetID()).MarkDead }
+			hx-patch={ urlb.UrlTools(p.Tool.GetID()).MarkDead }
 			hx-trigger="click"
 			hx-confirm="Sind Sie sicher, dass Sie dieses Werkzeug löschen möchten?"
 			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
@@ -73,10 +73,10 @@ templ actionBarContent(tool shared.ModelTool, user *shared.User) {
 	}
 	<button
 		class="primary flex gap"
-		if tool.IsCassette() {
-			hx-get={ urlb.UrlDialogs().EditCassette(tool.GetID()) }
+		if p.Tool.IsCassette() {
+			hx-get={ urlb.UrlDialogs().EditCassette(p.Tool.GetID()) }
 		} else {
-			hx-get={ urlb.UrlDialogs().EditTool(tool.GetID()) }
+			hx-get={ urlb.UrlDialogs().EditTool(p.Tool.GetID()) }
 		}
 		hx-trigger="click"
 		hx-target="body"

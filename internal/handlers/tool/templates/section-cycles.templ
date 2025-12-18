@@ -44,57 +44,51 @@ templ CyclesSectionContent(p CyclesSectionContentProps) {
 			"id": "tool-status-section",
 		}) {
 			@components.SectionTitle(components.SectionTitleLevelSub, "Aktueller Status")
-			@toolStatus(p.Tool, p.CassettesForBinding, p.ActivePressNumber, p.User)
+			@toolStatus(p)
 		}
 		// For now tool cycles for top cassette tools are ignored
-		@regenerations(p.Regenerations, p.User)
-		{{
-			var lastRegeneration *shared.ToolRegeneration
-			if len(p.Regenerations) > 0 {
-				lastRegeneration = p.Regenerations[0]
-			}
-		}}
-		@cyclesTable(p.Tool, p.ToolCycles, lastRegeneration, p.User)
+		@regenerations(p)
+		@cyclesTable(p)
 	</div>
 }
 
-templ toolStatus(tool shared.ModelTool, cassettesForBinding []*shared.Cassette, activePressNumber shared.PressNumber, user *shared.User) {
+templ toolStatus(p CyclesSectionContentProps) {
 	<div class="flex flex-col gap">
 		<span class="flex gap-lg">
 			@RegenerationEdit(RegenerationEditProps{
-				Tool:              tool,
-				ActivePressNumber: activePressNumber,
+				Tool:              p.Tool,
+				ActivePressNumber: p.ActivePressNumber,
 				Editable:          false,
-				UserHasPermission: user.IsAdmin(),
+				UserHasPermission: p.User.IsAdmin(),
 			})
-			if activePressNumber.IsValid() {
+			if p.ActivePressNumber.IsValid() {
 				<a
 					role="button"
 					class="small ghost flex gap"
-					href={ urlb.UrlPress(activePressNumber).Page }
+					href={ urlb.UrlPress(p.ActivePressNumber).Page }
 					title="Zur Pressenübersicht"
 				>
 					<i class="bi bi-arrow-right"></i>
-					Presse { fmt.Sprintf("%d", activePressNumber) }
+					Presse { fmt.Sprintf("%d", p.ActivePressNumber) }
 				</a>
 			}
 		</span>
-		if !tool.IsCassette() && tool.GetBase().Position == shared.SlotUpper {
+		if !p.Tool.IsCassette() && p.Tool.GetBase().Position == shared.SlotUpper {
 			@BindingSection(BindingSectionProps{
-				Tool:                tool.(*shared.Tool),
-				CassettesForBinding: cassettesForBinding,
-				IsAdmin:             user.IsAdmin(),
+				Tool:                p.Tool.(*shared.Tool),
+				CassettesForBinding: p.CassettesForBinding,
+				IsAdmin:             p.User.IsAdmin(),
 			})
 		}
 	</div>
 }
 
-templ regenerations(regenerations []*shared.ToolRegeneration, u *shared.User) {
+templ regenerations(p CyclesSectionContentProps) {
 	@components.Section(templ.Attributes{
 		"id": "regenerations-section",
 	}) {
 		@components.SectionTitle(components.SectionTitleLevelSub, "Regenerationen")
-		if len(regenerations) == 0 {
+		if len(p.Regenerations) == 0 {
 			<span class="flex justify-center items-center">
 				<i><small>Keine Regenerationen verzeichnet für dieses Werkzeug</small></i>
 			</span>
@@ -109,15 +103,15 @@ templ regenerations(regenerations []*shared.ToolRegeneration, u *shared.User) {
 						</tr>
 					</thead>
 					<tbody>
-						if len(regenerations) == 0 {
+						if len(p.Regenerations) == 0 {
 							<tr>
 								<td colspan="3" class="text-center">
 									<i><small>Keine Regenerationen verzeichnet</small></i>
 								</td>
 							</tr>
 						} else {
-							for _, r := range regenerations {
-								@regenerationsTableRow(r, u)
+							for _, r := range p.Regenerations {
+								@regenerationsTableRow(r, p.User)
 							}
 						}
 					</tbody>
@@ -147,20 +141,26 @@ templ regenerationsTableRow(r *shared.ToolRegeneration, u *shared.User) {
 	</tr>
 }
 
-templ cyclesTable(tool shared.ModelTool, toolCycles []*shared.Cycle, lastRegeneration *shared.ToolRegeneration, user *shared.User) {
+templ cyclesTable(p CyclesSectionContentProps) {
+	{{
+		var lastRegeneration *shared.ToolRegeneration
+		if len(p.Regenerations) > 0 {
+			lastRegeneration = p.Regenerations[0]
+		}
+	}}
 	@components.Section(templ.Attributes{
 		"id": "cycles-section",
 	}) {
 		@components.SectionTitle(components.SectionTitleLevelSub, "Pressennutzungsverlauf") {
 			<button
 				class="icon secondary small flex"
-				hx-get={ urlb.UrlDialogs().EditCycle(0, tool.GetID(), false) }
+				hx-get={ urlb.UrlDialogs().EditCycle(0, p.Tool.GetID(), false) }
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 				title="Neuen Eintrag hinzufügen"
-				if !user.IsAdmin() {
+				if !p.User.IsAdmin() {
 					disabled
 				}
 			>
@@ -172,7 +172,7 @@ templ cyclesTable(tool shared.ModelTool, toolCycles []*shared.Cycle, lastRegener
 				Gesamtzyklen:
 			</h6>
 			<span>
-				@TotalCycles(tool.GetBase().Cycles, true)
+				@TotalCycles(p.Tool.GetBase().Cycles, true)
 			</span>
 		}
 		<figure class="w-full overflow-x-scroll">
@@ -192,15 +192,15 @@ templ cyclesTable(tool shared.ModelTool, toolCycles []*shared.Cycle, lastRegener
 					</tr>
 				</thead>
 				<tbody>
-					if len(toolCycles) == 0 {
+					if len(p.ToolCycles) == 0 {
 						<tr>
 							<td colspan="5" class="text-center">
 								<i><small>Kein Pressenverlauf verfügbar</small></i>
 							</td>
 						</tr>
 					} else {
-						for _, cycle := range toolCycles {
-							@cycleTableRow(cycle, lastRegeneration, user)
+						for _, cycle := range p.ToolCycles {
+							@cycleTableRow(cycle, lastRegeneration, p.User)
 						}
 					}
 				</tbody>
