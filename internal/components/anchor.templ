@@ -18,7 +18,7 @@ templ ToolAnchor(p ToolAnchorProps) {
 	<a
 		role="button"
 		class="muted flex justify-between items-center p"
-		href={ urlb.UrlTool(p.Tool.ID, 0, 0, 0).Page }
+		href={ urlb.UrlTool(p.Tool.ID, 0, 0).Page }
 	>
 		<div class="flex flex-col gap-sm justify-between w-full">
 			<span class="text-semibold">
@@ -42,7 +42,7 @@ templ toolAnchorBadgesWithTotalCycles(tool *shared.Tool) {
 		@ToolStateBadge(tool, -1)
 		<span
 			class="total-cycles-container flex justify-end items-center w-full pr text-sm"
-			hx-get={ urlb.UrlTool(tool.ID, 0, 0, 0).TotalCycles }
+			hx-get={ urlb.UrlTool(tool.ID, 0, 0).TotalCycles }
 			hx-trigger="load"
 			hx-swap="innerHTML"
 		></span>
@@ -99,7 +99,7 @@ templ CassetteAnchor(p CassetteAnchorProps) {
 	<a
 		role="button"
 		class="muted flex justify-between items-center p"
-		href={ urlb.UrlTool(0, p.Cassette.ID, 0, 0).Page }
+		href={ urlb.UrlTool(p.Cassette.ID, 0, 0).Page }
 	>
 		<div class="flex flex-col gap-sm justify-between w-full">
 			<span class="text-semibold">
@@ -123,7 +123,7 @@ templ cassetteAnchorBadgesWithTotalCycles(cassette *shared.Cassette, boundToTool
 		@CassetteStateBadge(cassette, boundToTool)
 		<span
 			class="total-cycles-container flex justify-end items-center w-full pr text-sm"
-			hx-get={ urlb.UrlTool(0, cassette.ID, 0, 0).TotalCycles }
+			hx-get={ urlb.UrlTool(cassette.ID, 0, 0).TotalCycles }
 			hx-trigger="load"
 			hx-swap="innerHTML"
 		></span>
