@@ -16,20 +16,18 @@ const (
 			start 	INTEGER NOT NULL,
 			stop 	INTEGER NOT NULL,
 			cycles 	INTEGER NOT NULL,
-			position INTEGER NOT NULL,
 
 			PRIMARY KEY("id" AUTOINCREMENT),
-			UNIQUE(tool_id, position)
 		);
 	`
 
 	SQLCreateToolRegeneration string = `
-		INSERT INTO tool_regenerations (tool_id, start, stop, cycles, position)
-		VALUES (:tool_id, :start, :stop, :cycles, :position);
+		INSERT INTO tool_regenerations (tool_id, start, stop, cycles)
+		VALUES (:tool_id, :start, :stop, :cycles);
 	`
 
 	SQLGetToolRegenerationByID string = `
-		SELECT id, tool_id, start, stop, cycles, position
+		SELECT id, tool_id, start, stop, cycles
 		FROM tool_regenerations
 		WHERE id = :id;
 	`
@@ -40,7 +38,6 @@ const (
 			start = :start,
 			stop = :stop,
 			cycles = :cycles,
-			position = :position
 		WHERE id = :id;
 	`
 
@@ -50,7 +47,7 @@ const (
 	`
 
 	SQLListToolRegenerations string = `
-		SELECT id, tool_id, start, stop, cycles, position
+		SELECT id, tool_id, start, stop, cycles 
 		FROM tool_regenerations;
 	`
 )
@@ -72,6 +69,7 @@ func (s *ToolRegenerationService) Setup() *errors.MasterError {
 	return s.BaseService.Setup(DBName, SQLCreateToolRegenerationTable)
 }
 
+// TODO: Allow stop being zero, this marks an ongoing regeneration, update validation checks, allow cycles being zero until stopped
 func (s *ToolRegenerationService) Create(entity *shared.ToolRegeneration) *errors.MasterError {
 	verr := entity.Validate()
 	if verr != nil {
@@ -86,7 +84,6 @@ func (s *ToolRegenerationService) Create(entity *shared.ToolRegeneration) *error
 		sql.Named("start", entity.Start),
 		sql.Named("stop", entity.Stop),
 		sql.Named("cycles", entity.Cycles),
-		sql.Named("position", entity.Position),
 	)
 	if err != nil {
 		return errors.NewMasterError(err, 0)
@@ -121,7 +118,6 @@ func (s *ToolRegenerationService) Update(entity *shared.ToolRegeneration) *error
 		sql.Named("start", entity.Start),
 		sql.Named("stop", entity.Stop),
 		sql.Named("cycles", entity.Cycles),
-		sql.Named("position", entity.Position),
 		sql.Named("id", entity.ID),
 	)
 	if err != nil {
@@ -151,7 +147,6 @@ func (s *ToolRegenerationService) GetByID(id shared.EntityID) (*shared.ToolRegen
 		&tr.Start,
 		&tr.Stop,
 		&tr.Cycles,
-		&tr.Position,
 	)
 	if err != nil {
 		return tr, errors.NewMasterError(err, 0)
@@ -179,7 +174,6 @@ func (s *ToolRegenerationService) List() ([]*shared.ToolRegeneration, *errors.Ma
 			&tr.Start,
 			&tr.Stop,
 			&tr.Cycles,
-			&tr.Position,
 		)
 		if err != nil {
 			return nil, errors.NewMasterError(err, 0)

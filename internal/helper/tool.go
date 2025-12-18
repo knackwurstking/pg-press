@@ -2,11 +2,14 @@ package helper
 
 import (
 	"sync"
+	"time"
 
 	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
+
+var ToolMutex = &sync.Mutex{}
 
 func ListDeadTools(db *common.DB) (tools []*shared.Tool, merr *errors.MasterError) {
 	tools, merr = db.Tool.Tool.List()
@@ -72,8 +75,6 @@ func ListAvailableCassettesForBinding(db *common.DB, toolID shared.EntityID) ([]
 	return cassettes[:i], nil
 }
 
-var bindingMutex = &sync.Mutex{}
-
 func BindCassetteToTool(db *common.DB, toolID, cassetteID shared.EntityID) *errors.MasterError {
 	// First, check if cassette exists
 	_, merr := db.Tool.Cassette.GetByID(cassetteID)
@@ -81,8 +82,8 @@ func BindCassetteToTool(db *common.DB, toolID, cassetteID shared.EntityID) *erro
 		return merr
 	}
 
-	bindingMutex.Lock()
-	defer bindingMutex.Unlock()
+	ToolMutex.Lock()
+	defer ToolMutex.Unlock()
 
 	tool, merr := db.Tool.Tool.GetByID(toolID)
 	if merr != nil {
@@ -102,8 +103,8 @@ func BindCassetteToTool(db *common.DB, toolID, cassetteID shared.EntityID) *erro
 }
 
 func UnbindCassetteFromTool(db *common.DB, toolID shared.EntityID) *errors.MasterError {
-	bindingMutex.Lock()
-	defer bindingMutex.Unlock()
+	ToolMutex.Lock()
+	defer ToolMutex.Unlock()
 
 	tool, merr := db.Tool.Tool.GetByID(toolID)
 	if merr != nil {
@@ -158,4 +159,58 @@ func ListLowerMetalSheetsForTool(db *common.DB, toolID shared.EntityID) ([]*shar
 	}
 
 	return metalSheets[:i], nil
+}
+
+func StartToolRegeneration(db *common.DB, toolID shared.EntityID) *errors.MasterError {
+	merr := db.Tool.Regeneration.Create(&shared.ToolRegeneration{
+		ToolID: toolID,
+		Start:  shared.NewUnixMilli(time.Now()),
+	})
+	if merr != nil {
+		return merr
+	}
+	return nil
+}
+
+func StopToolRegeneration(db *common.DB, toolID shared.EntityID) *errors.MasterError {
+	ToolMutex.Lock()
+	defer ToolMutex.Unlock()
+
+	regeneration, merr := db.Tool.Regeneration.GetByID(toolID)
+	if merr != nil {
+		return merr
+	}
+	if merr != nil {
+		return merr
+	}
+	regeneration.Stop = shared.NewUnixMilli(time.Now())
+	totalCycles, merr := GetTotalCyclesForTool(db, toolID)
+	if merr != nil {
+		return merr
+	}
+	regeneration.Cycles = totalCycles
+	merr = db.Tool.Regeneration.Update(regeneration)
+	if merr != nil {
+		return merr
+	}
+	return nil
+}
+
+func AbortToolRegeneration(db *common.DB, toolID shared.EntityID) *errors.MasterError {
+	ToolMutex.Lock()
+	defer ToolMutex.Unlock()
+
+	regeneration, merr := db.Tool.Regeneration.GetByID(toolID)
+	if merr != nil {
+		return merr
+	}
+	if regeneration.Stop != 0 {
+		return errors.NewValidationError("cannot abort a completed regeneration").MasterError()
+	}
+
+	merr = db.Tool.Regeneration.Delete(regeneration.ID)
+	if merr != nil {
+		return merr
+	}
+	return nil
 }

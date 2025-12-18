@@ -302,13 +302,11 @@ func (h *Handler) HTMXDeleteRegeneration(c echo.Context) *echo.HTTPError {
 }
 
 func (h *Handler) HTMXGetStatusEdit(c echo.Context) *echo.HTTPError {
-	idParam, merr := utils.ParseParamInt64(c, "id")
+	id, merr := shared.ParseParamInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
-	toolID := models.ToolID(idParam)
-
-	tool, merr := h.registry.Tools.Get(toolID)
+	tool, merr := h.db.Tool.Tool.GetByID(shared.EntityID(id))
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -322,13 +320,11 @@ func (h *Handler) HTMXGetStatusEdit(c echo.Context) *echo.HTTPError {
 }
 
 func (h *Handler) HTMXGetStatusDisplay(c echo.Context) *echo.HTTPError {
-	idParam, merr := utils.ParseParamInt64(c, "id")
+	id, merr := shared.ParseParamInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
-	toolID := models.ToolID(idParam)
-
-	tool, merr := h.registry.Tools.Get(toolID)
+	tool, merr := h.db.Tool.Tool.GetByID(shared.EntityID(id))
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -349,60 +345,39 @@ func (h *Handler) HTMXUpdateToolStatus(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	idParam, merr := utils.ParseParamInt64(c, "id")
+	id, merr := shared.ParseParamInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
-	toolID := models.ToolID(idParam)
+	tool, merr := h.db.Tool.Tool.GetByID(shared.EntityID(id))
+	if merr != nil {
+		return merr.Echo()
+	}
 
 	statusStr := c.FormValue("status")
 	if statusStr == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "status is required")
 	}
 
-	tool, merr := h.registry.Tools.Get(toolID)
-	if merr != nil {
-		return merr.Echo()
-	}
-
 	// Handle regeneration start/stop/abort only
 	switch statusStr {
 	case "regenerating":
-		// Start regeneration
-		_, merr = h.registry.ToolRegenerations.StartToolRegeneration(toolID, "", user)
+		merr = helper.StartToolRegeneration(h.db, tool.ID)
 		if merr != nil {
 			return merr.Echo()
 		}
-
-		// Create Feed
-		title := "Werkzeug Regenerierung gestartet"
-		content := fmt.Sprintf("Werkzeug: %s", tool.String())
-		h.createFeed(title, content, user.TelegramID)
 
 	case "active":
-		merr = h.registry.ToolRegenerations.StopToolRegeneration(toolID, user)
+		merr = helper.StopToolRegeneration(h.db, tool.ID)
 		if merr != nil {
 			return merr.Echo()
 		}
-
-		// Create Feed
-		title := "Werkzeug Regenerierung beendet"
-		content := fmt.Sprintf("Werkzeug: %s", tool.String())
-
-		h.createFeed(title, content, user.TelegramID)
 
 	case "abort":
-		// Abort regeneration (remove regeneration record and set status to false)
-		merr = h.registry.ToolRegenerations.AbortToolRegeneration(toolID, user)
+		merr := helper.AbortToolRegeneration(h.db, tool.ID)
 		if merr != nil {
 			return merr.Echo()
 		}
-
-		// Create Feed
-		title := "Werkzeug Regenerierung abgebrochen"
-		content := fmt.Sprintf("Werkzeug: %s", tool.String())
-
-		h.createFeed(title, content, user.TelegramID)
 
 	default:
 		return echo.NewHTTPError(
@@ -412,13 +387,13 @@ func (h *Handler) HTMXUpdateToolStatus(c echo.Context) *echo.HTTPError {
 	}
 
 	// Get updated tool and render status display
-	updatedTool, merr := h.registry.Tools.Get(toolID)
+	tool, merr = h.db.Tool.Tool.GetByID(tool.ID)
 	if merr != nil {
 		return merr.Echo()
 	}
 
 	// Render the updated status component
-	eerr := h.renderRegenerationEdit(c, updatedTool, false, user)
+	eerr := h.renderRegenerationEdit(c, tool, false, user)
 	if eerr != nil {
 		return eerr
 	}

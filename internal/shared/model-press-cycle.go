@@ -9,7 +9,6 @@ import (
 type Cycle struct {
 	ID            EntityID    `json:"id"`             // ID is the unique identifier for the Cycle entity
 	ToolID        EntityID    `json:"tool_id"`        // ToolID is the identifier for the associated Tool entity
-	Position      Slot        `json:"position"`       // Position indicates the position of the tool in the press
 	PressNumber   PressNumber `json:"press_number"`   // PressNumber indicates which press machine performed the cycles
 	PressCycles   int64       `json:"cycles"`         // PressCycles is the number of cycles completed during this time period
 	PartialCycles int64       `json:"partial_cycles"` // PartialCycles are the completed cycles during this time period (calculated)
@@ -40,10 +39,6 @@ func (c *Cycle) Validate() *errors.ValidationError {
 		return errors.NewValidationError("tool_id must be positive")
 	}
 
-	if c.Position < SlotUnknown {
-		return errors.NewValidationError("position must be non-negative")
-	}
-
 	return nil
 }
 
@@ -51,7 +46,6 @@ func (c *Cycle) Clone() *Cycle {
 	return &Cycle{
 		ID:            c.ID,
 		ToolID:        c.ToolID,
-		Position:      c.Position,
 		PressNumber:   c.PressNumber,
 		PressCycles:   c.PressCycles,
 		PartialCycles: c.PartialCycles,
@@ -62,8 +56,8 @@ func (c *Cycle) Clone() *Cycle {
 
 func (c *Cycle) String() string {
 	return fmt.Sprintf(
-		"Cycle[ID=%d, ToolID=%d, Position=%d, PressNumber=%d, PressCycles=%d, PartialCycles=%d, Start=%d, Stop=%d]",
-		c.ID, c.ToolID, c.Position, c.PressNumber, c.PressCycles, c.PartialCycles, c.Start, c.Stop,
+		"Cycle[ID=%d, ToolID=%d, PressNumber=%d, PressCycles=%d, PartialCycles=%d, Start=%d, Stop=%d]",
+		c.ID, c.ToolID, c.PressNumber, c.PressCycles, c.PartialCycles, c.Start, c.Stop,
 	)
 }
 

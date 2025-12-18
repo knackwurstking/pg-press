@@ -23,8 +23,6 @@ const (
 			code 				TEXT NOT NULL,
 			cycles_offset 		INTEGER NOT NULL DEFAULT 0,
 			cycles 				INTEGER NOT NULL DEFAULT 0,
-			last_regeneration 	INTEGER NOT NULL DEFAULT 0,
-			regenerating 		INTEGER NOT NULL DEFAULT 0,
 			is_dead 			INTEGER NOT NULL DEFAULT 0,
 			cassette			INTEGER NOT NULL DEFAULT 0,
 			min_thickness		REAL NOT NULL,
@@ -34,12 +32,13 @@ const (
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
 	`
+
 	SQLCreateTool string = `
-	INSERT INTO tools (position, width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, cassette, min_thickness, max_thickness, model_type)
-		VALUES (:position, :width, :height, :type, :code, :cycles_offset, :cycles, :last_regeneration, :regenerating, :is_dead, :cassette, :min_thickness, :max_thickness, 'tool');
+	INSERT INTO tools (position, width, height, type, code, cycles_offset, cycles, is_dead, cassette, min_thickness, max_thickness, model_type)
+		VALUES (:position, :width, :height, :type, :code, :cycles_offset, :cycles, :is_dead, :cassette, :min_thickness, :max_thickness, 'tool');
 	`
 	SQLGetToolByID string = `
-		SELECT id, position, width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, cassette, min_thickness, max_thickness
+		SELECT id, position, width, height, type, code, cycles_offset, cycles, is_dead, cassette, min_thickness, max_thickness
 		FROM tools
 		WHERE id = :id AND model_type = 'tool';
 	`
@@ -52,8 +51,6 @@ const (
 			code = :code,
 			cycles_offset = :cycles_offset,
 			cycles = :cycles,
-			last_regeneration = :last_regeneration,
-			regenerating = :regenerating,
 			is_dead = :is_dead,
 			cassette = :cassette,
 			min_thickness = :min_thickness,
@@ -66,7 +63,7 @@ const (
 		WHERE id = :id AND model_type = 'tool';
 	`
 	SQLListTools string = `
-		SELECT id, position, width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, cassette, min_thickness, max_thickness
+		SELECT id, position, width, height, type, code, cycles_offset, cycles, is_dead, cassette, min_thickness, max_thickness
 		FROM tools
 		WHERE model_type = 'tool';
 	`
@@ -106,8 +103,6 @@ func (s *ToolService) Create(entity *shared.Tool) *errors.MasterError {
 		sql.Named("code", entity.Code),
 		sql.Named("cycles_offset", entity.CyclesOffset),
 		sql.Named("cycles", entity.Cycles),
-		sql.Named("last_regeneration", entity.LastRegeneration),
-		sql.Named("regenerating", entity.Regenerating),
 		sql.Named("is_dead", entity.IsDead),
 		sql.Named("cassette", entity.Cassette),
 	)
@@ -153,8 +148,6 @@ func (s *ToolService) GetByID(id shared.EntityID) (*shared.Tool, *errors.MasterE
 		&t.Code,
 		&t.CyclesOffset,
 		&t.Cycles,
-		&t.LastRegeneration,
-		&t.Regenerating,
 		&t.IsDead,
 		&t.Cassette,
 	)
@@ -183,8 +176,6 @@ func (s *ToolService) Update(entity *shared.Tool) *errors.MasterError {
 		sql.Named("code", entity.Code),
 		sql.Named("cycles_offset", entity.CyclesOffset),
 		sql.Named("cycles", entity.Cycles),
-		sql.Named("last_regeneration", entity.LastRegeneration),
-		sql.Named("regenerating", entity.Regenerating),
 		sql.Named("is_dead", entity.IsDead),
 		sql.Named("cassette", entity.Cassette),
 	)
@@ -231,8 +222,6 @@ func (s *ToolService) List() ([]*shared.Tool, *errors.MasterError) {
 			&t.Code,
 			&t.CyclesOffset,
 			&t.Cycles,
-			&t.LastRegeneration,
-			&t.Regenerating,
 			&t.IsDead,
 			&t.Cassette,
 		)

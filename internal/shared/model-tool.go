@@ -54,17 +54,15 @@ type ModelTool interface {
 // -----------------------------------------------------------------------------
 
 type BaseTool struct {
-	ID               EntityID `json:"id"`
-	Width            int      `json:"width"`         // Width defines the tile width this tool can press
-	Height           int      `json:"height"`        // Height defines the tile height this tool can press
-	Position         Slot     `json:"position"`      // Position indicates the position of the tool in the press (e.g., 1 for upper, 2 for lower)
-	Type             string   `json:"type"`          // Type represents the tool type, e.g., "MASS", "FC", "GTC", etc.
-	Code             string   `json:"code"`          // Code is the unique tool code/identifier, "G01", "12345", etc.
-	CyclesOffset     int64    `json:"cycles_offset"` // CyclesOffset is an offset added to the cycles count
-	Cycles           int64    `json:"cycles"`        // Cycles indicates how many cycles this tool has done
-	LastRegeneration EntityID `json:"last_regeneration,omitempty"`
-	Regenerating     bool     `json:"regenerating"` // A regeneration resets the cycles counter, including the offset, back to zero
-	IsDead           bool     `json:"is_dead"`      // IsDead indicates if the tool is dead/destroyed
+	ID           EntityID `json:"id"`
+	Width        int      `json:"width"`         // Width defines the tile width this tool can press
+	Height       int      `json:"height"`        // Height defines the tile height this tool can press
+	Position     Slot     `json:"position"`      // Position indicates the position of the tool in the press (e.g., 1 for upper, 2 for lower)
+	Type         string   `json:"type"`          // Type represents the tool type, e.g., "MASS", "FC", "GTC", etc.
+	Code         string   `json:"code"`          // Code is the unique tool code/identifier, "G01", "12345", etc.
+	CyclesOffset int64    `json:"cycles_offset"` // CyclesOffset is an offset added to the cycles count
+	Cycles       int64    `json:"cycles"`        // Cycles indicates how many cycles this tool has done
+	IsDead       bool     `json:"is_dead"`       // IsDead indicates if the tool is dead/destroyed
 }
 
 func (bt *BaseTool) GetBase() *BaseTool {
@@ -100,25 +98,22 @@ func (bt *BaseTool) Validate() *errors.ValidationError {
 
 func (bt *BaseTool) Clone() BaseTool {
 	return BaseTool{
-		ID:               bt.ID,
-		Width:            bt.Width,
-		Height:           bt.Height,
-		Position:         bt.Position,
-		Type:             bt.Type,
-		Code:             bt.Code,
-		CyclesOffset:     bt.CyclesOffset,
-		Cycles:           bt.Cycles,
-		LastRegeneration: bt.LastRegeneration,
-		Regenerating:     bt.Regenerating,
-		IsDead:           bt.IsDead,
+		ID:           bt.ID,
+		Width:        bt.Width,
+		Height:       bt.Height,
+		Position:     bt.Position,
+		Type:         bt.Type,
+		Code:         bt.Code,
+		CyclesOffset: bt.CyclesOffset,
+		Cycles:       bt.Cycles,
+		IsDead:       bt.IsDead,
 	}
 }
 
 func (bt *BaseTool) String() string {
 	return fmt.Sprintf(
 		"BaseTool[ID=%d, Width=%d, Height=%d, Position=%d, Type=%s, Code=%s, "+
-			"CyclesOffset=%d, Cycles=%d, LastRegeneration=%d, Regenerating=%t, "+
-			"IsDead=%t]",
+			"CyclesOffset=%d, Cycles=%d, IsDead=%t]",
 		bt.ID,
 		bt.Width,
 		bt.Height,
@@ -127,8 +122,6 @@ func (bt *BaseTool) String() string {
 		bt.Code,
 		bt.CyclesOffset,
 		bt.Cycles,
-		bt.LastRegeneration,
-		bt.Regenerating,
 		bt.IsDead,
 	)
 }
@@ -138,7 +131,6 @@ func (bt *BaseTool) String() string {
 // -----------------------------------------------------------------------------
 
 // Tool represents a tool used in a press machine,
-// there are upper and lower tools. Each tool can have its own regeneration history.
 type Tool struct {
 	BaseTool
 	Cassette EntityID `json:"cassette"` // Cassette indicates the cassette ID this tool belongs to (if any)

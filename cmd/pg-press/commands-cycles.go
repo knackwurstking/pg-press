@@ -61,18 +61,19 @@ func listCyclesAllCommand() cli.Command {
 					w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 
 					// Print header
-					fmt.Fprintln(w, "ID\tPRESS\tTOOL ID\tPOSITION\tTOTAL CYCLES\tDATE\tPERFORMED BY")
-					fmt.Fprintln(w, "----\t-----\t-------\t--------\t------------\t----\t------------")
+					fmt.Fprintln(w, "ID\tTOOL ID\tPRESS\tTOTAL CYCLES\tPARTIAL CYCLES\tSTART\tSTOP")
+					fmt.Fprintln(w, "--\t-------\t-----\t------------\t--------------\t-----\t----")
 
 					// Print each cycle
 					for _, cycle := range cycles {
 						fmt.Fprintf(w, "%d\t%d\t%d\t%d\t%d\t%s\n",
 							cycle.ID,
+							cycle.ToolID,
 							cycle.PressNumber,
-							cycle.Cycles,
+							cycle.PressCycles,
+							cycle.PartialCycles,
 							cycle.Start,
 							cycle.Stop,
-							"---", // Placeholder for position since it's not in cycle model
 						)
 					}
 

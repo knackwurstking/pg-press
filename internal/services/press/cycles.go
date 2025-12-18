@@ -5,7 +5,6 @@ package press
 import (
 	"database/sql"
 	"sync"
-	"weak"
 
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -16,24 +15,22 @@ const (
 		CREATE TABLE IF NOT EXISTS press_cycles (
 			id           INTEGER NOT NULL,
 			tool_id      INTEGER NOT NULL,
-			position     INTEGER NOT NULL,
 			press_number INTEGER NOT NULL,
 			cycles       INTEGER NOT NULL, -- Cycles at stop time
 			start        INTEGER NOT NULL,
 			stop         INTEGER NOT NULL,
 
 			PRIMARY KEY("id"),
-			UNIQUE(tool_id, position)
 		);
 	`
 
 	SQLCreateCycle string = `
-		INSERT INTO press_cycles (tool_id, position, press_number, cycles, start, stop)
-		VALUES (:tool_id, :position, :press_number, :cycles, :start, :stop);
+		INSERT INTO press_cycles (tool_id, press_number, cycles, start, stop)
+		VALUES (:tool_id, :press_number, :cycles, :start, :stop);
 	`
 
 	SQLGetCycleByID string = `
-		SELECT id, tool_id, position, press_number, cycles, start, stop
+		SELECT id, tool_id, press_number, cycles, start, stop
 		FROM press_cycles
 		WHERE id = :id;
 	`
@@ -41,7 +38,6 @@ const (
 	SQLUpdateCycle string = `
 		UPDATE press_cycles
 		SET tool_id      = :tool_id,
-			position     = :position,
 			press_number = :press_number,
 			cycles       = :cycles,
 			start        = :start,
@@ -55,7 +51,7 @@ const (
 	`
 
 	SQLListCycles string = `
-		SELECT id, tool_id, position, press_number, cycles, start, stop
+		SELECT id, tool_id, press_number, cycles, start, stop
 		FROM press_cycles
 		ORDER BY press_number ASC, stop DESC;
 	`
@@ -89,7 +85,6 @@ func (s *CycleService) Create(entity *shared.Cycle) *errors.MasterError {
 
 	r, err := s.DB().Exec(SQLCreateCycle,
 		sql.Named("tool_id", entity.ToolID),
-		sql.Named("position", entity.Position),
 		sql.Named("press_number", entity.PressNumber),
 		sql.Named("cycles", entity.PressCycles),
 		sql.Named("start", entity.Start),
@@ -126,7 +121,6 @@ func (s *CycleService) Update(entity *shared.Cycle) *errors.MasterError {
 	_, err := s.DB().Exec(SQLUpdateCycle,
 		sql.Named("id", entity.ID),
 		sql.Named("tool_id", entity.ToolID),
-		sql.Named("position", entity.Position),
 		sql.Named("press_number", entity.PressNumber),
 		sql.Named("cycles", entity.PressCycles),
 		sql.Named("start", entity.Start),
@@ -156,7 +150,6 @@ func (s *CycleService) GetByID(id shared.EntityID) (*shared.Cycle, *errors.Maste
 	err := r.Scan(
 		&c.ID,
 		&c.ToolID,
-		&c.Position,
 		&c.PressNumber,
 		&c.PressCycles,
 		&c.Start,
@@ -188,7 +181,6 @@ func (s *CycleService) List() ([]*shared.Cycle, *errors.MasterError) {
 		err := rows.Scan(
 			&c.ID,
 			&c.ToolID,
-			&c.Position,
 			&c.PressNumber,
 			&c.PressCycles,
 			&c.Start,
