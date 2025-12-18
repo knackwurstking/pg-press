@@ -48,7 +48,8 @@ const (
 
 	SQLListToolRegenerations string = `
 		SELECT id, tool_id, start, stop, cycles 
-		FROM tool_regenerations;
+		FROM tool_regenerations
+		ORDER BY start DESC;
 	`
 )
 
@@ -69,7 +70,8 @@ func (s *ToolRegenerationService) Setup() *errors.MasterError {
 	return s.BaseService.Setup(DBName, SQLCreateToolRegenerationTable)
 }
 
-// TODO: Allow stop being zero, this marks an ongoing regeneration, update validation checks, allow cycles being zero until stopped
+// TODO: Allow stop being zero, this marks an ongoing regeneration
+// TODO: Disallow adding new regeneration if one is ongoing for the same tool
 func (s *ToolRegenerationService) Create(entity *shared.ToolRegeneration) *errors.MasterError {
 	verr := entity.Validate()
 	if verr != nil {

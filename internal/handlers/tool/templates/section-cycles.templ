@@ -11,9 +11,9 @@ templ CyclesSection(oob bool, id shared.EntityID, isTool bool) {
 	{{
 		hxGet := ""
 		if isTool {
-			hxGet = string(urlb.UrlTool(id, 0, 0, 0).Cycles)
+			hxGet = string(urlb.UrlTool(id, 0, 0).Cycles)
 		} else {
-			hxGet = string(urlb.UrlTool(0, id, 0, 0).Cycles)
+			hxGet = string(urlb.UrlTool(0, id, 0).Cycles)
 		}
 	}}
 	@components.Section(templ.Attributes{
@@ -139,7 +139,7 @@ templ regenerationsTableRow(r *shared.ToolRegeneration, u *shared.User) {
 			@components.TableActions(components.TableActionsOptions{
 				EditHref:        urlb.UrlDialogs().EditToolRegeneration(r.ID),
 				EditAdminOnly:   false,
-				DeleteHref:      urlb.UrlTool(r.ToolID, 0, r.ID, 0).DeleteRegeneration,
+				DeleteHref:      urlb.UrlTool(r.ToolID, r.ID, 0).DeleteRegeneration,
 				DeleteAdminOnly: true,
 				User:            u,
 			})
@@ -186,8 +186,8 @@ templ cyclesTable(tool shared.ModelTool, toolCycles []*shared.Cycle, lastRegener
 						<th name="press">Presse</th>
 						<th name="start">Start</th>
 						<th name="stop">Stop</th>
-						<th name="total">Zyklen</th>
-						<th name="total">Zyklen (Teil)</th>
+						<th name="press_cycles">Zyklen</th>
+						<th name="partial_cycles">Zyklen (Teil)</th>
 						<th></th>
 					</tr>
 				</thead>
@@ -225,13 +225,16 @@ templ cycleTableRow(cycle *shared.Cycle, lastRegeneration *shared.ToolRegenerati
 			<span class="text-sm">{ cycle.Stop.FormatDate() }</span>
 		</td>
 		<td>
-			{ fmt.Sprintf("%d", cycle.Cycles) }
+			{ fmt.Sprintf("%d", cycle.PressCycles) }
+		</td>
+		<td>
+			{ fmt.Sprintf("%d", cycle.PartialCycles) }
 		</td>
 		<td>
 			@components.TableActions(components.TableActionsOptions{
 				EditHref:        urlb.UrlDialogs().EditCycle(cycle.ID, cycle.ToolID, false),
 				EditAdminOnly:   true,
-				DeleteHref:      urlb.UrlTool(0, 0, 0, cycle.ID).CycleDelete,
+				DeleteHref:      urlb.UrlTool(0, 0, cycle.ID).CycleDelete,
 				DeleteAdminOnly: true,
 				User:            user,
 			})

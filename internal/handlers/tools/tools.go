@@ -181,7 +181,8 @@ func (h *Handler) renderToolsSection(c echo.Context) *echo.HTTPError {
 		errCh <- nil
 	})
 
-	regenerationsMap := make(map[shared.EntityID][]*shared.ToolRegeneration)
+	isRegenerating := make(map[shared.EntityID]bool)
+	regenerationsCount := 0
 	wg.Go(func() {
 		regenerations, merr := h.DB.Tool.Regeneration.List()
 		if merr != nil {
@@ -189,29 +190,22 @@ func (h *Handler) renderToolsSection(c echo.Context) *echo.HTTPError {
 		}
 
 		for _, r := range regenerations {
-			if _, ok := regenerationsMap[r.ToolID]; !ok {
-				regenerationsMap[r.ToolID] = []*shared.ToolRegeneration{}
+			if r.Stop == 0 {
+				isRegenerating[r.ToolID] = true
 			}
-			regenerationsMap[r.ToolID] = append(regenerationsMap[r.ToolID], r)
 		}
 
+		regenerationsCount = len(regenerations)
 		errCh <- nil
 	})
 
-	notesMap := make(map[shared.EntityID][]*shared.Note)
+	notesCount := 0
 	wg.Go(func() {
 		notes, merr := h.DB.Note.Note.List()
 		if merr != nil {
 			errCh <- merr.Echo()
 		}
-
-		for _, n := range notes {
-			if _, ok := notesMap[n.ID]; !ok {
-				notesMap[n.ID] = []*shared.Note{}
-			}
-			notesMap[n.ID] = append(notesMap[n.ID], n)
-		}
-
+		notesCount = len(notes)
 		errCh <- nil
 	})
 
@@ -230,11 +224,12 @@ func (h *Handler) renderToolsSection(c echo.Context) *echo.HTTPError {
 	}
 
 	t := templates.SectionTools(templates.SectionToolsProps{
-		Tools:         tools,
-		Cassettes:     cassettes,
-		User:          user,
-		Regenerations: regenerationsMap,
-		Notes:         notesMap,
+		Tools:              tools,
+		Cassettes:          cassettes,
+		User:               user,
+		IsRegenerating:     isRegenerating,
+		RegenerationsCount: regenerationsCount,
+		NotesCount:         notesCount,
 	})
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {

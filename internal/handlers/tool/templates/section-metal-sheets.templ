@@ -24,7 +24,7 @@ templ UppperMetalSheets(metalSheets []*shared.UpperMetalSheet, tool *shared.Tool
 		@newMetalSheetButton(tool.ID)
 	}
 	<div class="table-container">
-		@MetalSheetTableForUpperSlot(metalSheets, user)
+		@metalSheetTableForUpperSlot(metalSheets, user)
 	</div>
 }
 
@@ -44,11 +44,11 @@ templ LowerMetalSheets(metalSheets []*shared.LowerMetalSheet, tool *shared.Tool,
 		@newMetalSheetButton(tool.ID)
 	}
 	<div class="table-container">
-		@MetalSheetTableForLowerSlot(metalSheets, user)
+		@metalSheetTableForLowerSlot(metalSheets, user)
 	</div>
 }
 
-templ MetalSheetTableForUpperSlot(metalSheets []*shared.UpperMetalSheet, user *shared.User) {
+templ metalSheetTableForUpperSlot(metalSheets []*shared.UpperMetalSheet, user *shared.User) {
 	<figure class="w-full overflow-x-scroll">
 		<table class="table borderless compact">
 			<thead>
@@ -87,7 +87,7 @@ templ MetalSheetTableForUpperSlot(metalSheets []*shared.UpperMetalSheet, user *s
 	</figure>
 }
 
-templ MetalSheetTableForLowerSlot(metalSheets []*shared.LowerMetalSheet, user *shared.User) {
+templ metalSheetTableForLowerSlot(metalSheets []*shared.LowerMetalSheet, user *shared.User) {
 	<figure class="w-full overflow-x-scroll">
 		<table class="table borderless compact">
 			<thead>

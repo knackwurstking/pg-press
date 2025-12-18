@@ -23,10 +23,7 @@ func (tr *ToolRegeneration) Validate() *errors.ValidationError {
 	if tr.Start < 0 {
 		return errors.NewValidationError("start must be non-negative")
 	}
-	if tr.Stop < 0 {
-		return errors.NewValidationError("stop must be non-negative")
-	}
-	if tr.Stop < tr.Start {
+	if tr.Stop > 0 && tr.Stop < tr.Start {
 		return errors.NewValidationError("stop must be greater than or equal to start")
 	}
 	return nil

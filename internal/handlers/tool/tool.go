@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/a-h/templ"
 	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
@@ -17,6 +16,7 @@ import (
 
 	ui "github.com/knackwurstking/ui/ui-templ"
 
+	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 )
 
@@ -245,13 +245,13 @@ func (h *Handler) HTMXGetToolMetalSheets(c echo.Context) *echo.HTTPError {
 		if merr != nil {
 			return merr.Echo()
 		}
-		t = templates.MetalSheetTableForUpperSlot(metalSheets, user)
+		t = templates.UppperMetalSheets(metalSheets, tool.(*shared.Tool), user)
 	case shared.SlotLower:
 		metalSheets, merr := helper.ListLowerMetalSheetsForTool(h.db, tool.GetID())
 		if merr != nil {
 			return merr.Echo()
 		}
-		t = templates.MetalSheetTableForLowerSlot(metalSheets, user)
+		t = templates.LowerMetalSheets(metalSheets, tool.(*shared.Tool), user)
 	default:
 		return echo.NewHTTPError(http.StatusBadRequest, "Tool is not supported for metal sheets")
 	}
@@ -476,9 +476,22 @@ func (h *Handler) renderRegenerationEdit(c echo.Context, tool shared.ModelTool, 
 		}
 	}
 
+	regenerations, merr := helper.GetRegenerationsForTool(h.db, tool.GetID())
+	if merr != nil && merr.Code != http.StatusNotFound {
+		return merr.Echo()
+	}
+	isRegenerating := false
+	for _, r := range regenerations {
+		if r.Stop == 0 {
+			isRegenerating = true
+			break
+		}
+	}
+
 	t := templates.RegenerationEdit(templates.RegenerationEditProps{
 		Tool:              tool,
 		ActivePressNumber: helper.GetPressNumberForTool(h.db, tool.GetID()),
+		IsRegenerating:    isRegenerating,
 		Editable:          editable,
 		UserHasPermission: user.IsAdmin(),
 	})

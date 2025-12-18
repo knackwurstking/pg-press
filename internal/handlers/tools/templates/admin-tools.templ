@@ -16,7 +16,7 @@ import (
 // - The trigger "pageLoaded from:body" needs to be removed and replaced with something more specific.
 templ AdminToolsSectionContent() {
 	<span
-		hx-get={ urlb.UrlTools(0, 0).AdminOverlappingTools }
+		hx-get={ urlb.UrlTools(0).AdminOverlappingTools }
 		hx-trigger="pageLoaded from:body"
 		hx-target="#tab-content"
 	></span>

@@ -29,27 +29,6 @@ func ListDeadTools(db *common.DB) (tools []*shared.Tool, merr *errors.MasterErro
 	return tools[:n], nil
 }
 
-func GetRegenerationsForTool(db *common.DB, toolID shared.EntityID) (
-	regenerations []*shared.ToolRegeneration, merr *errors.MasterError,
-) {
-	regenerations, merr = db.Tool.Regeneration.List()
-	if merr != nil {
-		return nil, merr
-	}
-
-	n := 0
-	for _, r := range regenerations {
-		if r.ToolID != toolID {
-			continue
-		}
-
-		regenerations[n] = r
-		n++
-	}
-
-	return regenerations[:n], nil
-}
-
 func ListAvailableCassettesForBinding(db *common.DB, toolID shared.EntityID) ([]*shared.Cassette, *errors.MasterError) {
 	tool, merr := db.Tool.Tool.GetByID(toolID)
 	if merr != nil {
@@ -159,6 +138,27 @@ func ListLowerMetalSheetsForTool(db *common.DB, toolID shared.EntityID) ([]*shar
 	}
 
 	return metalSheets[:i], nil
+}
+
+func GetRegenerationsForTool(db *common.DB, toolID shared.EntityID) (
+	regenerations []*shared.ToolRegeneration, merr *errors.MasterError,
+) {
+	regenerations, merr = db.Tool.Regeneration.List()
+	if merr != nil {
+		return nil, merr
+	}
+
+	n := 0
+	for _, r := range regenerations {
+		if r.ToolID != toolID {
+			continue
+		}
+
+		regenerations[n] = r
+		n++
+	}
+
+	return regenerations[:n], nil
 }
 
 func StartToolRegeneration(db *common.DB, toolID shared.EntityID) *errors.MasterError {

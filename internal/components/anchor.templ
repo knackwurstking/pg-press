@@ -10,8 +10,9 @@ import "github.com/knackwurstking/pg-press/internal/shared"
 type ToolAnchorProps struct {
 	Tool               *shared.Tool     // Required
 	Cassette           *shared.Cassette // Optional
-	NotesCount         int              // Optional
-	RegenerationsCount int              // Optional
+	IsRegenerating     bool
+	RegenerationsCount int
+	NotesCount         int
 }
 
 templ ToolAnchor(p ToolAnchorProps) {
@@ -24,7 +25,7 @@ templ ToolAnchor(p ToolAnchorProps) {
 			<span class="text-semibold">
 				{ p.Tool.German() }
 			</span>
-			@toolAnchorBadgesWithTotalCycles(p.Tool)
+			@toolAnchorBadgesWithTotalCycles(p.Tool, p.IsRegenerating)
 			@toolAnchorBinding(p.Cassette)
 		</div>
 		<div class="flex flex-col gap justify-between items-center">
@@ -34,12 +35,12 @@ templ ToolAnchor(p ToolAnchorProps) {
 	</a>
 }
 
-templ toolAnchorBadgesWithTotalCycles(tool *shared.Tool) {
+templ toolAnchorBadgesWithTotalCycles(tool *shared.Tool, isRegenerating bool) {
 	<div class="flex gap justify-start items-center w-full">
 		@SmallBadge("primary", "text-bold") {
 			{ tool.Position.German() }
 		}
-		@ToolStateBadge(tool, -1)
+		@ToolStateBadge(tool, -1, isRegenerating)
 		<span
 			class="total-cycles-container flex justify-end items-center w-full pr text-sm"
 			hx-get={ urlb.UrlTool(tool.ID, 0, 0).TotalCycles }
@@ -91,8 +92,9 @@ templ toolAnchorCounts(notesCount, regenerationsCount int) {
 type CassetteAnchorProps struct {
 	Cassette           *shared.Cassette // Required
 	Tool               *shared.Tool     // Optional
-	NotesCount         int              // Optional
-	RegenerationsCount int              // Optional
+	IsRegenerating     bool
+	RegenerationsCount int
+	NotesCount         int
 }
 
 templ CassetteAnchor(p CassetteAnchorProps) {
@@ -105,7 +107,7 @@ templ CassetteAnchor(p CassetteAnchorProps) {
 			<span class="text-semibold">
 				{ p.Cassette.German() }
 			</span>
-			@cassetteAnchorBadgesWithTotalCycles(p.Cassette, p.Tool)
+			@cassetteAnchorBadgesWithTotalCycles(p.Cassette, p.Tool, p.IsRegenerating)
 			@cassetteAnchorBinding(p.Tool)
 		</div>
 		<div class="flex flex-col gap justify-between items-center">
@@ -115,12 +117,12 @@ templ CassetteAnchor(p CassetteAnchorProps) {
 	</a>
 }
 
-templ cassetteAnchorBadgesWithTotalCycles(cassette *shared.Cassette, boundToTool *shared.Tool) {
+templ cassetteAnchorBadgesWithTotalCycles(cassette *shared.Cassette, boundToTool *shared.Tool, isRegenerating bool) {
 	<div class="flex gap justify-start items-center w-full">
 		@SmallBadge("primary", "text-bold") {
 			{ cassette.Position.German() }
 		}
-		@CassetteStateBadge(cassette, boundToTool)
+		@CassetteStateBadge(cassette, boundToTool, isRegenerating)
 		<span
 			class="total-cycles-container flex justify-end items-center w-full pr text-sm"
 			hx-get={ urlb.UrlTool(cassette.ID, 0, 0).TotalCycles }

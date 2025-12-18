@@ -9,11 +9,12 @@ import (
 )
 
 type SectionToolsProps struct {
-	Tools         []*shared.Tool
-	Cassettes     []*shared.Cassette
-	User          *shared.User
-	Regenerations map[shared.EntityID][]*shared.ToolRegeneration
-	Notes         map[shared.EntityID][]*shared.Note
+	Tools              []*shared.Tool
+	Cassettes          []*shared.Cassette
+	User               *shared.User
+	IsRegenerating     map[shared.EntityID]bool
+	RegenerationsCount int
+	NotesCount         int
 }
 
 templ SectionTools(p SectionToolsProps) {
@@ -95,8 +96,10 @@ templ ToolsList(p SectionToolsProps) {
 				<li id={ fmt.Sprintf("tool-%d", t.ID) } class="tool-item" style="display: none;">
 					@components.ToolAnchor(components.ToolAnchorProps{
 						Tool:               t,
-						RegenerationsCount: len(p.Regenerations[t.ID]),
-						NotesCount:         len(p.Notes[t.ID]),
+						Cassette:           p.Cassettes[t.ID],
+						IsRegenerating:     p.IsRegenerating[t.ID],
+						RegenerationsCount: p.RegenerationsCount,
+						NotesCount:         p.NotesCount,
 					})
 				</li>
 			}
@@ -113,10 +116,21 @@ templ ToolsList(p SectionToolsProps) {
 		<ul id="cassettes-list" class="flex flex-col gap p-0" style="list-style: none;">
 			for _, c := range p.Cassettes {
 				<li id={ fmt.Sprintf("cassette-%d", c.ID) } class="tool-item" style="display: none;">
+					{{
+						var boundTool *shared.Tool
+						for _, t := range p.Tools {
+							if t.Cassette == c.ID {
+								boundTool = t
+								break
+							}
+						}
+					}}
 					@components.CassetteAnchor(components.CassetteAnchorProps{
 						Cassette:           c,
-						RegenerationsCount: len(p.Regenerations[c.ID]),
-						NotesCount:         len(p.Notes[c.ID]),
+						Tool:               boundTool,
+						IsRegenerating:     p.IsRegenerating[c.ID],
+						RegenerationsCount: p.RegenerationsCount,
+						NotesCount:         p.NotesCount,
 					})
 				</li>
 			}

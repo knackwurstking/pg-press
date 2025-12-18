@@ -12,17 +12,16 @@ templ SmallBadge(classNames ...string) {
 	</small>
 }
 
-templ ToolStateBadge(tool *shared.Tool, pressNumber shared.PressNumber) {
+templ ToolStateBadge(tool *shared.Tool, pressNumber shared.PressNumber, isRegenerating bool) {
 	{{
 		var (
 			text  string
 			color string
 		)
-		//if lastRegeneration != nil && lastRegeneration.ToolID == tool.ID && lastRegeneration.Stop == 0 {
-		//	text = "Regenerierung"
-		//	color = "warning"
-		//} else if tool.IsDead {
-		if tool.IsDead {
+		if isRegenerating {
+			text = "Regenerierung"
+			color = "warning"
+		} else if tool.IsDead {
 			text = "RIP"
 			color = "destructive"
 		} else {
@@ -42,17 +41,16 @@ templ ToolStateBadge(tool *shared.Tool, pressNumber shared.PressNumber) {
 	}
 }
 
-templ CassetteStateBadge(cassette *shared.Cassette, boundToTool *shared.Tool) {
+templ CassetteStateBadge(cassette *shared.Cassette, boundToTool *shared.Tool, isRegenerating bool) {
 	{{
 		var (
 			text  string
 			color string
 		)
-		//if lastRegeneration != nil && lastRegeneration.ToolID == cassette.ID && lastRegeneration.Stop == 0 {
-		//	text = "Regenerierung"
-		//	color = "warning"
-		//} else if cassette.IsDead {
-		if cassette.IsDead {
+		if isRegenerating {
+			text = "Regenerierung"
+			color = "warning"
+		} else if cassette.IsDead {
 			text = "RIP"
 			color = "destructive"
 		} else {
