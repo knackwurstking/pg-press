@@ -20,9 +20,9 @@ func RegisterAll(db *common.DB, e *echo.Echo) {
 		{handler: home.Register, subPath: ""},
 		{handler: auth.Register, subPath: ""},
 		{handler: profile.Register, subPath: "/profile"},
-		{handler: tools.NewHandler(db).RegisterRoutes, subPath: "/tools"},
+		{handler: tools.Register, subPath: "/tools"},
 		{handler: dialogs.Register, subPath: "/dialog"},
-		{handler: tool.NewHandler(db).RegisterRoutes, subPath: "/tool"},
+		{handler: tool.Register, subPath: "/tool"},
 	}
 	for _, reg := range registers {
 		reg.handler(db, e, reg.subPath)

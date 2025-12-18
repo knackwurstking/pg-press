@@ -1,1 +1,29 @@
 package tools
+
+import (
+	"net/http"
+
+	"github.com/knackwurstking/pg-press/internal/common"
+	"github.com/knackwurstking/pg-press/internal/env"
+	"github.com/knackwurstking/pg-press/internal/logger"
+	ui "github.com/knackwurstking/ui/ui-templ"
+	"github.com/labstack/echo/v4"
+)
+
+var (
+	DB  *common.DB
+	Log = logger.New("handler: tools")
+)
+
+func Register(db *common.DB, e *echo.Echo, path string) {
+	DB = db
+
+	ui.RegisterEchoRoutes(e, env.ServerPathPrefix, []*ui.EchoRoute{
+		ui.NewEchoRoute(http.MethodGet, path, GetToolsPage),
+		ui.NewEchoRoute(http.MethodDelete, path+"/delete", Delete),
+		ui.NewEchoRoute(http.MethodPatch, path+"/mark-dead", MarkAsDead),
+		ui.NewEchoRoute(http.MethodGet, path+"/section/press", PressSection),
+		ui.NewEchoRoute(http.MethodGet, path+"/section/tools", ToolsSection),
+		ui.NewEchoRoute(http.MethodGet, path+"/admin/overlapping-tools", AdminOverlappingTools),
+	})
+}

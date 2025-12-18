@@ -1,0 +1,22 @@
+package tools
+
+import (
+	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/labstack/echo/v4"
+)
+
+func GetToolsPage(c echo.Context) *echo.HTTPError {
+	user, merr := shared.GetUserFromContext(c)
+	if merr != nil {
+		return merr.Echo()
+	}
+
+	t := Page(PageProps{User: user})
+	err := t.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "Tools Page")
+	}
+
+	return nil
+}

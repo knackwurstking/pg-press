@@ -1,0 +1,46 @@
+package tool
+
+import (
+	"net/http"
+
+	"github.com/knackwurstking/pg-press/internal/common"
+	"github.com/knackwurstking/pg-press/internal/env"
+	ui "github.com/knackwurstking/ui/ui-templ"
+	"github.com/labstack/echo/v4"
+)
+
+var (
+	DB *common.DB
+)
+
+func Register(db *common.DB, e *echo.Echo, path string) {
+	DB = db
+
+	ui.RegisterEchoRoutes(e, env.ServerPathPrefix, []*ui.EchoRoute{
+		// Main Page
+		ui.NewEchoRoute(http.MethodGet, path+"/:id", GetToolPage), // "is_cassette" defines the tool type
+
+		// Regenerations Table
+		ui.NewEchoRoute(http.MethodDelete, path+"/:id/delete-regeneration", DeleteRegeneration), // "id" is regeneration ID
+
+		// Tool status and regenerations management
+		ui.NewEchoRoute(http.MethodGet, path+"/:id/regeneration-edit", RegenerationEditable),
+		ui.NewEchoRoute(http.MethodGet, path+"/:id/regeneration-display", RegenerationNonEditable),
+		ui.NewEchoRoute(http.MethodPut, path+"/:id/regeneration", Regeneration),
+
+		// Section loading
+		ui.NewEchoRoute(http.MethodGet, path+"/:id/notes", HTMXGetToolNotes),
+		ui.NewEchoRoute(http.MethodGet, path+"/:id/metal-sheets", HTMXGetToolMetalSheets),
+
+		// Cycles table rows
+		ui.NewEchoRoute(http.MethodGet, path+"/:id/cycles", GetCyclesSectionContent),
+		ui.NewEchoRoute(http.MethodGet, path+"/:id/total-cycles", HTMXGetToolTotalCycles),
+
+		// Delete a cycle table entry
+		ui.NewEchoRoute(http.MethodDelete, path+"/cycle/delete", HTMXDeleteToolCycle),
+
+		// Update tools binding data
+		ui.NewEchoRoute(http.MethodPatch, path+"/:id/bind", HTMXPatchToolBinding),
+		ui.NewEchoRoute(http.MethodPatch, path+"/:id/unbind", HTMXPatchToolUnBinding),
+	})
+}

@@ -1,4 +1,4 @@
-package templates
+package tool
 
 import (
 	"fmt"
@@ -40,9 +40,9 @@ templ regenerationEditShowcase(p RegenerationEditProps) {
 
 			var hxGet templ.SafeURL
 			if p.Tool.IsCassette() {
-				hxGet = urlb.UrlTool(p.Tool.GetID(), 0, 0).StatusEdit
+				hxGet = urlb.UrlTool(p.Tool.GetID(), 0, 0).RegenerationEdit
 			} else {
-				hxGet = urlb.UrlTool(p.Tool.GetID(), 0, 0).StatusEdit
+				hxGet = urlb.UrlTool(p.Tool.GetID(), 0, 0).RegenerationEdit
 			}
 		}}
 		<button
@@ -78,9 +78,9 @@ templ regenerationEditForm(p RegenerationEditProps) {
 
 				var hxPut templ.SafeURL
 				if p.Tool.IsCassette() {
-					hxPut = urlb.UrlTool(p.Tool.GetID(), 0, 0).Status
+					hxPut = urlb.UrlTool(p.Tool.GetID(), 0, 0).Regeneration
 				} else {
-					hxPut = urlb.UrlTool(p.Tool.GetID(), 0, 0).Status
+					hxPut = urlb.UrlTool(p.Tool.GetID(), 0, 0).Regeneration
 				}
 			}}
 			<form
@@ -136,9 +136,9 @@ templ regenerationEditForm(p RegenerationEditProps) {
 			{{
 				var hxGet templ.SafeURL
 				if p.Tool.IsCassette() {
-					hxGet = urlb.UrlTool(p.Tool.GetID(), 0, 0).StatusDisplay
+					hxGet = urlb.UrlTool(p.Tool.GetID(), 0, 0).RegenerationDisplay
 				} else {
-					hxGet = urlb.UrlTool(p.Tool.GetID(), 0, 0).StatusDisplay
+					hxGet = urlb.UrlTool(p.Tool.GetID(), 0, 0).RegenerationDisplay
 				}
 			}}
 			<button

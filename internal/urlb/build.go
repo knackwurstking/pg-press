@@ -190,18 +190,18 @@ func UrlTools(toolID shared.EntityID) (url struct {
 
 // UrlTool constructs tool URLs
 func UrlTool(toolID, toolRegenerationID, cycleID shared.EntityID) (url struct {
-	Page               templ.SafeURL
-	DeleteRegeneration templ.SafeURL
-	StatusEdit         templ.SafeURL
-	StatusDisplay      templ.SafeURL
-	Status             templ.SafeURL
-	Notes              templ.SafeURL
-	MetalSheets        templ.SafeURL
-	Cycles             templ.SafeURL
-	TotalCycles        templ.SafeURL
-	CycleDelete        templ.SafeURL
-	Bind               templ.SafeURL
-	UnBind             templ.SafeURL
+	Page                templ.SafeURL
+	DeleteRegeneration  templ.SafeURL
+	RegenerationEdit    templ.SafeURL
+	RegenerationDisplay templ.SafeURL
+	Regeneration        templ.SafeURL
+	Notes               templ.SafeURL
+	MetalSheets         templ.SafeURL
+	Cycles              templ.SafeURL
+	TotalCycles         templ.SafeURL
+	CycleDelete         templ.SafeURL
+	Bind                templ.SafeURL
+	UnBind              templ.SafeURL
 }) {
 	url.Page = BuildURL(fmt.Sprintf("/tool/%d", toolID))
 
@@ -213,9 +213,9 @@ func UrlTool(toolID, toolRegenerationID, cycleID shared.EntityID) (url struct {
 		url.DeleteRegeneration = BuildURLWithParams(fmt.Sprintf("/tool/%d/delete-regeneration", toolID), params)
 	}
 
-	url.StatusEdit = BuildURL(fmt.Sprintf("/tool/%d/status-edit", toolID))
-	url.StatusDisplay = BuildURL(fmt.Sprintf("/tool/%d/status-display", toolID))
-	url.Status = BuildURL(fmt.Sprintf("/tool/%d/status", toolID))
+	url.RegenerationEdit = BuildURL(fmt.Sprintf("/tool/%d/regeneration-edit", toolID))
+	url.RegenerationDisplay = BuildURL(fmt.Sprintf("/tool/%d/regeneration-display", toolID))
+	url.Regeneration = BuildURL(fmt.Sprintf("/tool/%d/regeneration", toolID))
 	url.Notes = BuildURL(fmt.Sprintf("/tool/%d/notes", toolID))
 	url.MetalSheets = BuildURL(fmt.Sprintf("/tool/%d/metal-sheets", toolID))
 	url.Cycles = BuildURL(fmt.Sprintf("/tool/%d/cycles", toolID))
