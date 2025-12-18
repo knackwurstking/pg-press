@@ -18,10 +18,11 @@ templ ToolStateBadge(tool *shared.Tool, pressNumber shared.PressNumber) {
 			text  string
 			color string
 		)
-		if tool.Regenerating {
-			text = "Regenerierung"
-			color = "warning"
-		} else if tool.IsDead {
+		//if lastRegeneration != nil && lastRegeneration.ToolID == tool.ID && lastRegeneration.Stop == 0 {
+		//	text = "Regenerierung"
+		//	color = "warning"
+		//} else if tool.IsDead {
+		if tool.IsDead {
 			text = "RIP"
 			color = "destructive"
 		} else {
@@ -47,10 +48,11 @@ templ CassetteStateBadge(cassette *shared.Cassette, boundToTool *shared.Tool) {
 			text  string
 			color string
 		)
-		if cassette.Regenerating {
-			text = "Regenerierung"
-			color = "warning"
-		} else if cassette.IsDead {
+		//if lastRegeneration != nil && lastRegeneration.ToolID == cassette.ID && lastRegeneration.Stop == 0 {
+		//	text = "Regenerierung"
+		//	color = "warning"
+		//} else if cassette.IsDead {
+		if cassette.IsDead {
 			text = "RIP"
 			color = "destructive"
 		} else {
