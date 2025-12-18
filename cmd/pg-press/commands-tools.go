@@ -114,31 +114,25 @@ func listDeadToolsCommand() cli.Command {
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 
 		// Print header
-		fmt.Fprintln(w, "ID\tFORMAT\tCODE\tTYPE\tPOSITION\tPRESS\tREGEN")
-		fmt.Fprintln(w, "----\t------\t----\t----\t--------\t-----\t-----")
+		fmt.Fprintln(w, "ID\tFORMAT\tCODE\tTYPE\tPOSITION\tPRESS")
+		fmt.Fprintln(w, "----\t------\t----\t----\t--------\t-----")
 
 		// Print each tool
 		for _, tool := range tools {
-			pn, _ := helper.GetPressNumberForTool(r, tool.ID)
+			pn := helper.GetPressNumberForTool(r, tool.ID)
 
 			pressStr := "None"
 			if pn.IsValid() {
 				pressStr = strconv.Itoa(int(pn))
 			}
 
-			regenStr := "No"
-			if tool.Regenerating {
-				regenStr = "Yes"
-			}
-
-			fmt.Fprintf(w, "%d\t%dx%d\t%s\t%s\t%s\t%s\t%s\n",
+			fmt.Fprintf(w, "%d\t%dx%d\t%s\t%s\t%s\t%s\n",
 				tool.ID,
 				tool.Width, tool.Height,
 				tool.Code,
 				tool.Type,
 				tool.Position.German(),
 				pressStr,
-				regenStr,
 			)
 		}
 
@@ -333,14 +327,16 @@ func listCyclesCommand() cli.Command {
 						fmt.Println("No cycles found for this tool")
 					} else {
 						w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-						fmt.Fprintln(w, "ID\tPRESS\tCYCLES\tSTART\tSTOP")
-						fmt.Fprintln(w, "----\t-----\t-------\t-----\t----")
+						fmt.Fprintln(w, "ID\tTOOL ID\tPRESS\tPRESS CYCLES\tPARTIAL CYCLES\tSTART\tSTOP")
+						fmt.Fprintln(w, "--\t-------\t-----\t------------\t--------------\t-----\t----")
 
 						for _, cycle := range cycles {
-							fmt.Fprintf(w, "%d\t%d\t%d\t%s\t%s\n",
+							fmt.Fprintf(w, "%d\t%d\t%d\t%d\t%d\t%s\n%s",
 								cycle.ID,
+								cycle.ToolID,
 								cycle.PressNumber,
-								cycle.Cycles,
+								cycle.PressCycles,
+								cycle.PartialCycles,
 								cycle.Start.FormatDate(),
 								cycle.Stop.FormatDate(),
 							)
