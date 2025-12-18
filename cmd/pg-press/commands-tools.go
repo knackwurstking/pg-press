@@ -71,35 +71,20 @@ func listToolsCommand() cli.Command {
 					w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 
 					// Print header
-					fmt.Fprintln(w, "ID\tFORMAT\tCODE\tTYPE\tPRESS\tREGEN\tSTATE")
-					fmt.Fprintln(w, "----\t------\t----\t----\t--------\t-----\t-----\t------")
+					fmt.Fprintln(w, "ID\tFORMAT\tPOSITION\tTYPE\tCODE\tCYCLES OFFSET\tCYCLES\tIS DEAD")
+					fmt.Fprintln(w, "--\t------\t--------\t----\t----\t-------------\t------\t-------")
 
 					// Print each tool
 					for _, tool := range tools {
-						pressStr := "None"
-						pressNumber, _ := helper.GetPressNumberForTool(r, tool.ID)
-						if pressNumber.IsValid() {
-							pressStr = strconv.Itoa(int(pressNumber))
-						}
-
-						regenStr := "No"
-						if tool.Regenerating {
-							regenStr = "Yes"
-						}
-
-						stateStr := "Alive"
-						if tool.IsDead {
-							stateStr = "Dead"
-						}
-
-						fmt.Fprintf(w, "%d\t%dx%d\t%s\t%s\t%s\t%s\t%s\n",
+						fmt.Fprintf(w, "%d\t%dx%d\t%d\t%s\t%s\t%s\t%s\n",
 							tool.ID,
 							tool.Width, tool.Height,
-							tool.Code,
+							tool.Position,
 							tool.Type,
-							pressStr,
-							regenStr,
-							stateStr,
+							tool.Code,
+							tool.CyclesOffset,
+							tool.Cycles,
+							tool.IsDead,
 						)
 					}
 
