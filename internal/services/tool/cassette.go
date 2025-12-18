@@ -10,11 +10,11 @@ import (
 
 const (
 	SQLCreateCassette string = `
-		INSERT INTO tools (position, width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, min_thickness, max_thickness, model_type)
-		VALUES (:position, :width, :height, :type, :code, :cycles_offset, :cycles, :last_regeneration, :regenerating, :is_dead, :min_thickness, :max_thickness, 'cassette');
+		INSERT INTO tools (position, width, height, type, code, cycles_offset, cycles, is_dead, min_thickness, max_thickness, model_type)
+		VALUES (:position, :width, :height, :type, :code, :cycles_offset, :cycles, :is_dead, :min_thickness, :max_thickness, 'cassette');
 	`
 	SQLGetCassetteByID string = `
-		SELECT id, position, width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, min_thickness, max_thickness
+		SELECT id, position, width, height, type, code, cycles_offset, cycles, is_dead, min_thickness, max_thickness
 		FROM tools
 		WHERE id = :id AND model_type = 'cassette';
 	`
@@ -27,8 +27,6 @@ const (
 			code = :code,
 			cycles_offset = :cycles_offset,
 			cycles = :cycles,
-			last_regeneration = :last_regeneration,
-			regenerating = :regenerating,
 			is_dead = :is_dead,
 			min_thickness = :min_thickness,
 			max_thickness = :max_thickness,
@@ -40,7 +38,7 @@ const (
 		WHERE id = :id AND model_type = 'cassette';
 	`
 	SQLListCassettes string = `
-		SELECT id, position, width, height, type, code, cycles_offset, cycles, last_regeneration, regenerating, is_dead, min_thickness, max_thickness
+		SELECT id, position, width, height, type, code, cycles_offset, cycles, is_dead, min_thickness, max_thickness
 		FROM tools
 		WHERE model_type = 'cassette';
 	`
@@ -80,8 +78,6 @@ func (s *CassetteService) Create(entity *shared.Cassette) *errors.MasterError {
 		sql.Named("code", entity.Code),
 		sql.Named("cycles_offset", entity.CyclesOffset),
 		sql.Named("cycles", entity.Cycles),
-		sql.Named("last_regeneration", entity.LastRegeneration),
-		sql.Named("regenerating", entity.Regenerating),
 		sql.Named("is_dead", entity.IsDead),
 		sql.Named("min_thickness", entity.MinThickness),
 		sql.Named("max_thickness", entity.MaxThickness),
@@ -128,8 +124,6 @@ func (s *CassetteService) GetByID(id shared.EntityID) (*shared.Cassette, *errors
 		&c.Code,
 		&c.CyclesOffset,
 		&c.Cycles,
-		&c.LastRegeneration,
-		&c.Regenerating,
 		&c.IsDead,
 		&c.MinThickness,
 		&c.MaxThickness,
@@ -159,8 +153,6 @@ func (s *CassetteService) Update(entity *shared.Cassette) *errors.MasterError {
 		sql.Named("code", entity.Code),
 		sql.Named("cycles_offset", entity.CyclesOffset),
 		sql.Named("cycles", entity.Cycles),
-		sql.Named("last_regeneration", entity.LastRegeneration),
-		sql.Named("regenerating", entity.Regenerating),
 		sql.Named("is_dead", entity.IsDead),
 		sql.Named("min_thickness", entity.MinThickness),
 		sql.Named("max_thickness", entity.MaxThickness),
@@ -208,8 +200,6 @@ func (s *CassetteService) List() ([]*shared.Cassette, *errors.MasterError) {
 			&c.Code,
 			&c.CyclesOffset,
 			&c.Cycles,
-			&c.LastRegeneration,
-			&c.Regenerating,
 			&c.IsDead,
 			&c.MinThickness,
 			&c.MaxThickness,

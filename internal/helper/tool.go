@@ -180,9 +180,7 @@ func StopToolRegeneration(db *common.DB, toolID shared.EntityID) *errors.MasterE
 	if merr != nil {
 		return merr
 	}
-	if merr != nil {
-		return merr
-	}
+
 	regeneration.Stop = shared.NewUnixMilli(time.Now())
 	totalCycles, merr := GetTotalCyclesForTool(db, toolID)
 	if merr != nil {
