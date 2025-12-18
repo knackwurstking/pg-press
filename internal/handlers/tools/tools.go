@@ -181,6 +181,40 @@ func (h *Handler) renderToolsSection(c echo.Context) *echo.HTTPError {
 		errCh <- nil
 	})
 
+	regenerationsMap := make(map[shared.EntityID][]*shared.ToolRegeneration)
+	wg.Go(func() {
+		regenerations, merr := h.DB.Tool.Regeneration.List()
+		if merr != nil {
+			errCh <- merr.Echo()
+		}
+
+		for _, r := range regenerations {
+			if _, ok := regenerationsMap[r.ToolID]; !ok {
+				regenerationsMap[r.ToolID] = []*shared.ToolRegeneration{}
+			}
+			regenerationsMap[r.ToolID] = append(regenerationsMap[r.ToolID], r)
+		}
+
+		errCh <- nil
+	})
+
+	notesMap := make(map[shared.EntityID][]*shared.Note)
+	wg.Go(func() {
+		notes, merr := h.DB.Note.Note.List()
+		if merr != nil {
+			errCh <- merr.Echo()
+		}
+
+		for _, n := range notes {
+			if _, ok := notesMap[n.ID]; !ok {
+				notesMap[n.ID] = []*shared.Note{}
+			}
+			notesMap[n.ID] = append(notesMap[n.ID], n)
+		}
+
+		errCh <- nil
+	})
+
 	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
@@ -196,9 +230,11 @@ func (h *Handler) renderToolsSection(c echo.Context) *echo.HTTPError {
 	}
 
 	t := templates.SectionTools(templates.SectionToolsProps{
-		Tools:     tools,
-		Cassettes: cassettes,
-		User:      user,
+		Tools:         tools,
+		Cassettes:     cassettes,
+		User:          user,
+		Regenerations: regenerationsMap,
+		Notes:         notesMap,
 	})
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
