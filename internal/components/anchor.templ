@@ -98,6 +98,11 @@ type CassetteAnchorProps struct {
 }
 
 templ CassetteAnchor(p CassetteAnchorProps) {
+	{{
+		if p.Cassette.ID <= 0 {
+			panic("CassetteAnchor: Cassette is required")
+		}
+	}}
 	<a
 		role="button"
 		class="muted flex justify-between items-center p"

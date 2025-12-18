@@ -28,8 +28,9 @@ func GetToolPage(c echo.Context) *echo.HTTPError {
 			if merr != nil {
 				return merr.Echo()
 			}
+		} else {
+			return merr.Echo()
 		}
-		return merr.Echo()
 	}
 
 	t := Page(&PageProps{

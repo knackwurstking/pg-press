@@ -32,12 +32,12 @@ func ListDeadTools(db *common.DB) (tools []*shared.Tool, merr *errors.MasterErro
 func ListAvailableCassettesForBinding(db *common.DB, toolID shared.EntityID) ([]*shared.Cassette, *errors.MasterError) {
 	tool, merr := db.Tool.Tool.GetByID(toolID)
 	if merr != nil {
-		return nil, merr
+		return nil, merr.Wrap("could not get tool with ID %d", toolID)
 	}
 
 	cassettes, merr := db.Tool.Cassette.List()
 	if merr != nil {
-		return nil, merr
+		return nil, merr.Wrap("could not list cassettes")
 	}
 
 	// Filter cassettes based on the tool width and height

@@ -13,7 +13,7 @@ templ CyclesSection(oob bool, id shared.EntityID, isTool bool) {
 		if isTool {
 			hxGet = string(urlb.UrlTool(id, 0, 0).Cycles)
 		} else {
-			hxGet = string(urlb.UrlTool(0, id, 0).Cycles)
+			hxGet = string(urlb.UrlTool(id, 0, 0).Cycles)
 		}
 	}}
 	@components.Section(templ.Attributes{
@@ -73,6 +73,7 @@ templ toolStatus(p CyclesSectionContentProps) {
 				</a>
 			}
 		</span>
+		// Skip the binding section for cassette type tools and for lower slot tools
 		if !p.Tool.IsCassette() && p.Tool.GetBase().Position == shared.SlotUpper {
 			@BindingSection(BindingSectionProps{
 				Tool:                p.Tool.(*shared.Tool),

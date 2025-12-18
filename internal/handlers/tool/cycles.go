@@ -1,6 +1,8 @@
 package tool
 
 import (
+	"net/http"
+
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/helper"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -29,9 +31,17 @@ func renderCyclesSectionContent(c echo.Context) *echo.HTTPError {
 	}
 	toolID := shared.EntityID(id)
 
-	tool, merr := DB.Tool.Tool.GetByID(toolID)
+	var tool shared.ModelTool
+	tool, merr = DB.Tool.Tool.GetByID(toolID)
 	if merr != nil {
-		return merr.WrapEcho("could not get tool for cycles section")
+		if merr.Code == http.StatusNotFound {
+			tool, merr = DB.Tool.Cassette.GetByID(toolID)
+			if merr != nil {
+				return merr.WrapEcho("could not get cassette for cycles section")
+			}
+		} else {
+			return merr.WrapEcho("could not get tool for cycles section")
+		}
 	}
 
 	// Get cycles for this specific tool
@@ -44,9 +54,12 @@ func renderCyclesSectionContent(c echo.Context) *echo.HTTPError {
 	activePressNumber := helper.GetPressNumberForTool(DB, toolID)
 
 	// Get bindable cassettes for this tool, if it is a tool and not a cassette
-	cassettesForBinding, merr := helper.ListAvailableCassettesForBinding(DB, toolID)
-	if merr != nil {
-		return merr.WrapEcho("could not list available cassettes for binding")
+	var cassettesForBinding []*shared.Cassette
+	if !tool.IsCassette() {
+		cassettesForBinding, merr = helper.ListAvailableCassettesForBinding(DB, toolID)
+		if merr != nil {
+			return merr.WrapEcho("could not list available cassettes for binding")
+		}
 	}
 
 	// Get regenerations for this tool
