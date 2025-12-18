@@ -51,4 +51,6 @@ Fix all handler and templates
 - [-] dialogs
   - [x] tool dialog (new/edit)
   - [x] cassette dialog (new/edit)
+  - [ ] metal sheet dialog (new/edit)
+  - [ ] cycle dialog (new/edit)
 - [-] tool
