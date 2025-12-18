@@ -20,7 +20,7 @@ const (
 			start        INTEGER NOT NULL,
 			stop         INTEGER NOT NULL,
 
-			PRIMARY KEY("id"),
+			PRIMARY KEY("id")
 		);
 	`
 
