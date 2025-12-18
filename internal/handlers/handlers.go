@@ -28,8 +28,6 @@ func RegisterAll(db *common.DB, e *echo.Echo) {
 		reg.handler(db, e, reg.subPath)
 	}
 
-	//nav.NewHandler(r, wsFeedHandler).RegisterRoutes(e, "/nav")
-	//feed.NewHandler(r).RegisterRoutes(e, "/feed")
 	//help.NewHandler(r).RegisterRoutes(e, "/help")
 	//editor.NewHandler(r).RegisterRoutes(e, "/editor")
 	//notes.NewHandler(r).RegisterRoutes(e, "/notes")

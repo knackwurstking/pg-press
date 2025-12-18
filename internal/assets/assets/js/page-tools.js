@@ -37,6 +37,7 @@ function initFilterInputFromQuery() {
 
 const detailsOpenStates = new Map();
 
+// TODO: Update details summary tools count to match filtered results
 function filterToolsList(event = null, skipHistory = false) {
 	const target = event
 		? event.currentTarget

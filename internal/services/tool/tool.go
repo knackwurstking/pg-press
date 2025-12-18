@@ -25,8 +25,8 @@ const (
 			cycles 				INTEGER NOT NULL DEFAULT 0,
 			is_dead 			INTEGER NOT NULL DEFAULT 0,
 			cassette			INTEGER NOT NULL DEFAULT 0,
-			min_thickness		REAL NOT NULL,
-			max_thickness		REAL NOT NULL,
+			min_thickness		REAL NOT NULL DEFAULT 0,
+			max_thickness		REAL NOT NULL DEFAULT 0,
 			model_type			TEXT NOT NULL, -- e.g.: "tool", "cassette"
 
 			PRIMARY KEY("id" AUTOINCREMENT)
@@ -34,11 +34,11 @@ const (
 	`
 
 	SQLCreateTool string = `
-	INSERT INTO tools (position, width, height, type, code, cycles_offset, cycles, is_dead, cassette, min_thickness, max_thickness, model_type)
-		VALUES (:position, :width, :height, :type, :code, :cycles_offset, :cycles, :is_dead, :cassette, :min_thickness, :max_thickness, 'tool');
+	INSERT INTO tools (position, width, height, type, code, cycles_offset, cycles, is_dead, cassette, model_type)
+		VALUES (:position, :width, :height, :type, :code, :cycles_offset, :cycles, :is_dead, :cassette, 'tool');
 	`
 	SQLGetToolByID string = `
-		SELECT id, position, width, height, type, code, cycles_offset, cycles, is_dead, cassette, min_thickness, max_thickness
+		SELECT id, position, width, height, type, code, cycles_offset, cycles, is_dead, cassette
 		FROM tools
 		WHERE id = :id AND model_type = 'tool';
 	`
@@ -53,8 +53,6 @@ const (
 			cycles = :cycles,
 			is_dead = :is_dead,
 			cassette = :cassette,
-			min_thickness = :min_thickness,
-			max_thickness = :max_thickness,
 		WHERE id = :id AND model_type = 'tool';
 	`
 	SQLDeleteTool string = `
@@ -63,7 +61,7 @@ const (
 		WHERE id = :id AND model_type = 'tool';
 	`
 	SQLListTools string = `
-		SELECT id, position, width, height, type, code, cycles_offset, cycles, is_dead, cassette, min_thickness, max_thickness
+		SELECT id, position, width, height, type, code, cycles_offset, cycles, is_dead, cassette
 		FROM tools
 		WHERE model_type = 'tool';
 	`

@@ -117,9 +117,9 @@ func (s *CassetteService) GetByID(id shared.EntityID) (*shared.Cassette, *errors
 	var c = &shared.Cassette{}
 	err := r.Scan(
 		&c.ID,
+		&c.Position,
 		&c.Width,
 		&c.Height,
-		&c.Position,
 		&c.Type,
 		&c.Code,
 		&c.CyclesOffset,
@@ -193,9 +193,9 @@ func (s *CassetteService) List() ([]*shared.Cassette, *errors.MasterError) {
 		c := &shared.Cassette{}
 		err := rows.Scan(
 			&c.ID,
+			&c.Position,
 			&c.Width,
 			&c.Height,
-			&c.Position,
 			&c.Type,
 			&c.Code,
 			&c.CyclesOffset,

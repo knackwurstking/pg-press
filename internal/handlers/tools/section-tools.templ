@@ -94,10 +94,24 @@ templ ToolsList(p SectionToolsProps) {
 					{{ continue }}
 				}
 				<li id={ fmt.Sprintf("tool-%d", t.ID) } class="tool-item" style="display: none;">
+					{{
+						var cassette *shared.Cassette
+						for _, c := range p.Cassettes {
+							if c.ID == t.Cassette {
+								cassette = c
+								break
+							}
+						}
+
+						var isRegenerating bool
+						if v, ok := p.IsRegenerating[t.ID]; ok {
+							isRegenerating = v
+						}
+					}}
 					@components.ToolAnchor(components.ToolAnchorProps{
 						Tool:               t,
-						Cassette:           p.Cassettes[t.ID],
-						IsRegenerating:     p.IsRegenerating[t.ID],
+						Cassette:           cassette,
+						IsRegenerating:     isRegenerating,
 						RegenerationsCount: p.RegenerationsCount,
 						NotesCount:         p.NotesCount,
 					})
@@ -124,11 +138,16 @@ templ ToolsList(p SectionToolsProps) {
 								break
 							}
 						}
+
+						var isRegenerating bool
+						if v, ok := p.IsRegenerating[c.ID]; ok {
+							isRegenerating = v
+						}
 					}}
 					@components.CassetteAnchor(components.CassetteAnchorProps{
 						Cassette:           c,
 						Tool:               boundTool,
-						IsRegenerating:     p.IsRegenerating[c.ID],
+						IsRegenerating:     isRegenerating,
 						RegenerationsCount: p.RegenerationsCount,
 						NotesCount:         p.NotesCount,
 					})
