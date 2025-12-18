@@ -13,11 +13,13 @@ const (
 		INSERT INTO tools (position, width, height, type, code, cycles_offset, cycles, is_dead, min_thickness, max_thickness, model_type)
 		VALUES (:position, :width, :height, :type, :code, :cycles_offset, :cycles, :is_dead, :min_thickness, :max_thickness, 'cassette');
 	`
+
 	SQLGetCassetteByID string = `
 		SELECT id, position, width, height, type, code, cycles_offset, cycles, is_dead, min_thickness, max_thickness
 		FROM tools
 		WHERE id = :id AND model_type = 'cassette';
 	`
+
 	SQLUpdateCassette string = `
 		UPDATE tools
 		SET position = :position,
@@ -29,14 +31,16 @@ const (
 			cycles = :cycles,
 			is_dead = :is_dead,
 			min_thickness = :min_thickness,
-			max_thickness = :max_thickness,
+			max_thickness = :max_thickness
 		WHERE id = :id AND model_type = 'cassette';
 	`
+
 	SQLDeleteCassette string = `
 		UPDATE tools
 		SET is_dead = 1
 		WHERE id = :id AND model_type = 'cassette';
 	`
+
 	SQLListCassettes string = `
 		SELECT id, position, width, height, type, code, cycles_offset, cycles, is_dead, min_thickness, max_thickness
 		FROM tools

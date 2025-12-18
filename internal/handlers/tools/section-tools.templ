@@ -19,7 +19,7 @@ type SectionToolsProps struct {
 
 templ SectionTools(p SectionToolsProps) {
 	<span
-		hx-get={ urlb.UrlTools(0).SectionTools }
+		hx-get={ urlb.UrlTools(0, false).SectionTools }
 		hx-trigger="tools-tab from:body"
 		hx-target="#tab-content"
 	></span>
@@ -89,6 +89,9 @@ templ ToolsList(p SectionToolsProps) {
 		</summary>
 		<ul id="tools-list" class="flex flex-col gap p-0" style="list-style: none;">
 			for _, t := range p.Tools {
+				if !p.User.IsAdmin() && t.IsDead {
+					{{ continue }}
+				}
 				// NOTE: This is just a provisorium
 				if (strings.ToLower(t.Type) == "unbekannt" || strings.ToLower(t.Code) == "unbekannt") && !p.User.IsAdmin() {
 					{{ continue }}

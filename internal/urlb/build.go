@@ -165,7 +165,7 @@ func UrlTroubleReports(trID shared.EntityID, aID shared.EntityID, modificationTi
 }
 
 // UrlTools constructs tools URLs
-func UrlTools(toolID shared.EntityID) (url struct {
+func UrlTools(toolID shared.EntityID, isCassette bool) (url struct {
 	Page                  templ.SafeURL
 	Delete                templ.SafeURL
 	MarkDead              templ.SafeURL
@@ -176,6 +176,9 @@ func UrlTools(toolID shared.EntityID) (url struct {
 	params := map[string]string{}
 	if toolID != 0 {
 		params["id"] = fmt.Sprintf("%d", toolID)
+	}
+	if isCassette {
+		params["is_cassette"] = "true"
 	}
 
 	url.Page = BuildURL("/tools")

@@ -60,16 +60,20 @@ templ Page(p *PageProps) {
 
 templ actionBarContent(p *PageProps) {
 	if p.User.IsAdmin() {
-		<button
-			class="destructive flex gap"
-			hx-patch={ urlb.UrlTools(p.Tool.GetID()).MarkDead }
-			hx-trigger="click"
-			hx-confirm="Sind Sie sicher, dass Sie dieses Werkzeug löschen möchten?"
-			hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-		>
-			<i class="bi bi-trash"></i>
-			Löschen
-		</button>
+		if p.Tool.GetBase().IsDead {
+			// TODO: Revive tool/cassette button here
+		} else {
+			<button
+				class="destructive flex gap"
+				hx-patch={ urlb.UrlTools(p.Tool.GetID(), p.Tool.IsCassette()).MarkDead }
+				hx-trigger="click"
+				hx-confirm="Sind Sie sicher, dass Sie dieses Werkzeug löschen möchten?"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+			>
+				<i class="bi bi-trash"></i>
+				Löschen
+			</button>
+		}
 	}
 	<button
 		class="primary flex gap"

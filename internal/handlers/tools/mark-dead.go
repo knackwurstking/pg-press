@@ -17,7 +17,7 @@ func MarkAsDead(c echo.Context) *echo.HTTPError {
 	if shared.ParseQueryBool(c, "is_cassette") {
 		cassette, merr := DB.Tool.Cassette.GetByID(toolID)
 		if merr != nil {
-			return merr.Echo()
+			return merr.WrapEcho("failed to get cassette by ID")
 		}
 
 		if cassette.IsDead {
@@ -27,12 +27,12 @@ func MarkAsDead(c echo.Context) *echo.HTTPError {
 
 		merr = DB.Tool.Cassette.Update(cassette)
 		if merr != nil {
-			return merr.Echo()
+			return merr.WrapEcho("failed to update cassette")
 		}
 	} else {
 		tool, merr := DB.Tool.Tool.GetByID(toolID)
 		if merr != nil {
-			return merr.Echo()
+			return merr.WrapEcho("failed to get tool by ID")
 		}
 
 		if tool.IsDead {
@@ -42,11 +42,11 @@ func MarkAsDead(c echo.Context) *echo.HTTPError {
 
 		merr = DB.Tool.Tool.Update(tool)
 		if merr != nil {
-			return merr.Echo()
+			return merr.WrapEcho("failed to update tool")
 		}
 	}
 
-	urlb.SetHXTrigger(c, "tools-tab")
+	urlb.SetHXRedirect(c, urlb.UrlTools(0, false).Page)
 
 	return nil
 }
