@@ -32,9 +32,9 @@ func GetPressNumberForTool(db *common.DB, toolID shared.EntityID) shared.PressNu
 func ListCyclesForTool(db *common.DB, toolID shared.EntityID) ([]*shared.Cycle, *errors.MasterError) {
 	rows, err := db.Press.Cycle.DB().Query(
 		`
-			SELECT id, tool_id, position, press_number, cycles, start, stop
+			SELECT id, tool_id, press_number, cycles, start, stop
 			FROM press_cycles
-			WHERE slot_up = :tool_id OR slot_down = :tool_id
+			WHERE tool_id = :tool_id
 			ORDER BY press_number ASC, stop DESC;
 		`,
 		sql.Named("tool_id", toolID),
@@ -49,6 +49,7 @@ func ListCyclesForTool(db *common.DB, toolID shared.EntityID) ([]*shared.Cycle, 
 		c := &shared.Cycle{}
 		err := rows.Scan(
 			&c.ID,
+			&c.ToolID,
 			&c.PressNumber,
 			&c.PressCycles,
 			&c.Start,

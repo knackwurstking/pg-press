@@ -23,6 +23,7 @@ templ BindingSection(props BindingSectionProps) {
 		>
 			<select
 				id="tool-binding-select"
+				class="max-w-full"
 				hx-patch={ urlb.UrlTool(props.Tool.ID, 0, 0).Bind }
 				hx-vals="js:{target_id: event.target.value}"
 				hx-trigger="change"
@@ -48,7 +49,7 @@ templ BindingSection(props BindingSectionProps) {
 					<option
 						value={ c.ID }
 						selected?={ c.ID == props.Tool.Cassette }
-					>{ c.String() }</option>
+					>{ c.German() }</option>
 				}
 			</select>
 			<button

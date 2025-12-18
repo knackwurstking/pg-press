@@ -25,19 +25,19 @@ func renderCyclesSectionContent(c echo.Context) *echo.HTTPError {
 	// Get tool from URL param "id"
 	id, merr := shared.ParseParamInt64(c, "id")
 	if merr != nil {
-		return merr.Echo()
+		return merr.WrapEcho("could not parse tool ID from URL parameter")
 	}
 	toolID := shared.EntityID(id)
 
 	tool, merr := DB.Tool.Tool.GetByID(toolID)
 	if merr != nil {
-		return merr.Echo()
+		return merr.WrapEcho("could not get tool for cycles section")
 	}
 
 	// Get cycles for this specific tool
 	toolCycles, merr := helper.ListCyclesForTool(DB, toolID)
 	if merr != nil {
-		return merr.Echo()
+		return merr.WrapEcho("could not list cycles for tool")
 	}
 
 	// Get active press number for this tool, -1 if none
@@ -46,19 +46,19 @@ func renderCyclesSectionContent(c echo.Context) *echo.HTTPError {
 	// Get bindable cassettes for this tool, if it is a tool and not a cassette
 	cassettesForBinding, merr := helper.ListAvailableCassettesForBinding(DB, toolID)
 	if merr != nil {
-		return merr.Echo()
+		return merr.WrapEcho("could not list available cassettes for binding")
 	}
 
 	// Get regenerations for this tool
 	regenerations, merr := helper.GetRegenerationsForTool(DB, toolID)
 	if merr != nil {
-		return merr.Echo()
+		return merr.WrapEcho("could not get regenerations for tool")
 	}
 
 	// Get user from context
 	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
-		return merr.Echo()
+		return merr.WrapEcho("could not get user from context")
 	}
 
 	t := CyclesSectionContent(CyclesSectionContentProps{
