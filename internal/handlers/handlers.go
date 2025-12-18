@@ -14,18 +14,18 @@ import (
 
 func RegisterAll(db *common.DB, e *echo.Echo) {
 	registers := []struct {
-		handler func(e *echo.Echo, path string)
+		handler func(db *common.DB, e *echo.Echo, path string)
 		subPath string
 	}{
-		{handler: home.NewHandler(db).RegisterRoutes, subPath: ""},
-		{handler: auth.NewHandler(db).RegisterRoutes, subPath: ""},
-		{handler: profile.NewHandler(db).RegisterRoutes, subPath: "/profile"},
+		{handler: home.Register, subPath: ""},
+		{handler: auth.Register, subPath: ""},
+		{handler: profile.Register, subPath: "/profile"},
 		{handler: tools.NewHandler(db).RegisterRoutes, subPath: "/tools"},
-		{handler: dialogs.NewHandler(db).RegisterRoutes, subPath: "/dialog"},
+		{handler: dialogs.Register, subPath: "/dialog"},
 		{handler: tool.NewHandler(db).RegisterRoutes, subPath: "/tool"},
 	}
 	for _, reg := range registers {
-		reg.handler(e, reg.subPath)
+		reg.handler(db, e, reg.subPath)
 	}
 
 	//nav.NewHandler(r, wsFeedHandler).RegisterRoutes(e, "/nav")

@@ -6,25 +6,18 @@ import (
 	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/logger"
-
 	ui "github.com/knackwurstking/ui/ui-templ"
-
 	"github.com/labstack/echo/v4"
 )
 
-type Handler struct {
+var (
+	Log = logger.New("handler: dialogs")
 	DB  *common.DB
-	Log *ui.Logger
-}
+)
 
-func NewHandler(db *common.DB) *Handler {
-	return &Handler{
-		DB:  db,
-		Log: logger.New("handler: dialogs"),
-	}
-}
+func Register(db *common.DB, e *echo.Echo, path string) {
+	DB = db
 
-func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 	ui.RegisterEchoRoutes(e, env.ServerPathPrefix, []*ui.EchoRoute{
 		// Edit cycle dialog
 		//ui.NewEchoRoute(http.MethodGet, path+"/edit-cycle", h.GetEditCycle),
@@ -32,14 +25,14 @@ func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
 		//ui.NewEchoRoute(http.MethodPut, path+"/edit-cycle", h.PutEditCycle),
 
 		// Edit tool dialog
-		ui.NewEchoRoute(http.MethodGet, path+"/edit-tool", h.GetToolDialog),
-		ui.NewEchoRoute(http.MethodPost, path+"/edit-tool", h.PostTool),
-		ui.NewEchoRoute(http.MethodPut, path+"/edit-tool", h.PutTool),
+		ui.NewEchoRoute(http.MethodGet, path+"/edit-tool", GetToolDialog),
+		ui.NewEchoRoute(http.MethodPost, path+"/edit-tool", PostTool),
+		ui.NewEchoRoute(http.MethodPut, path+"/edit-tool", PutTool),
 
 		// Edit cassette dialog
-		ui.NewEchoRoute(http.MethodGet, path+"/edit-cassette", h.GetCassetteDialog),
-		ui.NewEchoRoute(http.MethodPost, path+"/edit-cassette", h.PostCassette),
-		ui.NewEchoRoute(http.MethodPut, path+"/edit-cassette", h.PutCassette),
+		ui.NewEchoRoute(http.MethodGet, path+"/edit-cassette", GetCassetteDialog),
+		ui.NewEchoRoute(http.MethodPost, path+"/edit-cassette", PostCassette),
+		ui.NewEchoRoute(http.MethodPut, path+"/edit-cassette", PutCassette),
 
 		// Edit metal sheet dialog
 		//ui.NewEchoRoute(http.MethodGet, path+"/edit-metal-sheet", h.GetEditMetalSheet),

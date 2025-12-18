@@ -3,58 +3,25 @@ package profile
 import (
 	"fmt"
 	"net/http"
-	"slices"
 
-	"github.com/knackwurstking/pg-press/internal/common"
-	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
-	"github.com/knackwurstking/pg-press/internal/handlers/profile/templates"
-	"github.com/knackwurstking/pg-press/internal/helper"
-	"github.com/knackwurstking/pg-press/internal/logger"
 	"github.com/knackwurstking/pg-press/internal/shared"
-
-	ui "github.com/knackwurstking/ui/ui-templ"
 
 	"github.com/labstack/echo/v4"
 )
 
-type Handler struct {
-	DB  *common.DB
-	Log *ui.Logger
-}
-
-func NewHandler(db *common.DB) *Handler {
-	return &Handler{
-		DB:  db,
-		Log: logger.New("handler: profile"),
-	}
-}
-
-func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
-	ui.RegisterEchoRoutes(
-		e,
-		env.ServerPathPrefix,
-		[]*ui.EchoRoute{
-			ui.NewEchoRoute(http.MethodGet, path, h.GetProfilePage),
-			ui.NewEchoRoute(http.MethodGet, path+"/cookies", h.HTMXGetCookies),
-			ui.NewEchoRoute(http.MethodDelete, path+"/cookies",
-				h.HTMXDeleteCookies),
-		},
-	)
-}
-
-func (h *Handler) GetProfilePage(c echo.Context) *echo.HTTPError {
+func GetProfilePage(c echo.Context) *echo.HTTPError {
 	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	merr = h.handleUserNameChange(c, user)
+	merr = handleUserNameChange(c, user)
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	t := templates.Page(templates.PageProps{User: user})
+	t := Page(PageProps{User: user})
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "Profile Page")
@@ -63,30 +30,7 @@ func (h *Handler) GetProfilePage(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func (h *Handler) HTMXGetCookies(c echo.Context) *echo.HTTPError {
-	return h.renderCookies(c, false)
-}
-
-func (h *Handler) HTMXDeleteCookies(c echo.Context) *echo.HTTPError {
-	value, merr := shared.ParseQueryString(c, "value")
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	merr = h.DB.User.Cookie.Delete(value)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	eerr := h.HTMXGetCookies(c)
-	if eerr != nil {
-		return eerr
-	}
-
-	return h.renderCookies(c, true)
-}
-
-func (h *Handler) handleUserNameChange(c echo.Context, user *shared.User) *errors.MasterError {
+func handleUserNameChange(c echo.Context, user *shared.User) *errors.MasterError {
 	userName := c.FormValue("user-name")
 	if userName == "" || userName == user.Name {
 		return nil
@@ -100,38 +44,11 @@ func (h *Handler) handleUserNameChange(c echo.Context, user *shared.User) *error
 	}
 
 	user.Name = userName
-	merr := h.DB.User.User.Update(user)
+	merr := DB.User.User.Update(user)
 	if merr != nil {
 		return merr
 	}
-	h.Log.Info("User %#v changed their name to %#v\n", user.Name, userName)
+	Log.Info("User %#v changed their name to %#v\n", user.Name, userName)
 
-	return nil
-}
-
-func (h *Handler) renderCookies(c echo.Context, oob bool) *echo.HTTPError {
-	user, merr := shared.GetUserFromContext(c)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	cookies, merr := helper.ListCookiesForApiKey(h.DB, user.ApiKey)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	// Sort cookies by last login
-	slices.SortFunc(cookies, func(a, b *shared.Cookie) int {
-		return int(a.LastLogin - b.LastLogin)
-	})
-
-	t := templates.Cookies(templates.CookiesProps{
-		Cookies: cookies,
-		OOB:     oob,
-	})
-	err := t.Render(c.Request().Context(), c.Response())
-	if err != nil {
-		return errors.NewRenderError(err, "Cookies")
-	}
 	return nil
 }

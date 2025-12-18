@@ -1,0 +1,49 @@
+package auth
+
+import (
+	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/urlb"
+)
+
+type PageProps struct {
+	FormData map[string]string
+}
+
+templ Page(p PageProps) {
+	@components.Layout(components.LayoutProps{
+		PageTitle:   "PG Presse | Login",
+		AppBarTitle: "Login",
+		NavContent:  components.StandardNavContent(),
+	}) {
+		<main class="container">
+			@apiKeyDialog(p.FormData["api-key"], p.FormData["invalid-api-key"])
+			<script>
+				document.querySelector("#login-dialog").showModal();
+			</script>
+		</main>
+	}
+}
+
+templ apiKeyDialog(apiKey, invalidApiKey string) {
+	<dialog id="login-dialog" class="clean" oncancel="event.preventDefault();">
+		<form
+			action={ urlb.UrlLogin("", nil).Page }
+			method="post"
+		>
+			<label class="flex flex-col">
+				API-Schlüssel
+				<input
+					name="api-key"
+					type="text"
+					placeholder="API-Schlüssel"
+					value={ apiKey }
+					aria-invalid?={ invalidApiKey == "true" }
+					required
+				/>
+			</label>
+			<footer class="flex">
+				<button class="flex-1" type="submit">Anmelden</button>
+			</footer>
+		</form>
+	</dialog>
+}

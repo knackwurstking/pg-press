@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/knackwurstking/pg-press/internal/errors"
-	"github.com/knackwurstking/pg-press/internal/handlers/dialogs/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 
@@ -13,12 +12,12 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (h *Handler) GetToolDialog(c echo.Context) *echo.HTTPError {
+func GetToolDialog(c echo.Context) *echo.HTTPError {
 	var tool *shared.Tool
 	id, _ := shared.ParseQueryInt64(c, "id")
 	if id > 0 {
 		var merr *errors.MasterError
-		tool, merr = h.DB.Tool.Tool.GetByID(shared.EntityID(id))
+		tool, merr = DB.Tool.Tool.GetByID(shared.EntityID(id))
 		if merr != nil {
 			return merr.Echo()
 		}
@@ -27,13 +26,13 @@ func (h *Handler) GetToolDialog(c echo.Context) *echo.HTTPError {
 	var t templ.Component
 	var tName string
 	if tool != nil {
-		t = templates.EditToolDialog(tool)
+		t = EditToolDialog(tool)
 		tName = "EditToolDialog"
-		h.Log.Debug("Rendering edit tool dialog: %#v", tool.String())
+		Log.Debug("Rendering edit tool dialog: %#v", tool.String())
 	} else {
-		t = templates.NewToolDialog()
+		t = NewToolDialog()
 		tName = "NewToolDialog"
-		h.Log.Debug("Rendering new tool dialog...")
+		Log.Debug("Rendering new tool dialog...")
 	}
 
 	err := t.Render(c.Request().Context(), c.Response())
@@ -44,15 +43,15 @@ func (h *Handler) GetToolDialog(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func (h *Handler) PostTool(c echo.Context) *echo.HTTPError {
-	tool, verr := h.getToolDialogForm(c)
+func PostTool(c echo.Context) *echo.HTTPError {
+	tool, verr := getToolDialogForm(c)
 	if verr != nil {
 		return verr.MasterError().Echo()
 	}
 
-	h.Log.Debug("Creating new tool: %#v", tool.String())
+	Log.Debug("Creating new tool: %#v", tool.String())
 
-	merr := h.DB.Tool.Tool.Create(tool)
+	merr := DB.Tool.Tool.Create(tool)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -63,22 +62,22 @@ func (h *Handler) PostTool(c echo.Context) *echo.HTTPError {
 }
 
 // PutTool handles updating an existing tool
-func (h *Handler) PutTool(c echo.Context) *echo.HTTPError {
+func PutTool(c echo.Context) *echo.HTTPError {
 	id, merr := shared.ParseQueryInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
 	toolID := shared.EntityID(id)
 
-	tool, verr := h.getToolDialogForm(c)
+	tool, verr := getToolDialogForm(c)
 	if verr != nil {
 		return verr.MasterError().Echo()
 	}
 	tool.ID = toolID // Just to be sure
 
-	h.Log.Debug("Updating tool: %#v", tool.String())
+	Log.Debug("Updating tool: %#v", tool.String())
 
-	merr = h.DB.Tool.Tool.Update(tool)
+	merr = DB.Tool.Tool.Update(tool)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -89,7 +88,7 @@ func (h *Handler) PutTool(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func (h *Handler) getToolDialogForm(c echo.Context) (*shared.Tool, *errors.ValidationError) {
+func getToolDialogForm(c echo.Context) (*shared.Tool, *errors.ValidationError) {
 	var (
 		vPosition = c.FormValue("position")
 		vWidth    = c.FormValue("width")
@@ -98,7 +97,7 @@ func (h *Handler) getToolDialogForm(c echo.Context) (*shared.Tool, *errors.Valid
 		vCode     = strings.Trim(c.FormValue("code"), " ")
 	)
 
-	h.Log.Debug("Tool dialog form values: position=%s, width=%s, height=%s, type=%s, code=%s",
+	Log.Debug("Tool dialog form values: position=%s, width=%s, height=%s, type=%s, code=%s",
 		vPosition, vWidth, vHeight, vType, vCode)
 
 	// Need to convert the vPosition to an integer

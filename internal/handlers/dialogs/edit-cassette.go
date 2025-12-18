@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/knackwurstking/pg-press/internal/errors"
-	"github.com/knackwurstking/pg-press/internal/handlers/dialogs/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 
@@ -13,12 +12,12 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (h *Handler) GetCassetteDialog(c echo.Context) *echo.HTTPError {
+func GetCassetteDialog(c echo.Context) *echo.HTTPError {
 	var cassette *shared.Cassette
 	id, _ := shared.ParseQueryInt64(c, "id")
 	if id > 0 {
 		var merr *errors.MasterError
-		cassette, merr = h.DB.Tool.Cassette.GetByID(shared.EntityID(id))
+		cassette, merr = DB.Tool.Cassette.GetByID(shared.EntityID(id))
 		if merr != nil {
 			return merr.Echo()
 		}
@@ -27,13 +26,13 @@ func (h *Handler) GetCassetteDialog(c echo.Context) *echo.HTTPError {
 	var t templ.Component
 	var tName string
 	if cassette != nil {
-		t = templates.EditCassetteDialog(cassette)
+		t = EditCassetteDialog(cassette)
 		tName = "EditCassetteDialog"
-		h.Log.Debug("Rendering edit cassette dialog: %#v", cassette.String())
+		Log.Debug("Rendering edit cassette dialog: %#v", cassette.String())
 	} else {
-		t = templates.NewCassetteDialog()
+		t = NewCassetteDialog()
 		tName = "NewCassetteDialog"
-		h.Log.Debug("Rendering new cassette dialog...")
+		Log.Debug("Rendering new cassette dialog...")
 	}
 
 	err := t.Render(c.Request().Context(), c.Response())
@@ -44,15 +43,15 @@ func (h *Handler) GetCassetteDialog(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func (h *Handler) PostCassette(c echo.Context) *echo.HTTPError {
-	cassette, verr := h.getCassetteDialogForm(c)
+func PostCassette(c echo.Context) *echo.HTTPError {
+	cassette, verr := getCassetteDialogForm(c)
 	if verr != nil {
 		return verr.MasterError().Echo()
 	}
 
-	h.Log.Debug("Creating new cassette: %#v", cassette.String())
+	Log.Debug("Creating new cassette: %#v", cassette.String())
 
-	merr := h.DB.Tool.Cassette.Create(cassette)
+	merr := DB.Tool.Cassette.Create(cassette)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -63,22 +62,22 @@ func (h *Handler) PostCassette(c echo.Context) *echo.HTTPError {
 }
 
 // PutCassette handles updating an existing cassette
-func (h *Handler) PutCassette(c echo.Context) *echo.HTTPError {
+func PutCassette(c echo.Context) *echo.HTTPError {
 	id, merr := shared.ParseQueryInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
 	cassetteID := shared.EntityID(id)
 
-	cassette, verr := h.getCassetteDialogForm(c)
+	cassette, verr := getCassetteDialogForm(c)
 	if verr != nil {
 		return verr.MasterError().Echo()
 	}
 	cassette.ID = cassetteID
 
-	h.Log.Debug("Updating cassette: %#v", cassette.String())
+	Log.Debug("Updating cassette: %#v", cassette.String())
 
-	merr = h.DB.Tool.Cassette.Update(cassette)
+	merr = DB.Tool.Cassette.Update(cassette)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -89,7 +88,7 @@ func (h *Handler) PutCassette(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func (h *Handler) getCassetteDialogForm(c echo.Context) (*shared.Cassette, *errors.ValidationError) {
+func getCassetteDialogForm(c echo.Context) (*shared.Cassette, *errors.ValidationError) {
 	var (
 		vWidth        = c.FormValue("width")
 		vHeight       = c.FormValue("height")
@@ -99,7 +98,7 @@ func (h *Handler) getCassetteDialogForm(c echo.Context) (*shared.Cassette, *erro
 		vMaxThickness = c.FormValue("max_thickness")
 	)
 
-	h.Log.Debug("Cassette dialog form values: width=%s, height=%s, type=%s, code=%s, min_thickness=%s, max_thickness=%s",
+	Log.Debug("Cassette dialog form values: width=%s, height=%s, type=%s, code=%s, min_thickness=%s, max_thickness=%s",
 		vWidth, vHeight, vType, vCode, vMinThickness, vMaxThickness)
 
 	// Convert vWidth and vHeight to integers
