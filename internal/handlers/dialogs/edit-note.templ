@@ -2,7 +2,6 @@ package dialogs
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
@@ -10,29 +9,29 @@ import (
 	ui "github.com/knackwurstking/ui/ui-templ"
 )
 
-templ NewNoteDialog(linkToTables []string, user *shared.User) {
+templ NewNoteDialog(linked string, user *shared.User) {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPost,
-		Href:             urlb.UrlDialogs().EditNote(0, strings.Join(linkToTables, ",")),
+		Href:             urlb.UrlDialogs().EditNote(0, linked),
 		ID:               "notes-dialog",
 		SubmitButtonText: "Erstellen",
 	}) {
 		@noteLevelSelect(0)
 		@noteContent("")
-		@displayLinkedTables(linkToTables, user)
+		@displayLinkedTables(linked, user)
 	}
 }
 
-templ EditNoteDialog(note *shared.Note, linkToTables []string, user *shared.User) {
+templ EditNoteDialog(note *shared.Note, linked string, user *shared.User) {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPut,
-		Href:             urlb.UrlDialogs().EditNote(note.ID, strings.Join(linkToTables, ",")),
+		Href:             urlb.UrlDialogs().EditNote(note.ID, linked),
 		ID:               "notes-edit-dialog",
 		SubmitButtonText: "Aktualisieren",
 	}) {
 		@noteLevelSelect(note.Level)
 		@noteContent(note.Content)
-		@displayLinkedTables(linkToTables, user)
+		@displayLinkedTables(linked, user)
 	}
 }
 
@@ -69,8 +68,8 @@ templ noteContent(content string) {
 	</label>
 }
 
-templ displayLinkedTables(linkToTables []string, user *shared.User) {
-	if len(linkToTables) > 0 {
+templ displayLinkedTables(linked string, user *shared.User) {
+	if linked != "" {
 		<div
 			class="flex flex-col gap"
 			if !user.IsAdmin() {
@@ -79,17 +78,15 @@ templ displayLinkedTables(linkToTables []string, user *shared.User) {
 		>
 			<h3>Verknüpfte Tabellen</h3>
 			<div class="flex flex-col gap-sm">
-				for _, table := range linkToTables {
-					<label class="flex flex-row gap items-center" disabled>
-						<input
-							type="checkbox"
-							name="linked_tables"
-							value={ table }
-							checked
-						/>
-						{ table }
-					</label>
-				}
+				<label class="flex flex-row gap items-center" disabled>
+					<input
+						type="checkbox"
+						name="linked"
+						value={ linked }
+						checked
+					/>
+					{ linked }
+				</label>
 			</div>
 		</div>
 	}

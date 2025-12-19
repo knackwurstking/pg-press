@@ -58,7 +58,7 @@ templ NoteCard(note *shared.Note, tools []shared.ModelTool) {
 				</button>
 			</span>
 		</div>
-		<div class="card-body">
+		<div class="card-body whitespace-pre-wrap">
 			{ note.Content }
 		</div>
 		if len(tools) > 0 && note.Linked != "" {

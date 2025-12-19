@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -14,19 +15,14 @@ import (
 )
 
 func GetEditNote(c echo.Context) *echo.HTTPError {
-	var linkToTables []string
-	var note *shared.Note
-	var merr *errors.MasterError
-
-	// Parse linked tables from query parameter
-	if ltt := c.QueryParam("link_to_tables"); ltt != "" {
-		linkToTables = strings.Split(ltt, ",")
-	}
+	linked := c.QueryParam("linked")
 
 	// Check if we're editing an existing note
+	var note *shared.Note
 	if id, _ := shared.ParseQueryInt64(c, "id"); id > 0 {
 		noteID := shared.EntityID(id)
 
+		var merr *errors.MasterError
 		note, merr = db.Notes.GetByID(noteID)
 		if merr != nil {
 			return merr.Echo()
@@ -36,8 +32,8 @@ func GetEditNote(c echo.Context) *echo.HTTPError {
 	user, _ := shared.GetUserFromContext(c)
 
 	if note != nil {
-		log.Debug("Rendering edit note dialog [note=%v, linkToTables=%v, user_name=%s]", note, linkToTables, c.Get("user-name"))
-		t := EditNoteDialog(note, linkToTables, user)
+		log.Debug("Rendering edit note dialog [note=%v, linked=%v, user_name=%s]", note, linked, c.Get("user-name"))
+		t := EditNoteDialog(note, linked, user)
 		err := t.Render(c.Request().Context(), c.Response())
 		if err != nil {
 			return errors.NewRenderError(err, "EditNoteDialog")
@@ -45,8 +41,8 @@ func GetEditNote(c echo.Context) *echo.HTTPError {
 		return nil
 	}
 
-	log.Debug("Rendering new note dialog [linkToTables=%v, user_name=%s]", linkToTables, c.Get("user-name"))
-	t := NewNoteDialog(linkToTables, user)
+	log.Debug("Rendering new note dialog [linked=%v, user_name=%s]", linked, c.Get("user-name"))
+	t := NewNoteDialog(linked, user)
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "NewNoteDialog")
@@ -99,8 +95,6 @@ func PutEditNote(c echo.Context) *echo.HTTPError {
 }
 
 func GetNoteFormData(c echo.Context) (*shared.Note, *errors.MasterError) {
-	note := &shared.Note{}
-
 	// Parse level (required)
 	levelStr := c.FormValue("level")
 	if levelStr == "" {
@@ -116,8 +110,8 @@ func GetNoteFormData(c echo.Context) (*shared.Note, *errors.MasterError) {
 	}
 
 	// Validate level is within valid range (0=INFO, 1=ATTENTION, 2=BROKEN)
-	note.Level = shared.NoteLevel(levelInt)
-	if !note.Level.IsValid() {
+	level := shared.NoteLevel(levelInt)
+	if !level.IsValid() {
 		return nil, errors.NewMasterError(
 			fmt.Errorf("invalid level value: %d", levelInt),
 			http.StatusBadRequest,
@@ -125,19 +119,18 @@ func GetNoteFormData(c echo.Context) (*shared.Note, *errors.MasterError) {
 	}
 
 	// Parse content (required)
-	note.Content = strings.TrimSpace(c.FormValue("content"))
-	if note.Content == "" {
+	content := strings.TrimSpace(c.FormValue("content"))
+	if content == "" {
 		return nil, errors.NewMasterError(
 			fmt.Errorf("content is required"),
 			http.StatusBadRequest,
 		)
 	}
 
-	// Handle linked field - get first linked_tables value or empty string
-	linkedTables := c.Request().Form["linked_tables"]
-	if len(linkedTables) > 0 {
-		note.Linked = linkedTables[0]
-	}
-
-	return note, nil
+	return &shared.Note{
+		Level:     level,
+		Content:   content,
+		CreatedAt: shared.NewUnixMilli(time.Now()),
+		Linked:    c.FormValue("linked"),
+	}, nil
 }

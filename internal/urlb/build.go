@@ -280,7 +280,7 @@ func UrlDialogs() (url struct {
 	EditTool              func(toolID shared.EntityID) templ.SafeURL
 	EditCassette          func(cassetteID shared.EntityID) templ.SafeURL
 	EditMetalSheet        func(metalSheetID shared.EntityID, toolID shared.EntityID) templ.SafeURL
-	EditNote              func(noteID shared.EntityID, linkToTables string) templ.SafeURL
+	EditNote              func(noteID shared.EntityID, linked string) templ.SafeURL
 	EditToolRegeneration  func(toolRegenerationID shared.EntityID) templ.SafeURL
 	EditPressRegeneration func(pressRegenerationID shared.EntityID) templ.SafeURL
 }) {
@@ -344,9 +344,9 @@ func urlEditMetalSheetDialog(metalSheetID shared.EntityID, toolID shared.EntityI
 }
 
 // urlEditNoteDialog constructs edit note dialog URL
-func urlEditNoteDialog(noteID shared.EntityID, linkToTables string) templ.SafeURL {
+func urlEditNoteDialog(noteID shared.EntityID, linked string) templ.SafeURL {
 	params := map[string]string{
-		"link_to_tables": linkToTables,
+		"linked": linked,
 	}
 	if noteID != 0 {
 		params["id"] = fmt.Sprintf("%d", noteID)

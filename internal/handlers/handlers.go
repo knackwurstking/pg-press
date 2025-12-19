@@ -5,6 +5,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/handlers/auth"
 	"github.com/knackwurstking/pg-press/internal/handlers/dialogs"
 	"github.com/knackwurstking/pg-press/internal/handlers/home"
+	"github.com/knackwurstking/pg-press/internal/handlers/notes"
 	"github.com/knackwurstking/pg-press/internal/handlers/profile"
 	"github.com/knackwurstking/pg-press/internal/handlers/tool"
 	"github.com/knackwurstking/pg-press/internal/handlers/tools"
@@ -23,6 +24,7 @@ func RegisterAll(db *common.DB, e *echo.Echo) {
 		{handler: tools.Register, subPath: "/tools"},
 		{handler: dialogs.Register, subPath: "/dialog"},
 		{handler: tool.Register, subPath: "/tool"},
+		{handler: notes.Register, subPath: "/notes"},
 	}
 	for _, reg := range registers {
 		reg.handler(db, e, reg.subPath)
@@ -30,7 +32,6 @@ func RegisterAll(db *common.DB, e *echo.Echo) {
 
 	//help.NewHandler(r).RegisterRoutes(e, "/help")
 	//editor.NewHandler(r).RegisterRoutes(e, "/editor")
-	//notes.NewHandler(r).RegisterRoutes(e, "/notes")
 	//metalsheets.NewHandler(r).RegisterRoutes(e, "/metal-sheets")
 	//umbau.NewHandler(r).RegisterRoutes(e, "/umbau")
 	//troublereports.NewHandler(r).RegisterRoutes(e, "/trouble-reports")

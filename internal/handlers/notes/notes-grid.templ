@@ -7,6 +7,7 @@ import (
 
 templ NotesGrid(notes []*shared.Note, tools []shared.ModelTool) {
 	if len(notes) > 0 {
+		// TODO: Improve flex grid flow
 		<div class="flex flex-wrap gap grow">
 			for _, note := range notes {
 				{{

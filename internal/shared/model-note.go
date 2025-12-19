@@ -32,10 +32,15 @@ type Note struct {
 
 // Validate checks if the note has valid data
 func (n *Note) Validate() *errors.ValidationError {
+	if n.CreatedAt == 0 {
+		return errors.NewValidationError("note created_at is required")
+	}
+	if !n.Level.IsValid() {
+		return errors.NewValidationError("note level is invalid")
+	}
 	if n.Content == "" {
 		return errors.NewValidationError("note content is required")
 	}
-
 	return nil
 }
 
