@@ -113,7 +113,6 @@ templ CassetteAnchor(p CassetteAnchorProps) {
 				{ p.Cassette.German() }
 			</span>
 			@cassetteAnchorBadgesWithTotalCycles(p.Cassette, p.Tool, p.IsRegenerating)
-			@cassetteAnchorBinding(p.Tool)
 		</div>
 		<div class="flex flex-col gap justify-between items-center">
 			<i class="bi bi-chevron-right"></i>
@@ -134,17 +133,6 @@ templ cassetteAnchorBadgesWithTotalCycles(cassette *shared.Cassette, boundToTool
 			hx-trigger="load"
 			hx-swap="innerHTML"
 		></span>
-	</div>
-}
-
-templ cassetteAnchorBinding(tool *shared.Tool) {
-	if tool == nil {
-		{{ return }}
-	}
-	<div class="text-sm italic info ghost">
-		<i class="text-xs">
-			Gebunden an Werkzeug: { tool.Width }x{ tool.Height } { tool.Type } { tool.Code }
-		</i>
 	</div>
 }
 
