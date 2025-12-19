@@ -8,48 +8,44 @@ import (
 
 // MarkAsDead marks a tools, or cassette if "is_cassette" query parameter is set to true, as dead.
 func MarkAsDead(c echo.Context) *echo.HTTPError {
+	isCassette := shared.ParseQueryBool(c, "is_cassette")
+
 	id, merr := shared.ParseQueryInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
 	toolID := shared.EntityID(id)
 
-	if shared.ParseQueryBool(c, "is_cassette") {
-		cassette, merr := DB.Tool.Cassette.GetByID(toolID)
+	var tool shared.ModelTool
+	if isCassette {
+		tool, merr = DB.Tool.Cassette.GetByID(toolID)
 		if merr != nil {
 			return merr.WrapEcho("failed to get cassette by ID")
 		}
-
-		if cassette.IsDead {
-			return nil
+	} else {
+		tool, merr = DB.Tool.Tool.GetByID(toolID)
+		if merr != nil {
+			return merr.WrapEcho("failed to get tool by ID")
 		}
-		cassette.IsDead = true
+	}
 
-		merr = DB.Tool.Cassette.Update(cassette)
+	if tool.GetBase().IsDead {
+		return nil
+	}
+	tool.GetBase().IsDead = true
+
+	if isCassette {
+		merr = DB.Tool.Cassette.Update(tool.(*shared.Cassette))
 		if merr != nil {
 			return merr.WrapEcho("failed to update cassette")
 		}
-
-		urlb.SetHXRedirect(c, urlb.UrlTool(cassette.ID, 0, 0).Page)
-		return nil
+	} else {
+		merr = DB.Tool.Tool.Update(tool.(*shared.Tool))
+		if merr != nil {
+			return merr.WrapEcho("failed to update tool")
+		}
 	}
 
-	tool, merr := DB.Tool.Tool.GetByID(toolID)
-	if merr != nil {
-		return merr.WrapEcho("failed to get tool by ID")
-	}
-
-	if tool.IsDead {
-		return nil
-	}
-	tool.IsDead = true
-
-	merr = DB.Tool.Tool.Update(tool)
-	if merr != nil {
-		return merr.WrapEcho("failed to update tool")
-	}
-
-	urlb.SetHXRedirect(c, urlb.UrlTool(tool.ID, 0, 0).Page)
-
+	urlb.SetHXRedirect(c, urlb.UrlTool(tool.GetID(), 0, 0).Page)
 	return nil
 }
