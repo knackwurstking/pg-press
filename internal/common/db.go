@@ -63,7 +63,6 @@ func NewDB(c *shared.Config) *DB {
 func (db *DB) Setup() error {
 	wg := &sync.WaitGroup{}
 	errCh := make(chan error, 4) // User, Pres, Tool and Note services
-	wg.Go(db.Tool.Close)
 
 	wg.Go(func() {
 		errCh <- db.User.Setup()
