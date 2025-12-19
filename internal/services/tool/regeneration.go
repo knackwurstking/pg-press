@@ -212,16 +212,18 @@ func (s *ToolRegenerationService) checkOngoingRegeneration(entity *shared.ToolRe
 	row := s.DB().QueryRow(
 		`
 			SELECT id FROM tool_regenerations
-			WHERE tool_id = :tool_id AND (stop = 0 OR stop > ?)
+			WHERE tool_id = :tool_id AND (start > 0 AND (stop = 0 OR stop > ?))
 			ORDER BY stop DESC
 			LIMIT 1;
 		`,
 		entity.Start,
 		sql.Named("tool_id", entity.ToolID),
 	)
-	if row != nil && row.Err() == nil && row.Err() != sql.ErrNoRows {
+	if row != nil && row.Err() != nil && row.Err() != sql.ErrNoRows {
 		return errors.NewValidationError(
-			"there is already an ongoing regeneration for tool ID %v", entity.ToolID)
+			"there is already an ongoing regeneration for tool ID %v: %v",
+			entity.ToolID, row.Err(),
+		)
 	}
 	return nil
 }

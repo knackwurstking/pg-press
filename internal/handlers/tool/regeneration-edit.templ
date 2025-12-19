@@ -88,7 +88,6 @@ templ regenerationEditForm(p RegenerationEditProps) {
 				hx-target={ hxTarget }
 				hx-swap="outerHTML"
 			>
-				<input type="hidden" name="tool_id" value={ fmt.Sprintf("%d", p.Tool.GetID()) }/>
 				if p.IsRegenerating {
 					<input type="hidden" name="status" value="regenerating"/>
 				} else {

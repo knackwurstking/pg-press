@@ -174,6 +174,10 @@ func ListLowerMetalSheetsForTool(db *common.DB, toolID shared.EntityID) ([]*shar
 // Tool Regeneration Helpers
 // ------------------------------------------------------------------------------
 
+const sqlSelectOngoingRegenerationForTool = `
+	SELECT id, tool_id, start, stop, cycles FROM tool_regenerations WHERE tool_id = ? AND stop = 0
+`
+
 var regenerationsMutex = &sync.Mutex{}
 
 func GetRegenerationsForTool(db *common.DB, toolID shared.EntityID) (
@@ -212,9 +216,16 @@ func StopToolRegeneration(db *common.DB, toolID shared.EntityID) *errors.MasterE
 	regenerationsMutex.Lock()
 	defer regenerationsMutex.Unlock()
 
-	regeneration, merr := db.Tool.Regeneration.GetByID(toolID)
-	if merr != nil {
-		return merr
+	regeneration := &shared.ToolRegeneration{}
+	err := db.Tool.Regeneration.DB().QueryRow(sqlSelectOngoingRegenerationForTool, toolID).Scan(
+		&regeneration.ID,
+		&regeneration.ToolID,
+		&regeneration.Start,
+		&regeneration.Stop,
+		&regeneration.Cycles,
+	)
+	if err != nil {
+		return errors.NewMasterError(err, 0)
 	}
 
 	regeneration.Stop = shared.NewUnixMilli(time.Now())
@@ -234,15 +245,17 @@ func AbortToolRegeneration(db *common.DB, toolID shared.EntityID) *errors.Master
 	regenerationsMutex.Lock()
 	defer regenerationsMutex.Unlock()
 
-	regeneration, merr := db.Tool.Regeneration.GetByID(toolID)
-	if merr != nil {
-		return merr
+	regeneration := &shared.ToolRegeneration{}
+	err := db.Tool.Regeneration.DB().QueryRow(sqlSelectOngoingRegenerationForTool, toolID).Err()
+	if err != nil {
+		return errors.NewMasterError(err, 0)
 	}
+
 	if regeneration.Stop != 0 {
 		return errors.NewValidationError("cannot abort a completed regeneration").MasterError()
 	}
 
-	merr = db.Tool.Regeneration.Delete(regeneration.ID)
+	merr := db.Tool.Regeneration.Delete(regeneration.ID)
 	if merr != nil {
 		return merr
 	}
