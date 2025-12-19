@@ -24,10 +24,10 @@ Fix all handler and templates
   - [x] note dialog (new/edit)
 - [x] tool
   - [x] Notes: add, rendering, reload
-    - [ ] delete note, note handler missing
+    - [x] delete note, note handler missing
   - [ ] Metal Sheets, dialog missing
   - [x] Regenerations edit
   - [x] Regenerations table
   - [x] Tool Binding
   - [ ] Cycles table, dialog missing
-- [-] note
+- [x] note
