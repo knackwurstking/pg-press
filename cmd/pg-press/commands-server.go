@@ -65,9 +65,9 @@ func middlewareConfiguration(e *echo.Echo, db *common.DB) {
 		CustomTimeFormat: "2006-01-02 15:04:05",
 		CustomTagFunc: func(c echo.Context, b *bytes.Buffer) (int, error) {
 			if c.Get("user-name") == nil || c.Get("user-name").(string) == "" {
-				return b.WriteString("user-name=\"anonymous\"")
+				return b.WriteString("[user_name=anonymous] ")
 			}
-			return fmt.Fprintf(b, "user-name=\"%s\" ", c.Get("user-name").(string))
+			return fmt.Fprintf(b, "[user_name=%s] ", c.Get("user-name").(string))
 		},
 	}))
 

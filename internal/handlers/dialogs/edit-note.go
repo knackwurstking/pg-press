@@ -36,7 +36,7 @@ func GetEditNote(c echo.Context) *echo.HTTPError {
 	user, _ := shared.GetUserFromContext(c)
 
 	if note != nil {
-		log.Debug("Rendering edit note dialog [note=%s] [linkToTables=%v] [user=\"%s\"]", note.String(), linkToTables, c.Get("user-name"))
+		log.Debug("Rendering edit note dialog [note=%v, linkToTables=%v, user_name=%s]", note, linkToTables, c.Get("user-name"))
 		t := EditNoteDialog(note, linkToTables, user)
 		err := t.Render(c.Request().Context(), c.Response())
 		if err != nil {
@@ -45,7 +45,7 @@ func GetEditNote(c echo.Context) *echo.HTTPError {
 		return nil
 	}
 
-	log.Debug("Rendering new note dialog [linkToTables=%v] [user=\"%s\"]", linkToTables, c.Get("user-name"))
+	log.Debug("Rendering new note dialog [linkToTables=%v, user_name=%s]", linkToTables, c.Get("user-name"))
 	t := NewNoteDialog(linkToTables, user)
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
@@ -60,7 +60,7 @@ func PostEditNote(c echo.Context) *echo.HTTPError {
 		return merr.WrapEcho("failed to get note form data")
 	}
 
-	log.Debug("Creating new note [note=%s] [user=\"%s\"]", note.String(), c.Get("user-name"))
+	log.Debug("Creating new note [note=%v, user_name=%s]", note, c.Get("user-name"))
 
 	merr = db.Notes.Create(note)
 	if merr != nil {
@@ -84,7 +84,7 @@ func PutEditNote(c echo.Context) *echo.HTTPError {
 	}
 	note.ID = shared.EntityID(id)
 
-	log.Debug("Updating note [note=%s] [user=\"%s\"]", note.String(), c.Get("user-name"))
+	log.Debug("Updating note [note=%v, user_name=%s]", note, c.Get("user-name"))
 
 	// Update the note
 	merr = db.Notes.Update(note)

@@ -23,7 +23,7 @@ Fix all handler and templates
   - [ ] cycle dialog (new/edit)
   - [x] note dialog (new/edit)
 - [x] tool
-  - [-] Notes, dialog missing
+  - [-] Notes: add, rendering, reload
   - [ ] Metal Sheets, dialog missing
   - [x] Regenerations edit
   - [x] Regenerations table

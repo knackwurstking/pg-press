@@ -84,7 +84,7 @@ func middlewareKeyAuth(db *common.DB) echo.MiddlewareFunc {
 		},
 		ErrorHandler: func(err error, c echo.Context) error {
 			logMiddleware.Error(
-				"KeyAuth error: %v, Method: %#v, Path: %#v, RealID: %#v",
+				"KeyAuth error: %v [method=%s, path=%s, real_ip=%s]",
 				err, c.Request().Method, c.Request().URL.Path, c.RealIP(),
 			)
 			merr := urlb.RedirectTo(c, urlb.UrlLogin("", nil).Page)
@@ -110,7 +110,7 @@ func keyAuthValidator(auth string, ctx echo.Context, db *common.DB) (bool, error
 	user, err := validateUserFromCookie(ctx, db)
 	if err != nil {
 		logMiddleware.Warn(
-			"Validate user from cookie failed: %v, RealIP: %#v",
+			"Validate user from cookie failed: %v [real_ip=%s]",
 			err, realIP,
 		)
 
@@ -136,7 +136,7 @@ func keyAuthValidator(auth string, ctx echo.Context, db *common.DB) (bool, error
 	}
 
 	logMiddleware.Debug(
-		"API-Key auth successful for user: %#v, RealIP: %#v",
+		"API-Key auth successful for %s [real_ip=%s]",
 		user.Name, realIP,
 	)
 
@@ -182,7 +182,7 @@ func validateUserFromCookie(ctx echo.Context, db *common.DB) (*shared.User, erro
 		merr = db.User.Cookies.Update(cookie)
 		if merr != nil {
 			logMiddleware.Error(
-				"Failed to update cookie: %v, UserName: %#v, RealIP: %#v",
+				"Failed to update cookie: %v [user_name=%s, real_ip=%s]",
 				merr, user.Name, realIP,
 			)
 		}
