@@ -66,6 +66,8 @@ func Regeneration(c echo.Context) *echo.HTTPError {
 		return echo.NewHTTPError(http.StatusBadRequest, "status is required")
 	}
 
+	log.Debug("Regeneration status change requested: tool ID %d, status %s", tool.GetID(), statusStr)
+
 	// Handle regeneration start/stop/abort only
 	switch statusStr {
 	case "regenerating":

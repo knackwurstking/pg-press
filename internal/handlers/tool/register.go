@@ -5,12 +5,14 @@ import (
 
 	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/env"
+	"github.com/knackwurstking/pg-press/internal/logger"
 	ui "github.com/knackwurstking/ui/ui-templ"
 	"github.com/labstack/echo/v4"
 )
 
 var (
-	DB *common.DB
+	DB  *common.DB
+	log = logger.New("handler: tool")
 )
 
 func Register(db *common.DB, e *echo.Echo, path string) {

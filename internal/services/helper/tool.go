@@ -246,7 +246,13 @@ func AbortToolRegeneration(db *common.DB, toolID shared.EntityID) *errors.Master
 	defer regenerationsMutex.Unlock()
 
 	regeneration := &shared.ToolRegeneration{}
-	err := db.Tool.Regeneration.DB().QueryRow(sqlSelectOngoingRegenerationForTool, toolID).Err()
+	err := db.Tool.Regeneration.DB().QueryRow(sqlSelectOngoingRegenerationForTool, toolID).Scan(
+		&regeneration.ID,
+		&regeneration.ToolID,
+		&regeneration.Start,
+		&regeneration.Stop,
+		&regeneration.Cycles,
+	)
 	if err != nil {
 		return errors.NewMasterError(err, 0)
 	}
