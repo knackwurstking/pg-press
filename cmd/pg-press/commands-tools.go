@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 	"text/tabwriter"
@@ -21,7 +22,6 @@ func toolsCommand() cli.Command {
 		Usage: cli.Usage("Handle tools database table, list all tools"),
 		Commands: []cli.Command{
 			listToolsCommand(),
-			listDeadToolsCommand(),
 			markDeadCommand(),
 			reviveDeadToolCommand(),
 			deleteToolCommand(),
@@ -44,10 +44,33 @@ func listToolsCommand() cli.Command {
 			return func(cmd *cli.Command) error {
 				return withDBOperation(*customDBPath, func(r *common.DB) error {
 					// Get all tools from database
-					tools, merr := r.Tool.Tool.List()
+					var tools []shared.ModelTool
+
+					t, merr := r.Tool.Tool.List()
 					if merr != nil {
 						return errors.Wrap(merr, "retrieve tools")
 					}
+					for _, tool := range t {
+						tools = append(tools, tool)
+					}
+
+					ct, merr := r.Tool.Cassette.List()
+					if merr != nil {
+						return errors.Wrap(merr, "retrieve cassettes")
+					}
+					for _, tool := range ct {
+						tools = append(tools, tool)
+					}
+					// Sort tools per id
+					slices.SortFunc(tools, func(a shared.ModelTool, b shared.ModelTool) int {
+						if a.GetID() < b.GetID() {
+							return -1
+						}
+						if a.GetID() > b.GetID() {
+							return 1
+						}
+						return 0
+					})
 
 					// Filter tools by ID if range/list is specified
 					if *idRange != "" {
@@ -71,20 +94,28 @@ func listToolsCommand() cli.Command {
 					w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 
 					// Print header
-					fmt.Fprintln(w, "ID\tFORMAT\tPOSITION\tTYPE\tCODE\tCYCLES OFFSET\tCYCLES\tIS DEAD")
-					fmt.Fprintln(w, "--\t------\t--------\t----\t----\t-------------\t------\t-------")
+					fmt.Fprintln(w, "ID\tFORMAT\tPOSITION\tTYPE\tCODE\tCYCLES OFFSET\tCYCLES\tCASSETTE\tIS DEAD")
+					fmt.Fprintln(w, "--\t------\t--------\t----\t----\t-------------\t------\t--------\t-------")
 
 					// Print each tool
 					for _, tool := range tools {
-						fmt.Fprintf(w, "%d\t%dx%d\t%d\t%s\t%s\t%d\t%d\t%t\n",
-							tool.ID,
-							tool.Width, tool.Height,
-							tool.Position,
-							tool.Type,
-							tool.Code,
-							tool.CyclesOffset,
-							tool.Cycles,
-							tool.IsDead,
+						base := tool.GetBase()
+
+						cassette := "-"
+						if !tool.IsCassette() {
+							cassette = fmt.Sprintf("%d", tool.(*shared.Tool).Cassette)
+						}
+
+						fmt.Fprintf(w, "%d\t%dx%d\t%d\t%s\t%s\t%d\t%d\t%s\t%t\n",
+							base.ID,
+							base.Width, base.Height,
+							base.Position,
+							base.Type,
+							base.Code,
+							base.CyclesOffset,
+							base.Cycles,
+							cassette,
+							base.IsDead,
 						)
 					}
 
@@ -100,51 +131,7 @@ func listToolsCommand() cli.Command {
 	}
 }
 
-func listDeadToolsCommand() cli.Command {
-	return createSimpleCommand("list-dead", "List all dead tools from the database", func(r *common.DB) error {
-		// Get all dead tools from database
-		tools, _ := helper.ListDeadTools(r)
-
-		if len(tools) == 0 {
-			fmt.Fprintln(os.Stderr, "No dead tools found in database.")
-			return nil
-		}
-
-		// Create tabwriter for nice formatting
-		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-
-		// Print header
-		fmt.Fprintln(w, "ID\tFORMAT\tCODE\tTYPE\tPOSITION\tPRESS")
-		fmt.Fprintln(w, "----\t------\t----\t----\t--------\t-----")
-
-		// Print each tool
-		for _, tool := range tools {
-			pn := helper.GetPressNumberForTool(r, tool.ID)
-
-			pressStr := "None"
-			if pn.IsValid() {
-				pressStr = strconv.Itoa(int(pn))
-			}
-
-			fmt.Fprintf(w, "%d\t%dx%d\t%s\t%s\t%s\t%s\n",
-				tool.ID,
-				tool.Width, tool.Height,
-				tool.Code,
-				tool.Type,
-				tool.Position.German(),
-				pressStr,
-			)
-		}
-
-		// Flush the tabwriter
-		w.Flush()
-
-		fmt.Printf("\nTotal dead tools: %d\n", len(tools))
-
-		return nil
-	})
-}
-
+// FIXME: tools/cassettes share the same ID space, so marking a cassette as dead should also be possible
 func markDeadCommand() cli.Command {
 	return cli.Command{
 		Name:  "mark-dead",
@@ -183,6 +170,7 @@ func markDeadCommand() cli.Command {
 	}
 }
 
+// FIXME: tools/cassettes share the same ID space, so marking a cassette as dead should also be possible
 func reviveDeadToolCommand() cli.Command {
 	return cli.Command{
 		Name:  "revive",
@@ -232,14 +220,15 @@ func deleteToolCommand() cli.Command {
 			return func(cmd *cli.Command) error {
 				return withDBOperation(*customDBPath, func(r *common.DB) error {
 					toolID := shared.EntityID(*toolIDArg)
-
 					// Get tool first to check if it exists and show info
-					tool, merr := r.Tool.Tool.GetByID(toolID)
+					tool, merr := helper.GetToolByID(r, toolID)
 					if merr != nil {
-						return fmt.Errorf("find tool with ID %d: %v", toolID, merr)
+						return merr.Wrap("failed to get tool with ID %d", toolID)
 					}
 
-					fmt.Printf("Deleting tool %d (%dx%d %s) and all related data...\n", tool.ID, tool.Width, tool.Height, tool.Code)
+					base := tool.GetBase()
+					fmt.Printf("Deleting tool %d (%dx%d %s) and all related data...\n",
+						base.ID, base.Width, base.Height, base.Code)
 
 					// 1. Delete all regenerations for this tool first (they reference cycles)
 					regenerations, merr := r.Tool.Regeneration.List()
@@ -249,7 +238,7 @@ func deleteToolCommand() cli.Command {
 					// Filter regenerations for this tool
 					var toolRegenerations []*shared.ToolRegeneration
 					for _, regen := range regenerations {
-						if regen.ToolID == tool.ID {
+						if regen.ToolID == base.ID {
 							toolRegenerations = append(toolRegenerations, regen)
 						}
 					}
@@ -280,13 +269,19 @@ func deleteToolCommand() cli.Command {
 					}
 
 					// 3. Finally, delete the tool itself
-					merr = r.Tool.Tool.Delete(toolID)
+					var delFn func(shared.EntityID) *errors.MasterError
+					if tool.IsCassette() {
+						delFn = r.Tool.Cassette.Delete
+					} else {
+						delFn = r.Tool.Tool.Delete
+					}
+					merr = delFn(toolID)
 					if merr != nil {
 						return fmt.Errorf("delete tool: %v", merr)
 					}
 
 					fmt.Printf("Successfully deleted tool %d (%dx%d %s) with %d cycle(s) and %d regeneration(s).\n",
-						tool.ID, tool.Width, tool.Height, tool.Code, len(cycles), len(regenerations))
+						base.ID, base.Width, base.Height, base.Code, len(cycles), len(regenerations))
 					return nil
 				})
 			}
@@ -294,6 +289,7 @@ func deleteToolCommand() cli.Command {
 	}
 }
 
+// FIXME: tools/cassettes share the same ID space, so marking a cassette as dead should also be possible
 func listCyclesCommand() cli.Command {
 	return cli.Command{
 		Name:  "list-cycles",
@@ -352,8 +348,65 @@ func listCyclesCommand() cli.Command {
 	}
 }
 
+func listRegenerationsCommand() cli.Command {
+	return cli.Command{
+		Name:  "list-regenerations",
+		Usage: cli.Usage("List regenerations for a tool by ID"),
+		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
+			customDBPath := createDBPathOption(cmd)
+			toolIDArg := cli.Int64Arg(cmd, "tool-id", cli.Required)
+
+			return func(cmd *cli.Command) error {
+				return withDBOperation(*customDBPath, func(db *common.DB) error {
+					toolID := shared.EntityID(*toolIDArg)
+
+					// Get tool first to check if it exists and show info
+					tool, merr := helper.GetToolByID(db, toolID)
+					if merr != nil {
+						return fmt.Errorf("find tool with ID %d: %v", toolID, merr)
+					}
+
+					baseTool := tool.GetBase()
+					fmt.Printf("Tool Information: ID %d (%dx%d %s) - %s - %s\n\n",
+						baseTool.ID, baseTool.Width, baseTool.Height, baseTool.Code, baseTool.Type, baseTool.Position.German())
+
+					// Get regenerations for this tool
+					regenerations, err := helper.GetRegenerationsForTool(db, toolID)
+					if err != nil {
+						return fmt.Errorf("retrieve regenerations: %v", err)
+					}
+
+					// Display Regenerations
+					fmt.Printf("=== REGENERATIONS ===\n")
+					if len(regenerations) == 0 {
+						fmt.Println("No regenerations found for this tool")
+					} else {
+						w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+						fmt.Fprintln(w, "ID\tTOOL ID\tSTART\tSTOP\tCYCLES")
+						fmt.Fprintln(w, "----\t-------\t-----\t----\t------")
+
+						for _, regen := range regenerations {
+							fmt.Fprintf(w, "%d\t%d\t%s\t%s\t%d\n",
+								regen.ID,
+								regen.ToolID,
+								regen.Start.FormatDate(),
+								regen.Stop.FormatDate(),
+								regen.Cycles,
+							)
+						}
+						w.Flush()
+						fmt.Printf("\nTotal regenerations: %d\n", len(regenerations))
+					}
+
+					return nil
+				})
+			}
+		}),
+	}
+}
+
 // filterToolsByIDs filters tools based on ID range or comma-separated list
-func filterToolsByIDs(tools []*shared.Tool, idSpec string) ([]*shared.Tool, error) {
+func filterToolsByIDs(tools []shared.ModelTool, idSpec string) ([]shared.ModelTool, error) {
 	var targetIDs []shared.EntityID
 	var err error
 
@@ -378,9 +431,9 @@ func filterToolsByIDs(tools []*shared.Tool, idSpec string) ([]*shared.Tool, erro
 	}
 
 	// Filter tools
-	var filteredTools []*shared.Tool
+	var filteredTools []shared.ModelTool
 	for _, tool := range tools {
-		if idSet[tool.ID] {
+		if idSet[tool.GetID()] {
 			filteredTools = append(filteredTools, tool)
 		}
 	}
@@ -440,61 +493,4 @@ func parseIDList(listSpec string) ([]shared.EntityID, error) {
 	}
 
 	return ids, nil
-}
-
-func listRegenerationsCommand() cli.Command {
-	return cli.Command{
-		Name:  "list-regenerations",
-		Usage: cli.Usage("List regenerations for a tool by ID"),
-		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
-			customDBPath := createDBPathOption(cmd)
-			toolIDArg := cli.Int64Arg(cmd, "tool-id", cli.Required)
-
-			return func(cmd *cli.Command) error {
-				return withDBOperation(*customDBPath, func(db *common.DB) error {
-					toolID := shared.EntityID(*toolIDArg)
-
-					// Get tool first to check if it exists and show info
-					tool, merr := helper.GetToolByID(db, toolID)
-					if merr != nil {
-						return fmt.Errorf("find tool with ID %d: %v", toolID, merr)
-					}
-
-					baseTool := tool.GetBase()
-					fmt.Printf("Tool Information: ID %d (%dx%d %s) - %s - %s\n\n",
-						baseTool.ID, baseTool.Width, baseTool.Height, baseTool.Code, baseTool.Type, baseTool.Position.German())
-
-					// Get regenerations for this tool
-					regenerations, err := helper.GetRegenerationsForTool(db, toolID)
-					if err != nil {
-						return fmt.Errorf("retrieve regenerations: %v", err)
-					}
-
-					// Display Regenerations
-					fmt.Printf("=== REGENERATIONS ===\n")
-					if len(regenerations) == 0 {
-						fmt.Println("No regenerations found for this tool")
-					} else {
-						w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-						fmt.Fprintln(w, "ID\tTOOL ID\tSTART\tSTOP\tCYCLES")
-						fmt.Fprintln(w, "----\t-------\t-----\t----\t------")
-
-						for _, regen := range regenerations {
-							fmt.Fprintf(w, "%d\t%d\t%s\t%s\t%d\n",
-								regen.ID,
-								regen.ToolID,
-								regen.Start.FormatDate(),
-								regen.Stop.FormatDate(),
-								regen.Cycles,
-							)
-						}
-						w.Flush()
-						fmt.Printf("\nTotal regenerations: %d\n", len(regenerations))
-					}
-
-					return nil
-				})
-			}
-		}),
-	}
 }
