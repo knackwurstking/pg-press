@@ -7,7 +7,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
-templ NoteCard(note *shared.Note, tools []*shared.Tool) {
+templ NoteCard(note *shared.Note, tools []shared.ModelTool) {
 	{{
 		filterClass := ""
 		icon := ""
@@ -69,17 +69,18 @@ templ NoteCard(note *shared.Note, tools []*shared.Tool) {
 					switch linked.Name {
 						case "tool":
 							for _, tool := range tools {
-								if tool.ID == shared.EntityID(linked.ID) {
+								if tool.GetID() == shared.EntityID(linked.ID) {
+									{{ base := tool.GetBase() }}
 									<a
-										href={ urlb.UrlTool(tool.ID, 0, 0).Page }
+										href={ urlb.UrlTool(base.ID, 0, 0).Page }
 										class="tool-link"
 									>
 										{ fmt.Sprintf(
 											"Werkzeug %dx%d %s %s (%s)", 
-											tool.Width, tool.Height, 
-											tool.Type, 
-											tool.Code, 
-											tool.Position.German(),
+											base.Width, base.Height, 
+											base.Type, 
+											base.Code, 
+											base.Position.German(),
 										) }
 									</a>
 								}

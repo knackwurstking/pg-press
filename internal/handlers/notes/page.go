@@ -2,9 +2,8 @@ package notes
 
 import (
 	"github.com/knackwurstking/pg-press/internal/errors"
-	"github.com/knackwurstking/pg-press/internal/handlers/notes/templates"
 	"github.com/knackwurstking/pg-press/internal/services/helper"
-	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/internal/shared"
 
 	"github.com/labstack/echo/v4"
 )
@@ -19,7 +18,7 @@ func GetPage(c echo.Context) *echo.HTTPError {
 
 	// Handle case where notes might be nil
 	if notes == nil {
-		notes = []*models.Note{}
+		notes = []*shared.Note{}
 	}
 
 	// Get all tools to show relationships
@@ -28,7 +27,7 @@ func GetPage(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	t := templates.Page(notes, tools)
+	t := Page(notes, tools)
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "Notes Page")
@@ -36,4 +35,3 @@ func GetPage(c echo.Context) *echo.HTTPError {
 
 	return nil
 }
-

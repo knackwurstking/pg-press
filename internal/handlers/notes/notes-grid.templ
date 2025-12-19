@@ -2,10 +2,10 @@ package notes
 
 import (
 	"github.com/knackwurstking/pg-press/internal/components"
-	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/internal/shared"
 )
 
-templ NotesGrid(notes []*models.Note, tools []*models.Tool) {
+templ NotesGrid(notes []*shared.Note, tools []shared.ModelTool) {
 	if len(notes) > 0 {
 		<div class="flex flex-wrap gap grow">
 			for _, note := range notes {
@@ -14,22 +14,12 @@ templ NotesGrid(notes []*models.Note, tools []*models.Tool) {
 					l := note.GetLinked()
 					if l.Name == "tool" {
 						for _, t := range tools {
-							if t.ID == models.ToolID(l.ID) && t.IsDead {
+							if t.GetID() == shared.EntityID(l.ID) && t.GetBase().IsDead {
 								skip = true
 								break
 							}
 						}
 					}
-
-					//filterClass := ""
-					//switch note.Level {
-					//case models.LevelInfo:
-					//	filterClass = "outline"
-					//case models.LevelAttention:
-					//	filterClass = "warning outline"
-					//case models.LevelBroken:
-					//	filterClass = "destructive outline"
-					//}
 				}}
 				if !skip {
 					@components.NoteCard(note, tools)

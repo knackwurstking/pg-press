@@ -20,7 +20,7 @@ templ Page(notes []*shared.Note, tools []shared.ModelTool) {
 				"class":                "notes-grid max-w-full",
 				"style":                "margin: 0 auto;",
 				"hx-get":               string(urlb.UrlNotes(0).Grid),
-				"hx-trigger":           "pageLoaded from:body",
+				"hx-trigger":           "reload-notes from:body",
 				"hx-on::after-request": "document.querySelector('button.active')?.click()",
 			}) {
 				@NotesGrid(notes, tools)

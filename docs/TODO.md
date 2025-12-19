@@ -30,4 +30,4 @@ Fix all handler and templates
   - [x] Regenerations table
   - [x] Tool Binding
   - [ ] Cycles table, dialog missing
-- [ ] note
+- [-] note
