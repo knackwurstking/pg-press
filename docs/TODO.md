@@ -8,33 +8,33 @@
 
 - note
   - note
-    - [ ] Rename to notes
+    - [-] Rename to notes
 - press
   - cycles
   - press
-    - [ ] Rename to presses
+    - [-] Rename to presses
   - regeneration
-    - [ ] Rename to regenerations
+    - [-] Rename to regenerations
 - tool
   - cassette
-    - [ ] Rename to cassettes
+    - [-] Rename to cassettes
   - lower-metal-sheet
-    - [ ] Rename to metal-sheets-lower
+    - [-] Rename to metal-sheets-lower
   - metal-sheet
-    - [ ] Rename to metal-sheets
+    - [-] Rename to metal-sheets
   - regeneration
-    - [ ] Rename to regenerations
+    - [-] Rename to regenerations
   - tool
-    - [ ] Rename to tools
+    - [-] Rename to tools
   - upper-metal-sheet
-    - [ ] Rename to metal-sheets-upper
+    - [-] Rename to metal-sheets-upper
 - user
   - cookie
-    - [ ] Rename to cookies
+    - [-] Rename to cookies
   - session
-    - [ ] Rename to sessions
+    - [-] Rename to sessions
   - user
-    - [ ] Rename to users
+    - [-] Rename to users
 - attachment
   - attachments
     - [ ] Create service for attachments handling, no SQL, local file
@@ -58,6 +58,6 @@ Fix all handler and templates
     - [ ] Notes, dialog missing
     - [ ] Metal Sheets, dialog missing
     - [x] Regenerations edit
-    - [-] Regenerations table
+    - [x] Regenerations table
     - [x] Tool Binding
     - [ ] Cycles table, dialog missing
