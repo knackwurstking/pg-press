@@ -76,7 +76,8 @@ func GetTotalCyclesForTool(db *common.DB, toolID shared.EntityID) (int64, *error
 		`
 			SELECT cycles
 			FROM press_cycles
-			WHERE slot_up = :tool_id OR slot_down = :tool_id;
+			WHERE tool_id = :tool_id
+			ORDER BY stop DESC;
 		`,
 		sql.Named("tool_id", toolID),
 	)
