@@ -141,6 +141,7 @@ func keyAuthValidator(auth string, ctx echo.Context, db *common.DB) (bool, error
 	)
 
 	ctx.Set("user", user)
+	ctx.Set("user-name", user.Name)
 	return true, nil
 }
 
