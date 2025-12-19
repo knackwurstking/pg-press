@@ -2,31 +2,21 @@ package dialogs
 
 import (
 	"fmt"
-	"log/slog"
 	"net/http"
 	"strconv"
 	"strings"
 
-	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
-	"github.com/knackwurstking/pg-press/internal/handlers/dialogs/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 
-	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 )
 
-func (h *Handler) GetEditNote(c echo.Context) *echo.HTTPError {
-	user, merr := shared.GetUserFromContext(c)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	var (
-		linkToTables []string
-		note         *shared.Note
-	)
+func GetEditNote(c echo.Context) *echo.HTTPError {
+	var linkToTables []string
+	var note *shared.Note
+	var merr *errors.MasterError
 
 	// Parse linked tables from query parameter
 	if ltt := c.QueryParam("link_to_tables"); ltt != "" {
@@ -37,89 +27,75 @@ func (h *Handler) GetEditNote(c echo.Context) *echo.HTTPError {
 	if id, _ := shared.ParseQueryInt64(c, "id"); id > 0 {
 		noteID := shared.EntityID(id)
 
-		note, merr = h.db.Note.Note.Get(noteID)
+		note, merr = db.Notes.GetByID(noteID)
 		if merr != nil {
 			return merr.Echo()
 		}
 	}
 
-	var (
-		t     templ.Component
-		tName string
-	)
+	user, _ := shared.GetUserFromContext(c)
+
 	if note != nil {
-		t = templates.EditNoteDialog(note, linkToTables, user)
-		tName = "EditNoteDialog"
-	} else {
-		t = templates.NewNoteDialog(linkToTables, user)
-		tName = "NewNoteDialog"
+		log.Debug("Rendering edit note dialog [note: %s, linkToTables=%v, user=%s]", note.String(), linkToTables, user.String())
+		t := EditNoteDialog(note, linkToTables, user)
+		err := t.Render(c.Request().Context(), c.Response())
+		if err != nil {
+			return errors.NewRenderError(err, "EditNoteDialog")
+		}
+		return nil
 	}
 
+	log.Debug("Rendering new note dialog [linkToTables=%v, user=%s]", linkToTables, user.String())
+	t := NewNoteDialog(linkToTables, user)
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return errors.NewRenderError(err, tName)
+		return errors.NewRenderError(err, "NewNoteDialog")
 	}
+	return nil
+}
+
+func PostEditNote(c echo.Context) *echo.HTTPError {
+	note, merr := GetNoteFormData(c)
+	if merr != nil {
+		return merr.WrapEcho("failed to get note form data")
+	}
+
+	user, _ := shared.GetUserFromContext(c)
+	log.Debug("Creating new note [note: %s, user: %s]", note.String(), user.String())
+
+	merr = db.Notes.Create(note)
+	if merr != nil {
+		return merr.WrapEcho("failed to create note")
+	}
+
+	urlb.SetHXTrigger(c, "reload-notes")
 
 	return nil
 }
 
-func (h *Handler) PostEditNote(c echo.Context) *echo.HTTPError {
-	slog.Info("Creating new note")
-
+func PutEditNote(c echo.Context) *echo.HTTPError {
 	note, merr := GetNoteFormData(c)
 	if merr != nil {
-		return merr.Echo()
+		return merr.WrapEcho("failed to get note form data")
 	}
 
-	urlb.SetHXTrigger(c, env.HXGlobalTrigger)
-
-	return nil
-}
-
-func (h *Handler) PutEditNote(c echo.Context) *echo.HTTPError {
-	slog.Info("Updating note")
-
-	user, merr := utils.GetUserFromContext(c)
+	id, merr := shared.ParseQueryInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
+	note.ID = shared.EntityID(id)
 
-	idq, merr := utils.ParseQueryInt64(c, "id")
-	if merr != nil {
-		return merr.Echo()
-	}
-	noteID := models.NoteID(idq)
-
-	note, merr := GetNoteFormData(c)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	// Set the ID for update
-	note.ID = noteID
+	user, _ := shared.GetUserFromContext(c)
+	log.Debug("Updating note [note: %s, user: %s]", note.String(), user.String())
 
 	// Update the note
-	merr = h.registry.Notes.Update(note)
+	merr = db.Notes.Update(note)
 	if merr != nil {
-		return merr.Echo()
-	}
-
-	// Create feed entry
-	title := "Notiz aktualisiert"
-	content := fmt.Sprintf("Eine Notiz wurde aktualisiert: %s", note.Content)
-
-	// Add linked info if any
-	if note.Linked != "" {
-		content += fmt.Sprintf("\nVerknüpft mit: %s", note.Linked)
-	}
-
-	merr = h.registry.Feeds.Add(title, content, user.TelegramID)
-	if merr != nil {
-		slog.Warn("Failed to create feed for cycle creation", "error", merr)
+		return merr.WrapEcho("failed to update note")
 	}
 
 	// Trigger reload of notes sections
-	urlb.SetHXTrigger(c, env.HXGlobalTrigger)
+	urlb.SetHXTrigger(c, "reload-notes")
 
 	return nil
 }

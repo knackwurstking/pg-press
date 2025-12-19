@@ -1,5 +1,7 @@
 # Refactoring Tasks
 
+- [ ] Add to env: htmx trigger values, just grep for `urlb.SetHXTrigger` (and `hx-trigger`)
+
 ## Shared contains all models, interfaces and types shared across services & more
 
 - [ ] Attachment model missing
@@ -14,14 +16,14 @@ Fix all handler and templates
 - [x] auth
 - [x] profile
 - [x] tools
-- [-] dialogs
+- [x] dialogs
   - [x] tool dialog (new/edit)
   - [x] cassette dialog (new/edit)
   - [ ] metal sheet dialog (new/edit)
   - [ ] cycle dialog (new/edit)
-  - [-] note dialog (new/edit)
+  - [x] note dialog (new/edit)
 - [x] tool
-  - [ ] Notes, dialog missing
+  - [-] Notes, dialog missing
   - [ ] Metal Sheets, dialog missing
   - [x] Regenerations edit
   - [x] Regenerations table

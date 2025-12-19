@@ -10,10 +10,10 @@ import (
 
 const (
 	// NOTE: Because i have an existing database with these levels, do not change the order or values
-	LevelInfo NoteLevel = iota
+	LevelNormal NoteLevel = iota
+	LevelInfo
 	LevelAttention
 	LevelBroken
-	LevelNormal
 )
 
 type NoteLevel int

@@ -17,7 +17,7 @@ func GetToolDialog(c echo.Context) *echo.HTTPError {
 	id, _ := shared.ParseQueryInt64(c, "id")
 	if id > 0 {
 		var merr *errors.MasterError
-		tool, merr = DB.Tool.Tools.GetByID(shared.EntityID(id))
+		tool, merr = db.Tool.Tools.GetByID(shared.EntityID(id))
 		if merr != nil {
 			return merr.Echo()
 		}
@@ -28,11 +28,11 @@ func GetToolDialog(c echo.Context) *echo.HTTPError {
 	if tool != nil {
 		t = EditToolDialog(tool)
 		tName = "EditToolDialog"
-		Log.Debug("Rendering edit tool dialog: %#v", tool.String())
+		log.Debug("Rendering edit tool dialog: %#v", tool.String())
 	} else {
 		t = NewToolDialog()
 		tName = "NewToolDialog"
-		Log.Debug("Rendering new tool dialog...")
+		log.Debug("Rendering new tool dialog...")
 	}
 
 	err := t.Render(c.Request().Context(), c.Response())
@@ -49,9 +49,9 @@ func PostTool(c echo.Context) *echo.HTTPError {
 		return verr.MasterError().Echo()
 	}
 
-	Log.Debug("Creating new tool: %#v", tool.String())
+	log.Debug("Creating new tool: %#v", tool.String())
 
-	merr := DB.Tool.Tools.Create(tool)
+	merr := db.Tool.Tools.Create(tool)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -75,9 +75,9 @@ func PutTool(c echo.Context) *echo.HTTPError {
 	}
 	tool.ID = toolID // Just to be sure
 
-	Log.Debug("Updating tool: %#v", tool.String())
+	log.Debug("Updating tool: %#v", tool.String())
 
-	merr = DB.Tool.Tools.Update(tool)
+	merr = db.Tool.Tools.Update(tool)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -97,7 +97,7 @@ func getToolDialogForm(c echo.Context) (*shared.Tool, *errors.ValidationError) {
 		vCode     = strings.Trim(c.FormValue("code"), " ")
 	)
 
-	Log.Debug("Tool dialog form values: position=%s, width=%s, height=%s, type=%s, code=%s",
+	log.Debug("Tool dialog form values: position=%s, width=%s, height=%s, type=%s, code=%s",
 		vPosition, vWidth, vHeight, vType, vCode)
 
 	// Need to convert the vPosition to an integer

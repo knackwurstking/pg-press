@@ -17,7 +17,7 @@ func GetCassetteDialog(c echo.Context) *echo.HTTPError {
 	id, _ := shared.ParseQueryInt64(c, "id")
 	if id > 0 {
 		var merr *errors.MasterError
-		cassette, merr = DB.Tool.Cassettes.GetByID(shared.EntityID(id))
+		cassette, merr = db.Tool.Cassettes.GetByID(shared.EntityID(id))
 		if merr != nil {
 			return merr.Echo()
 		}
@@ -28,11 +28,11 @@ func GetCassetteDialog(c echo.Context) *echo.HTTPError {
 	if cassette != nil {
 		t = EditCassetteDialog(cassette)
 		tName = "EditCassetteDialog"
-		Log.Debug("Rendering edit cassette dialog: %#v", cassette.String())
+		log.Debug("Rendering edit cassette dialog: %#v", cassette.String())
 	} else {
 		t = NewCassetteDialog()
 		tName = "NewCassetteDialog"
-		Log.Debug("Rendering new cassette dialog...")
+		log.Debug("Rendering new cassette dialog...")
 	}
 
 	err := t.Render(c.Request().Context(), c.Response())
@@ -49,9 +49,9 @@ func PostCassette(c echo.Context) *echo.HTTPError {
 		return verr.MasterError().Echo()
 	}
 
-	Log.Debug("Creating new cassette: %#v", cassette.String())
+	log.Debug("Creating new cassette: %#v", cassette.String())
 
-	merr := DB.Tool.Cassettes.Create(cassette)
+	merr := db.Tool.Cassettes.Create(cassette)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -75,9 +75,9 @@ func PutCassette(c echo.Context) *echo.HTTPError {
 	}
 	cassette.ID = cassetteID
 
-	Log.Debug("Updating cassette: %#v", cassette.String())
+	log.Debug("Updating cassette: %#v", cassette.String())
 
-	merr = DB.Tool.Cassettes.Update(cassette)
+	merr = db.Tool.Cassettes.Update(cassette)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -98,7 +98,7 @@ func getCassetteDialogForm(c echo.Context) (*shared.Cassette, *errors.Validation
 		vMaxThickness = c.FormValue("max_thickness")
 	)
 
-	Log.Debug("Cassette dialog form values: width=%s, height=%s, type=%s, code=%s, min_thickness=%s, max_thickness=%s",
+	log.Debug("Cassette dialog form values: width=%s, height=%s, type=%s, code=%s, min_thickness=%s, max_thickness=%s",
 		vWidth, vHeight, vType, vCode, vMinThickness, vMaxThickness)
 
 	// Convert vWidth and vHeight to integers

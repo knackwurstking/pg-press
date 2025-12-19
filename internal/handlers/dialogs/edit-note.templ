@@ -1,4 +1,4 @@
-package templates
+package dialogs
 
 import (
 	"net/http"
@@ -41,12 +41,15 @@ templ noteLevelSelect(level shared.NoteLevel) {
 		Priorität
 		<select id="level" name="level" required>
 			<option value="0" selected?={ level == 0 }>
-				Info
+				Normal
 			</option>
 			<option value="1" selected?={ level == 1 }>
-				Achtung
+				Info
 			</option>
 			<option value="2" selected?={ level == 2 }>
+				Achtung
+			</option>
+			<option value="3" selected?={ level == 3 }>
 				Defekt
 			</option>
 		</select>
