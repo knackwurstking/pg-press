@@ -24,6 +24,7 @@ type BaseService struct {
 	Log *ui.Logger `json:"-"`
 
 	serviceName string  `json:"-"`
+	dbName      string  `json:"-"`
 	db          *sql.DB `json:"-"`
 }
 
@@ -40,13 +41,12 @@ func (s *BaseService) DB() *sql.DB {
 }
 
 func (bs *BaseService) Setup(dbName, tableCreationQuery string) *errors.MasterError {
-	if bs.Log != nil {
-		bs.Log.Debug("Service setup: [name: %s, path: %s]", dbName, bs.DatabaseLocation)
-	}
-
 	if bs.db != nil {
 		return nil
 	}
+
+	bs.dbName = dbName
+	bs.Log.Debug("Opening the database [name: %s, path: %s]", bs.dbName, bs.DatabaseLocation)
 
 	var err error
 	err = os.MkdirAll(bs.DatabaseLocation, 0700)
@@ -61,7 +61,7 @@ func (bs *BaseService) Setup(dbName, tableCreationQuery string) *errors.MasterEr
 
 	path := fmt.Sprintf(
 		"file:%s.sqlite?cache=shared&mode=%s&_journal=WAL&_sync=0",
-		filepath.Join(bs.DatabaseLocation, dbName), mode,
+		filepath.Join(bs.DatabaseLocation, bs.dbName), mode,
 	)
 	bs.db, err = sql.Open(bs.DriverName, path)
 	if err != nil {
@@ -74,11 +74,12 @@ func (bs *BaseService) Setup(dbName, tableCreationQuery string) *errors.MasterEr
 	bs.db.SetConnMaxLifetime(5 * time.Minute) // Close connections after 5 minutes
 
 	return bs.createSQLTable(tableCreationQuery)
-
 }
 
 func (bs *BaseService) Close() *errors.MasterError {
 	if bs.db != nil {
+		bs.Log.Debug("Closing the database [name: %s, path: %s]", bs.dbName, bs.DatabaseLocation)
+
 		err := bs.db.Close()
 		if err != nil {
 			return errors.NewMasterError(err, 0)
