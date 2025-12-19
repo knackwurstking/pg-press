@@ -4,42 +4,6 @@
 
 - [ ] Attachment model missing
 
-## Services
-
-- note
-  - note
-    - [-] Rename to notes
-- press
-  - cycles
-  - press
-    - [-] Rename to presses
-  - regeneration
-    - [-] Rename to regenerations
-- tool
-  - cassette
-    - [-] Rename to cassettes
-  - lower-metal-sheet
-    - [-] Rename to metal-sheets-lower
-  - metal-sheet
-    - [-] Rename to metal-sheets
-  - regeneration
-    - [-] Rename to regenerations
-  - tool
-    - [-] Rename to tools
-  - upper-metal-sheet
-    - [-] Rename to metal-sheets-upper
-- user
-  - cookie
-    - [-] Rename to cookies
-  - session
-    - [-] Rename to sessions
-  - user
-    - [-] Rename to users
-- attachment
-  - attachments
-    - [ ] Create service for attachments handling, no SQL, local file
-          system storage? (@ /var/www/pg-press/attachments)
-
 ## Handlers
 
 Fix all handler and templates

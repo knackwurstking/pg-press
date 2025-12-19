@@ -57,24 +57,24 @@ const (
 	`
 )
 
-type CycleService struct {
+type PressCyclesService struct {
 	*shared.BaseService
 
 	mx *sync.Mutex `json:"-"`
 }
 
-func NewCycleService(c *shared.Config) *CycleService {
-	return &CycleService{
+func NewPressCyclesService(c *shared.Config) *PressCyclesService {
+	return &PressCyclesService{
 		BaseService: shared.NewBaseService(c, "Cycle"),
 		mx:          &sync.Mutex{},
 	}
 }
 
-func (s *CycleService) Setup() *errors.MasterError {
+func (s *PressCyclesService) Setup() *errors.MasterError {
 	return s.BaseService.Setup(DBName, SQLCreateCycleTable)
 }
 
-func (s *CycleService) Create(entity *shared.Cycle) *errors.MasterError {
+func (s *PressCyclesService) Create(entity *shared.Cycle) *errors.MasterError {
 	verr := entity.Validate()
 	if verr != nil {
 		return verr.MasterError()
@@ -109,7 +109,7 @@ func (s *CycleService) Create(entity *shared.Cycle) *errors.MasterError {
 	return nil
 }
 
-func (s *CycleService) Update(entity *shared.Cycle) *errors.MasterError {
+func (s *PressCyclesService) Update(entity *shared.Cycle) *errors.MasterError {
 	verr := entity.Validate()
 	if verr != nil {
 		return verr.MasterError()
@@ -133,7 +133,7 @@ func (s *CycleService) Update(entity *shared.Cycle) *errors.MasterError {
 	return nil
 }
 
-func (s *CycleService) GetByID(id shared.EntityID) (*shared.Cycle, *errors.MasterError) {
+func (s *PressCyclesService) GetByID(id shared.EntityID) (*shared.Cycle, *errors.MasterError) {
 	if id <= 0 {
 		return nil, errors.NewValidationError("invalid ID: %v", id).MasterError()
 	}
@@ -165,7 +165,7 @@ func (s *CycleService) GetByID(id shared.EntityID) (*shared.Cycle, *errors.Maste
 	return c, nil
 }
 
-func (s *CycleService) List() ([]*shared.Cycle, *errors.MasterError) {
+func (s *PressCyclesService) List() ([]*shared.Cycle, *errors.MasterError) {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
@@ -201,7 +201,7 @@ func (s *CycleService) List() ([]*shared.Cycle, *errors.MasterError) {
 	return cycles, nil
 }
 
-func (s *CycleService) Delete(id shared.EntityID) *errors.MasterError {
+func (s *PressCyclesService) Delete(id shared.EntityID) *errors.MasterError {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
@@ -250,4 +250,4 @@ func CalculatePartialCycles(db *sql.DB, cycle *shared.Cycle) int64 {
 // -----------------------------------------------------------------------------
 
 // Service validation
-var _ shared.Service[*shared.Cycle, shared.EntityID] = (*CycleService)(nil)
+var _ shared.Service[*shared.Cycle, shared.EntityID] = (*PressCyclesService)(nil)

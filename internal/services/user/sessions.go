@@ -9,27 +9,27 @@ import (
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
 
-type SessionService struct {
+type SessionsService struct {
 	*shared.BaseService
 
 	sessions map[shared.EntityID]*shared.Session
 	mx       *sync.Mutex
 }
 
-func NewSessionService(c *shared.Config) *SessionService {
-	return &SessionService{
+func NewSessionsService(c *shared.Config) *SessionsService {
+	return &SessionsService{
 		BaseService: shared.NewBaseService(c, "Session"),
 		sessions:    make(map[shared.EntityID]*shared.Session),
 		mx:          &sync.Mutex{},
 	}
 }
 
-func (s *SessionService) Setup() *errors.MasterError {
+func (s *SessionsService) Setup() *errors.MasterError {
 	return nil // Only in-memory storage; no setup needed
 }
 
 // Implement session service methods (in-memory)
-func (s *SessionService) Create(entity *shared.Session) *errors.MasterError {
+func (s *SessionsService) Create(entity *shared.Session) *errors.MasterError {
 	verr := entity.Validate()
 	if verr != nil {
 		return verr.MasterError()
@@ -49,12 +49,12 @@ func (s *SessionService) Create(entity *shared.Session) *errors.MasterError {
 }
 
 // NOTE: I need to overwrite the Close method from the BaseService here
-func (s *SessionService) Close() *errors.MasterError {
+func (s *SessionsService) Close() *errors.MasterError {
 	// No resources to close for in-memory storage
 	return nil
 }
 
-func (s *SessionService) Update(entity *shared.Session) *errors.MasterError {
+func (s *SessionsService) Update(entity *shared.Session) *errors.MasterError {
 	verr := entity.Validate()
 	if verr != nil {
 		return verr.MasterError()
@@ -75,7 +75,7 @@ func (s *SessionService) Update(entity *shared.Session) *errors.MasterError {
 	return nil
 }
 
-func (s *SessionService) GetByID(id shared.EntityID) (*shared.Session, *errors.MasterError) {
+func (s *SessionsService) GetByID(id shared.EntityID) (*shared.Session, *errors.MasterError) {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
@@ -90,7 +90,7 @@ func (s *SessionService) GetByID(id shared.EntityID) (*shared.Session, *errors.M
 	return session.Clone(), nil
 }
 
-func (s *SessionService) List() ([]*shared.Session, *errors.MasterError) {
+func (s *SessionsService) List() ([]*shared.Session, *errors.MasterError) {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
@@ -102,7 +102,7 @@ func (s *SessionService) List() ([]*shared.Session, *errors.MasterError) {
 	return sessions, nil
 }
 
-func (s *SessionService) Delete(id shared.EntityID) *errors.MasterError {
+func (s *SessionsService) Delete(id shared.EntityID) *errors.MasterError {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
@@ -118,4 +118,4 @@ func (s *SessionService) Delete(id shared.EntityID) *errors.MasterError {
 }
 
 // Service validation
-var _ shared.Service[*shared.Session, shared.EntityID] = (*SessionService)(nil)
+var _ shared.Service[*shared.Session, shared.EntityID] = (*SessionsService)(nil)

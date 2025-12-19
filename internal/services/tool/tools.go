@@ -70,24 +70,24 @@ const (
 	`
 )
 
-type ToolService struct {
+type ToolsService struct {
 	*shared.BaseService
 
 	mx *sync.Mutex `json:"-"`
 }
 
-func NewToolService(c *shared.Config) *ToolService {
-	return &ToolService{
+func NewToolsService(c *shared.Config) *ToolsService {
+	return &ToolsService{
 		BaseService: shared.NewBaseService(c, "Tool"),
 		mx:          &sync.Mutex{},
 	}
 }
 
-func (s *ToolService) Setup() *errors.MasterError {
+func (s *ToolsService) Setup() *errors.MasterError {
 	return s.BaseService.Setup(DBName, SQLCreateToolTable)
 }
 
-func (s *ToolService) Create(entity *shared.Tool) *errors.MasterError {
+func (s *ToolsService) Create(entity *shared.Tool) *errors.MasterError {
 	verr := entity.Validate()
 	if verr != nil {
 		return verr.MasterError()
@@ -126,7 +126,7 @@ func (s *ToolService) Create(entity *shared.Tool) *errors.MasterError {
 	return nil
 }
 
-func (s *ToolService) GetByID(id shared.EntityID) (*shared.Tool, *errors.MasterError) {
+func (s *ToolsService) GetByID(id shared.EntityID) (*shared.Tool, *errors.MasterError) {
 	if id <= 0 {
 		return nil, errors.NewValidationError("invalid ID: %v", id).MasterError()
 	}
@@ -159,7 +159,7 @@ func (s *ToolService) GetByID(id shared.EntityID) (*shared.Tool, *errors.MasterE
 	return t, nil
 }
 
-func (s *ToolService) Update(entity *shared.Tool) *errors.MasterError {
+func (s *ToolsService) Update(entity *shared.Tool) *errors.MasterError {
 	verr := entity.Validate()
 	if verr != nil {
 		return verr.MasterError()
@@ -187,7 +187,7 @@ func (s *ToolService) Update(entity *shared.Tool) *errors.MasterError {
 	return nil
 }
 
-func (s *ToolService) Delete(id shared.EntityID) *errors.MasterError {
+func (s *ToolsService) Delete(id shared.EntityID) *errors.MasterError {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
@@ -201,7 +201,7 @@ func (s *ToolService) Delete(id shared.EntityID) *errors.MasterError {
 	return nil
 }
 
-func (s *ToolService) List() ([]*shared.Tool, *errors.MasterError) {
+func (s *ToolsService) List() ([]*shared.Tool, *errors.MasterError) {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
@@ -240,4 +240,4 @@ func (s *ToolService) List() ([]*shared.Tool, *errors.MasterError) {
 }
 
 // Service validation
-var _ shared.Service[*shared.Tool, shared.EntityID] = (*ToolService)(nil)
+var _ shared.Service[*shared.Tool, shared.EntityID] = (*ToolsService)(nil)

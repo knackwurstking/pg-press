@@ -49,24 +49,24 @@ const (
 	`
 )
 
-type NoteService struct {
+type NotesService struct {
 	*shared.BaseService
 
 	mx *sync.Mutex `json:"-"`
 }
 
-func NewNoteService(c *shared.Config) *NoteService {
-	return &NoteService{
+func NewNotesService(c *shared.Config) *NotesService {
+	return &NotesService{
 		BaseService: shared.NewBaseService(c, "Note"),
 		mx:          &sync.Mutex{},
 	}
 }
 
-func (s *NoteService) Setup() *errors.MasterError {
+func (s *NotesService) Setup() *errors.MasterError {
 	return s.BaseService.Setup(DBName, SQLCreateNoteTable)
 }
 
-func (s *NoteService) Create(entity *shared.Note) *errors.MasterError {
+func (s *NotesService) Create(entity *shared.Note) *errors.MasterError {
 	verr := entity.Validate()
 	if verr != nil {
 		return verr.MasterError()
@@ -100,7 +100,7 @@ func (s *NoteService) Create(entity *shared.Note) *errors.MasterError {
 	return nil
 }
 
-func (s *NoteService) Update(entity *shared.Note) *errors.MasterError {
+func (s *NotesService) Update(entity *shared.Note) *errors.MasterError {
 	verr := entity.Validate()
 	if verr != nil {
 		return verr.MasterError()
@@ -123,7 +123,7 @@ func (s *NoteService) Update(entity *shared.Note) *errors.MasterError {
 	return nil
 }
 
-func (s *NoteService) GetByID(id shared.EntityID) (*shared.Note, *errors.MasterError) {
+func (s *NotesService) GetByID(id shared.EntityID) (*shared.Note, *errors.MasterError) {
 	if id <= 0 {
 		return nil, errors.NewValidationError("invalid ID: %v", id).MasterError()
 	}
@@ -151,7 +151,7 @@ func (s *NoteService) GetByID(id shared.EntityID) (*shared.Note, *errors.MasterE
 	return n, nil
 }
 
-func (s *NoteService) List() ([]*shared.Note, *errors.MasterError) {
+func (s *NotesService) List() ([]*shared.Note, *errors.MasterError) {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
@@ -184,7 +184,7 @@ func (s *NoteService) List() ([]*shared.Note, *errors.MasterError) {
 	return notes, nil
 }
 
-func (s *NoteService) Delete(id shared.EntityID) *errors.MasterError {
+func (s *NotesService) Delete(id shared.EntityID) *errors.MasterError {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
@@ -199,4 +199,4 @@ func (s *NoteService) Delete(id shared.EntityID) *errors.MasterError {
 }
 
 // Service validation
-var _ shared.Service[*shared.Note, shared.EntityID] = (*NoteService)(nil)
+var _ shared.Service[*shared.Note, shared.EntityID] = (*NotesService)(nil)

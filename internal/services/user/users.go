@@ -47,24 +47,24 @@ const (
 	`
 )
 
-type UserService struct {
+type UsersService struct {
 	*shared.BaseService
 
 	mx *sync.Mutex `json:"-"`
 }
 
-func NewUserService(c *shared.Config) *UserService {
-	return &UserService{
+func NewUsersService(c *shared.Config) *UsersService {
+	return &UsersService{
 		BaseService: shared.NewBaseService(c, "User"),
 		mx:          &sync.Mutex{},
 	}
 }
 
-func (s *UserService) Setup() *errors.MasterError {
+func (s *UsersService) Setup() *errors.MasterError {
 	return s.BaseService.Setup(DBName, SQLCreateUserTable)
 }
 
-func (s *UserService) Create(entity *shared.User) *errors.MasterError {
+func (s *UsersService) Create(entity *shared.User) *errors.MasterError {
 	verr := entity.Validate()
 	if verr != nil {
 		return verr.MasterError()
@@ -96,7 +96,7 @@ func (s *UserService) Create(entity *shared.User) *errors.MasterError {
 	return nil
 }
 
-func (s *UserService) Update(entity *shared.User) *errors.MasterError {
+func (s *UsersService) Update(entity *shared.User) *errors.MasterError {
 	verr := entity.Validate()
 	if verr != nil {
 		return verr.MasterError()
@@ -117,7 +117,7 @@ func (s *UserService) Update(entity *shared.User) *errors.MasterError {
 	return nil
 }
 
-func (s *UserService) GetByID(id shared.TelegramID) (*shared.User, *errors.MasterError) {
+func (s *UsersService) GetByID(id shared.TelegramID) (*shared.User, *errors.MasterError) {
 	if id <= 0 {
 		return nil, errors.NewValidationError("invalid ID: %v", id).MasterError()
 	}
@@ -143,7 +143,7 @@ func (s *UserService) GetByID(id shared.TelegramID) (*shared.User, *errors.Maste
 	return u, nil
 }
 
-func (s *UserService) List() ([]*shared.User, *errors.MasterError) {
+func (s *UsersService) List() ([]*shared.User, *errors.MasterError) {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
@@ -174,7 +174,7 @@ func (s *UserService) List() ([]*shared.User, *errors.MasterError) {
 	return users, nil
 }
 
-func (s *UserService) Delete(id shared.TelegramID) *errors.MasterError {
+func (s *UsersService) Delete(id shared.TelegramID) *errors.MasterError {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
@@ -189,4 +189,4 @@ func (s *UserService) Delete(id shared.TelegramID) *errors.MasterError {
 }
 
 // Service validation
-var _ shared.Service[*shared.User, shared.TelegramID] = (*UserService)(nil)
+var _ shared.Service[*shared.User, shared.TelegramID] = (*UsersService)(nil)

@@ -58,29 +58,29 @@ const (
 	`
 )
 
-type PressService struct {
+type PressesService struct {
 	*shared.BaseService
 
 	mx *sync.Mutex `json:"-"`
 }
 
-func NewPressService(c *shared.Config) *PressService {
-	return &PressService{
+func NewPressesService(c *shared.Config) *PressesService {
+	return &PressesService{
 		BaseService: shared.NewBaseService(c, "Press"),
 		mx:          &sync.Mutex{},
 	}
 }
 
-func (s *PressService) Setup() *errors.MasterError {
+func (s *PressesService) Setup() *errors.MasterError {
 	return s.BaseService.Setup(DBName, SQLCreatePressTable)
 }
 
-func (s *PressService) Close() *errors.MasterError {
+func (s *PressesService) Close() *errors.MasterError {
 	// Close the base service connection
 	return s.BaseService.Close()
 }
 
-func (s *PressService) Create(entity *shared.Press) *errors.MasterError {
+func (s *PressesService) Create(entity *shared.Press) *errors.MasterError {
 	verr := entity.Validate()
 	if verr != nil {
 		return verr.MasterError()
@@ -115,7 +115,7 @@ func (s *PressService) Create(entity *shared.Press) *errors.MasterError {
 	return nil
 }
 
-func (s *PressService) Update(entity *shared.Press) *errors.MasterError {
+func (s *PressesService) Update(entity *shared.Press) *errors.MasterError {
 	verr := entity.Validate()
 	if verr != nil {
 		return verr.MasterError()
@@ -140,7 +140,7 @@ func (s *PressService) Update(entity *shared.Press) *errors.MasterError {
 	return nil
 }
 
-func (s *PressService) GetByID(id shared.PressNumber) (*shared.Press, *errors.MasterError) {
+func (s *PressesService) GetByID(id shared.PressNumber) (*shared.Press, *errors.MasterError) {
 	if id < 0 {
 		return nil, errors.NewValidationError("invalid ID: %v", id).MasterError()
 	}
@@ -170,7 +170,7 @@ func (s *PressService) GetByID(id shared.PressNumber) (*shared.Press, *errors.Ma
 	return p, nil
 }
 
-func (s *PressService) List() ([]*shared.Press, *errors.MasterError) {
+func (s *PressesService) List() ([]*shared.Press, *errors.MasterError) {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
@@ -205,7 +205,7 @@ func (s *PressService) List() ([]*shared.Press, *errors.MasterError) {
 	return presses, nil
 }
 
-func (s *PressService) Delete(id shared.PressNumber) *errors.MasterError {
+func (s *PressesService) Delete(id shared.PressNumber) *errors.MasterError {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
@@ -220,4 +220,4 @@ func (s *PressService) Delete(id shared.PressNumber) *errors.MasterError {
 }
 
 // Service validation
-var _ shared.Service[*shared.Press, shared.PressNumber] = (*PressService)(nil)
+var _ shared.Service[*shared.Press, shared.PressNumber] = (*PressesService)(nil)

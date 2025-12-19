@@ -47,24 +47,24 @@ const (
 	`
 )
 
-type CassetteService struct {
+type CassettesService struct {
 	*shared.BaseService
 
 	mx *sync.Mutex `json:"-"`
 }
 
-func NewCassetteService(c *shared.Config) *CassetteService {
-	return &CassetteService{
+func NewCassettesService(c *shared.Config) *CassettesService {
+	return &CassettesService{
 		BaseService: shared.NewBaseService(c, "Cassette"),
 		mx:          &sync.Mutex{},
 	}
 }
 
-func (s *CassetteService) Setup() *errors.MasterError {
+func (s *CassettesService) Setup() *errors.MasterError {
 	return s.BaseService.Setup(DBName, SQLCreateToolTable)
 }
 
-func (s *CassetteService) Create(entity *shared.Cassette) *errors.MasterError {
+func (s *CassettesService) Create(entity *shared.Cassette) *errors.MasterError {
 	verr := entity.Validate()
 	if verr != nil {
 		return verr.MasterError()
@@ -104,7 +104,7 @@ func (s *CassetteService) Create(entity *shared.Cassette) *errors.MasterError {
 	return nil
 }
 
-func (s *CassetteService) GetByID(id shared.EntityID) (*shared.Cassette, *errors.MasterError) {
+func (s *CassettesService) GetByID(id shared.EntityID) (*shared.Cassette, *errors.MasterError) {
 	if id <= 0 {
 		return nil, errors.NewValidationError("invalid ID: %v", id).MasterError()
 	}
@@ -138,7 +138,7 @@ func (s *CassetteService) GetByID(id shared.EntityID) (*shared.Cassette, *errors
 	return c, nil
 }
 
-func (s *CassetteService) Update(entity *shared.Cassette) *errors.MasterError {
+func (s *CassettesService) Update(entity *shared.Cassette) *errors.MasterError {
 	verr := entity.Validate()
 	if verr != nil {
 		return verr.MasterError()
@@ -167,7 +167,7 @@ func (s *CassetteService) Update(entity *shared.Cassette) *errors.MasterError {
 	return nil
 }
 
-func (s *CassetteService) Delete(id shared.EntityID) *errors.MasterError {
+func (s *CassettesService) Delete(id shared.EntityID) *errors.MasterError {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
@@ -181,7 +181,7 @@ func (s *CassetteService) Delete(id shared.EntityID) *errors.MasterError {
 	return nil
 }
 
-func (s *CassetteService) List() ([]*shared.Cassette, *errors.MasterError) {
+func (s *CassettesService) List() ([]*shared.Cassette, *errors.MasterError) {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
@@ -221,4 +221,4 @@ func (s *CassetteService) List() ([]*shared.Cassette, *errors.MasterError) {
 }
 
 // Service validation
-var _ shared.Service[*shared.Cassette, shared.EntityID] = (*CassetteService)(nil)
+var _ shared.Service[*shared.Cassette, shared.EntityID] = (*CassettesService)(nil)

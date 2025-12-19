@@ -50,24 +50,24 @@ const (
 	`
 )
 
-type CookieService struct {
+type CookiesService struct {
 	*shared.BaseService
 
 	mx *sync.Mutex `json:"-"`
 }
 
-func NewCookieService(c *shared.Config) *CookieService {
-	return &CookieService{
+func NewCookiesService(c *shared.Config) *CookiesService {
+	return &CookiesService{
 		BaseService: shared.NewBaseService(c, "Cookie"),
 		mx:          &sync.Mutex{},
 	}
 }
 
-func (s *CookieService) Setup() *errors.MasterError {
+func (s *CookiesService) Setup() *errors.MasterError {
 	return s.BaseService.Setup(DBName, SQLCreateCookieTable)
 }
 
-func (s *CookieService) Create(entity *shared.Cookie) *errors.MasterError {
+func (s *CookiesService) Create(entity *shared.Cookie) *errors.MasterError {
 	verr := entity.Validate()
 	if verr != nil {
 		return verr.MasterError()
@@ -98,7 +98,7 @@ func (s *CookieService) Create(entity *shared.Cookie) *errors.MasterError {
 	return nil
 }
 
-func (s *CookieService) Update(entity *shared.Cookie) *errors.MasterError {
+func (s *CookiesService) Update(entity *shared.Cookie) *errors.MasterError {
 	verr := entity.Validate()
 	if verr != nil {
 		return verr.MasterError()
@@ -120,7 +120,7 @@ func (s *CookieService) Update(entity *shared.Cookie) *errors.MasterError {
 	return nil
 }
 
-func (s *CookieService) GetByID(value string) (*shared.Cookie, *errors.MasterError) {
+func (s *CookiesService) GetByID(value string) (*shared.Cookie, *errors.MasterError) {
 	if value == "" {
 		return nil, errors.NewValidationError("cookie value is required").MasterError()
 	}
@@ -142,7 +142,7 @@ func (s *CookieService) GetByID(value string) (*shared.Cookie, *errors.MasterErr
 	return c, nil
 }
 
-func (s *CookieService) List() ([]*shared.Cookie, *errors.MasterError) {
+func (s *CookiesService) List() ([]*shared.Cookie, *errors.MasterError) {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
@@ -165,7 +165,7 @@ func (s *CookieService) List() ([]*shared.Cookie, *errors.MasterError) {
 	return cookies, nil
 }
 
-func (s *CookieService) Delete(value string) *errors.MasterError {
+func (s *CookiesService) Delete(value string) *errors.MasterError {
 	if value == "" {
 		return errors.NewValidationError("cookie value is required").MasterError()
 	}
@@ -184,4 +184,4 @@ func (s *CookieService) Delete(value string) *errors.MasterError {
 }
 
 // Service validation
-var _ shared.Service[*shared.Cookie, string] = (*CookieService)(nil)
+var _ shared.Service[*shared.Cookie, string] = (*CookiesService)(nil)

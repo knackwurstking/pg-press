@@ -53,24 +53,24 @@ const (
 	`
 )
 
-type ToolRegenerationService struct {
+type ToolRegenerationsService struct {
 	*shared.BaseService
 
 	mx *sync.Mutex `json:"-"`
 }
 
-func NewToolRegenerationService(c *shared.Config) *ToolRegenerationService {
-	return &ToolRegenerationService{
+func NewToolRegenerationsService(c *shared.Config) *ToolRegenerationsService {
+	return &ToolRegenerationsService{
 		BaseService: shared.NewBaseService(c, "ToolRegeneration"),
 		mx:          &sync.Mutex{},
 	}
 }
 
-func (s *ToolRegenerationService) Setup() *errors.MasterError {
+func (s *ToolRegenerationsService) Setup() *errors.MasterError {
 	return s.BaseService.Setup(DBName, SQLCreateToolRegenerationTable)
 }
 
-func (s *ToolRegenerationService) Create(entity *shared.ToolRegeneration) *errors.MasterError {
+func (s *ToolRegenerationsService) Create(entity *shared.ToolRegeneration) *errors.MasterError {
 	verr := entity.Validate()
 	if verr != nil {
 		return verr.MasterError()
@@ -110,7 +110,7 @@ func (s *ToolRegenerationService) Create(entity *shared.ToolRegeneration) *error
 	return nil
 }
 
-func (s *ToolRegenerationService) Update(entity *shared.ToolRegeneration) *errors.MasterError {
+func (s *ToolRegenerationsService) Update(entity *shared.ToolRegeneration) *errors.MasterError {
 	verr := entity.Validate()
 	if verr != nil {
 		return verr.MasterError()
@@ -133,7 +133,7 @@ func (s *ToolRegenerationService) Update(entity *shared.ToolRegeneration) *error
 	return nil
 }
 
-func (s *ToolRegenerationService) GetByID(id shared.EntityID) (*shared.ToolRegeneration, *errors.MasterError) {
+func (s *ToolRegenerationsService) GetByID(id shared.EntityID) (*shared.ToolRegeneration, *errors.MasterError) {
 	if id <= 0 {
 		return nil, errors.NewValidationError("invalid ID: %v", id).MasterError()
 	}
@@ -161,7 +161,7 @@ func (s *ToolRegenerationService) GetByID(id shared.EntityID) (*shared.ToolRegen
 	return tr, nil
 }
 
-func (s *ToolRegenerationService) List() ([]*shared.ToolRegeneration, *errors.MasterError) {
+func (s *ToolRegenerationsService) List() ([]*shared.ToolRegeneration, *errors.MasterError) {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
@@ -194,7 +194,7 @@ func (s *ToolRegenerationService) List() ([]*shared.ToolRegeneration, *errors.Ma
 	return regenerations, nil
 }
 
-func (s *ToolRegenerationService) Delete(id shared.EntityID) *errors.MasterError {
+func (s *ToolRegenerationsService) Delete(id shared.EntityID) *errors.MasterError {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
@@ -208,7 +208,7 @@ func (s *ToolRegenerationService) Delete(id shared.EntityID) *errors.MasterError
 	return nil
 }
 
-func (s *ToolRegenerationService) checkOngoingRegeneration(entity *shared.ToolRegeneration) *errors.ValidationError {
+func (s *ToolRegenerationsService) checkOngoingRegeneration(entity *shared.ToolRegeneration) *errors.ValidationError {
 	row := s.DB().QueryRow(
 		`
 			SELECT id FROM tool_regenerations
@@ -229,4 +229,4 @@ func (s *ToolRegenerationService) checkOngoingRegeneration(entity *shared.ToolRe
 }
 
 // Service validation
-var _ shared.Service[*shared.ToolRegeneration, shared.EntityID] = (*ToolRegenerationService)(nil)
+var _ shared.Service[*shared.ToolRegeneration, shared.EntityID] = (*ToolRegenerationsService)(nil)

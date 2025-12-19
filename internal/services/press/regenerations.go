@@ -47,29 +47,29 @@ const (
 	`
 )
 
-// PressRegenerationService provides methods to manage press regenerations
+// PressRegenerationsService provides methods to manage press regenerations
 //
 // - A press regeneration is a record which will reset a press's cycle count back to zero
 // - A regeneration means that the press was broken and got renewed, so the cycle count starts fresh, but this does not matter here
 
-type PressRegenerationService struct {
+type PressRegenerationsService struct {
 	*shared.BaseService
 
 	mx *sync.Mutex `json:"-"`
 }
 
-func NewPressRegenerationService(c *shared.Config) *PressRegenerationService {
-	return &PressRegenerationService{
+func NewPressRegenerationsService(c *shared.Config) *PressRegenerationsService {
+	return &PressRegenerationsService{
 		BaseService: shared.NewBaseService(c, "PressRegeneration"),
 		mx:          &sync.Mutex{},
 	}
 }
 
-func (s *PressRegenerationService) Setup() *errors.MasterError {
+func (s *PressRegenerationsService) Setup() *errors.MasterError {
 	return s.BaseService.Setup(DBName, SQLCreatePressRegenerationTable)
 }
 
-func (s *PressRegenerationService) Create(entity *shared.PressRegeneration) *errors.MasterError {
+func (s *PressRegenerationsService) Create(entity *shared.PressRegeneration) *errors.MasterError {
 	verr := entity.Validate()
 	if verr != nil {
 		return verr.MasterError()
@@ -103,7 +103,7 @@ func (s *PressRegenerationService) Create(entity *shared.PressRegeneration) *err
 	return nil
 }
 
-func (s *PressRegenerationService) Update(entity *shared.PressRegeneration) *errors.MasterError {
+func (s *PressRegenerationsService) Update(entity *shared.PressRegeneration) *errors.MasterError {
 	verr := entity.Validate()
 	if verr != nil {
 		return verr.MasterError()
@@ -126,7 +126,7 @@ func (s *PressRegenerationService) Update(entity *shared.PressRegeneration) *err
 	return nil
 }
 
-func (s *PressRegenerationService) GetByID(id shared.EntityID) (*shared.PressRegeneration, *errors.MasterError) {
+func (s *PressRegenerationsService) GetByID(id shared.EntityID) (*shared.PressRegeneration, *errors.MasterError) {
 	if id <= 0 {
 		return nil, errors.NewValidationError("invalid ID: %v", id).MasterError()
 	}
@@ -154,7 +154,7 @@ func (s *PressRegenerationService) GetByID(id shared.EntityID) (*shared.PressReg
 	return pr, nil
 }
 
-func (s *PressRegenerationService) List() ([]*shared.PressRegeneration, *errors.MasterError) {
+func (s *PressRegenerationsService) List() ([]*shared.PressRegeneration, *errors.MasterError) {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
@@ -187,7 +187,7 @@ func (s *PressRegenerationService) List() ([]*shared.PressRegeneration, *errors.
 	return regenerations, nil
 }
 
-func (s *PressRegenerationService) Delete(id shared.EntityID) *errors.MasterError {
+func (s *PressRegenerationsService) Delete(id shared.EntityID) *errors.MasterError {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
@@ -201,9 +201,9 @@ func (s *PressRegenerationService) Delete(id shared.EntityID) *errors.MasterErro
 	return nil
 }
 
-func (s *PressRegenerationService) Close() *errors.MasterError {
+func (s *PressRegenerationsService) Close() *errors.MasterError {
 	return s.BaseService.Close()
 }
 
 // Service validation
-var _ shared.Service[*shared.PressRegeneration, shared.EntityID] = (*PressRegenerationService)(nil)
+var _ shared.Service[*shared.PressRegeneration, shared.EntityID] = (*PressRegenerationsService)(nil)

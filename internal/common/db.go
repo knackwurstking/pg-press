@@ -37,24 +37,24 @@ type DB struct {
 func NewDB(c *shared.Config) *DB {
 	return &DB{
 		User: &UserDB{
-			User:    user.NewUserService(c),
-			Cookie:  user.NewCookieService(c),
-			Session: user.NewSessionService(c),
+			User:    user.NewUsersService(c),
+			Cookie:  user.NewCookiesService(c),
+			Session: user.NewSessionsService(c),
 		},
 		Press: &PressDB{
-			Press:        press.NewPressService(c),
-			Cycle:        press.NewCycleService(c),
-			Regeneration: press.NewPressRegenerationService(c),
+			Press:        press.NewPressesService(c),
+			Cycle:        press.NewPressCyclesService(c),
+			Regeneration: press.NewPressRegenerationsService(c),
 		},
 		Tool: &ToolDB{
-			Tool:            tool.NewToolService(c),
-			Regeneration:    tool.NewToolRegenerationService(c),
-			Cassette:        tool.NewCassetteService(c),
-			UpperMetalSheet: tool.NewUpperMetalSheetService(c),
-			LowerMetalSheet: tool.NewLowerMetalSheetService(c),
+			Tool:            tool.NewToolsService(c),
+			Regeneration:    tool.NewToolRegenerationsService(c),
+			Cassette:        tool.NewCassettesService(c),
+			UpperMetalSheet: tool.NewUpperMetalSheetsService(c),
+			LowerMetalSheet: tool.NewLowerMetalSheetsService(c),
 		},
 		Note: &NoteDB{
-			Note: note.NewNoteService(c),
+			Note: note.NewNotesService(c),
 		},
 	}
 }

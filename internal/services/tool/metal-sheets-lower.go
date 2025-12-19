@@ -41,24 +41,24 @@ const (
 	`
 )
 
-type LowerMetalSheetService struct {
+type LowerMetalSheetsService struct {
 	*shared.BaseService
 
 	mx *sync.Mutex `json:"-"`
 }
 
-func NewLowerMetalSheetService(c *shared.Config) *LowerMetalSheetService {
-	return &LowerMetalSheetService{
+func NewLowerMetalSheetsService(c *shared.Config) *LowerMetalSheetsService {
+	return &LowerMetalSheetsService{
 		BaseService: shared.NewBaseService(c, "LowerMetalSheet"),
 		mx:          &sync.Mutex{},
 	}
 }
 
-func (s *LowerMetalSheetService) Setup() *errors.MasterError {
+func (s *LowerMetalSheetsService) Setup() *errors.MasterError {
 	return s.BaseService.Setup(DBName, SQLCreateMetalSheetTable)
 }
 
-func (s *LowerMetalSheetService) GetByID(id shared.EntityID) (*shared.LowerMetalSheet, *errors.MasterError) {
+func (s *LowerMetalSheetsService) GetByID(id shared.EntityID) (*shared.LowerMetalSheet, *errors.MasterError) {
 	if id <= 0 {
 		return nil, errors.NewValidationError("invalid ID: %v", id).MasterError()
 	}
@@ -88,7 +88,7 @@ func (s *LowerMetalSheetService) GetByID(id shared.EntityID) (*shared.LowerMetal
 	return &lowerSheet, nil
 }
 
-func (s *LowerMetalSheetService) List() ([]*shared.LowerMetalSheet, *errors.MasterError) {
+func (s *LowerMetalSheetsService) List() ([]*shared.LowerMetalSheet, *errors.MasterError) {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
@@ -123,7 +123,7 @@ func (s *LowerMetalSheetService) List() ([]*shared.LowerMetalSheet, *errors.Mast
 	return lowerSheets, nil
 }
 
-func (s *LowerMetalSheetService) Create(entity *shared.LowerMetalSheet) *errors.MasterError {
+func (s *LowerMetalSheetsService) Create(entity *shared.LowerMetalSheet) *errors.MasterError {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
@@ -158,7 +158,7 @@ func (s *LowerMetalSheetService) Create(entity *shared.LowerMetalSheet) *errors.
 	return nil
 }
 
-func (s *LowerMetalSheetService) Update(entity *shared.LowerMetalSheet) *errors.MasterError {
+func (s *LowerMetalSheetsService) Update(entity *shared.LowerMetalSheet) *errors.MasterError {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
@@ -184,7 +184,7 @@ func (s *LowerMetalSheetService) Update(entity *shared.LowerMetalSheet) *errors.
 	return nil
 }
 
-func (s *LowerMetalSheetService) Delete(id shared.EntityID) *errors.MasterError {
+func (s *LowerMetalSheetsService) Delete(id shared.EntityID) *errors.MasterError {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
@@ -198,4 +198,4 @@ func (s *LowerMetalSheetService) Delete(id shared.EntityID) *errors.MasterError 
 	return nil
 }
 
-var _ shared.Service[*shared.LowerMetalSheet, shared.EntityID] = (*LowerMetalSheetService)(nil)
+var _ shared.Service[*shared.LowerMetalSheet, shared.EntityID] = (*LowerMetalSheetsService)(nil)
