@@ -53,4 +53,11 @@ Fix all handler and templates
   - [x] cassette dialog (new/edit)
   - [ ] metal sheet dialog (new/edit)
   - [ ] cycle dialog (new/edit)
-- [-] tool
+  - [ ] note dialog (new/edit)
+- [x] tool
+    - [ ] Notes, dialog missing
+    - [ ] Metal Sheets, dialog missing
+    - [-] Regenerations edit
+    - [-] Regenerations table
+    - [x] Tool Binding
+    - [ ] Cycles table, dialog missing
