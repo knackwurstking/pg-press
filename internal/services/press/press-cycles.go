@@ -74,10 +74,10 @@ func (s *PressCyclesService) Setup() *errors.MasterError {
 	return s.BaseService.Setup(DBName, SQLCreateCycleTable)
 }
 
-func (s *PressCyclesService) Create(entity *shared.Cycle) *errors.MasterError {
+func (s *PressCyclesService) Create(entity *shared.Cycle) (*shared.Cycle, *errors.MasterError) {
 	verr := entity.Validate()
 	if verr != nil {
-		return verr.MasterError()
+		return nil, verr.MasterError()
 	}
 
 	s.mx.Lock()
@@ -91,22 +91,23 @@ func (s *PressCyclesService) Create(entity *shared.Cycle) *errors.MasterError {
 		sql.Named("stop", entity.Stop),
 	)
 	if err != nil {
-		return errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err, 0)
 	}
 
 	// Store the inserted ID back into the entity
 	id, err := r.LastInsertId()
 	if err != nil {
-		return errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	if id <= 0 {
-		return errors.NewMasterError(
-			errors.NewValidationError("invalid ID returned after insert: %v", id), 0)
+		return nil, errors.NewValidationError(
+			"invalid ID returned after insert: %v", id,
+		).MasterError()
 	}
 
 	entity.ID = shared.EntityID(id)
 
-	return nil
+	return entity, nil
 }
 
 func (s *PressCyclesService) Update(entity *shared.Cycle) *errors.MasterError {

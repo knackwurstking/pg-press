@@ -111,13 +111,13 @@ func (s *UpperMetalSheetsService) List() ([]*shared.UpperMetalSheet, *errors.Mas
 	return upperSheets, nil
 }
 
-func (s *UpperMetalSheetsService) Create(entity *shared.UpperMetalSheet) *errors.MasterError {
+func (s *UpperMetalSheetsService) Create(entity *shared.UpperMetalSheet) (*shared.UpperMetalSheet, *errors.MasterError) {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
 	verr := entity.Validate()
 	if verr != nil {
-		return verr.MasterError()
+		return nil, verr.MasterError()
 	}
 
 	r, err := s.DB().Exec(SQLCreateUpperMetalSheet,
@@ -126,20 +126,20 @@ func (s *UpperMetalSheetsService) Create(entity *shared.UpperMetalSheet) *errors
 		sql.Named("value", entity.Value),
 	)
 	if err != nil {
-		return errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err, 0)
 	}
 
 	id, err := r.LastInsertId()
 	if err != nil {
-		return errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	if id <= 0 {
-		return errors.NewValidationError("invalid ID returned after insert: %v", id).MasterError()
+		return nil, errors.NewValidationError("invalid ID returned after insert: %v", id).MasterError()
 	}
 
 	entity.ID = shared.EntityID(id)
 
-	return nil
+	return entity, nil
 }
 
 func (s *UpperMetalSheetsService) Update(entity *shared.UpperMetalSheet) *errors.MasterError {

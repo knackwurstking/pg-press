@@ -70,10 +70,10 @@ func (s *ToolRegenerationsService) Setup() *errors.MasterError {
 	return s.BaseService.Setup(DBName, SQLCreateToolRegenerationTable)
 }
 
-func (s *ToolRegenerationsService) Create(entity *shared.ToolRegeneration) *errors.MasterError {
+func (s *ToolRegenerationsService) Create(entity *shared.ToolRegeneration) (*shared.ToolRegeneration, *errors.MasterError) {
 	verr := entity.Validate()
 	if verr != nil {
-		return verr.MasterError()
+		return nil, verr.MasterError()
 	}
 
 	s.mx.Lock()
@@ -82,7 +82,7 @@ func (s *ToolRegenerationsService) Create(entity *shared.ToolRegeneration) *erro
 	// Check if there's already an ongoing regeneration for this tool (where stop = 0)
 	verr = s.checkOngoingRegeneration(entity)
 	if verr != nil {
-		return verr.MasterError()
+		return nil, verr.MasterError()
 	}
 
 	r, err := s.DB().Exec(SQLCreateToolRegeneration,
@@ -92,22 +92,23 @@ func (s *ToolRegenerationsService) Create(entity *shared.ToolRegeneration) *erro
 		sql.Named("cycles", entity.Cycles),
 	)
 	if err != nil {
-		return errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err, 0)
 	}
 
 	// Store the inserted ID back into the entity
 	id, err := r.LastInsertId()
 	if err != nil {
-		return errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	if id <= 0 {
-		return errors.NewMasterError(
-			errors.NewValidationError("invalid ID returned after insert: %v", id), 0)
+		return nil, errors.NewValidationError(
+			"invalid ID returned after insert: %v", id,
+		).MasterError()
 	}
 
 	entity.ID = shared.EntityID(id)
 
-	return nil
+	return entity, nil
 }
 
 func (s *ToolRegenerationsService) Update(entity *shared.ToolRegeneration) *errors.MasterError {

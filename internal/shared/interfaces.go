@@ -16,7 +16,7 @@ type Service[T any, ID comparable] interface {
 	Close() *errors.MasterError
 
 	// Create adds a new entity to the repository
-	Create(entity T) *errors.MasterError
+	Create(entity T) (T, *errors.MasterError)
 
 	// GetByID retrieves an entity by its ID
 	GetByID(id ID) (T, *errors.MasterError)

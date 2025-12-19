@@ -67,35 +67,26 @@ func (s *CookiesService) Setup() *errors.MasterError {
 	return s.BaseService.Setup(DBName, SQLCreateCookieTable)
 }
 
-func (s *CookiesService) Create(entity *shared.Cookie) *errors.MasterError {
+func (s *CookiesService) Create(entity *shared.Cookie) (*shared.Cookie, *errors.MasterError) {
 	verr := entity.Validate()
 	if verr != nil {
-		return verr.MasterError()
+		return nil, verr.MasterError()
 	}
 
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
-	r, err := s.DB().Exec(SQLCreateCookie,
+	_, err := s.DB().Exec(SQLCreateCookie,
 		sql.Named("user_agent", entity.UserAgent),
 		sql.Named("value", entity.Value),
 		sql.Named("user_id", entity.UserID),
 		sql.Named("last_login", entity.LastLogin),
 	)
 	if err != nil {
-		return errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err, 0)
 	}
 
-	id, err := r.LastInsertId()
-	if err != nil {
-		return errors.NewMasterError(err, 0)
-	}
-	if id <= 0 {
-		return errors.NewMasterError(
-			errors.NewValidationError("invalid ID returned after insert: %v", id), 0)
-	}
-
-	return nil
+	return entity, nil
 }
 
 func (s *CookiesService) Update(entity *shared.Cookie) *errors.MasterError {

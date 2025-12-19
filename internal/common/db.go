@@ -47,9 +47,10 @@ func NewDB(c *shared.Config) *DB {
 			Regenerations: press.NewPressRegenerationsService(c),
 		},
 		Tool: &ToolDB{
-			Tools:            tool.NewToolsService(c),
-			Regenerations:    tool.NewToolRegenerationsService(c),
+			UpperTools:       tool.NewUpperToolsService(c),
+			LowerTools:       tool.NewLowerToolsService(c),
 			Cassettes:        tool.NewCassettesService(c),
+			Regenerations:    tool.NewToolRegenerationsService(c),
 			UpperMetalSheets: tool.NewUpperMetalSheetsService(c),
 			LowerMetalSheets: tool.NewLowerMetalSheetsService(c),
 		},
@@ -121,18 +122,18 @@ type UserDB struct {
 // Setup initializes user database services
 func (udb *UserDB) Setup() error {
 	return setupServices([]setupServicesProps{
-		{"user", udb.Users.Setup},
-		{"cookie", udb.Cookies.Setup},
-		{"session", udb.Sessions.Setup},
+		{"users", udb.Users.Setup},
+		{"cookies", udb.Cookies.Setup},
+		{"sessions", udb.Sessions.Setup},
 	}...)
 }
 
 // Close shuts down user database services
 func (udb *UserDB) Close() {
 	closeServices([]closeServicesProps{
-		{"user", udb.Users.Close},
-		{"cookie", udb.Cookies.Close},
-		{"session", udb.Sessions.Close},
+		{"users", udb.Users.Close},
+		{"cookies", udb.Cookies.Close},
+		{"sessions", udb.Sessions.Close},
 	}...)
 }
 
@@ -146,26 +147,27 @@ type PressDB struct {
 // Setup initializes press database services
 func (pdb *PressDB) Setup() error {
 	return setupServices([]setupServicesProps{
-		{"press", pdb.Presses.Setup},
-		{"cycle", pdb.Cycles.Setup},
-		{"regeneration", pdb.Regenerations.Setup},
+		{"presses", pdb.Presses.Setup},
+		{"cycles", pdb.Cycles.Setup},
+		{"regenerations", pdb.Regenerations.Setup},
 	}...)
 }
 
 // Close shuts down press database services
 func (pdb *PressDB) Close() {
 	closeServices([]closeServicesProps{
-		{"press", pdb.Presses.Close},
-		{"cycle", pdb.Cycles.Close},
-		{"regeneration", pdb.Regenerations.Close},
+		{"presses", pdb.Presses.Close},
+		{"cycles", pdb.Cycles.Close},
+		{"regenerations", pdb.Regenerations.Close},
 	}...)
 }
 
 // ToolDB holds tool-related database services
 type ToolDB struct {
-	Tools            shared.Service[*shared.Tool, shared.EntityID]             `json:"tool"`
-	Regenerations    shared.Service[*shared.ToolRegeneration, shared.EntityID] `json:"regeneration"`
+	UpperTools            shared.Service[*shared.Tool, shared.EntityID]             `json:"upper_tool"`
+	LowerTools            shared.Service[*shared.Tool, shared.EntityID]             `json:"lower_tool"`
 	Cassettes        shared.Service[*shared.Cassette, shared.EntityID]         `json:"cassette"`
+	Regenerations    shared.Service[*shared.ToolRegeneration, shared.EntityID] `json:"regeneration"`
 	UpperMetalSheets shared.Service[*shared.UpperMetalSheet, shared.EntityID]  `json:"upper_metal_sheet"`
 	LowerMetalSheets shared.Service[*shared.LowerMetalSheet, shared.EntityID]  `json:"lower_metal_sheet"`
 }
@@ -173,22 +175,24 @@ type ToolDB struct {
 // Setup initializes tool database services
 func (tdb *ToolDB) Setup() error {
 	return setupServices([]setupServicesProps{
-		{"tool", tdb.Tools.Setup},
-		{"regeneration", tdb.Regenerations.Setup},
-		{"cassette", tdb.Cassettes.Setup},
-		{"upper_metal_sheet", tdb.UpperMetalSheets.Setup},
-		{"lower_metal_sheet", tdb.LowerMetalSheets.Setup},
+		{"upper_tools", tdb.UpperTools.Setup},
+		{"lower_tools", tdb.LowerTools.Setup},
+		{"regenerations", tdb.Regenerations.Setup},
+		{"cassettes", tdb.Cassettes.Setup},
+		{"upper_metal_sheets", tdb.UpperMetalSheets.Setup},
+		{"lower_metal_sheets", tdb.LowerMetalSheets.Setup},
 	}...)
 }
 
 // Close shuts down tool database services
 func (tdb *ToolDB) Close() {
 	closeServices([]closeServicesProps{
-		{"tool", tdb.Tools.Close},
-		{"regeneration", tdb.Regenerations.Close},
-		{"cassette", tdb.Cassettes.Close},
-		{"upper_metal_sheet", tdb.UpperMetalSheets.Close},
-		{"lower_metal_sheet", tdb.LowerMetalSheets.Close},
+		{"upper_tools", tdb.UpperTools.Close},
+		{"lower_tools", tdb.LowerTools.Close},
+		{"regenerations", tdb.Regenerations.Close},
+		{"cassettes", tdb.Cassettes.Close},
+		{"upper_metal_sheets", tdb.UpperMetalSheets.Close},
+		{"lower_metal_sheets", tdb.LowerMetalSheets.Close},
 	}...)
 }
 

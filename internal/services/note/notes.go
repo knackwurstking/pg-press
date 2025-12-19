@@ -66,10 +66,10 @@ func (s *NotesService) Setup() *errors.MasterError {
 	return s.BaseService.Setup(DBName, SQLCreateNoteTable)
 }
 
-func (s *NotesService) Create(entity *shared.Note) *errors.MasterError {
+func (s *NotesService) Create(entity *shared.Note) (*shared.Note, *errors.MasterError) {
 	verr := entity.Validate()
 	if verr != nil {
-		return verr.MasterError()
+		return nil, verr.MasterError()
 	}
 
 	s.mx.Lock()
@@ -82,22 +82,23 @@ func (s *NotesService) Create(entity *shared.Note) *errors.MasterError {
 		sql.Named("linked", entity.Linked),
 	)
 	if err != nil {
-		return errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err, 0)
 	}
 
 	// Store the inserted ID back into the entity
 	id, err := r.LastInsertId()
 	if err != nil {
-		return errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	if id <= 0 {
-		return errors.NewMasterError(
-			errors.NewValidationError("invalid ID returned after insert: %v", id), 0)
+		return nil, errors.NewValidationError(
+			"invalid ID returned after insert: %v", id,
+		).MasterError()
 	}
 
 	entity.ID = shared.EntityID(id)
 
-	return nil
+	return entity, nil
 }
 
 func (s *NotesService) Update(entity *shared.Note) *errors.MasterError {

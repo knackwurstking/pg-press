@@ -69,10 +69,10 @@ func (s *PressRegenerationsService) Setup() *errors.MasterError {
 	return s.BaseService.Setup(DBName, SQLCreatePressRegenerationTable)
 }
 
-func (s *PressRegenerationsService) Create(entity *shared.PressRegeneration) *errors.MasterError {
+func (s *PressRegenerationsService) Create(entity *shared.PressRegeneration) (*shared.PressRegeneration, *errors.MasterError) {
 	verr := entity.Validate()
 	if verr != nil {
-		return verr.MasterError()
+		return nil, verr.MasterError()
 	}
 
 	s.mx.Lock()
@@ -85,22 +85,23 @@ func (s *PressRegenerationsService) Create(entity *shared.PressRegeneration) *er
 		sql.Named("cycles", entity.Cycles),
 	)
 	if err != nil {
-		return errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err, 0)
 	}
 
 	// Store the inserted ID back into the entity
 	id, err := r.LastInsertId()
 	if err != nil {
-		return errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	if id <= 0 {
-		return errors.NewMasterError(
-			errors.NewValidationError("invalid ID returned after insert: %v", id), 0)
+		return nil, errors.NewValidationError(
+			"invalid ID returned after insert: %v", id,
+		).MasterError()
 	}
 
 	entity.ID = shared.EntityID(id)
 
-	return nil
+	return entity, nil
 }
 
 func (s *PressRegenerationsService) Update(entity *shared.PressRegeneration) *errors.MasterError {

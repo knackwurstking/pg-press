@@ -29,23 +29,23 @@ func (s *SessionsService) Setup() *errors.MasterError {
 }
 
 // Implement session service methods (in-memory)
-func (s *SessionsService) Create(entity *shared.Session) *errors.MasterError {
+func (s *SessionsService) Create(entity *shared.Session) (*shared.Session, *errors.MasterError) {
 	verr := entity.Validate()
 	if verr != nil {
-		return verr.MasterError()
+		return nil, verr.MasterError()
 	}
 
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
 	if _, ok := s.sessions[entity.ID]; ok {
-		return errors.NewExistsError("id", entity.ID).MasterError()
+		return nil, errors.NewExistsError("id", entity.ID).MasterError()
 	}
 
 	// Add to in-memory storage
 	s.sessions[entity.ID] = entity.Clone()
 
-	return nil
+	return entity, nil
 }
 
 // NOTE: I need to overwrite the Close method from the BaseService here

@@ -80,10 +80,10 @@ func (s *PressesService) Close() *errors.MasterError {
 	return s.BaseService.Close()
 }
 
-func (s *PressesService) Create(entity *shared.Press) *errors.MasterError {
+func (s *PressesService) Create(entity *shared.Press) (*shared.Press, *errors.MasterError) {
 	verr := entity.Validate()
 	if verr != nil {
-		return verr.MasterError()
+		return nil, verr.MasterError()
 	}
 
 	s.mx.Lock()
@@ -99,20 +99,21 @@ func (s *PressesService) Create(entity *shared.Press) *errors.MasterError {
 		sql.Named("type", entity.Type),
 	)
 	if err != nil {
-		return errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err, 0)
 	}
 
 	// Store the inserted ID back into the entity
 	id, err := r.LastInsertId()
 	if err != nil {
-		return errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	if id <= 0 {
-		return errors.NewMasterError(
-			errors.NewValidationError("invalid ID returned after insert: %v", id), 0)
+		return nil, errors.NewValidationError(
+			"invalid ID returned after insert: %v", id,
+		).MasterError()
 	}
 
-	return nil
+	return entity, nil
 }
 
 func (s *PressesService) Update(entity *shared.Press) *errors.MasterError {

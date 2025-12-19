@@ -64,10 +64,10 @@ func (s *UsersService) Setup() *errors.MasterError {
 	return s.BaseService.Setup(DBName, SQLCreateUserTable)
 }
 
-func (s *UsersService) Create(entity *shared.User) *errors.MasterError {
+func (s *UsersService) Create(entity *shared.User) (*shared.User, *errors.MasterError) {
 	verr := entity.Validate()
 	if verr != nil {
-		return verr.MasterError()
+		return nil, verr.MasterError()
 	}
 
 	s.mx.Lock()
@@ -78,22 +78,23 @@ func (s *UsersService) Create(entity *shared.User) *errors.MasterError {
 		sql.Named("api_key", entity.ApiKey),
 	)
 	if err != nil {
-		return errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err, 0)
 	}
 
 	// Store the inserted ID back into the entity
 	id, err := r.LastInsertId()
 	if err != nil {
-		return errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	if id <= 0 {
-		return errors.NewMasterError(
-			errors.NewValidationError("invalid ID returned after insert: %v", id), 0)
+		return nil, errors.NewValidationError(
+			"invalid ID returned after insert: %v", id,
+		).MasterError()
 	}
 
 	entity.ID = shared.TelegramID(id)
 
-	return nil
+	return entity, nil
 }
 
 func (s *UsersService) Update(entity *shared.User) *errors.MasterError {

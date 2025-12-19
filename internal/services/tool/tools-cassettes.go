@@ -64,47 +64,51 @@ func (s *CassettesService) Setup() *errors.MasterError {
 	return s.BaseService.Setup(DBName, SQLCreateToolTable)
 }
 
-func (s *CassettesService) Create(entity *shared.Cassette) *errors.MasterError {
+func (s *CassettesService) Create(entity shared.ModelTool) (shared.ModelTool, *errors.MasterError) {
+	if !entity.IsCassette() {
+		return nil, errors.NewValidationError("entity is not a cassette").MasterError()
+	}
 	verr := entity.Validate()
 	if verr != nil {
-		return verr.MasterError()
+		return nil, verr.MasterError()
 	}
+	cassette := entity.(*shared.Cassette)
 
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
 	r, err := s.DB().Exec(SQLCreateCassette,
-		sql.Named("position", entity.Position),
-		sql.Named("width", entity.Width),
-		sql.Named("height", entity.Height),
-		sql.Named("type", entity.Type),
-		sql.Named("code", entity.Code),
-		sql.Named("cycles_offset", entity.CyclesOffset),
-		sql.Named("cycles", entity.Cycles),
-		sql.Named("is_dead", entity.IsDead),
-		sql.Named("min_thickness", entity.MinThickness),
-		sql.Named("max_thickness", entity.MaxThickness),
+		sql.Named("position", cassette.Position),
+		sql.Named("width", cassette.Width),
+		sql.Named("height", cassette.Height),
+		sql.Named("type", cassette.Type),
+		sql.Named("code", cassette.Code),
+		sql.Named("cycles_offset", cassette.CyclesOffset),
+		sql.Named("cycles", cassette.Cycles),
+		sql.Named("is_dead", cassette.IsDead),
+		sql.Named("min_thickness", cassette.MinThickness),
+		sql.Named("max_thickness", cassette.MaxThickness),
 	)
 	if err != nil {
-		return errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err, 0)
 	}
 
 	// Store the inserted ID back into the entity
 	id, err := r.LastInsertId()
 	if err != nil {
-		return errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err, 0)
 	}
 	if id <= 0 {
-		return errors.NewMasterError(
-			errors.NewValidationError("invalid ID returned after insert: %v", id), 0)
+		return nil, errors.NewValidationError(
+			"invalid ID returned after insert: %v", id,
+		).MasterError()
 	}
+	cassette.ID = shared.EntityID(id)
 
-	entity.ID = shared.EntityID(id)
-
-	return nil
+	return cassette, nil
 }
 
-func (s *CassettesService) GetByID(id shared.EntityID) (*shared.Cassette, *errors.MasterError) {
+func (s *CassettesService) GetByID(id shared.EntityID) (shared.ModelTool, *errors.MasterError) {
 	if id <= 0 {
 		return nil, errors.NewValidationError("invalid ID: %v", id).MasterError()
 	}
@@ -138,27 +142,31 @@ func (s *CassettesService) GetByID(id shared.EntityID) (*shared.Cassette, *error
 	return c, nil
 }
 
-func (s *CassettesService) Update(entity *shared.Cassette) *errors.MasterError {
+func (s *CassettesService) Update(entity shared.ModelTool) *errors.MasterError {
+	if !entity.IsCassette() {
+		return errors.NewValidationError("entity is not a cassette").MasterError()
+	}
 	verr := entity.Validate()
 	if verr != nil {
 		return verr.MasterError()
 	}
+	cassette := entity.(*shared.Cassette)
 
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
 	_, err := s.DB().Exec(SQLUpdateCassette,
-		sql.Named("id", entity.ID),
-		sql.Named("position", entity.Position),
-		sql.Named("width", entity.Width),
-		sql.Named("height", entity.Height),
-		sql.Named("type", entity.Type),
-		sql.Named("code", entity.Code),
-		sql.Named("cycles_offset", entity.CyclesOffset),
-		sql.Named("cycles", entity.Cycles),
-		sql.Named("is_dead", entity.IsDead),
-		sql.Named("min_thickness", entity.MinThickness),
-		sql.Named("max_thickness", entity.MaxThickness),
+		sql.Named("id", cassette.ID),
+		sql.Named("position", cassette.Position),
+		sql.Named("width", cassette.Width),
+		sql.Named("height", cassette.Height),
+		sql.Named("type", cassette.Type),
+		sql.Named("code", cassette.Code),
+		sql.Named("cycles_offset", cassette.CyclesOffset),
+		sql.Named("cycles", cassette.Cycles),
+		sql.Named("is_dead", cassette.IsDead),
+		sql.Named("min_thickness", cassette.MinThickness),
+		sql.Named("max_thickness", cassette.MaxThickness),
 	)
 	if err != nil {
 		return errors.NewMasterError(err, 0)
@@ -181,7 +189,7 @@ func (s *CassettesService) Delete(id shared.EntityID) *errors.MasterError {
 	return nil
 }
 
-func (s *CassettesService) List() ([]*shared.Cassette, *errors.MasterError) {
+func (s *CassettesService) List() ([]shared.ModelTool, *errors.MasterError) {
 	s.mx.Lock()
 	defer s.mx.Unlock()
 
@@ -191,7 +199,7 @@ func (s *CassettesService) List() ([]*shared.Cassette, *errors.MasterError) {
 	}
 	defer rows.Close()
 
-	cassettes := []*shared.Cassette{}
+	tools := []shared.ModelTool{}
 	for rows.Next() {
 		c := &shared.Cassette{}
 		err := rows.Scan(
@@ -210,15 +218,15 @@ func (s *CassettesService) List() ([]*shared.Cassette, *errors.MasterError) {
 		if err != nil {
 			return nil, errors.NewMasterError(err, 0)
 		}
-		cassettes = append(cassettes, c)
+		tools = append(tools, c)
 	}
 
 	if err = rows.Err(); err != nil {
 		return nil, errors.NewMasterError(err, 0)
 	}
 
-	return cassettes, nil
+	return tools, nil
 }
 
 // Service validation
-var _ shared.Service[*shared.Cassette, shared.EntityID] = (*CassettesService)(nil)
+var _ shared.Service[shared.ModelTool, shared.EntityID] = (*CassettesService)(nil)

@@ -1,7 +1,6 @@
 package helper
 
 import (
-	"net/http"
 	"sync"
 	"time"
 
@@ -14,23 +13,20 @@ import (
 // Tool Helpers
 // ------------------------------------------------------------------------------
 
+const sqlGetToolByID = `
+	SELECT id, position, width, height, type, code, cycles_offset, cycles, is_dead, cassette
+	FROM tools
+	WHERE id = :id;
+`
+
 // GetToolByID retrieves a tool by its ID from the "tools" table and if it fails from the cassettes table.
+//
+// TODO: Improve... Search all tools using a custom query
 func GetToolByID(db *common.DB, id shared.EntityID) (shared.ModelTool, *errors.MasterError) {
-	var tool shared.ModelTool
-	tool, merr := db.Tool.Tools.GetByID(id)
-	if merr != nil {
-		if merr.Code == http.StatusNotFound {
-			tool, merr = db.Tool.Cassettes.GetByID(id)
-			if merr != nil {
-				return nil, merr
-			}
-		} else {
-			return nil, merr
-		}
-	}
-	return tool, nil
+	// TODO: ...
 }
 
+// TODO: Improve...
 func ListDeadTools(db *common.DB) ([]shared.ModelTool, *errors.MasterError) {
 	allDeadTools := make([]shared.ModelTool, 0)
 
@@ -60,6 +56,8 @@ func ListDeadTools(db *common.DB) ([]shared.ModelTool, *errors.MasterError) {
 }
 
 // ListTools retrieves all tools and cassettes and combines them into a single slice of ModelTool.
+//
+// TODO: Improve...
 func ListTools(db *common.DB) ([]shared.ModelTool, *errors.MasterError) {
 	tools, merr := db.Tool.Tools.List()
 	if merr != nil {
@@ -82,6 +80,7 @@ func ListTools(db *common.DB) ([]shared.ModelTool, *errors.MasterError) {
 	return allTools, nil
 }
 
+// TODO: Improve...
 func ListAvailableCassettesForBinding(db *common.DB, toolID shared.EntityID) ([]*shared.Cassette, *errors.MasterError) {
 	tool, merr := db.Tool.Tools.GetByID(toolID)
 	if merr != nil {
