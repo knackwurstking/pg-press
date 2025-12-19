@@ -26,6 +26,6 @@ func Register(cdb *common.DB, e *echo.Echo, path string) {
 		ui.NewEchoRoute(http.MethodDelete, path+"/delete", DeleteNote),
 
 		// Render Notes Grid
-		ui.NewEchoRoute(http.MethodGet, path+"/grid", NotesGrid),
+		ui.NewEchoRoute(http.MethodGet, path+"/grid", GetNotesGrid),
 	})
 }

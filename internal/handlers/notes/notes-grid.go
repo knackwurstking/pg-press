@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func NotesGrid(c echo.Context) error {
+func GetNotesGrid(c echo.Context) *echo.HTTPError {
 	notes, merr := h.registry.Notes.List()
 	if merr != nil {
 		return merr.Echo()

@@ -10,7 +10,7 @@ import (
 )
 
 // GetNotesPage serves the main notes page
-func GetPage(c echo.Context) error {
+func GetPage(c echo.Context) *echo.HTTPError {
 	// Get all notes with defensive error handling
 	notes, merr := db.Notes.List()
 	if merr != nil {

@@ -1,15 +1,14 @@
 package notes
 
 import (
-	"fmt"
 	"github.com/knackwurstking/pg-press/internal/components"
-	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
-templ Page(notes []*models.Note, tools []*models.Tool) {
+templ Page(notes []*shared.Note, tools []shared.ModelTool) {
 	@components.Layout(
-		components.LayoutOptions{
+		components.LayoutProps{
 			PageTitle:      "PG Presse | Notizen Verwaltung",
 			AppBarTitle:    "Notizen Verwaltung",
 			NavContent:     components.StandardNavContent(),
@@ -18,60 +17,9 @@ templ Page(notes []*models.Note, tools []*models.Tool) {
 	) {
 		<main class="container fluid">
 			@components.Section(templ.Attributes{
-				"class": "filter-section mb",
-			}) {
-				<div class="flex gap-sm justify-center items-center w-full flex-wrap">
-					<button class="filter-btn active small" data-filter="all">
-						Alle ({ fmt.Sprintf("%d", len(notes)) })
-					</button>
-					{{
-						brokenCount := 0
-						attentionCount := 0
-						infoCount := 0
-
-						for _, note := range notes {
-							l := note.GetLinked()
-							if l.Name == "tool" {
-								skip := false
-								for _, t := range tools {
-									if t.ID == models.ToolID(l.ID) && t.IsDead {
-										skip = true
-										break
-									}
-								}
-								if skip {
-									continue
-								}
-							}
-
-							switch note.Level {
-							case models.LevelBroken:
-								brokenCount++
-							case models.LevelAttention:
-								attentionCount++
-							case models.LevelInfo:
-								infoCount++
-							}
-						}
-					}}
-					<button class="filter-btn small destructive flex gap-sm" data-filter="broken">
-						<i class="bi bi-x-circle"></i>
-						Defekt ({ fmt.Sprintf("%d", brokenCount) })
-					</button>
-					<button class="filter-btn small warning flex gap-sm" data-filter="attention">
-						<i class="bi bi-exclamation-triangle"></i>
-						Achtung ({ fmt.Sprintf("%d", attentionCount) })
-					</button>
-					<button class="filter-btn small info flex gap-sm" data-filter="info">
-						<i class="bi bi-info-circle"></i>
-						Info ({ fmt.Sprintf("%d", infoCount) })
-					</button>
-				</div>
-			}
-			@components.Section(templ.Attributes{
 				"class":                "notes-grid max-w-full",
 				"style":                "margin: 0 auto;",
-				"hx-get":               string(utils.UrlNotes(0).Grid),
+				"hx-get":               string(urlb.UrlNotes(0).Grid),
 				"hx-trigger":           "pageLoaded from:body",
 				"hx-on::after-request": "document.querySelector('button.active')?.click()",
 			}) {

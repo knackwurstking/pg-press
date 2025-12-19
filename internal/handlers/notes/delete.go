@@ -8,7 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func DeleteNote(c echo.Context) error {
+func DeleteNote(c echo.Context) *echo.HTTPError {
 	slog.Info("Deleting note")
 
 	user, merr := utils.GetUserFromContext(c)
