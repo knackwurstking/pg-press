@@ -31,22 +31,55 @@ func GetToolByID(db *common.DB, id shared.EntityID) (shared.ModelTool, *errors.M
 	return tool, nil
 }
 
-func ListDeadTools(db *common.DB) (tools []*shared.Tool, merr *errors.MasterError) {
-	tools, merr = db.Tool.Tools.List()
+func ListDeadTools(db *common.DB) ([]shared.ModelTool, *errors.MasterError) {
+	allDeadTools := make([]shared.ModelTool, 0)
+
+	tools, merr := db.Tool.Tools.List()
 	if merr != nil {
 		return nil, merr
 	}
-
-	n := 0
 	for _, t := range tools {
 		if !t.IsDead {
 			continue
 		}
-
-		tools[n] = t
-		n++
+		allDeadTools = append(allDeadTools, t)
 	}
-	return tools[:n], nil
+
+	cassettes, merr := db.Tool.Cassettes.List()
+	if merr != nil {
+		return nil, merr
+	}
+	for _, c := range cassettes {
+		if !c.IsDead {
+			continue
+		}
+		allDeadTools = append(allDeadTools, c)
+	}
+
+	return allDeadTools, nil
+}
+
+// ListTools retrieves all tools and cassettes and combines them into a single slice of ModelTool.
+func ListTools(db *common.DB) ([]shared.ModelTool, *errors.MasterError) {
+	tools, merr := db.Tool.Tools.List()
+	if merr != nil {
+		return nil, merr
+	}
+
+	cassettes, merr := db.Tool.Cassettes.List()
+	if merr != nil {
+		return nil, merr
+	}
+
+	var allTools []shared.ModelTool = make([]shared.ModelTool, 0, len(tools)+len(cassettes))
+	for _, t := range tools {
+		allTools = append(allTools, t)
+	}
+	for _, c := range cassettes {
+		allTools = append(allTools, c)
+	}
+
+	return allTools, nil
 }
 
 func ListAvailableCassettesForBinding(db *common.DB, toolID shared.EntityID) ([]*shared.Cassette, *errors.MasterError) {
