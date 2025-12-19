@@ -56,7 +56,7 @@ func (c *Cycle) Clone() *Cycle {
 
 func (c *Cycle) String() string {
 	return fmt.Sprintf(
-		"Cycle[ID=%d, ToolID=%d, PressNumber=%d, PressCycles=%d, PartialCycles=%d, Start=%d, Stop=%d]",
+		"Cycle{ID:%d, ToolID:%d, PressNumber:%d, PressCycles:%d, PartialCycles:%d, Start:%d, Stop:%d}",
 		c.ID, c.ToolID, c.PressNumber, c.PressCycles, c.PartialCycles, c.Start, c.Stop,
 	)
 }

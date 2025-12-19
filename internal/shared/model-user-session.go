@@ -18,7 +18,7 @@ func (e *Session) Clone() *Session {
 }
 
 func (e *Session) String() string {
-	return "Session[ID=" + e.ID.String() + "]"
+	return "Session{ID:" + e.ID.String() + "}"
 }
 
 var _ Entity[*Session] = (*Session)(nil)

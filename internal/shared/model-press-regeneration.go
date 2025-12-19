@@ -48,7 +48,7 @@ func (pr *PressRegeneration) Clone() *PressRegeneration {
 
 func (pr *PressRegeneration) String() string {
 	return fmt.Sprintf(
-		"PressRegeneration[ID=%d, PressNumber=%d, Cycles=%d, Start=%d, Stop=%d]",
+		"PressRegeneration{ID:%d, PressNumber:%d, Cycles:%d, Start:%d, Stop:%d}",
 		pr.ID, pr.PressNumber, pr.Cycles, pr.Start, pr.Stop,
 	)
 }

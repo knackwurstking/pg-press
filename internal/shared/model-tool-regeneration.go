@@ -41,7 +41,7 @@ func (tr *ToolRegeneration) Clone() *ToolRegeneration {
 
 func (tr *ToolRegeneration) String() string {
 	return fmt.Sprintf(
-		"ToolRegeneration[ID=%d, ToolID=%d, Cycles=%d, Start=%d, Stop=%d]",
+		"ToolRegeneration{ID:%d, ToolID:%d, Cycles:%d, Start:%d, Stop:%d}",
 		tr.ID, tr.ToolID, tr.Cycles, tr.Start, tr.Stop,
 	)
 }

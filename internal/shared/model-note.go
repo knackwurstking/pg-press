@@ -49,7 +49,7 @@ func (n *Note) Clone() *Note {
 // String returns a string representation of the note
 func (n *Note) String() string {
 	return fmt.Sprintf(
-		"Note[ID=%s, Level=%d, Content=%s, CreatedAt=%s, Linked=%s]",
+		"Note{ID:%s, Level:%d, Content:%s, CreatedAt:%s, Linked:%s}",
 		n.ID.String(),
 		n.Level,
 		n.Content,

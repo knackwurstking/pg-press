@@ -112,8 +112,8 @@ func (bt *BaseTool) Clone() BaseTool {
 
 func (bt *BaseTool) String() string {
 	return fmt.Sprintf(
-		"BaseTool[ID=%d, Width=%d, Height=%d, Position=%d, Type=%s, Code=%s, "+
-			"CyclesOffset=%d, Cycles=%d, IsDead=%t]",
+		"BaseTool{ID:%d, Width:%d, Height:%d, Position:%d, Type:%s, Code:%s, "+
+			"CyclesOffset:%d, Cycles:%d, IsDead:%t}",
 		bt.ID,
 		bt.Width,
 		bt.Height,

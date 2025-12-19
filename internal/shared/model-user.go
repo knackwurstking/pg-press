@@ -47,7 +47,7 @@ func (e *User) Clone() *User {
 }
 
 func (e *User) String() string {
-	return "User[ID=" + e.ID.String() + ", Name=" + e.Name + ", ApiKey=" + MaskString(e.ApiKey) + "]"
+	return "User{ID:" + e.ID.String() + ", Name:" + e.Name + ", ApiKey:" + MaskString(e.ApiKey) + "}"
 }
 
 // IsAdmin checks if the user is an administrator

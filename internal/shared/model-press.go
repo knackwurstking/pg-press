@@ -50,7 +50,7 @@ func (p *Press) Clone() *Press {
 
 func (p *Press) String() string {
 	return fmt.Sprintf(
-		"Press[ID=%d, SlotUp=%d, SlotDown=%d, LastRegeneration=%d, StartCycles=%d, Cycles=%d, Type=%s]",
+		"Press{ID:%d, SlotUp:%d, SlotDown:%d, LastRegeneration:%d, StartCycles:%d, Cycles:%d, Type:%s}",
 		p.ID, p.SlotUp, p.SlotDown, p.LastRegeneration, p.StartCycles, p.Cycles, p.Type,
 	)
 }

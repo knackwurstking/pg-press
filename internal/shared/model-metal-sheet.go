@@ -65,7 +65,7 @@ func (u *LowerMetalSheet) Clone() *LowerMetalSheet {
 // String returns a string representation of the lower metal sheet
 func (u *LowerMetalSheet) String() string {
 	return fmt.Sprintf(
-		"LowerMetalSheet[ID=%s, ToolID=%s, TileHeight=%.2f, Value=%.2f, MarkeHeight=%d, STF=%.2f, STFMax=%.2f, Identifier=%s]",
+		"LowerMetalSheet{ID:%s, ToolID:%s, TileHeight:%.2f, Value:%.2f, MarkeHeight:%d, STF:%.2f, STFMax:%.2f, Identifier:%s}",
 		u.ID.String(),
 		u.ToolID.String(),
 		u.TileHeight,
@@ -101,7 +101,7 @@ func (u *UpperMetalSheet) Clone() *UpperMetalSheet {
 // String returns a string representation of the upper metal sheet
 func (u *UpperMetalSheet) String() string {
 	return fmt.Sprintf(
-		"UpperMetalSheet[ID=%s, ToolID=%s, TileHeight=%.2f, Value=%.2f]",
+		"UpperMetalSheet{ID:%s, ToolID:%s, TileHeight:%.2f, Value:%.2f}",
 		u.ID.String(),
 		u.ToolID.String(),
 		u.TileHeight,
