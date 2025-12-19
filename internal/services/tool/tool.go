@@ -52,7 +52,7 @@ const (
 			cycles_offset = :cycles_offset,
 			cycles = :cycles,
 			is_dead = :is_dead,
-			cassette = :cassette,
+			cassette = :cassette
 		WHERE id = :id AND model_type = 'tool';
 	`
 	SQLDeleteTool string = `
