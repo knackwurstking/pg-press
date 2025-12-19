@@ -132,8 +132,6 @@ templ regenerationsTableRow(r *shared.ToolRegeneration, u *shared.User) {
 		</td>
 		<td>
 			@components.TableActions(components.TableActionsOptions{
-				EditHref:        urlb.UrlDialogs().EditToolRegeneration(r.ID),
-				EditAdminOnly:   false,
 				DeleteHref:      urlb.UrlTool(r.ToolID, r.ID, 0).DeleteRegeneration,
 				DeleteAdminOnly: true,
 				User:            u,
