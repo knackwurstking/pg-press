@@ -57,7 +57,7 @@ Fix all handler and templates
 - [x] tool
     - [ ] Notes, dialog missing
     - [ ] Metal Sheets, dialog missing
-    - [-] Regenerations edit
+    - [x] Regenerations edit
     - [-] Regenerations table
     - [x] Tool Binding
     - [ ] Cycles table, dialog missing
