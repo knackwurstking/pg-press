@@ -27,6 +27,7 @@ func toolsCommand() cli.Command {
 			deleteToolCommand(),
 			listCyclesCommand(),
 			listRegenerationsCommand(),
+			deleteRegenerationCommand(),
 		},
 	}
 }
@@ -396,6 +397,40 @@ func listRegenerationsCommand() cli.Command {
 						fmt.Printf("\nTotal regenerations: %d\n", len(regenerations))
 					}
 
+					return nil
+				})
+			}
+		}),
+	}
+}
+
+func deleteRegenerationCommand() cli.Command {
+	return cli.Command{
+		Name:  "delete-regeneration",
+		Usage: cli.Usage("Delete a tool regeneration by ID"),
+		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
+			customDBPath := createDBPathOption(cmd)
+			regenerationIDArg := cli.Int64Arg(cmd, "regeneration-id", cli.Required)
+
+			return func(cmd *cli.Command) error {
+				return withDBOperation(*customDBPath, func(r *common.DB) error {
+					regenerationID := shared.EntityID(*regenerationIDArg)
+
+					// Get regeneration first to check if it exists and show info
+					regeneration, err := r.Tool.Regeneration.GetByID(regenerationID)
+					if err != nil {
+						return fmt.Errorf("find regeneration with ID %d: %v", regenerationID, err)
+					}
+
+					fmt.Printf("Deleting regeneration %d for tool %d...\n", regenerationID, regeneration.ToolID)
+
+					// Delete the regeneration
+					merr := r.Tool.Regeneration.Delete(regenerationID)
+					if merr != nil {
+						return fmt.Errorf("delete regeneration: %v", merr)
+					}
+
+					fmt.Printf("Successfully deleted regeneration %d.\n", regenerationID)
 					return nil
 				})
 			}
