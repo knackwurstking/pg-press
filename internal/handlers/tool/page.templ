@@ -36,7 +36,7 @@ templ Page(p *PageProps) {
 			@components.Section(templ.Attributes{
 				"id":                        "notes-section",
 				"hx-get":                    string(urlb.UrlTool(p.Tool.GetID(), 0, 0).Notes),
-				"hx-trigger":                "load",
+				"hx-trigger":                "load, reload-notes from:body",
 				"hx-swap":                   "innerHTML",
 				"hx-on:htmx:response-error": "alert(event.detail.xhr.responseText)",
 			}) {
@@ -46,7 +46,7 @@ templ Page(p *PageProps) {
 				@components.Section(templ.Attributes{
 					"id":                        "metal-sheets-section",
 					"hx-get":                    string(urlb.UrlTool(p.Tool.GetID(), 0, 0).MetalSheets),
-					"hx-trigger":                "load",
+					"hx-trigger":                "load, reload-metal-sheets from:body",
 					"hx-swap":                   "innerHTML",
 					"hx-on:htmx:response-error": "alert(event.detail.xhr.responseText)",
 				}) {

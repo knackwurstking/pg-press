@@ -21,6 +21,6 @@ func DeleteRegeneration(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	urlb.SetHXTrigger(c, "reload-cycles-section")
+	urlb.SetHXTrigger(c, "reload-cycles")
 	return nil
 }
