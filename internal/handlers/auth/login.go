@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
-	"github.com/knackwurstking/pg-press/internal/helper"
+	"github.com/knackwurstking/pg-press/internal/services/helper"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/labstack/echo/v4"

@@ -10,7 +10,9 @@ import (
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
 
-var ToolMutex = &sync.Mutex{}
+// -----------------------------------------------------------------------------
+// Tool Helpers
+// ------------------------------------------------------------------------------
 
 // GetToolByID retrieves a tool by its ID from the "tools" table and if it fails from the cassettes table.
 func GetToolByID(db *common.DB, id shared.EntityID) (shared.ModelTool, *errors.MasterError) {
@@ -72,6 +74,12 @@ func ListAvailableCassettesForBinding(db *common.DB, toolID shared.EntityID) ([]
 	return cassettes[:i], nil
 }
 
+// -----------------------------------------------------------------------------
+// Tool Cassette Binding Helpers
+// ------------------------------------------------------------------------------
+
+var bindMutex = &sync.Mutex{}
+
 func BindCassetteToTool(db *common.DB, toolID, cassetteID shared.EntityID) *errors.MasterError {
 	// First, check if cassette exists
 	_, merr := db.Tool.Cassette.GetByID(cassetteID)
@@ -79,8 +87,8 @@ func BindCassetteToTool(db *common.DB, toolID, cassetteID shared.EntityID) *erro
 		return merr
 	}
 
-	ToolMutex.Lock()
-	defer ToolMutex.Unlock()
+	bindMutex.Lock()
+	defer bindMutex.Unlock()
 
 	tool, merr := db.Tool.Tool.GetByID(toolID)
 	if merr != nil {
@@ -100,8 +108,8 @@ func BindCassetteToTool(db *common.DB, toolID, cassetteID shared.EntityID) *erro
 }
 
 func UnbindCassetteFromTool(db *common.DB, toolID shared.EntityID) *errors.MasterError {
-	ToolMutex.Lock()
-	defer ToolMutex.Unlock()
+	bindMutex.Lock()
+	defer bindMutex.Unlock()
 
 	tool, merr := db.Tool.Tool.GetByID(toolID)
 	if merr != nil {
@@ -119,6 +127,10 @@ func UnbindCassetteFromTool(db *common.DB, toolID shared.EntityID) *errors.Maste
 
 	return nil
 }
+
+// -----------------------------------------------------------------------------
+// Tool Metal Sheet Helpers
+// ------------------------------------------------------------------------------
 
 func ListUpperMetalSheetsForTool(db *common.DB, toolID shared.EntityID) ([]*shared.UpperMetalSheet, *errors.MasterError) {
 	metalSheets, merr := db.Tool.UpperMetalSheet.List()
@@ -158,6 +170,12 @@ func ListLowerMetalSheetsForTool(db *common.DB, toolID shared.EntityID) ([]*shar
 	return metalSheets[:i], nil
 }
 
+// -----------------------------------------------------------------------------
+// Tool Regeneration Helpers
+// ------------------------------------------------------------------------------
+
+var regenerationsMutex = &sync.Mutex{}
+
 func GetRegenerationsForTool(db *common.DB, toolID shared.EntityID) (
 	regenerations []*shared.ToolRegeneration, merr *errors.MasterError,
 ) {
@@ -191,8 +209,8 @@ func StartToolRegeneration(db *common.DB, toolID shared.EntityID) *errors.Master
 }
 
 func StopToolRegeneration(db *common.DB, toolID shared.EntityID) *errors.MasterError {
-	ToolMutex.Lock()
-	defer ToolMutex.Unlock()
+	regenerationsMutex.Lock()
+	defer regenerationsMutex.Unlock()
 
 	regeneration, merr := db.Tool.Regeneration.GetByID(toolID)
 	if merr != nil {
@@ -213,8 +231,8 @@ func StopToolRegeneration(db *common.DB, toolID shared.EntityID) *errors.MasterE
 }
 
 func AbortToolRegeneration(db *common.DB, toolID shared.EntityID) *errors.MasterError {
-	ToolMutex.Lock()
-	defer ToolMutex.Unlock()
+	regenerationsMutex.Lock()
+	defer regenerationsMutex.Unlock()
 
 	regeneration, merr := db.Tool.Regeneration.GetByID(toolID)
 	if merr != nil {

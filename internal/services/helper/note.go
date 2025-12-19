@@ -8,6 +8,10 @@ import (
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
 
+// -----------------------------------------------------------------------------
+// Table Helpers: "notes"
+// -----------------------------------------------------------------------------
+
 func ListNotesForLinked(db *common.DB, linked string, id shared.EntityID) ([]*shared.Note, *errors.MasterError) {
 	notes, merr := db.Note.Note.List()
 	if merr != nil {
