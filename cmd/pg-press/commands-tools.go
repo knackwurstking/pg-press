@@ -45,24 +45,22 @@ func listToolsCommand() cli.Command {
 				return withDBOperation(*customDBPath, func(r *common.DB) error {
 					// Get all tools from database
 					var tools []shared.ModelTool
-
-					t, merr := r.Tool.Tool.List()
-					if merr != nil {
+					if t, merr := r.Tool.Tool.List(); merr != nil {
 						return errors.Wrap(merr, "retrieve tools")
+					} else {
+						for _, tool := range t {
+							tools = append(tools, tool)
+						}
 					}
-					for _, tool := range t {
-						tools = append(tools, tool)
-					}
-
-					ct, merr := r.Tool.Cassette.List()
-					if merr != nil {
+					if ct, merr := r.Tool.Cassette.List(); merr != nil {
 						return errors.Wrap(merr, "retrieve cassettes")
-					}
-					for _, tool := range ct {
-						tools = append(tools, tool)
+					} else {
+						for _, tool := range ct {
+							tools = append(tools, tool)
+						}
 					}
 					// Sort tools per id
-					slices.SortFunc(tools, func(a shared.ModelTool, b shared.ModelTool) int {
+					slices.SortFunc(tools, func(a, b shared.ModelTool) int {
 						if a.GetID() < b.GetID() {
 							return -1
 						}
