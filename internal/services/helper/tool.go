@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"database/sql"
 	"sync"
 	"time"
 
@@ -13,78 +14,87 @@ import (
 // Tool Helpers
 // ------------------------------------------------------------------------------
 
-const sqlGetToolByID = `
-	SELECT id, position, width, height, type, code, cycles_offset, cycles, is_dead, cassette
-	FROM tools
-	WHERE id = :id;
-`
+const sqlGetToolPositionByID = `SELECT position FROM tools WHERE id = :id;`
 
 // GetToolByID retrieves a tool by its ID from the "tools" table and if it fails from the cassettes table.
-//
-// TODO: Improve... Search all tools using a custom query
 func GetToolByID(db *common.DB, id shared.EntityID) (shared.ModelTool, *errors.MasterError) {
-	// TODO: ...
+	toolsDB := db.Tool.UpperTools.DB() // Does not matter which database we use here
+
+	var position shared.Slot
+	err := toolsDB.QueryRow(sqlGetToolPositionByID, sql.Named("id", id)).Scan(&position)
+	if err != nil {
+		return nil, errors.NewMasterError(err, 0)
+	}
+
+	var dbFn func(shared.EntityID) (shared.ModelTool, *errors.MasterError)
+	switch position {
+	case shared.SlotUpper:
+		dbFn = db.Tool.UpperTools.GetByID
+	case shared.SlotLower:
+		dbFn = db.Tool.LowerTools.GetByID
+	case shared.SlotUpperCassette:
+		dbFn = db.Tool.Cassettes.GetByID
+	default:
+		return nil, errors.NewValidationError(
+			"invalid tool position for tool ID %d: %d", id, position,
+		).MasterError()
+	}
+	return dbFn(id)
 }
 
-// TODO: Improve...
-func ListDeadTools(db *common.DB) ([]shared.ModelTool, *errors.MasterError) {
-	allDeadTools := make([]shared.ModelTool, 0)
-
-	tools, merr := db.Tool.Tools.List()
-	if merr != nil {
-		return nil, merr
-	}
-	for _, t := range tools {
-		if !t.IsDead {
-			continue
-		}
-		allDeadTools = append(allDeadTools, t)
-	}
-
-	cassettes, merr := db.Tool.Cassettes.List()
-	if merr != nil {
-		return nil, merr
-	}
-	for _, c := range cassettes {
-		if !c.IsDead {
-			continue
-		}
-		allDeadTools = append(allDeadTools, c)
-	}
-
-	return allDeadTools, nil
-}
-
-// ListTools retrieves all tools and cassettes and combines them into a single slice of ModelTool.
-//
-// TODO: Improve...
 func ListTools(db *common.DB) ([]shared.ModelTool, *errors.MasterError) {
-	tools, merr := db.Tool.Tools.List()
-	if merr != nil {
-		return nil, merr
+	allTools := make([]shared.ModelTool, 0)
+
+	queryFn := []func() ([]shared.ModelTool, *errors.MasterError){
+		db.Tool.UpperTools.List,
+		db.Tool.LowerTools.List,
+		db.Tool.Cassettes.List,
 	}
 
-	cassettes, merr := db.Tool.Cassettes.List()
-	if merr != nil {
-		return nil, merr
-	}
+	for _, fn := range queryFn {
+		tools, merr := fn()
+		if merr != nil {
+			return nil, merr
+		}
 
-	var allTools []shared.ModelTool = make([]shared.ModelTool, 0, len(tools)+len(cassettes))
-	for _, t := range tools {
-		allTools = append(allTools, t)
-	}
-	for _, c := range cassettes {
-		allTools = append(allTools, c)
+		allTools = append(allTools, tools...)
 	}
 
 	return allTools, nil
 }
 
-// TODO: Improve...
+func ListDeadTools(db *common.DB) ([]shared.ModelTool, *errors.MasterError) {
+	deadTools := make([]shared.ModelTool, 0)
+
+	queryFn := []func() ([]shared.ModelTool, *errors.MasterError){
+		db.Tool.UpperTools.List,
+		db.Tool.LowerTools.List,
+		db.Tool.Cassettes.List,
+	}
+
+	for _, fn := range queryFn {
+		tools, merr := fn()
+		if merr != nil {
+			return nil, merr
+		}
+
+		for _, t := range tools {
+			if t.GetBase().IsDead {
+				deadTools = append(deadTools, t)
+			}
+		}
+	}
+
+	return deadTools, nil
+}
+
 func ListAvailableCassettesForBinding(db *common.DB, toolID shared.EntityID) ([]*shared.Cassette, *errors.MasterError) {
-	tool, merr := db.Tool.Tools.GetByID(toolID)
+	tool, merr := GetToolByID(db, toolID)
 	if merr != nil {
-		return nil, merr.Wrap("could not get tool with ID %d", toolID)
+		return nil, merr.Wrap("could not get tool for ID %d", toolID)
+	}
+	if tool.GetBase().Position != shared.SlotUpper {
+		return nil, errors.NewValidationError("tool ID %d is not an upper tool", toolID).MasterError()
 	}
 
 	cassettes, merr := db.Tool.Cassettes.List()
@@ -93,17 +103,18 @@ func ListAvailableCassettesForBinding(db *common.DB, toolID shared.EntityID) ([]
 	}
 
 	// Filter cassettes based on the tool width and height
-	i := 0
+	bindableCassettes := make([]*shared.Cassette, 0)
+	width := tool.GetBase().Width
+	height := tool.GetBase().Height
 	for _, c := range cassettes {
-		if c.IsDead || c.Width != tool.Width || c.Height != tool.Height {
+		// Skip dead cassettes or those that do not match the tool dimensions
+		if c.GetBase().IsDead || c.GetBase().Width != width || c.GetBase().Height != height {
 			continue
 		}
-
-		cassettes[i] = c
-		i++
+		bindableCassettes = append(bindableCassettes, c.(*shared.Cassette))
 	}
 
-	return cassettes[:i], nil
+	return bindableCassettes, nil
 }
 
 // -----------------------------------------------------------------------------
@@ -116,22 +127,27 @@ func BindCassetteToTool(db *common.DB, toolID, cassetteID shared.EntityID) *erro
 	// First, check if cassette exists
 	_, merr := db.Tool.Cassettes.GetByID(cassetteID)
 	if merr != nil {
-		return merr
+		return errors.NewValidationError("cassette ID %d does not exist", cassetteID).MasterError()
 	}
 
 	bindMutex.Lock()
 	defer bindMutex.Unlock()
 
-	tool, merr := db.Tool.Tools.GetByID(toolID)
+	// Get the tool and check if it's an upper tool without a cassette bound to it
+	mTool, merr := GetToolByID(db, toolID)
 	if merr != nil {
 		return merr
+	}
+	tool, ok := mTool.(*shared.Tool)
+	if !ok {
+		return errors.NewValidationError("tool ID %d is not an upper tool", toolID).MasterError()
 	}
 	if tool.Cassette > 0 {
 		return errors.NewValidationError("tool already has a cassette bound").MasterError()
 	}
 
 	tool.Cassette = cassetteID
-	merr = db.Tool.Tools.Update(tool)
+	merr = db.Tool.UpperTools.Update(tool)
 	if merr != nil {
 		return merr
 	}
@@ -143,16 +159,14 @@ func UnbindCassetteFromTool(db *common.DB, toolID shared.EntityID) *errors.Maste
 	bindMutex.Lock()
 	defer bindMutex.Unlock()
 
-	tool, merr := db.Tool.Tools.GetByID(toolID)
+	mTool, merr := db.Tool.UpperTools.GetByID(toolID)
 	if merr != nil {
 		return merr
 	}
-	if tool.Cassette == 0 {
-		return errors.NewValidationError("tool has no cassette bound").MasterError()
-	}
+	tool, _ := mTool.(*shared.Tool)
 
 	tool.Cassette = 0
-	merr = db.Tool.Tools.Update(tool)
+	merr = db.Tool.UpperTools.Update(tool)
 	if merr != nil {
 		return merr
 	}
@@ -234,7 +248,7 @@ func GetRegenerationsForTool(db *common.DB, toolID shared.EntityID) (
 }
 
 func StartToolRegeneration(db *common.DB, toolID shared.EntityID) *errors.MasterError {
-	merr := db.Tool.Regenerations.Create(&shared.ToolRegeneration{
+	_, merr := db.Tool.Regenerations.Create(&shared.ToolRegeneration{
 		ToolID: toolID,
 		Start:  shared.NewUnixMilli(time.Now()),
 	})

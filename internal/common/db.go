@@ -164,9 +164,9 @@ func (pdb *PressDB) Close() {
 
 // ToolDB holds tool-related database services
 type ToolDB struct {
-	UpperTools            shared.Service[*shared.Tool, shared.EntityID]             `json:"upper_tool"`
-	LowerTools            shared.Service[*shared.Tool, shared.EntityID]             `json:"lower_tool"`
-	Cassettes        shared.Service[*shared.Cassette, shared.EntityID]         `json:"cassette"`
+	UpperTools       shared.Service[shared.ModelTool, shared.EntityID]         `json:"upper_tool"`
+	LowerTools       shared.Service[shared.ModelTool, shared.EntityID]         `json:"lower_tool"`
+	Cassettes        shared.Service[shared.ModelTool, shared.EntityID]         `json:"cassette"`
 	Regenerations    shared.Service[*shared.ToolRegeneration, shared.EntityID] `json:"regeneration"`
 	UpperMetalSheets shared.Service[*shared.UpperMetalSheet, shared.EntityID]  `json:"upper_metal_sheet"`
 	LowerMetalSheets shared.Service[*shared.LowerMetalSheet, shared.EntityID]  `json:"lower_metal_sheet"`
