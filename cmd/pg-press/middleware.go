@@ -115,7 +115,7 @@ func keyAuthValidator(auth string, ctx echo.Context, db *common.DB) (bool, error
 		)
 
 		// Try to get user directly from the API key
-		users, merr := db.User.User.List()
+		users, merr := db.User.Users.List()
 		if merr != nil {
 			return false, merr.Err
 		}
@@ -151,7 +151,7 @@ func validateUserFromCookie(ctx echo.Context, db *common.DB) (*shared.User, erro
 		return nil, errors.Wrap(err, "get cookie")
 	}
 
-	cookie, merr := db.User.Cookie.GetByID(httpCookie.Value)
+	cookie, merr := db.User.Cookies.GetByID(httpCookie.Value)
 	if merr != nil {
 		return nil, merr.Wrap("get cookie").Err
 	}
@@ -161,7 +161,7 @@ func validateUserFromCookie(ctx echo.Context, db *common.DB) (*shared.User, erro
 		return nil, fmt.Errorf("cookie has expired")
 	}
 
-	user, merr := db.User.User.GetByID(cookie.UserID)
+	user, merr := db.User.Users.GetByID(cookie.UserID)
 	if merr != nil {
 		return nil, merr.Wrap("validate user from API key").Err
 	}
@@ -178,7 +178,7 @@ func validateUserFromCookie(ctx echo.Context, db *common.DB) (*shared.User, erro
 		httpCookie.Expires = cookie.ExpiredAtTime()
 
 		// Try to update cookie with lock
-		merr = db.User.Cookie.Update(cookie)
+		merr = db.User.Cookies.Update(cookie)
 		if merr != nil {
 			logMiddleware.Error(
 				"Failed to update cookie: %v, UserName: %#v, RealIP: %#v",

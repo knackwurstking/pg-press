@@ -27,35 +27,33 @@ func init() {
 
 // DB holds and initializes all the services required
 type DB struct {
-	User  *UserDB  `json:"user"`
-	Press *PressDB `json:"press"`
-	Tool  *ToolDB  `json:"tool"`
-	Note  *NoteDB  `json:"note"`
+	User  *UserDB                                       `json:"user"`
+	Press *PressDB                                      `json:"press"`
+	Tool  *ToolDB                                       `json:"tool"`
+	Notes shared.Service[*shared.Note, shared.EntityID] `json:"note"`
 }
 
 // NewDB creates a new database instance with initialized services
 func NewDB(c *shared.Config) *DB {
 	return &DB{
 		User: &UserDB{
-			User:    user.NewUsersService(c),
-			Cookie:  user.NewCookiesService(c),
-			Session: user.NewSessionsService(c),
+			Users:    user.NewUsersService(c),
+			Cookies:  user.NewCookiesService(c),
+			Sessions: user.NewSessionsService(c),
 		},
 		Press: &PressDB{
-			Press:        press.NewPressesService(c),
-			Cycle:        press.NewPressCyclesService(c),
-			Regeneration: press.NewPressRegenerationsService(c),
+			Presses:       press.NewPressesService(c),
+			Cycles:        press.NewPressCyclesService(c),
+			Regenerations: press.NewPressRegenerationsService(c),
 		},
 		Tool: &ToolDB{
-			Tool:            tool.NewToolsService(c),
-			Regeneration:    tool.NewToolRegenerationsService(c),
-			Cassette:        tool.NewCassettesService(c),
-			UpperMetalSheet: tool.NewUpperMetalSheetsService(c),
-			LowerMetalSheet: tool.NewLowerMetalSheetsService(c),
+			Tools:            tool.NewToolsService(c),
+			Regenerations:    tool.NewToolRegenerationsService(c),
+			Cassettes:        tool.NewCassettesService(c),
+			UpperMetalSheets: tool.NewUpperMetalSheetsService(c),
+			LowerMetalSheets: tool.NewLowerMetalSheetsService(c),
 		},
-		Note: &NoteDB{
-			Note: note.NewNotesService(c),
-		},
+		Notes: note.NewNotesService(c),
 	}
 }
 
@@ -77,7 +75,9 @@ func (db *DB) Setup() error {
 	})
 
 	wg.Go(func() {
-		errCh <- db.Note.Setup()
+		errCh <- setupServices([]setupServicesProps{
+			{"note", db.Notes.Setup},
+		}...)
 	})
 
 	wg.Wait()
@@ -103,107 +103,92 @@ func (db *DB) Close() {
 	wg.Go(db.User.Close)
 	wg.Go(db.Press.Close)
 	wg.Go(db.Tool.Close)
-	wg.Go(db.Note.Close)
+	wg.Go(func() {
+		closeServices([]closeServicesProps{
+			{"note", db.Notes.Close},
+		}...)
+	})
 	wg.Wait()
 }
 
 // UserDB holds user-related database services
 type UserDB struct {
-	User    shared.Service[*shared.User, shared.TelegramID]  `json:"user"`
-	Cookie  shared.Service[*shared.Cookie, string]           `json:"cookie"`
-	Session shared.Service[*shared.Session, shared.EntityID] `json:"session"`
+	Users    shared.Service[*shared.User, shared.TelegramID]  `json:"user"`
+	Cookies  shared.Service[*shared.Cookie, string]           `json:"cookie"`
+	Sessions shared.Service[*shared.Session, shared.EntityID] `json:"session"`
 }
 
 // Setup initializes user database services
 func (udb *UserDB) Setup() error {
 	return setupServices([]setupServicesProps{
-		{"user", udb.User.Setup},
-		{"cookie", udb.Cookie.Setup},
-		{"session", udb.Session.Setup},
+		{"user", udb.Users.Setup},
+		{"cookie", udb.Cookies.Setup},
+		{"session", udb.Sessions.Setup},
 	}...)
 }
 
 // Close shuts down user database services
 func (udb *UserDB) Close() {
 	closeServices([]closeServicesProps{
-		{"user", udb.User.Close},
-		{"cookie", udb.Cookie.Close},
-		{"session", udb.Session.Close},
+		{"user", udb.Users.Close},
+		{"cookie", udb.Cookies.Close},
+		{"session", udb.Sessions.Close},
 	}...)
 }
 
 // PressDB holds press-related database services
 type PressDB struct {
-	Press        shared.Service[*shared.Press, shared.PressNumber]          `json:"press"`
-	Cycle        shared.Service[*shared.Cycle, shared.EntityID]             `json:"cycle"`
-	Regeneration shared.Service[*shared.PressRegeneration, shared.EntityID] `json:"regeneration"`
+	Presses       shared.Service[*shared.Press, shared.PressNumber]          `json:"press"`
+	Cycles        shared.Service[*shared.Cycle, shared.EntityID]             `json:"cycle"`
+	Regenerations shared.Service[*shared.PressRegeneration, shared.EntityID] `json:"regeneration"`
 }
 
 // Setup initializes press database services
 func (pdb *PressDB) Setup() error {
 	return setupServices([]setupServicesProps{
-		{"press", pdb.Press.Setup},
-		{"cycle", pdb.Cycle.Setup},
-		{"regeneration", pdb.Regeneration.Setup},
+		{"press", pdb.Presses.Setup},
+		{"cycle", pdb.Cycles.Setup},
+		{"regeneration", pdb.Regenerations.Setup},
 	}...)
 }
 
 // Close shuts down press database services
 func (pdb *PressDB) Close() {
 	closeServices([]closeServicesProps{
-		{"press", pdb.Press.Close},
-		{"cycle", pdb.Cycle.Close},
-		{"regeneration", pdb.Regeneration.Close},
+		{"press", pdb.Presses.Close},
+		{"cycle", pdb.Cycles.Close},
+		{"regeneration", pdb.Regenerations.Close},
 	}...)
 }
 
 // ToolDB holds tool-related database services
 type ToolDB struct {
-	Tool            shared.Service[*shared.Tool, shared.EntityID]             `json:"tool"`
-	Regeneration    shared.Service[*shared.ToolRegeneration, shared.EntityID] `json:"regeneration"`
-	Cassette        shared.Service[*shared.Cassette, shared.EntityID]         `json:"cassette"`
-	UpperMetalSheet shared.Service[*shared.UpperMetalSheet, shared.EntityID]  `json:"upper_metal_sheet"`
-	LowerMetalSheet shared.Service[*shared.LowerMetalSheet, shared.EntityID]  `json:"lower_metal_sheet"`
+	Tools            shared.Service[*shared.Tool, shared.EntityID]             `json:"tool"`
+	Regenerations    shared.Service[*shared.ToolRegeneration, shared.EntityID] `json:"regeneration"`
+	Cassettes        shared.Service[*shared.Cassette, shared.EntityID]         `json:"cassette"`
+	UpperMetalSheets shared.Service[*shared.UpperMetalSheet, shared.EntityID]  `json:"upper_metal_sheet"`
+	LowerMetalSheets shared.Service[*shared.LowerMetalSheet, shared.EntityID]  `json:"lower_metal_sheet"`
 }
 
 // Setup initializes tool database services
 func (tdb *ToolDB) Setup() error {
 	return setupServices([]setupServicesProps{
-		{"tool", tdb.Tool.Setup},
-		{"regeneration", tdb.Regeneration.Setup},
-		{"cassette", tdb.Cassette.Setup},
-		{"upper_metal_sheet", tdb.UpperMetalSheet.Setup},
-		{"lower_metal_sheet", tdb.LowerMetalSheet.Setup},
+		{"tool", tdb.Tools.Setup},
+		{"regeneration", tdb.Regenerations.Setup},
+		{"cassette", tdb.Cassettes.Setup},
+		{"upper_metal_sheet", tdb.UpperMetalSheets.Setup},
+		{"lower_metal_sheet", tdb.LowerMetalSheets.Setup},
 	}...)
 }
 
 // Close shuts down tool database services
 func (tdb *ToolDB) Close() {
 	closeServices([]closeServicesProps{
-		{"tool", tdb.Tool.Close},
-		{"regeneration", tdb.Regeneration.Close},
-		{"cassette", tdb.Cassette.Close},
-		{"upper_metal_sheet", tdb.UpperMetalSheet.Close},
-		{"lower_metal_sheet", tdb.LowerMetalSheet.Close},
-	}...)
-}
-
-// NoteDB holds tool-related database services
-type NoteDB struct {
-	Note shared.Service[*shared.Note, shared.EntityID] `json:"note"`
-}
-
-// Setup initializes tool database services
-func (ndb *NoteDB) Setup() error {
-	return setupServices([]setupServicesProps{
-		{"note", ndb.Note.Setup},
-	}...)
-}
-
-// Close shuts down tool database services
-func (ndb *NoteDB) Close() {
-	closeServices([]closeServicesProps{
-		{"note", ndb.Note.Close},
+		{"tool", tdb.Tools.Close},
+		{"regeneration", tdb.Regenerations.Close},
+		{"cassette", tdb.Cassettes.Close},
+		{"upper_metal_sheet", tdb.UpperMetalSheets.Close},
+		{"lower_metal_sheet", tdb.LowerMetalSheets.Close},
 	}...)
 }
 

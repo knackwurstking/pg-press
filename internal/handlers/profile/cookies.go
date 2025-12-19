@@ -19,7 +19,7 @@ func HTMXDeleteCookies(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	merr = DB.User.Cookie.Delete(value)
+	merr = DB.User.Cookies.Delete(value)
 	if merr != nil {
 		return merr.Echo()
 	}

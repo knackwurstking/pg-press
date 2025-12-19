@@ -28,12 +28,12 @@ func GetPressNumberForTool(db *common.DB, toolID shared.EntityID) shared.PressNu
 
 	// Get the tool ID from the cassette ID, if the `toolID` is a cassette
 	var id shared.EntityID
-	db.Tool.Tool.DB().QueryRow(SQLGetToolIDForCassette, toolID).Scan(&id)
+	db.Tool.Tools.DB().QueryRow(SQLGetToolIDForCassette, toolID).Scan(&id)
 	if id > 0 {
 		toolID = id
 	}
 
-	db.Press.Press.DB().QueryRow(
+	db.Press.Presses.DB().QueryRow(
 		SQLGetPressNumberForTool, sql.Named("tool_id", toolID),
 	).Scan(&pressNumber)
 
@@ -45,21 +45,21 @@ func GetPressUtilization(db *common.DB, pressNumber shared.PressNumber) (
 ) {
 	pu := &shared.PressUtilization{PressNumber: pressNumber}
 
-	press, merr := db.Press.Press.GetByID(pressNumber)
+	press, merr := db.Press.Presses.GetByID(pressNumber)
 	if merr != nil {
 		return nil, merr
 	}
 
 	if press.SlotUp > 0 {
 		// Get the top tool and cassette
-		tool, merr := db.Tool.Tool.GetByID(press.SlotUp)
+		tool, merr := db.Tool.Tools.GetByID(press.SlotUp)
 		if merr != nil {
 			return nil, merr
 		}
 		pu.SlotUpper = tool
 
 		if tool.Cassette > 0 {
-			cassette, merr := db.Tool.Cassette.GetByID(tool.Cassette)
+			cassette, merr := db.Tool.Cassettes.GetByID(tool.Cassette)
 			if merr != nil {
 				return nil, merr
 			}
@@ -71,7 +71,7 @@ func GetPressUtilization(db *common.DB, pressNumber shared.PressNumber) (
 	}
 
 	if press.SlotDown > 0 {
-		tool, merr := db.Tool.Tool.GetByID(press.SlotDown)
+		tool, merr := db.Tool.Tools.GetByID(press.SlotDown)
 		if merr != nil {
 			return nil, merr
 		}
@@ -104,7 +104,7 @@ func GetPressUtilizations(db *common.DB, pressNumbers []shared.PressNumber) (
 // -----------------------------------------------------------------------------
 
 func ListCyclesForTool(db *common.DB, toolID shared.EntityID) ([]*shared.Cycle, *errors.MasterError) {
-	cycles, merr := db.Press.Cycle.List()
+	cycles, merr := db.Press.Cycles.List()
 	if merr != nil {
 		return nil, merr
 	}
@@ -127,7 +127,7 @@ func ListCyclesForTool(db *common.DB, toolID shared.EntityID) ([]*shared.Cycle, 
 func GetTotalCyclesForTool(db *common.DB, toolID shared.EntityID) (int64, *errors.MasterError) {
 	var totalCycles int64 = 0
 
-	cycles, merr := db.Press.Cycle.List()
+	cycles, merr := db.Press.Cycles.List()
 	if merr != nil {
 		return totalCycles, merr
 	}

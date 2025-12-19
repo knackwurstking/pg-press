@@ -46,14 +46,14 @@ func listToolsCommand() cli.Command {
 				return withDBOperation(*customDBPath, func(r *common.DB) error {
 					// Get all tools from database
 					var tools []shared.ModelTool
-					if t, merr := r.Tool.Tool.List(); merr != nil {
+					if t, merr := r.Tool.Tools.List(); merr != nil {
 						return errors.Wrap(merr, "retrieve tools")
 					} else {
 						for _, tool := range t {
 							tools = append(tools, tool)
 						}
 					}
-					if ct, merr := r.Tool.Cassette.List(); merr != nil {
+					if ct, merr := r.Tool.Cassettes.List(); merr != nil {
 						return errors.Wrap(merr, "retrieve cassettes")
 					} else {
 						for _, tool := range ct {
@@ -144,7 +144,7 @@ func markDeadCommand() cli.Command {
 					toolID := shared.EntityID(*toolIDArg)
 
 					// Get tool first to check if it exists
-					tool, err := r.Tool.Tool.GetByID(toolID)
+					tool, err := r.Tool.Tools.GetByID(toolID)
 					if err != nil {
 						return fmt.Errorf("find tool with ID %d: %v", toolID, err)
 					}
@@ -156,7 +156,7 @@ func markDeadCommand() cli.Command {
 
 					// Mark tool as dead
 					tool.IsDead = true
-					merr := r.Tool.Tool.Update(tool)
+					merr := r.Tool.Tools.Update(tool)
 					if merr != nil {
 						return errors.Wrap(merr, "mark tool as dead")
 					}
@@ -183,7 +183,7 @@ func reviveDeadToolCommand() cli.Command {
 					toolID := shared.EntityID(*toolIDArg)
 
 					// Get tool first to check if it exists
-					tool, err := r.Tool.Tool.GetByID(toolID)
+					tool, err := r.Tool.Tools.GetByID(toolID)
 					if err != nil {
 						return fmt.Errorf("find tool with ID %d: %v", toolID, err)
 					}
@@ -195,7 +195,7 @@ func reviveDeadToolCommand() cli.Command {
 
 					// Revive tool (mark as alive)
 					tool.IsDead = false
-					err = r.Tool.Tool.Update(tool)
+					err = r.Tool.Tools.Update(tool)
 					if err != nil {
 						return fmt.Errorf("revive tool: %v", err)
 					}
@@ -230,7 +230,7 @@ func deleteToolCommand() cli.Command {
 						base.ID, base.Width, base.Height, base.Code)
 
 					// 1. Delete all regenerations for this tool first (they reference cycles)
-					regenerations, merr := r.Tool.Regeneration.List()
+					regenerations, merr := r.Tool.Regenerations.List()
 					if merr != nil {
 						return fmt.Errorf("get regenerations for tool: %v", merr)
 					}
@@ -246,7 +246,7 @@ func deleteToolCommand() cli.Command {
 					if len(regenerations) > 0 {
 						fmt.Printf("Deleting %d regeneration(s)...\n", len(regenerations))
 						for _, regen := range regenerations {
-							if err := r.Tool.Regeneration.Delete(regen.ID); err != nil {
+							if err := r.Tool.Regenerations.Delete(regen.ID); err != nil {
 								return fmt.Errorf("delete regeneration %d: %v", regen.ID, err)
 							}
 						}
@@ -261,7 +261,7 @@ func deleteToolCommand() cli.Command {
 					if len(cycles) > 0 {
 						fmt.Printf("Deleting %d cycle(s)...\n", len(cycles))
 						for _, cycle := range cycles {
-							if err := r.Press.Cycle.Delete(cycle.ID); err != nil {
+							if err := r.Press.Cycles.Delete(cycle.ID); err != nil {
 								return fmt.Errorf("delete cycle %d: %v", cycle.ID, err)
 							}
 						}
@@ -270,9 +270,9 @@ func deleteToolCommand() cli.Command {
 					// 3. Finally, delete the tool itself
 					var delFn func(shared.EntityID) *errors.MasterError
 					if tool.IsCassette() {
-						delFn = r.Tool.Cassette.Delete
+						delFn = r.Tool.Cassettes.Delete
 					} else {
-						delFn = r.Tool.Tool.Delete
+						delFn = r.Tool.Tools.Delete
 					}
 					merr = delFn(toolID)
 					if merr != nil {
@@ -302,7 +302,7 @@ func listCyclesCommand() cli.Command {
 					toolID := shared.EntityID(*toolIDArg)
 
 					// Get tool first to check if it exists and show info
-					tool, merr := r.Tool.Tool.GetByID(toolID)
+					tool, merr := r.Tool.Tools.GetByID(toolID)
 					if merr != nil {
 						return fmt.Errorf("find tool with ID %d: %v", toolID, merr)
 					}
@@ -417,7 +417,7 @@ func deleteRegenerationCommand() cli.Command {
 					regenerationID := shared.EntityID(*regenerationIDArg)
 
 					// Get regeneration first to check if it exists and show info
-					regeneration, err := r.Tool.Regeneration.GetByID(regenerationID)
+					regeneration, err := r.Tool.Regenerations.GetByID(regenerationID)
 					if err != nil {
 						return fmt.Errorf("find regeneration with ID %d: %v", regenerationID, err)
 					}
@@ -425,7 +425,7 @@ func deleteRegenerationCommand() cli.Command {
 					fmt.Printf("Deleting regeneration %d for tool %d...\n", regenerationID, regeneration.ToolID)
 
 					// Delete the regeneration
-					merr := r.Tool.Regeneration.Delete(regenerationID)
+					merr := r.Tool.Regenerations.Delete(regenerationID)
 					if merr != nil {
 						return fmt.Errorf("delete regeneration: %v", merr)
 					}

@@ -13,7 +13,7 @@ func HTMXDeleteToolCycle(c echo.Context) *echo.HTTPError {
 	}
 	cycleID := shared.EntityID(id)
 
-	merr = DB.Press.Cycle.Delete(cycleID)
+	merr = DB.Press.Cycles.Delete(cycleID)
 	if merr != nil {
 		return merr.Echo()
 	}

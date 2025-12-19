@@ -21,7 +21,7 @@ func HTMXPatchToolBinding(c echo.Context) *echo.HTTPError {
 	if merr != nil {
 		return merr.Echo()
 	}
-	tool, merr := DB.Tool.Tool.GetByID(shared.EntityID(id))
+	tool, merr := DB.Tool.Tools.GetByID(shared.EntityID(id))
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -41,7 +41,7 @@ func HTMXPatchToolBinding(c echo.Context) *echo.HTTPError {
 			"invalid target_id",
 		)
 	}
-	cassette, merr := DB.Tool.Cassette.GetByID(shared.EntityID(id))
+	cassette, merr := DB.Tool.Cassettes.GetByID(shared.EntityID(id))
 	if merr != nil {
 		return merr.Echo()
 	}

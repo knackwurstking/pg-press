@@ -18,12 +18,12 @@ func MarkAsDead(c echo.Context) *echo.HTTPError {
 
 	var tool shared.ModelTool
 	if isCassette {
-		tool, merr = DB.Tool.Cassette.GetByID(toolID)
+		tool, merr = DB.Tool.Cassettes.GetByID(toolID)
 		if merr != nil {
 			return merr.WrapEcho("failed to get cassette by ID")
 		}
 	} else {
-		tool, merr = DB.Tool.Tool.GetByID(toolID)
+		tool, merr = DB.Tool.Tools.GetByID(toolID)
 		if merr != nil {
 			return merr.WrapEcho("failed to get tool by ID")
 		}
@@ -35,12 +35,12 @@ func MarkAsDead(c echo.Context) *echo.HTTPError {
 	tool.GetBase().IsDead = true
 
 	if isCassette {
-		merr = DB.Tool.Cassette.Update(tool.(*shared.Cassette))
+		merr = DB.Tool.Cassettes.Update(tool.(*shared.Cassette))
 		if merr != nil {
 			return merr.WrapEcho("failed to update cassette")
 		}
 	} else {
-		merr = DB.Tool.Tool.Update(tool.(*shared.Tool))
+		merr = DB.Tool.Tools.Update(tool.(*shared.Tool))
 		if merr != nil {
 			return merr.WrapEcho("failed to update tool")
 		}

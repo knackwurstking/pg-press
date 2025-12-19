@@ -17,13 +17,13 @@ func Delete(c echo.Context) *echo.HTTPError {
 	isCassette := shared.ParseQueryBool(c, "is_cassette")
 
 	if isCassette {
-		merr = DB.Tool.Cassette.Delete(toolID)
+		merr = DB.Tool.Cassettes.Delete(toolID)
 		if merr != nil {
 			return merr.Echo()
 		}
 		Log.Debug("Deleted cassette with ID: %#v", toolID)
 	} else {
-		merr = DB.Tool.Tool.Delete(toolID)
+		merr = DB.Tool.Tools.Delete(toolID)
 		if merr != nil {
 			return merr.Echo()
 		}

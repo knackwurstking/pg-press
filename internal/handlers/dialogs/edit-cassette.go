@@ -17,7 +17,7 @@ func GetCassetteDialog(c echo.Context) *echo.HTTPError {
 	id, _ := shared.ParseQueryInt64(c, "id")
 	if id > 0 {
 		var merr *errors.MasterError
-		cassette, merr = DB.Tool.Cassette.GetByID(shared.EntityID(id))
+		cassette, merr = DB.Tool.Cassettes.GetByID(shared.EntityID(id))
 		if merr != nil {
 			return merr.Echo()
 		}
@@ -51,7 +51,7 @@ func PostCassette(c echo.Context) *echo.HTTPError {
 
 	Log.Debug("Creating new cassette: %#v", cassette.String())
 
-	merr := DB.Tool.Cassette.Create(cassette)
+	merr := DB.Tool.Cassettes.Create(cassette)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -77,7 +77,7 @@ func PutCassette(c echo.Context) *echo.HTTPError {
 
 	Log.Debug("Updating cassette: %#v", cassette.String())
 
-	merr = DB.Tool.Cassette.Update(cassette)
+	merr = DB.Tool.Cassettes.Update(cassette)
 	if merr != nil {
 		return merr.Echo()
 	}

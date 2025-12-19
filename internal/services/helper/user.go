@@ -10,7 +10,7 @@ import (
 )
 
 func GetUserForApiKey(db *common.DB, apiKey string) (user *shared.User, merr *errors.MasterError) {
-	users, merr := db.User.User.List()
+	users, merr := db.User.Users.List()
 	if merr != nil {
 		return user, merr
 	}
@@ -41,7 +41,7 @@ func ListCookiesForApiKey(db *common.DB, apiKey string) (cookies []*shared.Cooki
 		)
 	}
 
-	cookies, merr = db.User.Cookie.List()
+	cookies, merr = db.User.Cookies.List()
 	if merr != nil {
 		return cookies, merr
 	}

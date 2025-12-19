@@ -39,7 +39,7 @@ func listCyclesAllCommand() cli.Command {
 					}
 
 					// Get all cycles and filter by press
-					allCycles, err := db.Press.Cycle.List()
+					allCycles, err := db.Press.Cycles.List()
 					if err != nil {
 						return fmt.Errorf("retrieve cycles: %v", err)
 					}
@@ -100,7 +100,7 @@ func deleteCycleCommand() cli.Command {
 			return func(cmd *cli.Command) error {
 				return withDBOperation(*customDBPath, func(db *common.DB) error {
 					// Delete cycle
-					err := db.Press.Cycle.Delete(shared.EntityID(*cycleIDArg))
+					err := db.Press.Cycles.Delete(shared.EntityID(*cycleIDArg))
 					if err != nil {
 						return fmt.Errorf("delete cycle: %v", err)
 					}

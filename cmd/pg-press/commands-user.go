@@ -14,7 +14,7 @@ import (
 
 func listUserCommand() cli.Command {
 	return createSimpleCommand("list", "List all users", func(r *common.DB) error {
-		users, merr := r.User.User.List()
+		users, merr := r.User.Users.List()
 		if merr != nil {
 			return merr
 		}
@@ -41,7 +41,7 @@ func showUserCommand() cli.Command {
 				return withDBOperation(*customDBPath, func(r *common.DB) error {
 					telegramID := shared.TelegramID(*telegramIDArg)
 
-					user, merr := r.User.User.GetByID(telegramID)
+					user, merr := r.User.Users.GetByID(telegramID)
 					if merr != nil {
 						fmt.Fprintf(os.Stderr, "Failed to get user (%d): %v\n", telegramID, merr)
 
@@ -61,7 +61,7 @@ func showUserCommand() cli.Command {
 					fmt.Printf("%-15s %-20s %s\n", "-----------", "---------", "-------")
 					fmt.Printf("%-15d %-20s %s\n", user.ID, user.Name, user.ApiKey)
 
-					if cookies, err := r.User.Cookie.List(); err != nil {
+					if cookies, err := r.User.Cookies.List(); err != nil {
 						fmt.Fprintf(os.Stderr, "Get cookies from the database: %v\n", err)
 					} else {
 						if len(cookies) > 0 {
@@ -104,7 +104,7 @@ func addUserCommand() cli.Command {
 						Name:   *userName,
 						ApiKey: *apiKey,
 					}
-					merr := r.User.User.Create(user)
+					merr := r.User.Users.Create(user)
 					if merr != nil && merr.IsExistsError() {
 						return fmt.Errorf("user already exists: %d (%s)", telegramID, *userName)
 					}
@@ -124,7 +124,7 @@ func removeUserCommand() cli.Command {
 
 			return func(cmd *cli.Command) error {
 				return withDBOperation(*customDBPath, func(r *common.DB) error {
-					return r.User.User.Delete(shared.TelegramID(*telegramIDArg))
+					return r.User.Users.Delete(shared.TelegramID(*telegramIDArg))
 				})
 			}
 		}),
@@ -142,7 +142,7 @@ func modUserCommand() cli.Command {
 
 			return func(cmd *cli.Command) error {
 				return withDBOperation(*customDBPath, func(r *common.DB) error {
-					user, err := r.User.User.GetByID(shared.TelegramID(*telegramID))
+					user, err := r.User.Users.GetByID(shared.TelegramID(*telegramID))
 					if err != nil {
 						return err
 					}
@@ -155,7 +155,7 @@ func modUserCommand() cli.Command {
 						user.ApiKey = *apiKey
 					}
 
-					return r.User.User.Update(user)
+					return r.User.Users.Update(user)
 				})
 			}
 		}),

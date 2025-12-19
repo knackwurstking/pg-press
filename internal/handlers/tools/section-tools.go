@@ -24,7 +24,7 @@ func renderToolsSection(c echo.Context) *echo.HTTPError {
 
 	wg.Go(func() {
 		var merr *errors.MasterError
-		tools, merr = DB.Tool.Tool.List()
+		tools, merr = DB.Tool.Tools.List()
 		if merr != nil {
 			errCh <- merr.Echo()
 			return
@@ -34,7 +34,7 @@ func renderToolsSection(c echo.Context) *echo.HTTPError {
 
 	wg.Go(func() {
 		var merr *errors.MasterError
-		cassettes, merr = DB.Tool.Cassette.List()
+		cassettes, merr = DB.Tool.Cassettes.List()
 		if merr != nil {
 			errCh <- merr.Echo()
 			return
@@ -45,7 +45,7 @@ func renderToolsSection(c echo.Context) *echo.HTTPError {
 	isRegenerating := make(map[shared.EntityID]bool)
 	regenerationsCount := 0
 	wg.Go(func() {
-		regenerations, merr := DB.Tool.Regeneration.List()
+		regenerations, merr := DB.Tool.Regenerations.List()
 		if merr != nil {
 			errCh <- merr.Echo()
 			return
@@ -61,7 +61,7 @@ func renderToolsSection(c echo.Context) *echo.HTTPError {
 
 	notesCount := 0
 	wg.Go(func() {
-		notes, merr := DB.Note.Note.List()
+		notes, merr := DB.Notes.List()
 		if merr != nil {
 			errCh <- merr.Echo()
 			return

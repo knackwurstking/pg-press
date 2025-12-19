@@ -11,12 +11,12 @@ func DeleteRegeneration(c echo.Context) *echo.HTTPError {
 	if merr != nil {
 		return merr.Echo()
 	}
-	regeneration, merr := DB.Tool.Regeneration.GetByID(shared.EntityID(id))
+	regeneration, merr := DB.Tool.Regenerations.GetByID(shared.EntityID(id))
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	merr = DB.Tool.Regeneration.Delete(regeneration.ID)
+	merr = DB.Tool.Regenerations.Delete(regeneration.ID)
 	if merr != nil {
 		return merr.Echo()
 	}

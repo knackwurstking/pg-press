@@ -91,7 +91,7 @@ func clearExistingSession(ctx echo.Context) *errors.MasterError {
 		return errors.NewMasterError(err, 0)
 	}
 
-	merr := DB.User.Cookie.Delete(cookie.Value)
+	merr := DB.User.Cookies.Delete(cookie.Value)
 	if merr != nil {
 		return merr
 	}
@@ -106,7 +106,7 @@ func createSession(ctx echo.Context, userID shared.TelegramID) *errors.MasterErr
 		UserID:    userID,
 		LastLogin: shared.NewUnixMilli(time.Now()),
 	}
-	merr := DB.User.Cookie.Create(cookie)
+	merr := DB.User.Cookies.Create(cookie)
 	if merr != nil {
 		return merr
 	}

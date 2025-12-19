@@ -44,7 +44,7 @@ func handleUserNameChange(c echo.Context, user *shared.User) *errors.MasterError
 	}
 
 	user.Name = userName
-	merr := DB.User.User.Update(user)
+	merr := DB.User.Users.Update(user)
 	if merr != nil {
 		return merr
 	}
