@@ -1,8 +1,6 @@
 package tool
 
 import (
-	"net/http"
-
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/helper"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -13,7 +11,7 @@ func GetCyclesSectionContent(c echo.Context) *echo.HTTPError {
 	return renderCyclesSectionContent(c)
 }
 
-func renderCyclesSection(c echo.Context, tool *shared.Tool) *echo.HTTPError {
+func renderCyclesSection(c echo.Context, tool shared.ModelTool) *echo.HTTPError {
 	// Render out-of-band swap for cycles section to trigger reload
 	t := CyclesSection(true, tool.GetID(), !tool.IsCassette())
 	err := t.Render(c.Request().Context(), c.Response())
@@ -31,17 +29,9 @@ func renderCyclesSectionContent(c echo.Context) *echo.HTTPError {
 	}
 	toolID := shared.EntityID(id)
 
-	var tool shared.ModelTool
-	tool, merr = DB.Tool.Tool.GetByID(toolID)
+	tool, merr := helper.GetToolByID(DB, toolID)
 	if merr != nil {
-		if merr.Code == http.StatusNotFound {
-			tool, merr = DB.Tool.Cassette.GetByID(toolID)
-			if merr != nil {
-				return merr.WrapEcho("could not get cassette for cycles section")
-			}
-		} else {
-			return merr.WrapEcho("could not get tool for cycles section")
-		}
+		return merr.WrapEcho("could not get tool by ID")
 	}
 
 	// Get cycles for this specific tool

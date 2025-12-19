@@ -76,7 +76,7 @@ func listToolsCommand() cli.Command {
 
 					// Print each tool
 					for _, tool := range tools {
-						fmt.Fprintf(w, "%d\t%dx%d\t%d\t%s\t%s\t%s\t%s\n",
+						fmt.Fprintf(w, "%d\t%dx%d\t%d\t%s\t%s\t%d\t%d\t%t\n",
 							tool.ID,
 							tool.Width, tool.Height,
 							tool.Position,
@@ -455,13 +455,14 @@ func listRegenerationsCommand() cli.Command {
 					toolID := shared.EntityID(*toolIDArg)
 
 					// Get tool first to check if it exists and show info
-					tool, err := db.Tool.Tool.GetByID(toolID)
-					if err != nil {
-						return fmt.Errorf("find tool with ID %d: %v", toolID, err)
+					tool, merr := helper.GetToolByID(db, toolID)
+					if merr != nil {
+						return fmt.Errorf("find tool with ID %d: %v", toolID, merr)
 					}
 
+					baseTool := tool.GetBase()
 					fmt.Printf("Tool Information: ID %d (%dx%d %s) - %s - %s\n\n",
-						tool.ID, tool.Width, tool.Height, tool.Code, tool.Type, tool.Position.German())
+						baseTool.ID, baseTool.Width, baseTool.Height, baseTool.Code, baseTool.Type, baseTool.Position.German())
 
 					// Get regenerations for this tool
 					regenerations, err := helper.GetRegenerationsForTool(db, toolID)

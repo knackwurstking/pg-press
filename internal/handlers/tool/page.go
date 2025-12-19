@@ -1,9 +1,8 @@
 package tool
 
 import (
-	"net/http"
-
 	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/helper"
 	"github.com/knackwurstking/pg-press/internal/shared"
 
 	"github.com/labstack/echo/v4"
@@ -20,17 +19,9 @@ func GetToolPage(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	var tool shared.ModelTool
-	tool, merr = DB.Tool.Tool.GetByID(shared.EntityID(id))
+	tool, merr := helper.GetToolByID(DB, shared.EntityID(id))
 	if merr != nil {
-		if merr.Code == http.StatusNotFound {
-			tool, merr = DB.Tool.Cassette.GetByID(shared.EntityID(id))
-			if merr != nil {
-				return merr.Echo()
-			}
-		} else {
-			return merr.Echo()
-		}
+		return merr.WrapEcho("could not get tool by ID")
 	}
 
 	t := Page(&PageProps{

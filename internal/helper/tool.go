@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"net/http"
 	"sync"
 	"time"
 
@@ -10,6 +11,23 @@ import (
 )
 
 var ToolMutex = &sync.Mutex{}
+
+// GetToolByID retrieves a tool by its ID from the "tools" table and if it fails from the cassettes table.
+func GetToolByID(db *common.DB, id shared.EntityID) (shared.ModelTool, *errors.MasterError) {
+	var tool shared.ModelTool
+	tool, merr := db.Tool.Tool.GetByID(id)
+	if merr != nil {
+		if merr.Code == http.StatusNotFound {
+			tool, merr = db.Tool.Cassette.GetByID(id)
+			if merr != nil {
+				return nil, merr
+			}
+		} else {
+			return nil, merr
+		}
+	}
+	return tool, nil
+}
 
 func ListDeadTools(db *common.DB) (tools []*shared.Tool, merr *errors.MasterError) {
 	tools, merr = db.Tool.Tool.List()

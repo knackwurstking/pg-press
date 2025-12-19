@@ -15,7 +15,7 @@ func RegenerationEditable(c echo.Context) *echo.HTTPError {
 	if merr != nil {
 		return merr.Echo()
 	}
-	tool, merr := DB.Tool.Tool.GetByID(shared.EntityID(id))
+	tool, merr := helper.GetToolByID(DB, shared.EntityID(id))
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -33,7 +33,7 @@ func RegenerationNonEditable(c echo.Context) *echo.HTTPError {
 	if merr != nil {
 		return merr.Echo()
 	}
-	tool, merr := DB.Tool.Tool.GetByID(shared.EntityID(id))
+	tool, merr := helper.GetToolByID(DB, shared.EntityID(id))
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -56,7 +56,7 @@ func Regeneration(c echo.Context) *echo.HTTPError {
 	if merr != nil {
 		return merr.Echo()
 	}
-	tool, merr := DB.Tool.Tool.GetByID(shared.EntityID(id))
+	tool, merr := helper.GetToolByID(DB, shared.EntityID(id))
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -69,19 +69,19 @@ func Regeneration(c echo.Context) *echo.HTTPError {
 	// Handle regeneration start/stop/abort only
 	switch statusStr {
 	case "regenerating":
-		merr = helper.StartToolRegeneration(DB, tool.ID)
+		merr = helper.StartToolRegeneration(DB, tool.GetID())
 		if merr != nil {
 			return merr.Echo()
 		}
 
 	case "active":
-		merr = helper.StopToolRegeneration(DB, tool.ID)
+		merr = helper.StopToolRegeneration(DB, tool.GetID())
 		if merr != nil {
 			return merr.Echo()
 		}
 
 	case "abort":
-		merr := helper.AbortToolRegeneration(DB, tool.ID)
+		merr := helper.AbortToolRegeneration(DB, tool.GetID())
 		if merr != nil {
 			return merr.Echo()
 		}
@@ -94,7 +94,7 @@ func Regeneration(c echo.Context) *echo.HTTPError {
 	}
 
 	// Get updated tool and render status display
-	tool, merr = DB.Tool.Tool.GetByID(tool.ID)
+	tool, merr = helper.GetToolByID(DB, tool.GetID())
 	if merr != nil {
 		return merr.Echo()
 	}

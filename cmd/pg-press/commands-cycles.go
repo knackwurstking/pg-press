@@ -66,7 +66,7 @@ func listCyclesAllCommand() cli.Command {
 
 					// Print each cycle
 					for _, cycle := range cycles {
-						fmt.Fprintf(w, "%d\t%d\t%d\t%d\t%d\t%s\n",
+						fmt.Fprintf(w, "%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
 							cycle.ID,
 							cycle.ToolID,
 							cycle.PressNumber,

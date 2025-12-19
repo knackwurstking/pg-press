@@ -20,18 +20,9 @@ func HTMXGetToolMetalSheets(c echo.Context) *echo.HTTPError {
 	if merr != nil {
 		return merr.Echo()
 	}
-	var tool shared.ModelTool
-	tool, merr = DB.Tool.Tool.GetByID(shared.EntityID(id))
-	// If not found, try cassette
+	tool, merr := helper.GetToolByID(DB, shared.EntityID(id))
 	if merr != nil {
-		if merr.Code == http.StatusNotFound {
-			tool, merr = DB.Tool.Cassette.GetByID(shared.EntityID(id))
-			if merr != nil {
-				return merr.Echo()
-			}
-		} else {
-			return merr.Echo()
-		}
+		return merr.WrapEcho("could not get tool by ID")
 	}
 
 	var t templ.Component
