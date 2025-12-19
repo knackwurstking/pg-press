@@ -12,8 +12,11 @@ templ NoteCard(note *shared.Note, tools []*shared.Tool) {
 		filterClass := ""
 		icon := ""
 		switch note.Level {
-		case shared.LevelInfo:
+		case shared.LevelNormal:
 			filterClass = "outline"
+			icon = "bi-sticky"
+		case shared.LevelInfo:
+			filterClass = "info outline"
 			icon = "bi-info-circle"
 		case shared.LevelAttention:
 			filterClass = "warning outline"
