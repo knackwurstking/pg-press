@@ -14,18 +14,12 @@ templ SmallBadge(classNames ...string) {
 
 templ ToolStateBadge(tool *shared.Tool, pressNumber shared.PressNumber, isRegenerating bool) {
 	{{
-		var (
-			text  string
-			color string
-		)
+		var color string
 		if isRegenerating {
-			text = "Regenerierung"
 			color = "warning"
 		} else if tool.IsDead {
-			text = "RIP"
 			color = "destructive"
 		} else {
-			text = "Verfügbar"
 			color = "info"
 		}
 	}}
@@ -36,25 +30,27 @@ templ ToolStateBadge(tool *shared.Tool, pressNumber shared.PressNumber, isRegene
 				<span>Presse { pressNumber }</span>
 			</span>
 		} else {
-			{ text }
+			if isRegenerating {
+				Regenerierung
+			} else if tool.IsDead {
+				RIP
+			} else {
+				Verfügbar
+			}
 		}
 	}
 }
 
 templ CassetteStateBadge(cassette *shared.Cassette, boundToTool *shared.Tool, isRegenerating bool) {
 	{{
-		var (
-			text  string
-			color string
-		)
+		var color string
 		if isRegenerating {
-			text = "Regenerierung"
 			color = "warning"
 		} else if cassette.IsDead {
-			text = "RIP"
 			color = "destructive"
+		} else if boundToTool != nil {
+			color = "secondary"
 		} else {
-			text = "Verfügbar"
 			color = "info"
 		}
 	}}
@@ -62,10 +58,16 @@ templ CassetteStateBadge(cassette *shared.Cassette, boundToTool *shared.Tool, is
 		if boundToTool != nil {
 			<span class="flex flex-col gap-0 justify-center items-center">
 				<span class="text-bold">Gebunden</span>
-				<span>an Werkzeug { boundToTool.String() }</span>
+				<span>{ boundToTool.German() }</span>
 			</span>
 		} else {
-			{ text }
+			if isRegenerating {
+				Regenerierung
+			} else if cassette.IsDead {
+				RIP
+			} else {
+				Verfügbar
+			}
 		}
 	}
 }
