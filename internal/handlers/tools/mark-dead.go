@@ -29,24 +29,27 @@ func MarkAsDead(c echo.Context) *echo.HTTPError {
 		if merr != nil {
 			return merr.WrapEcho("failed to update cassette")
 		}
-	} else {
-		tool, merr := DB.Tool.Tool.GetByID(toolID)
-		if merr != nil {
-			return merr.WrapEcho("failed to get tool by ID")
-		}
 
-		if tool.IsDead {
-			return nil
-		}
-		tool.IsDead = true
-
-		merr = DB.Tool.Tool.Update(tool)
-		if merr != nil {
-			return merr.WrapEcho("failed to update tool")
-		}
+		urlb.SetHXRedirect(c, urlb.UrlTool(cassette.ID, 0, 0).Page)
+		return nil
 	}
 
-	urlb.SetHXRedirect(c, urlb.UrlTools(0, false).Page)
+	tool, merr := DB.Tool.Tool.GetByID(toolID)
+	if merr != nil {
+		return merr.WrapEcho("failed to get tool by ID")
+	}
+
+	if tool.IsDead {
+		return nil
+	}
+	tool.IsDead = true
+
+	merr = DB.Tool.Tool.Update(tool)
+	if merr != nil {
+		return merr.WrapEcho("failed to update tool")
+	}
+
+	urlb.SetHXRedirect(c, urlb.UrlTool(tool.ID, 0, 0).Page)
 
 	return nil
 }
