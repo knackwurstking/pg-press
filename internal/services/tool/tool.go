@@ -37,11 +37,13 @@ const (
 	INSERT INTO tools (position, width, height, type, code, cycles_offset, cycles, is_dead, cassette, model_type)
 		VALUES (:position, :width, :height, :type, :code, :cycles_offset, :cycles, :is_dead, :cassette, 'tool');
 	`
+
 	SQLGetToolByID string = `
 		SELECT id, position, width, height, type, code, cycles_offset, cycles, is_dead, cassette
 		FROM tools
 		WHERE id = :id AND model_type = 'tool';
 	`
+
 	SQLUpdateTool string = `
 		UPDATE tools
 		SET position = :position,
@@ -55,11 +57,12 @@ const (
 			cassette = :cassette
 		WHERE id = :id AND model_type = 'tool';
 	`
+
 	SQLDeleteTool string = `
-		UPDATE tools
-		SET is_dead = 1
+		DELETE FROM tools
 		WHERE id = :id AND model_type = 'tool';
 	`
+
 	SQLListTools string = `
 		SELECT id, position, width, height, type, code, cycles_offset, cycles, is_dead, cassette
 		FROM tools

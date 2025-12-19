@@ -36,8 +36,7 @@ const (
 	`
 
 	SQLDeleteCassette string = `
-		UPDATE tools
-		SET is_dead = 1
+		DELETE FROM tools
 		WHERE id = :id AND model_type = 'cassette';
 	`
 
