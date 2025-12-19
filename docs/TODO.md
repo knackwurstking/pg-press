@@ -19,7 +19,7 @@ Fix all handler and templates
   - [x] cassette dialog (new/edit)
   - [ ] metal sheet dialog (new/edit)
   - [ ] cycle dialog (new/edit)
-  - [ ] note dialog (new/edit)
+  - [-] note dialog (new/edit)
 - [x] tool
   - [ ] Notes, dialog missing
   - [ ] Metal Sheets, dialog missing
