@@ -27,14 +27,14 @@ const (
 			cassette			INTEGER NOT NULL DEFAULT 0,
 			min_thickness		REAL NOT NULL DEFAULT 0,
 			max_thickness		REAL NOT NULL DEFAULT 0,
-			model_type			TEXT NOT NULL, -- e.g.: "tool", "cassette"
+			model_type			TEXT NOT NULL, -- e.g.: "tool", "cassette",
 
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
 	`
 
 	SQLCreateTool string = `
-	INSERT INTO tools (position, width, height, type, code, cycles_offset, cycles, is_dead, cassette, model_type)
+		INSERT INTO tools (position, width, height, type, code, cycles_offset, cycles, is_dead, cassette, model_type)
 		VALUES (:position, :width, :height, :type, :code, :cycles_offset, :cycles, :is_dead, :cassette, 'tool');
 	`
 
