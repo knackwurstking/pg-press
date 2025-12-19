@@ -18,6 +18,10 @@ const (
 
 type NoteLevel int
 
+func (nl NoteLevel) IsValid() bool {
+	return nl >= LevelNormal && nl <= LevelBroken
+}
+
 type Note struct {
 	ID        EntityID  `json:"id"`
 	Level     NoteLevel `json:"level"`

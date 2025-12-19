@@ -116,14 +116,13 @@ func GetNoteFormData(c echo.Context) (*shared.Note, *errors.MasterError) {
 	}
 
 	// Validate level is within valid range (0=INFO, 1=ATTENTION, 2=BROKEN)
-	if levelInt < 0 || levelInt > 2 {
+	note.Level = shared.NoteLevel(levelInt)
+	if !note.Level.IsValid() {
 		return nil, errors.NewMasterError(
-			fmt.Errorf("invalid level value: %d (must be 0, 1, or 2)", levelInt),
+			fmt.Errorf("invalid level value: %d", levelInt),
 			http.StatusBadRequest,
 		)
 	}
-
-	note.Level = shared.NoteLevel(levelInt)
 
 	// Parse content (required)
 	note.Content = strings.TrimSpace(c.FormValue("content"))

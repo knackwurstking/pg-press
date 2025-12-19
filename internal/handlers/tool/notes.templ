@@ -21,7 +21,7 @@ templ Notes(toolID shared.EntityID, notes []*shared.Note) {
 		</button>
 	}
 	if len(notes) > 0 {
-		<div class="notes-list">
+		<div class="notes-list flex flex-col gap">
 			for _, n := range notes {
 				@components.NoteCard(n, nil)
 			}
