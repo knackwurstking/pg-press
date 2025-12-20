@@ -43,13 +43,13 @@ const (
 // Table Helpers: "users"
 // -----------------------------------------------------------------------------
 
-const SQLGetUserByID string = `
+const SQLGetUser string = `
 	SELECT id, name, api_key
 	FROM users
 	WHERE id = :id;
 `
 
-func GetUserByID(id shared.TelegramID) (*shared.User, *errors.MasterError) {
+func GetUser(id shared.TelegramID) (*shared.User, *errors.MasterError) {
 	return ScanUser(DBUser.QueryRow(SQLGetUserByID, sql.Named("id", id)))
 }
 
@@ -66,6 +66,86 @@ func GetUserByApiKey(apiKey string) (user *shared.User, merr *errors.MasterError
 // -----------------------------------------------------------------------------
 // Table Helpers: "cookies"
 // -----------------------------------------------------------------------------
+
+// ListCookies
+const SQLListCookies string = `
+	SELECT user_agent, value, user_id, last_login
+	FROM cookies;
+`
+
+func ListCookies() (cookies []*shared.Cookie, merr *errors.MasterError) {
+	rows, err := DBUser.Query(SQLListCookies)
+	if err != nil {
+		return nil, errors.NewMasterError(err, 0)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		cookie, merr := ScanCookie(rows)
+		if merr != nil {
+			return nil, merr
+		}
+		cookies = append(cookies, cookie)
+	}
+
+	return cookies, nil
+}
+
+const SQLListCookiesByUserID string = `
+	SELECT user_agent, value, user_id, last_login
+	FROM cookies
+	WHERE user_id = :user_id
+	ORDER BY last_login DESC;
+`
+
+func ListCookiesByUserID(userID shared.TelegramID) (cookies []*shared.Cookie, merr *errors.MasterError) {
+	rows, err := DBUser.Query(SQLListCookiesByUserID, sql.Named("user_id", userID))
+	if err != nil {
+		return nil, errors.NewMasterError(err, 0)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		cookie, merr := ScanCookie(rows)
+		if merr != nil {
+			return nil, merr
+		}
+		cookies = append(cookies, cookie)
+	}
+
+	return cookies, nil
+}
+
+const SQLListCookiesByApiKey string = `
+	SELECT user_agent, value, user_id, last_login
+	FROM cookies
+	WHERE user_id = :user_id
+	ORDER BY last_login DESC;
+`
+
+func ListCookiesByApiKey(apiKey string) (cookies []*shared.Cookie, merr *errors.MasterError) {
+	// Get user id from the users table
+	user, merr := GetUserByApiKey(apiKey)
+	if merr != nil {
+		return nil, merr
+	}
+
+	rows, err := DBUser.Query(SQLListCookiesByApiKey, sql.Named("user_id", user.ID))
+	if err != nil {
+		return nil, errors.NewMasterError(err, 0)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		cookie, merr := ScanCookie(rows)
+		if merr != nil {
+			return nil, merr
+		}
+		cookies = append(cookies, cookie)
+	}
+
+	return cookies, nil
+}
 
 const SQLGetCookie string = `
 	SELECT user_agent, value, user_id, last_login
@@ -119,39 +199,31 @@ func UpdateCookie(value string, cookie *shared.Cookie) *errors.MasterError {
 	return nil
 }
 
-const SQLListCookiesByApiKey string = `
-	SELECT user_agent, value, user_id, last_login
-	FROM cookies
-	WHERE user_id = :user_id
-	ORDER BY last_login DESC;
+const SQLDeleteCookie string = `
+	DELETE FROM cookies
+	WHERE value = :value;
 `
 
-func ListCookiesByApiKey(apiKey string) (cookies []*shared.Cookie, merr *errors.MasterError) {
-	// Get user id from the users table
-	user, merr := GetUserByApiKey(apiKey)
-	if merr != nil {
-		return nil, merr
-	}
-
-	rows, err := DBUser.Query(SQLListCookiesByApiKey, sql.Named("user_id", user.ID))
+func DeleteCookie(value string) *errors.MasterError {
+	_, err := DBUser.Exec(SQLDeleteCookie, sql.Named("value", value))
 	if err != nil {
-		return nil, errors.NewMasterError(err, 0)
+		return errors.NewMasterError(err, 0)
 	}
-	defer rows.Close()
-
-	for rows.Next() {
-		cookie, merr := ScanCookie(rows)
-		if merr != nil {
-			return nil, merr
-		}
-		cookies = append(cookies, cookie)
-	}
-
-	return cookies, nil
+	return nil
 }
 
-// TODO: DeleteCookie
-// TODO: DeleteCookiesByUserID
+const SQLDeleteCookiesByUserID string = `
+	DELETE FROM cookies
+	WHERE user_id = :user_id;
+`
+
+func DeleteCookiesByUserID(userID shared.TelegramID) *errors.MasterError {
+	_, err := DBUser.Exec(SQLDeleteCookiesByUserID, sql.Named("user_id", userID))
+	if err != nil {
+		return errors.NewMasterError(err, 0)
+	}
+	return nil
+}
 
 // -----------------------------------------------------------------------------
 // Scanners

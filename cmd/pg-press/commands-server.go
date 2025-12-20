@@ -11,7 +11,6 @@ import (
 	"os"
 
 	"github.com/knackwurstking/pg-press/internal/assets"
-	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/handlers"
 
@@ -67,7 +66,7 @@ func middlewareConfiguration(e *echo.Echo) {
 		},
 	}))
 
-	e.Use(middlewareKeyAuth(db))
+	e.Use(middlewareKeyAuth())
 	e.Use(ui.EchoMiddlewareCache(pages))
 }
 
@@ -78,7 +77,7 @@ func middlewareConfiguration(e *echo.Echo) {
 func setupRouter(e *echo.Echo, prefix string) {
 	// Static File Server
 	e.StaticFS(prefix+"/", assets.GetAssets())
-	handlers.RegisterAll(db, e)
+	handlers.RegisterAll(e)
 }
 
 /*******************************************************************************

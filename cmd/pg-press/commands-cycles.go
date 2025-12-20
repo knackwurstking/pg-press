@@ -5,7 +5,7 @@ import (
 	"os"
 	"text/tabwriter"
 
-	"github.com/knackwurstking/pg-press/internal/common"
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/shared"
 
 	"github.com/SuperPaintman/nice/cli"
@@ -31,7 +31,7 @@ func listCyclesAllCommand() cli.Command {
 			argPressNumber := cli.Int64Arg(cmd, "press-number", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(*argCustomDBPath, func(db *common.DB) error {
+				return withDBOperation(*argCustomDBPath, false, func() error {
 					// Validate press number
 					pressNumber := shared.PressNumber(*argPressNumber)
 					if !pressNumber.IsValid() {
@@ -39,22 +39,9 @@ func listCyclesAllCommand() cli.Command {
 					}
 
 					// Get all cycles and filter by press
-					allCycles, err := db.Press.Cycles.List()
+					cycles, err := db.ListCyclesByPressNumber(pressNumber)
 					if err != nil {
 						return fmt.Errorf("retrieve cycles: %v", err)
-					}
-
-					// Filter cycles by press number
-					var cycles []*shared.Cycle
-					for _, cycle := range allCycles {
-						if cycle.PressNumber == pressNumber {
-							cycles = append(cycles, cycle)
-						}
-					}
-
-					if len(cycles) == 0 {
-						fmt.Fprintf(os.Stderr, "No cycles found for press %d.\n", pressNumber)
-						return nil
 					}
 
 					// Create tabwriter for nice formatting
@@ -98,11 +85,10 @@ func deleteCycleCommand() cli.Command {
 			cycleIDArg := cli.Int64Arg(cmd, "cycle-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(*customDBPath, func(db *common.DB) error {
+				return withDBOperation(*customDBPath, false, func() error {
 					// Delete cycle
-					err := db.Press.Cycles.Delete(shared.EntityID(*cycleIDArg))
-					if err != nil {
-						return fmt.Errorf("delete cycle: %v", err)
+					if merr := db.DeleteCycle(shared.EntityID(*cycleIDArg)); merr != nil {
+						return fmt.Errorf("delete cycle: %v", merr)
 					}
 					return nil
 				})

@@ -55,133 +55,71 @@ const (
 )
 
 // -----------------------------------------------------------------------------
-// SQL Queries
-// -----------------------------------------------------------------------------
-
-// -----------------------------------------------------------------------------
 // Table Helpers: "presses"
 // -----------------------------------------------------------------------------
 
-const (
-	SQLGetToolIDForCassette string = `
-		SELECT id FROM tools WHERE cassette = ?
-	`
+// -----------------------------------------------------------------------------
+// Table Helpers: "cycles"
+// -----------------------------------------------------------------------------
 
-	SQLGetPressNumberForTool string = `
-		SELECT id FROM presses WHERE slot_up = :tool_id OR slot_down = :tool_id
-	`
-)
+const SQLListCyclesByPressNumber string = `
+	SELECT id, tool_id, press_number, cycles, start, stop
+	FROM cycles
+	WHERE press_number = :press_number;
+`
 
-func GetPressNumberForTool(db *common.DB, toolID shared.EntityID) shared.PressNumber {
-	var pressNumber shared.PressNumber = -1
-
-	// Get the tool ID from the cassette ID, if the `toolID` is a cassette
-	var id shared.EntityID
-	db.Tool.UpperTools.DB().QueryRow(SQLGetToolIDForCassette, toolID).Scan(&id)
-	if id > 0 {
-		toolID = id
+func ListCyclesByPressNumber(pressNumber shared.PressNumber) ([]shared.Cycle, *errors.MasterError) {
+	rows, err := DBUser.Query(SQLListCyclesByPressNumber, sql.Named("press_number", int64(pressNumber)))
+	if err != nil {
+		return nil, errors.NewMasterError(err, 0)
 	}
+	defer rows.Close()
 
-	db.Press.Presses.DB().QueryRow(
-		SQLGetPressNumberForTool, sql.Named("tool_id", toolID),
-	).Scan(&pressNumber)
-
-	return pressNumber
-}
-
-func GetPressUtilization(db *common.DB, pressNumber shared.PressNumber) (
-	*shared.PressUtilization, *errors.MasterError,
-) {
-	pu := &shared.PressUtilization{PressNumber: pressNumber}
-
-	press, merr := db.Press.Presses.GetByID(pressNumber)
-	if merr != nil {
-		return nil, merr
-	}
-
-	if press.SlotUp > 0 {
-		// Get the top tool and cassette
-		mTool, merr := db.Tool.UpperTools.GetByID(press.SlotUp)
+	var cycles []shared.Cycle
+	for rows.Next() {
+		cycle, merr := ScanCycle(rows)
 		if merr != nil {
 			return nil, merr
 		}
-		pu.SlotUpper = mTool.(*shared.Tool)
-
-		if pu.SlotUpper.Cassette > 0 {
-			cassette, merr := db.Tool.Cassettes.GetByID(pu.SlotUpper.Cassette)
-			if merr != nil {
-				return nil, merr
-			}
-			pu.SlotUpperCassette = cassette.(*shared.Cassette)
-		}
+		cycles = append(cycles, *cycle)
 	}
 
-	if press.SlotDown > 0 {
-		mTool, merr := db.Tool.LowerTools.GetByID(press.SlotDown)
-		if merr != nil {
-			return nil, merr
-		}
-		pu.SlotLower = mTool.(*shared.Tool)
-	}
-
-	return pu, nil
+	return cycles, nil
 }
 
-func GetPressUtilizations(db *common.DB, pressNumbers []shared.PressNumber) (
-	map[shared.PressNumber]*shared.PressUtilization, *errors.MasterError,
-) {
-	utilizations := make(map[shared.PressNumber]*shared.PressUtilization, len(pressNumbers))
+const SQLDeleteCycle string = `
+	DELETE FROM cycles
+	WHERE id = :id;
+`
 
-	for _, pn := range pressNumbers {
-		pu, merr := GetPressUtilization(db, pn)
-		if merr != nil && merr.Code != http.StatusNotFound {
-			return nil, merr
-		}
-		utilizations[pn] = pu
+func DeleteCycle(id shared.EntityID) *errors.MasterError {
+	_, err := DBUser.Exec(SQLDeleteCycle, sql.Named("id", int64(id)))
+	if err != nil {
+		return errors.NewMasterError(err, 0)
 	}
-
-	return utilizations, nil
+	return nil
 }
 
 // -----------------------------------------------------------------------------
-// Table Helpers: "press_cycles"
+// Table Helpers: "press_regenerations"
 // -----------------------------------------------------------------------------
 
-func ListCyclesForTool(db *common.DB, toolID shared.EntityID) ([]*shared.Cycle, *errors.MasterError) {
-	cycles, merr := db.Press.Cycles.List()
-	if merr != nil {
-		return nil, merr
+// -----------------------------------------------------------------------------
+// Scan Helpers
+// -----------------------------------------------------------------------------
+
+func ScanCycle(row Scannable) (cycle *shared.Cycle, merr *errors.MasterError) {
+	cycle = &shared.Cycle{}
+	err := row.Scan(
+		&cycle.ID,
+		&cycle.ToolID,
+		&cycle.PressNumber,
+		&cycle.PressCycles,
+		&cycle.Start,
+		&cycle.Stop,
+	)
+	if err != nil {
+		return nil, errors.NewMasterError(err, 0)
 	}
-
-	// Filter cycles for the toolID
-	i := 0
-	for _, c := range cycles {
-		if c.ToolID != toolID {
-			continue
-		}
-
-		cycles[i] = c
-		i++
-	}
-
-	return cycles[:i], nil
-}
-
-// TODO: Need to check for tool regenerations and only count cycles since the last regeneration
-func GetTotalCyclesForTool(db *common.DB, toolID shared.EntityID) (int64, *errors.MasterError) {
-	var totalCycles int64 = 0
-
-	cycles, merr := db.Press.Cycles.List()
-	if merr != nil {
-		return totalCycles, merr
-	}
-	for _, c := range cycles {
-		if c.ToolID != toolID {
-			continue
-		}
-
-		totalCycles += c.PartialCycles
-	}
-
-	return totalCycles, nil
+	return cycle, nil
 }

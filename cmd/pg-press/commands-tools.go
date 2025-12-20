@@ -8,9 +8,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/errors"
-	"github.com/knackwurstking/pg-press/internal/services/helper"
 	"github.com/knackwurstking/pg-press/internal/shared"
 
 	"github.com/SuperPaintman/nice/cli"
@@ -43,7 +41,7 @@ func listToolsCommand() cli.Command {
 				cli.Optional)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(*customDBPath, func(r *common.DB) error {
+				return withDBOperation(*customDBPath, false, func() error {
 					// Get all tools from database
 					var tools []shared.ModelTool
 					if t, merr := r.Tool.Tools.List(); merr != nil {
@@ -130,7 +128,6 @@ func listToolsCommand() cli.Command {
 	}
 }
 
-// FIXME: tools/cassettes share the same ID space, so marking a cassette as dead should also be possible
 func markDeadCommand() cli.Command {
 	return cli.Command{
 		Name:  "mark-dead",
