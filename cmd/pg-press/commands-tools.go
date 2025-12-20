@@ -86,8 +86,12 @@ func listToolsCommand() cli.Command {
 
 						cassette := "-"
 						if !tool.IsCassette() {
-							cassette = fmt.Sprintf("%d", tool.(*shared.Tool).Cassette)
+							// This is a regular tool, show its cassette ID
+							if t, ok := tool.(*shared.Tool); ok {
+								cassette = fmt.Sprintf("%d", t.Cassette)
+							}
 						}
+						// If it's a cassette, cassette remains "-" (no cassette reference)
 
 						fmt.Fprintf(w, "%d\t%dx%d\t%d\t%s\t%s\t%d\t%d\t%s\t%t\n",
 							base.ID,
