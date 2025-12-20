@@ -76,42 +76,45 @@ func listToolsCommand() cli.Command {
 					// Create tabwriter for nice formatting
 					w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 
-					// Print header
-					fmt.Fprintln(w, "ID\tFORMAT\tPOSITION\tTYPE\tCODE\tCYCLES OFFSET\tCYCLES\tCASSETTE\tIS DEAD")
-					fmt.Fprintln(w, "--\t------\t--------\t----\t----\t-------------\t------\t--------\t-------")
+					fmt.Printf("=== TOOLS ===\n\n")
+					fmt.Printf("ID\tFORMAT\tPOSITION\tTYPE\tCODE\tCYCLES OFFSET\tCYCLES\tCASSETTE\tIS DEAD\n")
+					fmt.Printf("--\t------\t--------\t----\t----\t-------------\t------\t--------\t-------\n")
 
-					// Print each tool
-					for _, tool := range tools {
-						base := tool.GetBase()
+					for _, t := range tools {
+						fmt.Printf("%d\t%dx%d\t%d\t%s\t%s\t%d\t%d\t%d\t%t\n",
+							t.ID,
+							t.Width, t.Height,
+							t.Position,
+							t.Type,
+							t.Code,
+							t.CyclesOffset,
+							t.Cycles,
+							t.Cassette,
+							t.IsDead,
+						)
+					}
 
-						cassette := "-"
-						if !tool.IsCassette() {
-							// This is a regular tool, show its cassette ID
-							if t, ok := tool.(*shared.Tool); ok {
-								cassette = fmt.Sprintf("%d", t.Cassette)
-							}
-						}
-						// If it's a cassette, cassette remains "-" (no cassette reference)
+					fmt.Printf("\n=== CASSETTES ===\n\n")
+					fmt.Printf("ID\tFORMAT\tPOSITION\tTYPE\tCODE\tCYCLES OFFSET\tCYCLES\tMIN THICKNESS\tMAX THICKNESS\tIS DEAD\n")
+					fmt.Printf("--\t------\t--------\t----\t----\t-------------\t------\t-------------\t-------------\t-------\n")
 
-						fmt.Fprintf(w, "%d\t%dx%d\t%d\t%s\t%s\t%d\t%d\t%s\t%t\n",
-							base.ID,
-							base.Width, base.Height,
-							base.Position,
-							base.Type,
-							base.Code,
-							base.CyclesOffset,
-							base.Cycles,
-							cassette,
-							base.IsDead,
+					for _, c := range cassettes {
+						fmt.Printf("%d\t%dx%d\t%d\t%s\t%s\t%d\t%d\t%d\t%d\t%t\n",
+							c.ID,
+							c.Width, c.Height,
+							c.Position,
+							c.Type,
+							c.Code,
+							c.CyclesOffset,
+							c.Cycles,
+							c.MinThickness,
+							c.MaxThickness,
+							c.IsDead,
 						)
 					}
 
 					// Flush the tabwriter
-					w.Flush()
-
-					fmt.Printf("\nTotal tools: %d\n", len(tools))
-
-					return nil
+					return w.Flush()
 				})
 			}
 		}),
@@ -127,7 +130,7 @@ func markDeadCommand() cli.Command {
 			toolIDArg := cli.Int64Arg(cmd, "tool-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(*customDBPath, func(r *common.DB) error {
+				return withDBOperation(*customDBPath, func(r *common.DB) error { // TODO: Continue refactoring here...
 					toolID := shared.EntityID(*toolIDArg)
 
 					// Get tool first to check if it exists
