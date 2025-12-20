@@ -12,35 +12,6 @@ import (
 // ------------------------------------------------------------------------------
 
 const (
-	SQLCreateMetalSheetsTable string = `
-		CREATE TABLE IF NOT EXISTS metal_sheets (
-			id 				INTEGER NOT NULL,
-			tool_id 		INTEGER NOT NULL,
-			tile_height 	REAL NOT NULL,
-			value 			REAL NOT NULL,
-			type 			TEXT NOT NULL,
-			marke_height 	INTEGER,
-			stf 			REAL,
-			stf_max 		REAL,
-			identifier 		TEXT,
-
-			PRIMARY KEY("id" AUTOINCREMENT),
-			FOREIGN KEY(tool_id) REFERENCES tools(id) ON DELETE CASCADE
-		);
-	`
-
-	SQLCreateToolRegenerationsTable string = `
-		CREATE TABLE IF NOT EXISTS tool_regenerations (
-			id 		INTEGER NOT NULL,
-			tool_id INTEGER NOT NULL,
-			start 	INTEGER NOT NULL,
-			stop 	INTEGER NOT NULL,
-			cycles 	INTEGER NOT NULL,
-
-			PRIMARY KEY("id" AUTOINCREMENT)
-		);
-	`
-
 	SQLCreateToolsTable string = `
 		CREATE TABLE IF NOT EXISTS tools (
 			id					INTEGER NOT NULL, 			-- Base Tool
@@ -61,6 +32,8 @@ const (
 	`
 )
 
+// -----------------------------------------------------------------------------
+// Table Helpers: "tools"
 // -----------------------------------------------------------------------------
 
 const SQLGetTool string = `
@@ -140,53 +113,6 @@ func ReviveTool(id shared.EntityID) *errors.MasterError {
 // -----------------------------------------------------------------------------
 // Scan Helpers
 // -----------------------------------------------------------------------------
-
-func ScanUpperMetalSheet(row Scannable) (*shared.UpperMetalSheet, *errors.MasterError) {
-	var ums shared.UpperMetalSheet
-	err := row.Scan(
-		&ums.ID,
-		&ums.ToolID,
-		&ums.TileHeight,
-		&ums.Value,
-	)
-	if err != nil {
-		return nil, errors.NewMasterError(err, 0)
-	}
-	return &ums, nil
-}
-
-func ScanLowerMetalSheet(row Scannable) (*shared.LowerMetalSheet, *errors.MasterError) {
-	var lms shared.LowerMetalSheet
-	err := row.Scan(
-		&lms.ID,
-		&lms.ToolID,
-		&lms.TileHeight,
-		&lms.Value,
-		&lms.MarkeHeight,
-		&lms.STF,
-		&lms.STFMax,
-		&lms.Identifier,
-	)
-	if err != nil {
-		return nil, errors.NewMasterError(err, 0)
-	}
-	return &lms, nil
-}
-
-func ScanToolRegeneration(row Scannable) (*shared.ToolRegeneration, *errors.MasterError) {
-	var tr shared.ToolRegeneration
-	err := row.Scan(
-		&tr.ID,
-		&tr.ToolID,
-		&tr.Start,
-		&tr.Stop,
-		&tr.Cycles,
-	)
-	if err != nil {
-		return nil, errors.NewMasterError(err, 0)
-	}
-	return &tr, nil
-}
 
 func ScanTool(row Scannable) (*shared.Tool, *errors.MasterError) {
 	var t shared.Tool

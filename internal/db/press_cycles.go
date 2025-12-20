@@ -12,20 +12,6 @@ import (
 // -----------------------------------------------------------------------------
 
 const (
-	SQLCreatePressesTable string = `
-		CREATE TABLE IF NOT EXISTS presses (
-			id 					INTEGER NOT NULL,
-			slot_up 			INTEGER NOT NULL,
-			slot_down 			INTEGER NOT NULL,
-			last_regeneration 	INTEGER NOT NULL,
-			start_cycles 		INTEGER NOT NULL,
-			cycles 				INTEGER NOT NULL,
-			type 				TEXT NOT NULL,
-
-			PRIMARY KEY("id")
-		);
-	`
-
 	SQLCreateCyclesTable string = `
 		CREATE TABLE IF NOT EXISTS cycles (
 			id           INTEGER NOT NULL,
@@ -38,27 +24,44 @@ const (
 			PRIMARY KEY("id")
 		);
 	`
-
-	SQLCreatePressRegenerationsTable string = `
-		CREATE TABLE IF NOT EXISTS press_regenerations (
-			id 				INTEGER NOT NULL,
-			press_number 	INTEGER NOT NULL,
-			start 			INTEGER NOT NULL,
-			stop 			INTEGER NOT NULL,
-			cycles 			INTEGER NOT NULL,
-
-			PRIMARY KEY("id" AUTOINCREMENT)
-		);
-	`
 )
-
-// -----------------------------------------------------------------------------
-// Table Helpers: "presses"
-// -----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------
 // Table Helpers: "cycles"
 // -----------------------------------------------------------------------------
+
+const SQLListToolCycles string = `
+	SELECT id, tool_id, press_number, cycles, start, stop
+	FROM cycles
+	WHERE tool_id = :tool_id;
+`
+
+func ListToolCycles(toolID shared.EntityID) ([]*shared.Cycle, *errors.MasterError) {
+	rows, err := DBUser.Query(SQLListToolCycles, sql.Named("tool_id", int64(toolID)))
+	if err != nil {
+		return nil, errors.NewMasterError(err, 0)
+	}
+
+	var cycles []*shared.Cycle
+	for rows.Next() {
+		cycle, merr := ScanCycle(rows)
+		if merr != nil {
+			rows.Close()
+			return nil, merr
+		}
+		cycles = append(cycles, cycle)
+	}
+	rows.Close()
+
+	var merr *errors.MasterError
+	for _, c := range cycles {
+		if merr = InjectPartialCycles(c); merr != nil {
+			return nil, merr.Wrap("failed to inject partial cycles for ID %d", c.ID)
+		}
+	}
+
+	return cycles, nil
+}
 
 const SQLListCyclesByPressNumber string = `
 	SELECT id, tool_id, press_number, cycles, start, stop
@@ -105,10 +108,45 @@ func DeleteCycle(id shared.EntityID) *errors.MasterError {
 	return nil
 }
 
-const SQLTotalToolCycles string = `
+// get all cycles for the fiven tool id across all presses
+const SQLGetTotalToolCycles string = `
+	SELECT id, tool_id, press_number, cycles, start, stop
+	FROM cycles
+	WHERE tool_id = ?;
 `
 
-func TotalToolCycles(id shared.EntityID) (int64, *errors.MasterError) // TODO: ...
+// TotalToolCycles since last tool regeneration
+//
+// TODO: Take into account tool regenerations
+func GetTotalToolCycles(id shared.EntityID) (int64, *errors.MasterError) {
+	rows, err := DBUser.Query(SQLGetTotalToolCycles, int64(id))
+	if err != nil {
+		return 0, errors.NewMasterError(err, 0)
+	}
+
+	var cycles []*shared.Cycle
+	for rows.Next() {
+		cycle, merr := ScanCycle(rows)
+		if merr != nil {
+			rows.Close()
+			return 0, merr
+		}
+
+		cycles = append(cycles, cycle)
+	}
+	rows.Close()
+
+	// Inject partial cycles for each cycle
+	var totalCycles int64 = 0
+	for _, c := range cycles {
+		if merr := InjectPartialCycles(c); merr != nil {
+			return 0, merr.Wrap("failed to inject partial cycles for ID %d", c.ID)
+		}
+		totalCycles += c.PartialCycles
+	}
+
+	return totalCycles, nil
+}
 
 const SQLGetPrevCycle string = `
 	SELECT cycles
@@ -118,6 +156,8 @@ const SQLGetPrevCycle string = `
 	LIMIT 1;
 `
 
+// InjectPartialCycles calculates and injects the partial cycles into the given cycle
+//
 // TODO: Take into account the last press regeneration when calculating partial cycles
 func InjectPartialCycles(cycle *shared.Cycle) *errors.MasterError {
 	var lastKnownCycles int64 = 0
@@ -137,29 +177,8 @@ func InjectPartialCycles(cycle *shared.Cycle) *errors.MasterError {
 }
 
 // -----------------------------------------------------------------------------
-// Table Helpers: "press_regenerations"
-// -----------------------------------------------------------------------------
-
-// -----------------------------------------------------------------------------
 // Scan Helpers
 // -----------------------------------------------------------------------------
-
-func ScanPress(row Scannable) (press *shared.Press, merr *errors.MasterError) {
-	press = &shared.Press{}
-	err := row.Scan(
-		&press.ID,
-		&press.SlotUp,
-		&press.SlotDown,
-		&press.LastRegeneration,
-		&press.StartCycles,
-		&press.Cycles,
-		&press.Type,
-	)
-	if err != nil {
-		return nil, errors.NewMasterError(err, 0)
-	}
-	return press, nil
-}
 
 func ScanCycle(row Scannable) (cycle *shared.Cycle, merr *errors.MasterError) {
 	cycle = &shared.Cycle{}
@@ -175,19 +194,4 @@ func ScanCycle(row Scannable) (cycle *shared.Cycle, merr *errors.MasterError) {
 		return nil, errors.NewMasterError(err, 0)
 	}
 	return cycle, nil
-}
-
-func ScanPressRegeneration(row Scannable) (pr *shared.PressRegeneration, merr *errors.MasterError) {
-	pr = &shared.PressRegeneration{}
-	err := row.Scan(
-		&pr.ID,
-		&pr.PressNumber,
-		&pr.Start,
-		&pr.Stop,
-		&pr.Cycles,
-	)
-	if err != nil {
-		return nil, errors.NewMasterError(err, 0)
-	}
-	return pr, nil
 }

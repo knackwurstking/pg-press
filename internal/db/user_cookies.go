@@ -12,16 +12,6 @@ import (
 // -----------------------------------------------------------------------------
 
 const (
-	SQLCreateUsersTable string = `
-		CREATE TABLE IF NOT EXISTS users (
-			id 			INTEGER NOT NULL,
-			name 		TEXT NOT NULL,
-			api_key 	TEXT NOT NULL UNIQUE,
-
-			PRIMARY KEY("id" AUTOINCREMENT)
-		);
-	`
-
 	SQLCreateCookiesTable string = `
 		CREATE TABLE IF NOT EXISTS cookies (
 			user_agent 	TEXT NOT NULL,
@@ -38,30 +28,6 @@ const (
 		ON cookies(user_id);
 	`
 )
-
-// -----------------------------------------------------------------------------
-// Table Helpers: "users"
-// -----------------------------------------------------------------------------
-
-const SQLGetUser string = `
-	SELECT id, name, api_key
-	FROM users
-	WHERE id = :id;
-`
-
-func GetUser(id shared.TelegramID) (*shared.User, *errors.MasterError) {
-	return ScanUser(DBUser.QueryRow(SQLGetUserByID, sql.Named("id", id)))
-}
-
-const SQLGetUserByApiKey string = `
-	SELECT id, name, api_key
-	FROM users
-	WHERE api_key = :api_key;
-`
-
-func GetUserByApiKey(apiKey string) (user *shared.User, merr *errors.MasterError) {
-	return ScanUser(DBUser.QueryRow(SQLGetUserByApiKey, sql.Named("api_key", apiKey)))
-}
 
 // -----------------------------------------------------------------------------
 // Table Helpers: "cookies"
@@ -228,19 +194,6 @@ func DeleteCookiesByUserID(userID shared.TelegramID) *errors.MasterError {
 // -----------------------------------------------------------------------------
 // Scanners
 // -----------------------------------------------------------------------------
-
-func ScanUser(row Scannable) (*shared.User, *errors.MasterError) {
-	var u shared.User
-	err := row.Scan(
-		&u.ID,
-		&u.Name,
-		&u.ApiKey,
-	)
-	if err != nil {
-		return nil, errors.NewMasterError(err, 0)
-	}
-	return &u, nil
-}
 
 func ScanCookie(row Scannable) (*shared.Cookie, *errors.MasterError) {
 	var c shared.Cookie

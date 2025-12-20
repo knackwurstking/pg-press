@@ -200,8 +200,12 @@ func listCyclesCommand() cli.Command {
 						return merr.Wrap("find tool with ID %d", *toolIDArg)
 					}
 
+					totalCycles, merr := db.GetTotalToolCycles(tool.ID)
+					if merr != nil {
+						return merr.Wrap("calculate total cycles for tool ID %d", tool.ID)
+					}
 					fmt.Printf("Tool Information: %s\n\n", tool.String())
-					fmt.Printf("\nTotal cycles: %d\n", db.TotalToolCycles(tool.ID))
+					fmt.Printf("\nTotal cycles: %d\n", totalCycles)
 
 					// Get cycles for this tool
 					cycles, merr := db.ListToolCycles(tool.ID)
@@ -252,7 +256,7 @@ func listRegenerationsCommand() cli.Command {
 			toolIDArg := cli.Int64Arg(cmd, "tool-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(*customDBPath, func(db *common.DB) error {
+				return withDBOperation(*customDBPath, false, func() error {
 					toolID := shared.EntityID(*toolIDArg)
 
 					// Get tool first to check if it exists and show info
