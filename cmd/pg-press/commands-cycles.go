@@ -39,9 +39,9 @@ func listCyclesAllCommand() cli.Command {
 					}
 
 					// Get all cycles and filter by press
-					cycles, err := db.ListCyclesByPressNumber(pressNumber)
-					if err != nil {
-						return fmt.Errorf("retrieve cycles: %v", err)
+					cycles, merr := db.ListCyclesByPressNumber(pressNumber)
+					if merr != nil {
+						return merr.Wrap("list cycles by press number")
 					}
 
 					// Create tabwriter for nice formatting
@@ -88,7 +88,7 @@ func deleteCycleCommand() cli.Command {
 				return withDBOperation(*customDBPath, false, func() error {
 					// Delete cycle
 					if merr := db.DeleteCycle(shared.EntityID(*cycleIDArg)); merr != nil {
-						return fmt.Errorf("delete cycle: %v", merr)
+						return merr.Wrap("delete cycle")
 					}
 					return nil
 				})

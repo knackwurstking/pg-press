@@ -51,7 +51,7 @@ func listToolsCommand() cli.Command {
 				return withDBOperation(*customDBPath, false, func() error {
 					tools, merr := db.ListTools()
 					if merr != nil {
-						return errors.Wrap(merr, "list tools")
+						return merr.Wrap("list tools")
 					}
 
 					// Filter tools by ID if range/list is specified
@@ -130,7 +130,7 @@ func deleteToolCommand() cli.Command {
 				return withDBOperation(*customDBPath, false, func() error {
 					merr := db.DeleteTool(shared.EntityID(*toolIDArg))
 					if merr != nil {
-						return errors.Wrap(merr, "delete tool")
+						return merr.Wrap("delete tool")
 					}
 					return nil
 				})
@@ -151,7 +151,7 @@ func markDeadCommand() cli.Command {
 				return withDBOperation(*customDBPath, false, func() error {
 					merr := db.MarkToolAsDead(shared.EntityID(*toolIDArg))
 					if merr != nil {
-						return errors.Wrap(merr, "mark tool as dead")
+						return merr.Wrap("mark tool as dead")
 					}
 					return nil
 				})
@@ -169,28 +169,10 @@ func reviveDeadToolCommand() cli.Command {
 			toolIDArg := cli.Int64Arg(cmd, "tool-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(*customDBPath, false, func() error { // TODO: ...
-					toolID := shared.EntityID(*toolIDArg)
-
-					// Get tool first to check if it exists
-					tool, err := r.Tool.Tools.GetByID(toolID)
-					if err != nil {
-						return fmt.Errorf("find tool with ID %d: %v", toolID, err)
+				return withDBOperation(*customDBPath, false, func() error {
+					if merr := db.ReviveTool(shared.EntityID(*toolIDArg)); merr != nil {
+						return merr.Wrap("revive tool")
 					}
-
-					if !tool.IsDead {
-						fmt.Printf("Tool %d (%dx%d %s) is not dead and doesn't need to be revived.\n", tool.ID, tool.Width, tool.Height, tool.Code)
-						return nil
-					}
-
-					// Revive tool (mark as alive)
-					tool.IsDead = false
-					err = r.Tool.Tools.Update(tool)
-					if err != nil {
-						return fmt.Errorf("revive tool: %v", err)
-					}
-
-					fmt.Printf("Successfully revived tool %d (%dx%d %s).\n", tool.ID, tool.Width, tool.Height, tool.Code)
 					return nil
 				})
 			}
@@ -202,7 +184,6 @@ func reviveDeadToolCommand() cli.Command {
 // Tool Press Cycles Commands
 // -----------------------------------------------------------------------------
 
-// FIXME: tools/cassettes share the same ID space, so marking a cassette as dead should also be possible
 func listCyclesCommand() cli.Command {
 	return cli.Command{
 		Name:  "list-cycles",
@@ -212,7 +193,7 @@ func listCyclesCommand() cli.Command {
 			toolIDArg := cli.Int64Arg(cmd, "tool-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(*customDBPath, func(r *common.DB) error {
+				return withDBOperation(*customDBPath, func(r *common.DB) error { // TODO: Continue here...
 					toolID := shared.EntityID(*toolIDArg)
 
 					// Get tool first to check if it exists and show info

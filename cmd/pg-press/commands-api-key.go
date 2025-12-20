@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/SuperPaintman/nice/cli"
+	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/williepotgieter/keymaker"
 )
 
@@ -16,8 +16,7 @@ func apiKeyCommand() cli.Command {
 			return func(cmd *cli.Command) error {
 				apiKey, err := keymaker.NewApiKey("pgp", 32)
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "Generating a new api key: %v\n", err)
-					return err
+					return errors.Wrap(err, "generate api key")
 				}
 
 				fmt.Print(apiKey) // Yes, no newline at the end

@@ -123,6 +123,20 @@ func MarkToolAsDead(id shared.EntityID) *errors.MasterError {
 	return nil
 }
 
+const SQLReviveTool string = `
+	UPDATE tools
+	SET is_dead = 0
+	WHERE id = :id;
+`
+
+func ReviveTool(id shared.EntityID) *errors.MasterError {
+	_, err := DBTool.Exec(SQLReviveTool, sql.Named("id", id))
+	if err != nil {
+		return errors.NewMasterError(err, 0)
+	}
+	return nil
+}
+
 // -----------------------------------------------------------------------------
 // Scan Helpers
 // -----------------------------------------------------------------------------
