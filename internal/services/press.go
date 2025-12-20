@@ -1,4 +1,4 @@
-package helper
+package services
 
 import (
 	"database/sql"
@@ -9,6 +9,59 @@ import (
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
 
+// -----------------------------------------------------------------------------
+// Table Creation Statements
+// -----------------------------------------------------------------------------
+
+const (
+	SQLCreatePressesTable string = `
+		CREATE TABLE IF NOT EXISTS presses (
+			id 					INTEGER NOT NULL,
+			slot_up 			INTEGER NOT NULL,
+			slot_down 			INTEGER NOT NULL,
+			last_regeneration 	INTEGER NOT NULL,
+			start_cycles 		INTEGER NOT NULL,
+			cycles 				INTEGER NOT NULL,
+			type 				TEXT NOT NULL,
+
+			PRIMARY KEY("id")
+		);
+	`
+
+	SQLCreateCyclesTable string = `
+		CREATE TABLE IF NOT EXISTS cycles (
+			id           INTEGER NOT NULL,
+			tool_id      INTEGER NOT NULL,
+			press_number INTEGER NOT NULL,
+			cycles       INTEGER NOT NULL, -- Cycles at stop time
+			start        INTEGER NOT NULL,
+			stop         INTEGER NOT NULL,
+
+			PRIMARY KEY("id")
+		);
+	`
+
+	SQLCreatePressRegenerationsTable string = `
+		CREATE TABLE IF NOT EXISTS press_regenerations (
+			id 				INTEGER NOT NULL,
+			press_number 	INTEGER NOT NULL,
+			start 			INTEGER NOT NULL,
+			stop 			INTEGER NOT NULL,
+			cycles 			INTEGER NOT NULL,
+
+			PRIMARY KEY("id" AUTOINCREMENT)
+		);
+	`
+)
+
+// -----------------------------------------------------------------------------
+// SQL Queries
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
+// Table Helpers: "presses"
+// -----------------------------------------------------------------------------
+
 const (
 	SQLGetToolIDForCassette string = `
 		SELECT id FROM tools WHERE cassette = ?
@@ -18,10 +71,6 @@ const (
 		SELECT id FROM presses WHERE slot_up = :tool_id OR slot_down = :tool_id
 	`
 )
-
-// -----------------------------------------------------------------------------
-// Table Helpers: "presses"
-// -----------------------------------------------------------------------------
 
 func GetPressNumberForTool(db *common.DB, toolID shared.EntityID) shared.PressNumber {
 	var pressNumber shared.PressNumber = -1

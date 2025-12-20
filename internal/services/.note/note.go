@@ -22,15 +22,18 @@ const (
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
 	`
+
 	SQLCreateNote string = `
 		INSERT INTO notes (level, content, created_at, linked)
 		VALUES (:level, :content, :created_at, :linked);
 	`
+
 	SQLGetNoteByID string = `
 		SELECT id, level, content, created_at, linked
 		FROM notes
 		WHERE id = :id;
 	`
+
 	SQLUpdateNote string = `
 		UPDATE notes
 		SET level 		= :level,
@@ -39,10 +42,12 @@ const (
 			linked 		= :linked
 		WHERE id = :id;
 	`
+
 	SQLDeleteNote string = `
 		DELETE FROM notes
 		WHERE id = :id;
 	`
+
 	SQLListNotes string = `
 		SELECT id, level, content, created_at, linked
 		FROM notes;

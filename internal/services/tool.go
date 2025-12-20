@@ -1,4 +1,4 @@
-package helper
+package services
 
 import (
 	"database/sql"
@@ -8,6 +8,61 @@ import (
 	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
+)
+
+// -----------------------------------------------------------------------------
+// Table Creation Statements
+// ------------------------------------------------------------------------------
+
+const (
+	SQLCreateMetalSheetsTable string = `
+		CREATE TABLE IF NOT EXISTS metal_sheets (
+			id 				INTEGER NOT NULL,
+			tool_id 		INTEGER NOT NULL,
+			tile_height 	REAL NOT NULL,
+			value 			REAL NOT NULL,
+			type 			TEXT NOT NULL,
+			marke_height 	INTEGER,
+			stf 			REAL,
+			stf_max 		REAL,
+			identifier 		TEXT,
+
+			PRIMARY KEY("id" AUTOINCREMENT),
+			FOREIGN KEY(tool_id) REFERENCES tools(id) ON DELETE CASCADE
+		);
+	`
+
+	SQLCreateToolRegenerationsTable string = `
+		CREATE TABLE IF NOT EXISTS tool_regenerations (
+			id 		INTEGER NOT NULL,
+			tool_id INTEGER NOT NULL,
+			start 	INTEGER NOT NULL,
+			stop 	INTEGER NOT NULL,
+			cycles 	INTEGER NOT NULL,
+
+			PRIMARY KEY("id" AUTOINCREMENT)
+		);
+	`
+
+	SQLCreateToolsTable string = `
+		CREATE TABLE IF NOT EXISTS tools (
+			id					INTEGER NOT NULL,
+			position 			INTEGER NOT NULL,
+			width 				INTEGER NOT NULL,
+			height 				INTEGER NOT NULL,
+			type 				TEXT NOT NULL,
+			code 				TEXT NOT NULL,
+			cycles_offset 		INTEGER NOT NULL DEFAULT 0,
+			cycles 				INTEGER NOT NULL DEFAULT 0,
+			is_dead 			INTEGER NOT NULL DEFAULT 0,
+			cassette			INTEGER NOT NULL DEFAULT 0,
+			min_thickness		REAL NOT NULL DEFAULT 0,
+			max_thickness		REAL NOT NULL DEFAULT 0,
+			model_type			TEXT NOT NULL, -- e.g.: "tool", "cassette",
+
+			PRIMARY KEY("id" AUTOINCREMENT)
+		);
+	`
 )
 
 // -----------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-package helper
+package services
 
 import (
 	"fmt"
@@ -8,6 +8,42 @@ import (
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
+
+// -----------------------------------------------------------------------------
+// Table Creation Statements
+// -----------------------------------------------------------------------------
+
+const (
+	SQLCreateCookiesTable string = `
+		CREATE TABLE IF NOT EXISTS cookies (
+			user_agent 	TEXT NOT NULL,
+			value 		TEXT NOT NULL,
+			user_id 	INTEGER NOT NULL,
+			last_login 	INTEGER NOT NULL,
+
+			PRIMARY KEY("value")
+		);
+
+		-- Index to quickly find cookies by user_id
+
+		CREATE INDEX IF NOT EXISTS idx_cookies_user_id
+		ON cookies(user_id);
+	`
+
+	SQLCreateUsersTable string = `
+		CREATE TABLE IF NOT EXISTS users (
+			id 			INTEGER NOT NULL,
+			name 		TEXT NOT NULL,
+			api_key 	TEXT NOT NULL UNIQUE,
+
+			PRIMARY KEY("id" AUTOINCREMENT)
+		);
+	`
+)
+
+// -----------------------------------------------------------------------------
+// Table Helpers: "users"
+// -----------------------------------------------------------------------------
 
 func GetUserForApiKey(db *common.DB, apiKey string) (user *shared.User, merr *errors.MasterError) {
 	users, merr := db.User.Users.List()
