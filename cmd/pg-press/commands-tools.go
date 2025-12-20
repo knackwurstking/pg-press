@@ -260,42 +260,40 @@ func listRegenerationsCommand() cli.Command {
 					toolID := shared.EntityID(*toolIDArg)
 
 					// Get tool first to check if it exists and show info
-					tool, merr := helper.GetToolByID(db, toolID)
+					tool, merr := db.GetTool(toolID)
 					if merr != nil {
-						return fmt.Errorf("find tool with ID %d: %v", toolID, merr)
+						return merr.Wrap("find tool with ID %d", toolID)
 					}
 
-					baseTool := tool.GetBase()
-					fmt.Printf("Tool Information: ID %d (%dx%d %s) - %s - %s\n\n",
-						baseTool.ID, baseTool.Width, baseTool.Height, baseTool.Code, baseTool.Type, baseTool.Position.German())
+					fmt.Printf("Tool Information: %s\n\n", tool.String())
 
 					// Get regenerations for this tool
-					regenerations, err := helper.GetRegenerationsForTool(db, toolID)
-					if err != nil {
-						return fmt.Errorf("retrieve regenerations: %v", err)
+					regenerations, merr := db.ListToolRegenerations(toolID)
+					if merr != nil {
+						return merr.Wrap("retrieve regenerations")
 					}
 
 					// Display Regenerations
 					fmt.Printf("=== REGENERATIONS ===\n")
 					if len(regenerations) == 0 {
 						fmt.Println("No regenerations found for this tool")
-					} else {
-						w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-						fmt.Fprintln(w, "ID\tTOOL ID\tSTART\tSTOP\tCYCLES")
-						fmt.Fprintln(w, "----\t-------\t-----\t----\t------")
-
-						for _, regen := range regenerations {
-							fmt.Fprintf(w, "%d\t%d\t%s\t%s\t%d\n",
-								regen.ID,
-								regen.ToolID,
-								regen.Start.FormatDate(),
-								regen.Stop.FormatDate(),
-								regen.Cycles,
-							)
-						}
-						w.Flush()
-						fmt.Printf("\nTotal regenerations: %d\n", len(regenerations))
+						return nil
 					}
+
+					w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+					fmt.Fprintln(w, "ID\tTOOL ID\tSTART\tSTOP\tCYCLES")
+					fmt.Fprintln(w, "--\t-------\t-----\t----\t------")
+
+					for _, regen := range regenerations {
+						fmt.Fprintf(w, "%d\t%d\t%s\t%s\t%d\n",
+							regen.ID,
+							regen.ToolID,
+							regen.Start.FormatDate(),
+							regen.Stop.FormatDate(),
+							regen.Cycles,
+						)
+					}
+					w.Flush()
 
 					return nil
 				})
@@ -313,7 +311,7 @@ func deleteRegenerationCommand() cli.Command {
 			regenerationIDArg := cli.Int64Arg(cmd, "regeneration-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(*customDBPath, func(r *common.DB) error {
+				return withDBOperation(*customDBPath, func(r *common.DB) error { // TODO: Continue refactoring here...
 					regenerationID := shared.EntityID(*regenerationIDArg)
 
 					// Get regeneration first to check if it exists and show info
