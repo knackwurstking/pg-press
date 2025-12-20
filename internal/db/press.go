@@ -2,9 +2,7 @@ package db
 
 import (
 	"database/sql"
-	"net/http"
 
-	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
@@ -108,6 +106,23 @@ func DeleteCycle(id shared.EntityID) *errors.MasterError {
 // Scan Helpers
 // -----------------------------------------------------------------------------
 
+func ScanPress(row Scannable) (press *shared.Press, merr *errors.MasterError) {
+	press = &shared.Press{}
+	err := row.Scan(
+		&press.ID,
+		&press.SlotUp,
+		&press.SlotDown,
+		&press.LastRegeneration,
+		&press.StartCycles,
+		&press.Cycles,
+		&press.Type,
+	)
+	if err != nil {
+		return nil, errors.NewMasterError(err, 0)
+	}
+	return press, nil
+}
+
 func ScanCycle(row Scannable) (cycle *shared.Cycle, merr *errors.MasterError) {
 	cycle = &shared.Cycle{}
 	err := row.Scan(
@@ -122,4 +137,19 @@ func ScanCycle(row Scannable) (cycle *shared.Cycle, merr *errors.MasterError) {
 		return nil, errors.NewMasterError(err, 0)
 	}
 	return cycle, nil
+}
+
+func ScanPressRegeneration(row Scannable) (pr *shared.PressRegeneration, merr *errors.MasterError) {
+	pr = &shared.PressRegeneration{}
+	err := row.Scan(
+		&pr.ID,
+		&pr.PressNumber,
+		&pr.Start,
+		&pr.Stop,
+		&pr.Cycles,
+	)
+	if err != nil {
+		return nil, errors.NewMasterError(err, 0)
+	}
+	return pr, nil
 }

@@ -33,8 +33,14 @@ const (
 // Table Helpers: "notes"
 // -----------------------------------------------------------------------------
 
+const SQLListNotesForLinked string = `
+	SELECT id, level, content, created_at, linked
+	FROM notes
+	ORDER BY created_at DESC;
+`
+
 func ListNotesForLinked(linked string, id shared.EntityID) ([]*shared.Note, *errors.MasterError) {
-	rows, err := Note.Query(SQLListNotes)
+	rows, err := DBNote.Query(SQLListNotesForLinked)
 	if err != nil {
 		return nil, errors.NewMasterError(err, 0)
 	}

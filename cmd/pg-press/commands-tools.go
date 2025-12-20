@@ -8,6 +8,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 
@@ -42,48 +43,33 @@ func listToolsCommand() cli.Command {
 
 			return func(cmd *cli.Command) error {
 				return withDBOperation(*customDBPath, false, func() error {
-					// Get all tools from database
-					var tools []shared.ModelTool
-					if t, merr := r.Tool.Tools.List(); merr != nil {
-						return errors.Wrap(merr, "retrieve tools")
-					} else {
-						for _, tool := range t {
-							tools = append(tools, tool)
-						}
+					tools, merr := db.ListTools()
+					if merr != nil {
+						return errors.Wrap(merr, "list tools")
 					}
-					if ct, merr := r.Tool.Cassettes.List(); merr != nil {
-						return errors.Wrap(merr, "retrieve cassettes")
-					} else {
-						for _, tool := range ct {
-							tools = append(tools, tool)
-						}
+
+					cassettes, merr := db.ListCassettes()
+					if merr != nil {
+						return errors.Wrap(merr, "list cassettes")
 					}
-					// Sort tools per id
-					slices.SortFunc(tools, func(a, b shared.ModelTool) int {
-						if a.GetID() < b.GetID() {
-							return -1
-						}
-						if a.GetID() > b.GetID() {
-							return 1
-						}
-						return 0
-					})
 
 					// Filter tools by ID if range/list is specified
 					if *idRange != "" {
 						var err error
-						tools, err = filterToolsByIDs(tools, *idRange)
+
+						tools, err = filterToolsByIDs[*shared.Tool](tools, *idRange)
 						if err != nil {
 							return errors.Wrap(err, "filter tools by IDs")
 						}
+
+						cassettes, err = filterToolsByIDs[*shared.Cassette](cassettes, *idRange)
+						if err != nil {
+							return errors.Wrap(err, "filter cassettes by IDs")
+						}
 					}
 
-					if len(tools) == 0 {
-						if *idRange != "" {
-							fmt.Printf("No tools found matching ID criteria '%s'.\n", *idRange)
-						} else {
-							fmt.Println("No tools found in database.")
-						}
+					if len(tools) == 0 || len(cassettes) == 0 {
+						fmt.Fprintln(os.Stderr, "No tools or cassettes found with the specified criteria.")
 						return nil
 					}
 
@@ -436,7 +422,7 @@ func deleteRegenerationCommand() cli.Command {
 }
 
 // filterToolsByIDs filters tools based on ID range or comma-separated list
-func filterToolsByIDs(tools []shared.ModelTool, idSpec string) ([]shared.ModelTool, error) {
+func filterToolsByIDs[T shared.ModelTool](tools []T, idSpec string) ([]T, error) {
 	var targetIDs []shared.EntityID
 	var err error
 
