@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"slices"
 	"strconv"
 	"strings"
 	"text/tabwriter"
@@ -21,15 +20,22 @@ func toolsCommand() cli.Command {
 		Usage: cli.Usage("Handle tools database table, list all tools"),
 		Commands: []cli.Command{
 			listToolsCommand(),
+			deleteToolCommand(),
+
 			markDeadCommand(),
 			reviveDeadToolCommand(),
-			deleteToolCommand(),
+
 			listCyclesCommand(),
+
 			listRegenerationsCommand(),
 			deleteRegenerationCommand(),
 		},
 	}
 }
+
+// -----------------------------------------------------------------------------
+// Tool Commands
+// -----------------------------------------------------------------------------
 
 func listToolsCommand() cli.Command {
 	return cli.Command{
@@ -121,83 +127,6 @@ func listToolsCommand() cli.Command {
 	}
 }
 
-func markDeadCommand() cli.Command {
-	return cli.Command{
-		Name:  "mark-dead",
-		Usage: cli.Usage("Mark a tool as dead by ID"),
-		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
-			customDBPath := createDBPathOption(cmd)
-			toolIDArg := cli.Int64Arg(cmd, "tool-id", cli.Required)
-
-			return func(cmd *cli.Command) error {
-				return withDBOperation(*customDBPath, func(r *common.DB) error { // TODO: Continue refactoring here...
-					toolID := shared.EntityID(*toolIDArg)
-
-					// Get tool first to check if it exists
-					tool, err := r.Tool.Tools.GetByID(toolID)
-					if err != nil {
-						return fmt.Errorf("find tool with ID %d: %v", toolID, err)
-					}
-
-					if tool.IsDead {
-						fmt.Printf("Tool %d (%dx%d %s) is already marked as dead.\n", tool.ID, tool.Width, tool.Height, tool.Code)
-						return nil
-					}
-
-					// Mark tool as dead
-					tool.IsDead = true
-					merr := r.Tool.Tools.Update(tool)
-					if merr != nil {
-						return errors.Wrap(merr, "mark tool as dead")
-					}
-
-					fmt.Printf("Successfully marked tool %d (%dx%d %s) as dead.\n", tool.ID, tool.Width, tool.Height, tool.Code)
-					return nil
-				})
-			}
-		}),
-	}
-}
-
-// FIXME: tools/cassettes share the same ID space, so marking a cassette as dead should also be possible
-func reviveDeadToolCommand() cli.Command {
-	return cli.Command{
-		Name:  "revive",
-		Usage: cli.Usage("Revive a dead tool by ID"),
-		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
-			customDBPath := createDBPathOption(cmd)
-			toolIDArg := cli.Int64Arg(cmd, "tool-id", cli.Required)
-
-			return func(cmd *cli.Command) error {
-				return withDBOperation(*customDBPath, func(r *common.DB) error {
-					toolID := shared.EntityID(*toolIDArg)
-
-					// Get tool first to check if it exists
-					tool, err := r.Tool.Tools.GetByID(toolID)
-					if err != nil {
-						return fmt.Errorf("find tool with ID %d: %v", toolID, err)
-					}
-
-					if !tool.IsDead {
-						fmt.Printf("Tool %d (%dx%d %s) is not dead and doesn't need to be revived.\n", tool.ID, tool.Width, tool.Height, tool.Code)
-						return nil
-					}
-
-					// Revive tool (mark as alive)
-					tool.IsDead = false
-					err = r.Tool.Tools.Update(tool)
-					if err != nil {
-						return fmt.Errorf("revive tool: %v", err)
-					}
-
-					fmt.Printf("Successfully revived tool %d (%dx%d %s).\n", tool.ID, tool.Width, tool.Height, tool.Code)
-					return nil
-				})
-			}
-		}),
-	}
-}
-
 func deleteToolCommand() cli.Command {
 	return cli.Command{
 		Name:  "delete",
@@ -207,7 +136,7 @@ func deleteToolCommand() cli.Command {
 			toolIDArg := cli.Int64Arg(cmd, "tool-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(*customDBPath, func(r *common.DB) error {
+				return withDBOperation(*customDBPath, func(r *common.DB) error { // TODO: Continue refactoring here...
 					toolID := shared.EntityID(*toolIDArg)
 					// Get tool first to check if it exists and show info
 					tool, merr := helper.GetToolByID(r, toolID)
@@ -278,6 +207,71 @@ func deleteToolCommand() cli.Command {
 	}
 }
 
+func markDeadCommand() cli.Command {
+	return cli.Command{
+		Name:  "mark-dead",
+		Usage: cli.Usage("Mark a tool as dead by ID"),
+		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
+			customDBPath := createDBPathOption(cmd)
+			toolIDArg := cli.Int64Arg(cmd, "tool-id", cli.Required)
+
+			return func(cmd *cli.Command) error {
+				return withDBOperation(*customDBPath, false, func() error {
+					merr := db.MarkToolAsDead(shared.EntityID(*toolIDArg))
+					if merr != nil {
+						return errors.Wrap(merr, "mark tool as dead")
+					}
+
+					fmt.Printf("Successfully marked tool %d as dead.\n", *toolIDArg)
+					return nil
+				})
+			}
+		}),
+	}
+}
+
+func reviveDeadToolCommand() cli.Command {
+	return cli.Command{
+		Name:  "revive",
+		Usage: cli.Usage("Revive a dead tool by ID"),
+		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
+			customDBPath := createDBPathOption(cmd)
+			toolIDArg := cli.Int64Arg(cmd, "tool-id", cli.Required)
+
+			return func(cmd *cli.Command) error {
+				return withDBOperation(*customDBPath, false, func() error {
+					toolID := shared.EntityID(*toolIDArg)
+
+					// Get tool first to check if it exists
+					tool, err := r.Tool.Tools.GetByID(toolID)
+					if err != nil {
+						return fmt.Errorf("find tool with ID %d: %v", toolID, err)
+					}
+
+					if !tool.IsDead {
+						fmt.Printf("Tool %d (%dx%d %s) is not dead and doesn't need to be revived.\n", tool.ID, tool.Width, tool.Height, tool.Code)
+						return nil
+					}
+
+					// Revive tool (mark as alive)
+					tool.IsDead = false
+					err = r.Tool.Tools.Update(tool)
+					if err != nil {
+						return fmt.Errorf("revive tool: %v", err)
+					}
+
+					fmt.Printf("Successfully revived tool %d (%dx%d %s).\n", tool.ID, tool.Width, tool.Height, tool.Code)
+					return nil
+				})
+			}
+		}),
+	}
+}
+
+// -----------------------------------------------------------------------------
+// Tool Press Cycles Commands
+// -----------------------------------------------------------------------------
+
 // FIXME: tools/cassettes share the same ID space, so marking a cassette as dead should also be possible
 func listCyclesCommand() cli.Command {
 	return cli.Command{
@@ -336,6 +330,10 @@ func listCyclesCommand() cli.Command {
 		}),
 	}
 }
+
+// -----------------------------------------------------------------------------
+// Tool Regenerations Commands
+// ---------------------------------------------------------------------------
 
 func listRegenerationsCommand() cli.Command {
 	return cli.Command{
@@ -427,6 +425,10 @@ func deleteRegenerationCommand() cli.Command {
 		}),
 	}
 }
+
+// -----------------------------------------------------------------------------
+// Helper Functions
+// -----------------------------------------------------------------------------
 
 // filterToolsByIDs filters tools based on ID range or comma-separated list
 func filterToolsByIDs[T shared.ModelTool](tools []T, idSpec string) ([]T, error) {

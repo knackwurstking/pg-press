@@ -62,10 +62,20 @@ const (
 
 // -----------------------------------------------------------------------------
 
+const SQLGetTool string = `
+	SELECT id, width, height, position, type, codee, cycles_offset, cycles, is_dead, cassette
+	FROM tools
+	WHERE model_type = 'tool' AND id = :id;
+`
+
+func GetTool(id shared.EntityID) (*shared.Tool, *errors.MasterError) {
+	return ScanTool(DBTool.QueryRow(SQLGetTool, id))
+}
+
 const SQLListTools string = `
 	SELECT id, width, height, position, type, codee, cycles_offset, cycles, is_dead, cassette
-	WHERE model_type = 'tool'
 	FROM tools
+	WHERE model_type = 'tool'
 	ORDER BY id ASC;
 `
 
@@ -86,10 +96,20 @@ func ListTools() (tools []*shared.Tool, merr *errors.MasterError) {
 	return tools, nil
 }
 
+const SQLGetCassette string = `
+	SELECT id, width, height, position, type, codee, cycles_offset, cycles, is_dead, min_thickness, max_thickness 
+	FROM tools
+	WHERE model_type = 'cassette' AND id = :id;
+`
+
+func GetCassette(id shared.EntityID) (*shared.Cassette, *errors.MasterError) {
+	return ScanCassette(DBTool.QueryRow(SQLGetCassette, id))
+}
+
 const SQLListCassettes string = `
 	SELECT id, width, height, position, type, codee, cycles_offset, cycles, is_dead, min_thickness, max_thickness 
-	WHERE model_type = 'cassette'
 	FROM tools
+	WHERE model_type = 'cassette'
 	ORDER BY id ASC;
 `
 
@@ -109,6 +129,20 @@ func ListCassettes() ([]*shared.Cassette, *errors.MasterError) {
 		cassettes = append(cassettes, cassette)
 	}
 	return cassettes, nil
+}
+
+const SQLMarkToolAsDead string = `
+	UPDATE tools
+	SET is_dead = 1
+	WHERE id = :id;
+`
+
+func MarkToolAsDead(id shared.EntityID) *errors.MasterError {
+	_, err := DBTool.Exec(SQLMarkToolAsDead, sql.Named("id", id))
+	if err != nil {
+		return errors.NewMasterError(err, 0)
+	}
+	return nil
 }
 
 // -----------------------------------------------------------------------------
