@@ -108,40 +108,18 @@ func DeleteCycle(id shared.EntityID) *errors.MasterError {
 	return nil
 }
 
-// get all cycles for the fiven tool id across all presses
-const SQLGetTotalToolCycles string = `
-	SELECT id, tool_id, press_number, cycles, start, stop
-	FROM cycles
-	WHERE tool_id = ?;
-`
-
 // TotalToolCycles since last tool regeneration
 //
 // TODO: Take into account tool regenerations
 func GetTotalToolCycles(id shared.EntityID) (int64, *errors.MasterError) {
-	rows, err := DBUser.Query(SQLGetTotalToolCycles, int64(id))
-	if err != nil {
-		return 0, errors.NewMasterError(err, 0)
+	cycles, merr := ListToolCycles(id)
+	if merr != nil {
+		return 0, merr.Wrap("failed to list tool cycles for tool ID %d", id)
 	}
-
-	var cycles []*shared.Cycle
-	for rows.Next() {
-		cycle, merr := ScanCycle(rows)
-		if merr != nil {
-			rows.Close()
-			return 0, merr
-		}
-
-		cycles = append(cycles, cycle)
-	}
-	rows.Close()
 
 	// Inject partial cycles for each cycle
 	var totalCycles int64 = 0
 	for _, c := range cycles {
-		if merr := InjectPartialCycles(c); merr != nil {
-			return 0, merr.Wrap("failed to inject partial cycles for ID %d", c.ID)
-		}
 		totalCycles += c.PartialCycles
 	}
 
