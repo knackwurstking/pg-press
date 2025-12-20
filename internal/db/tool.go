@@ -1,6 +1,8 @@
 package db
 
 import (
+	"database/sql"
+
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
@@ -53,7 +55,6 @@ const (
 			cassette			INTEGER NOT NULL DEFAULT 0, -- Tool
 			min_thickness		REAL NOT NULL DEFAULT 0, 	-- Cassette
 			max_thickness		REAL NOT NULL DEFAULT 0, 	-- Cassette
-			model_type			TEXT NOT NULL, 				-- Just for identification, e.g.: "tool", "cassette",
 
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
@@ -63,9 +64,9 @@ const (
 // -----------------------------------------------------------------------------
 
 const SQLGetTool string = `
-	SELECT id, width, height, position, type, codee, cycles_offset, cycles, is_dead, cassette
+	SELECT id, width, height, position, type, codee, cycles_offset, cycles, is_dead, cassette, min_thickness, max_thickness
 	FROM tools
-	WHERE model_type = 'tool' AND id = :id;
+	WHERE id = :id;
 `
 
 func GetTool(id shared.EntityID) (*shared.Tool, *errors.MasterError) {
@@ -73,9 +74,8 @@ func GetTool(id shared.EntityID) (*shared.Tool, *errors.MasterError) {
 }
 
 const SQLListTools string = `
-	SELECT id, width, height, position, type, codee, cycles_offset, cycles, is_dead, cassette
+	SELECT id, width, height, position, type, codee, cycles_offset, cycles, is_dead, cassette, min_thickness, max_thickness
 	FROM tools
-	WHERE model_type = 'tool'
 	ORDER BY id ASC;
 `
 
@@ -96,39 +96,17 @@ func ListTools() (tools []*shared.Tool, merr *errors.MasterError) {
 	return tools, nil
 }
 
-const SQLGetCassette string = `
-	SELECT id, width, height, position, type, codee, cycles_offset, cycles, is_dead, min_thickness, max_thickness 
-	FROM tools
-	WHERE model_type = 'cassette' AND id = :id;
+const SQLDeleteTool string = `
+	DELETE FROM tools
+	WHERE id = :id;
 `
 
-func GetCassette(id shared.EntityID) (*shared.Cassette, *errors.MasterError) {
-	return ScanCassette(DBTool.QueryRow(SQLGetCassette, id))
-}
-
-const SQLListCassettes string = `
-	SELECT id, width, height, position, type, codee, cycles_offset, cycles, is_dead, min_thickness, max_thickness 
-	FROM tools
-	WHERE model_type = 'cassette'
-	ORDER BY id ASC;
-`
-
-func ListCassettes() ([]*shared.Cassette, *errors.MasterError) {
-	r, err := DBTool.Query(SQLListCassettes)
+func DeleteTool(id shared.EntityID) *errors.MasterError {
+	_, err := DBTool.Exec(SQLDeleteTool, sql.Named("id", id))
 	if err != nil {
-		return nil, errors.NewMasterError(err, 0)
+		return errors.NewMasterError(err, 0)
 	}
-	defer r.Close()
-
-	var cassettes []*shared.Cassette
-	for r.Next() {
-		cassette, merr := ScanCassette(r)
-		if merr != nil {
-			return nil, merr
-		}
-		cassettes = append(cassettes, cassette)
-	}
-	return cassettes, nil
+	return nil
 }
 
 const SQLMarkToolAsDead string = `
@@ -209,30 +187,11 @@ func ScanTool(row Scannable) (*shared.Tool, *errors.MasterError) {
 		&t.Cycles,
 		&t.IsDead,
 		&t.Cassette,
+		&t.MinThickness,
+		&t.MaxThickness,
 	)
 	if err != nil {
 		return nil, errors.NewMasterError(err, 0)
 	}
 	return &t, nil
-}
-
-func ScanCassette(row Scannable) (*shared.Cassette, *errors.MasterError) {
-	var c shared.Cassette
-	err := row.Scan(
-		&c.ID,
-		&c.Position,
-		&c.Width,
-		&c.Height,
-		&c.Type,
-		&c.Code,
-		&c.CyclesOffset,
-		&c.Cycles,
-		&c.IsDead,
-		&c.MinThickness,
-		&c.MaxThickness,
-	)
-	if err != nil {
-		return nil, errors.NewMasterError(err, 0)
-	}
-	return &c, nil
 }
