@@ -2,14 +2,12 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/shared"
 
 	"github.com/SuperPaintman/nice/cli"
-	"github.com/labstack/gommon/color"
 )
 
 func listUserCommand() cli.Command {
@@ -38,18 +36,10 @@ func showUserCommand() cli.Command {
 			telegramIDArg := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(*customDBPath, func(r *common.DB) error {
-					telegramID := shared.TelegramID(*telegramIDArg)
-
-					user, merr := r.User.Users.GetByID(telegramID)
+				return withDBOperation(*customDBPath, false, func() error {
+					user, merr := db.GetUser(shared.TelegramID(*telegramIDArg))
 					if merr != nil {
-						fmt.Fprintf(os.Stderr, "Failed to get user (%d): %v\n", telegramID, merr)
-
-						if merr.Code == http.StatusNotFound {
-							os.Exit(exitCodeNotFound)
-						}
-
-						os.Exit(exitCodeGeneric)
+						return merr.Wrap("get user")
 					}
 
 					if *flagApiKey {
@@ -57,25 +47,23 @@ func showUserCommand() cli.Command {
 						return nil
 					}
 
-					fmt.Printf("%-15s %-20s %s\n", "Telegram ID", "User Name", "Api Key")
-					fmt.Printf("%-15s %-20s %s\n", "-----------", "---------", "-------")
-					fmt.Printf("%-15d %-20s %s\n", user.ID, user.Name, user.ApiKey)
+					fmt.Printf("Telegram ID\tUser Name\tApi Key\n")
+					fmt.Printf("-----------\t---------\t-------\n")
+					fmt.Printf("%d\t%s\t%s\n", user.ID, user.Name, user.ApiKey)
 
-					if cookies, err := r.User.Cookies.List(); err != nil {
-						fmt.Fprintf(os.Stderr, "Get cookies from the database: %v\n", err)
-					} else {
-						if len(cookies) > 0 {
-							fmt.Printf("\n%s <last-login> - <user> - <value> - <user-agent>\n\n",
-								color.Underline(color.Bold("Cookies:")))
+					cookies, merr := db.ListCookiesByUserID(user.ID)
+					if merr != nil {
+						return merr.Wrap("list cookies for user ID %d", user.ID)
+					}
 
-							for _, c := range cookies {
-								fmt.Printf("%s - %s - %s - \"%s\"\n",
-									c.LastLogin.FormatDateTime(),
-									color.Bold(c.UserID.String()),
-									c.Value,
-									color.Italic(c.UserAgent),
-								)
-							}
+					if len(cookies) > 0 {
+						fmt.Printf("\n=== Cookies ===n")
+						fmt.Printf("LAST LOGIN\tUSER\tVALUE\tUSER AGENT>\n")
+
+						for _, c := range cookies {
+							fmt.Printf("%s\t%s\t%s\t%s\n",
+								c.LastLogin.FormatDateTime(), c.UserID.String(),
+								c.Value, c.UserAgent)
 						}
 					}
 
@@ -96,15 +84,14 @@ func addUserCommand() cli.Command {
 			apiKey := cli.StringArg(cmd, "api-key", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(*customDBPath, func(r *common.DB) error {
+				return withDBOperation(*customDBPath, false, func() error {
 					telegramID := shared.TelegramID(*telegramIDArg)
 
-					user := &shared.User{
+					merr := db.AddUser(&shared.User{
 						ID:     telegramID,
 						Name:   *userName,
 						ApiKey: *apiKey,
-					}
-					merr := r.User.Users.Create(user)
+					})
 					if merr != nil && merr.IsExistsError() {
 						return fmt.Errorf("user already exists: %d (%s)", telegramID, *userName)
 					}

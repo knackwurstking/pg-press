@@ -47,6 +47,23 @@ func GetUserByApiKey(apiKey string) (user *shared.User, merr *errors.MasterError
 	return ScanUser(DBUser.QueryRow(SQLGetUserByApiKey, sql.Named("api_key", apiKey)))
 }
 
+const SQLAddUser string = `
+	INSERT INTO users (id, name, api_key)
+	VALUES (:id, :name, :api_key);
+`
+
+func AddUser(user *shared.User) *errors.MasterError {
+	_, err := DBUser.Exec(SQLAddUser,
+		sql.Named("id", user.ID),
+		sql.Named("name", user.Name),
+		sql.Named("api_key", user.ApiKey),
+	)
+	if err != nil {
+		return errors.NewMasterError(err, 0)
+	}
+	return nil
+}
+
 const SQLListUsers string = `
 	SELECT id, name, api_key
 	FROM users
