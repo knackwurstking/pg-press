@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/shared"
 
 	"github.com/SuperPaintman/nice/cli"
@@ -16,7 +17,6 @@ func removeCookiesCommand() cli.Command {
 		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
 			customDBPath := createDBPathOption(cmd)
 
-			// TODO: Switch this to user_id instead, this will make things a lot easier
 			useApiKey := cli.Bool(cmd, "api-key",
 				cli.Usage("Remove all entries containing the api-key"),
 				cli.Optional)
@@ -27,53 +27,32 @@ func removeCookiesCommand() cli.Command {
 
 			return func(cmd *cli.Command) error {
 				return withDBOperation(*customDBPath, false, func() error {
-					var err error
 					if *useApiKey {
-						// Get users, we need to find the user ID for the api key
-						users, merr := r.User.Users.List()
+						user, merr := db.GetUserByApiKey(*value)
 						if merr != nil {
-							fmt.Fprintf(os.Stderr, "Failed to list users: %v\n", merr)
+							fmt.Fprintf(os.Stderr, "Failed to get user by api key: %v\n", merr)
+							if merr.Code == http.StatusNotFound {
+								os.Exit(exitCodeNotFound)
+							}
 							os.Exit(exitCodeGeneric)
 						}
 
-						// Get cookies, we need to find all cookies for the user
-						// ID which matches the api key
-						cookies, merr := r.User.Cookies.List()
+						merr = db.DeleteCookiesByUserID(user.ID)
 						if merr != nil {
-							fmt.Fprintf(os.Stderr, "Failed to list cookies: %v\n", merr)
+							fmt.Fprintf(os.Stderr, "Failed to remove cookies for user: %v\n", merr)
+							if merr.Code == http.StatusNotFound {
+								os.Exit(exitCodeNotFound)
+							}
 							os.Exit(exitCodeGeneric)
 						}
-
-						for _, u := range users {
-							// Only process users which match the api key
-							if u.ApiKey != *value {
-								continue
-							}
-
-							// Remove all cookies matching the current user ID
-							// (user_id and api_key are unique)
-							for _, c := range cookies {
-								if c.UserID != u.ID {
-									continue
-								}
-
-								merr := r.User.Cookies.Delete(c.Value)
-								if merr != nil {
-									// Ignore not found errors, continue with others
-									if merr.Code == http.StatusNotFound {
-										continue
-									}
-									fmt.Fprintf(os.Stderr, "Failed to remove cookie entry: %v\n", merr)
-									os.Exit(exitCodeGeneric)
-								}
-							}
-						}
-					} else {
-						err = r.User.Cookies.Delete(*value)
 					}
 
-					if err != nil {
-						fmt.Fprintf(os.Stderr, "Failed to remove cookie entry: %v\n", err)
+					merr := db.DeleteCookie(*value)
+					if merr != nil {
+						fmt.Fprintf(os.Stderr, "Failed to remove cookie: %v\n", merr)
+						if merr.Code == http.StatusNotFound {
+							os.Exit(exitCodeNotFound)
+						}
 						os.Exit(exitCodeGeneric)
 					}
 

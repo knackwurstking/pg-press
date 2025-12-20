@@ -67,14 +67,14 @@ func GetUserByApiKey(apiKey string) (user *shared.User, merr *errors.MasterError
 // Table Helpers: "cookies"
 // -----------------------------------------------------------------------------
 
-const SQLGetCookieByValue string = `
+const SQLGetCookie string = `
 	SELECT user_agent, value, user_id, last_login
 	FROM cookies
 	WHERE value = :value;
 `
 
-func GetCookieByValue(value string) (*shared.Cookie, *errors.MasterError) {
-	return ScanCookie(DBUser.QueryRow(SQLGetCookieByValue, sql.Named("value", value)))
+func GetCookie(value string) (*shared.Cookie, *errors.MasterError) {
+	return ScanCookie(DBUser.QueryRow(SQLGetCookie, sql.Named("value", value)))
 }
 
 const SQLAddCookie string = `
@@ -149,6 +149,9 @@ func ListCookiesByApiKey(apiKey string) (cookies []*shared.Cookie, merr *errors.
 
 	return cookies, nil
 }
+
+// TODO: DeleteCookie
+// TODO: DeleteCookiesByUserID
 
 // -----------------------------------------------------------------------------
 // Scanners
