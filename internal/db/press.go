@@ -66,20 +66,27 @@ const SQLListCyclesByPressNumber string = `
 	WHERE press_number = :press_number;
 `
 
-func ListCyclesByPressNumber(pressNumber shared.PressNumber) ([]shared.Cycle, *errors.MasterError) {
+func ListCyclesByPressNumber(pressNumber shared.PressNumber) ([]*shared.Cycle, *errors.MasterError) {
 	rows, err := DBUser.Query(SQLListCyclesByPressNumber, sql.Named("press_number", int64(pressNumber)))
 	if err != nil {
 		return nil, errors.NewMasterError(err, 0)
 	}
 	defer rows.Close()
 
-	var cycles []shared.Cycle
+	var cycles []*shared.Cycle
 	for rows.Next() {
 		cycle, merr := ScanCycle(rows)
 		if merr != nil {
 			return nil, merr
 		}
-		cycles = append(cycles, *cycle)
+		cycles = append(cycles, cycle)
+	}
+
+	var merr *errors.MasterError
+	for _, c := range cycles {
+		if merr = InjectPartialCycles(c); merr != nil {
+			return nil, merr.Wrap("failed to inject partial cycles for ID %d", c.ID)
+		}
 	}
 
 	return cycles, nil
@@ -95,6 +102,37 @@ func DeleteCycle(id shared.EntityID) *errors.MasterError {
 	if err != nil {
 		return errors.NewMasterError(err, 0)
 	}
+	return nil
+}
+
+const SQLTotalToolCycles string = `
+`
+
+func TotalToolCycles(id shared.EntityID) (int64, *errors.MasterError) // TODO: ...
+
+const SQLGetPrevCycle string = `
+	SELECT cycles
+	FROM cycles
+	WHERE press_number = ? AND stop <= ?
+	ORDER BY stop DESC
+	LIMIT 1;
+`
+
+// TODO: Take into account the last press regeneration when calculating partial cycles
+func InjectPartialCycles(cycle *shared.Cycle) *errors.MasterError {
+	var lastKnownCycles int64 = 0
+	err := DBPress.QueryRow(SQLGetPrevCycle, cycle.PressNumber, cycle.Start).Scan(&lastKnownCycles)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// No previous cycles found, return full cycles
+			cycle.PartialCycles = cycle.PressCycles
+		} else {
+			cycle.PartialCycles = 0
+		}
+		return errors.NewMasterError(err, 0)
+	}
+
+	cycle.PartialCycles = cycle.PressCycles - lastKnownCycles
 	return nil
 }
 

@@ -193,47 +193,44 @@ func listCyclesCommand() cli.Command {
 			toolIDArg := cli.Int64Arg(cmd, "tool-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(*customDBPath, func(r *common.DB) error { // TODO: Continue here...
-					toolID := shared.EntityID(*toolIDArg)
-
+				return withDBOperation(*customDBPath, false, func() error {
 					// Get tool first to check if it exists and show info
-					tool, merr := r.Tool.Tools.GetByID(toolID)
+					tool, merr := db.GetTool(shared.EntityID(*toolIDArg))
 					if merr != nil {
-						return fmt.Errorf("find tool with ID %d: %v", toolID, merr)
+						return merr.Wrap("find tool with ID %d", *toolIDArg)
 					}
 
-					fmt.Printf("Tool Information: ID %d (%dx%d %s) - %s\n\n",
-						tool.ID, tool.Width, tool.Height, tool.Code, tool.Type) // NOTE: " - %s" removed, tool position
+					fmt.Printf("Tool Information: %s\n\n", tool.String())
+					fmt.Printf("\nTotal cycles: %d\n", db.TotalToolCycles(tool.ID))
 
 					// Get cycles for this tool
-					cycles, merr := helper.ListCyclesForTool(r, toolID)
+					cycles, merr := db.ListToolCycles(tool.ID)
 					if merr != nil {
 						return fmt.Errorf("retrieve cycles: %v", merr)
 					}
 
-					// Display Cycles
-					fmt.Printf("=== PRESS CYCLES ===\n")
 					if len(cycles) == 0 {
 						fmt.Println("No cycles found for this tool")
-					} else {
-						w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-						fmt.Fprintln(w, "ID\tTOOL ID\tPRESS\tPRESS CYCLES\tPARTIAL CYCLES\tSTART\tSTOP")
-						fmt.Fprintln(w, "--\t-------\t-----\t------------\t--------------\t-----\t----")
-
-						for _, cycle := range cycles {
-							fmt.Fprintf(w, "%d\t%d\t%d\t%d\t%d\t%s\n%s",
-								cycle.ID,
-								cycle.ToolID,
-								cycle.PressNumber,
-								cycle.PressCycles,
-								cycle.PartialCycles,
-								cycle.Start.FormatDate(),
-								cycle.Stop.FormatDate(),
-							)
-						}
-						w.Flush()
-						fmt.Printf("\nTotal cycles: %d\n", len(cycles))
+						return nil
 					}
+
+					w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+
+					fmt.Fprintln(w, "ID\tTOOL ID\tPRESS\tPRESS CYCLES\tPARTIAL CYCLES\tSTART\tSTOP")
+					fmt.Fprintln(w, "--\t-------\t-----\t------------\t--------------\t-----\t----")
+
+					for _, c := range cycles {
+						fmt.Fprintf(w, "%d\t%d\t%d\t%d\t%d\t%s\n%s",
+							c.ID,
+							c.ToolID,
+							c.PressNumber,
+							c.PressCycles,
+							c.PartialCycles,
+							c.Start.FormatDate(),
+							c.Stop.FormatDate(),
+						)
+					}
+					w.Flush()
 
 					return nil
 				})
