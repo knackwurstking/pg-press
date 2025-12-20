@@ -1,35 +1,8 @@
 package shared
 
 import (
-	"database/sql"
-
 	"github.com/knackwurstking/pg-press/internal/errors"
 )
-
-type Service[T any, ID comparable] interface {
-	DB() *sql.DB
-
-	// Setup initializes the service with the provided setup configuration
-	Setup() *errors.MasterError
-
-	// Close cleans up any resources held by the service
-	Close() *errors.MasterError
-
-	// Create adds a new entity to the repository
-	Create(entity T) (T, *errors.MasterError)
-
-	// GetByID retrieves an entity by its ID
-	GetByID(id ID) (T, *errors.MasterError)
-
-	// Update modifies an existing entity in the repository
-	Update(entity T) *errors.MasterError
-
-	// Delete removes an entity from the repository by its ID
-	Delete(id ID) *errors.MasterError
-
-	// List retrieves all entities from the repository
-	List() ([]T, *errors.MasterError)
-}
 
 type Entity[T any] interface {
 	// Validate checks if the entity has valid data
