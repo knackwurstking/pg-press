@@ -6,16 +6,16 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
-	"github.com/knackwurstking/pg-press/internal/services/helper"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/labstack/echo/v4"
 )
 
 func GetLoginPage(c echo.Context) *echo.HTTPError {
-	Log.Debug("Login page requested from IP: %#v", c.RealIP())
+	log.Debug("Login page requested from IP: %#v", c.RealIP())
 
 	t := Page(
 		PageProps{
@@ -34,7 +34,7 @@ func GetLoginPage(c echo.Context) *echo.HTTPError {
 }
 
 func PostLoginPage(c echo.Context) *echo.HTTPError {
-	Log.Debug("Login attempt from IP: %#v", c.RealIP())
+	log.Debug("Login attempt from IP: %#v", c.RealIP())
 
 	apiKey := c.FormValue("api-key")
 
@@ -68,32 +68,13 @@ func processApiKeyLogin(apiKey string, ctx echo.Context) *errors.MasterError {
 		return merr
 	}
 
-	merr = clearExistingSession(ctx)
-	if merr != nil {
-		Log.Warn("Failed to clear existing session: %v", merr)
-	}
-
 	merr = createSession(ctx, user.ID)
 	if merr != nil {
 		return merr
 	}
 
 	if user.IsAdmin() {
-		Log.Info("Administrator login successful: %#v, from ID: %#v", user.Name, ctx.RealIP())
-	}
-
-	return nil
-}
-
-func clearExistingSession(ctx echo.Context) *errors.MasterError {
-	cookie, err := ctx.Cookie(CookieName)
-	if err != nil {
-		return errors.NewMasterError(err, 0)
-	}
-
-	merr := DB.User.Cookies.Delete(cookie.Value)
-	if merr != nil {
-		return merr
+		log.Info("Administrator login successful: %#v, from ID: %#v", user.Name, ctx.RealIP())
 	}
 
 	return nil
@@ -106,7 +87,12 @@ func createSession(ctx echo.Context, userID shared.TelegramID) *errors.MasterErr
 		UserID:    userID,
 		LastLogin: shared.NewUnixMilli(time.Now()),
 	}
-	merr := DB.User.Cookies.Create(cookie)
+
+	if cookieContext, _ := ctx.Cookie(CookieName); cookieContext != nil && cookieContext.Value != "" {
+		return db.UpdateCookie(cookieContext.Value, cookie)
+	}
+
+	merr := db.AddCookie(cookie)
 	if merr != nil {
 		return merr
 	}

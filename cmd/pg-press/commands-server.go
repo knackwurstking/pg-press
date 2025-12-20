@@ -35,20 +35,16 @@ func serverCommand() cli.Command {
 				cli.Usage("Set server address in format <host>:<port> (e.g., localhost:8080)"))
 
 			return func(cmd *cli.Command) error {
-				db, err := openDB(*customDBPath, true)
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "Error opening database: %v\n", err)
-					return err
-				}
+				return withDBOperation(*customDBPath, true, func() error {
+					e := echo.New()
+					e.HideBanner = true
 
-				e := echo.New()
-				e.HideBanner = true
+					middlewareConfiguration(e)
+					setupRouter(e, env.ServerPathPrefix)
+					startServer(e, env.ServerAddress)
 
-				middlewareConfiguration(e, db)
-				setupRouter(e, db, env.ServerPathPrefix)
-				startServer(e, env.ServerAddress)
-
-				return nil
+					return nil
+				})
 			}
 		}),
 	}
@@ -58,7 +54,7 @@ func serverCommand() cli.Command {
  * Server Middleware Configuration
  ******************************************************************************/
 
-func middlewareConfiguration(e *echo.Echo, db *common.DB) {
+func middlewareConfiguration(e *echo.Echo) {
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Output:           os.Stderr,
 		Format:           "${time_custom} ${method} ${status} ${uri} ${latency_human} ${remote_ip} ${error} ${custom}\n",
@@ -79,7 +75,7 @@ func middlewareConfiguration(e *echo.Echo, db *common.DB) {
  * Server Route Configuration
  ******************************************************************************/
 
-func setupRouter(e *echo.Echo, db *common.DB, prefix string) {
+func setupRouter(e *echo.Echo, prefix string) {
 	// Static File Server
 	e.StaticFS(prefix+"/", assets.GetAssets())
 	handlers.RegisterAll(db, e)

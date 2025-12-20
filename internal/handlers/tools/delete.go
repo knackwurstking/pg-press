@@ -21,13 +21,13 @@ func Delete(c echo.Context) *echo.HTTPError {
 		if merr != nil {
 			return merr.Echo()
 		}
-		Log.Debug("Deleted cassette with ID: %#v", toolID)
+		log.Debug("Deleted cassette with ID: %#v", toolID)
 	} else {
 		merr = DB.Tool.Tools.Delete(toolID)
 		if merr != nil {
 			return merr.Echo()
 		}
-		Log.Debug("Deleted tool with ID: %#v", toolID)
+		log.Debug("Deleted tool with ID: %#v", toolID)
 	}
 
 	urlb.SetHXTrigger(c, "tools-tab")

@@ -3,7 +3,6 @@ package dialogs
 import (
 	"net/http"
 
-	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/logger"
 	ui "github.com/knackwurstking/ui/ui-templ"
@@ -12,12 +11,9 @@ import (
 
 var (
 	log = logger.New("handler: dialogs")
-	db  *common.DB
 )
 
-func Register(cdb *common.DB, e *echo.Echo, path string) {
-	db = cdb
-
+func Register(e *echo.Echo, path string) {
 	ui.RegisterEchoRoutes(e, env.ServerPathPrefix, []*ui.EchoRoute{
 		// Edit tool dialog
 		ui.NewEchoRoute(http.MethodGet, path+"/edit-tool", GetToolDialog),

@@ -48,7 +48,7 @@ func handleUserNameChange(c echo.Context, user *shared.User) *errors.MasterError
 	if merr != nil {
 		return merr
 	}
-	Log.Info("User %#v changed their name to %#v\n", user.Name, userName)
+	log.Info("User %#v changed their name to %#v\n", user.Name, userName)
 
 	return nil
 }

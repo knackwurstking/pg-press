@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/handlers/auth"
 	"github.com/knackwurstking/pg-press/internal/handlers/dialogs"
 	"github.com/knackwurstking/pg-press/internal/handlers/home"
@@ -13,9 +12,9 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func RegisterAll(db *common.DB, e *echo.Echo) {
+func RegisterAll(e *echo.Echo) {
 	registers := []struct {
-		handler func(db *common.DB, e *echo.Echo, path string)
+		handler func(e *echo.Echo, path string)
 		subPath string
 	}{
 		{handler: home.Register, subPath: ""},
@@ -27,7 +26,7 @@ func RegisterAll(db *common.DB, e *echo.Echo) {
 		{handler: notes.Register, subPath: "/notes"},
 	}
 	for _, reg := range registers {
-		reg.handler(db, e, reg.subPath)
+		reg.handler(e, reg.subPath)
 	}
 
 	//help.NewHandler(r).RegisterRoutes(e, "/help")

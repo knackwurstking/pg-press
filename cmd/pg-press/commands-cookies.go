@@ -26,7 +26,7 @@ func removeCookiesCommand() cli.Command {
 				cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(*customDBPath, func(r *common.DB) error {
+				return withDBOperation(*customDBPath, false, func() error {
 					var err error
 					if *useApiKey {
 						// Get users, we need to find the user ID for the api key

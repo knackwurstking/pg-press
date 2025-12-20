@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pg-press/internal/common"
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/auth"
@@ -73,14 +74,14 @@ func init() {
 	}
 }
 
-func middlewareKeyAuth(db *common.DB) echo.MiddlewareFunc {
+func middlewareKeyAuth() echo.MiddlewareFunc {
 	return middleware.KeyAuthWithConfig(middleware.KeyAuthConfig{
 		Skipper: keyAuthSkipper,
 		KeyLookup: "header:" + echo.HeaderAuthorization +
 			",query:access_token,cookie:" + auth.CookieName,
 		AuthScheme: "Bearer",
 		Validator: func(auth string, ctx echo.Context) (bool, error) {
-			return keyAuthValidator(auth, ctx, db)
+			return keyAuthValidator(auth, ctx)
 		},
 		ErrorHandler: func(err error, c echo.Context) error {
 			logMiddleware.Error(
@@ -104,10 +105,10 @@ func keyAuthSkipper(ctx echo.Context) bool {
 		slices.Contains(keyAuthFilesToSkip, url)
 }
 
-func keyAuthValidator(auth string, ctx echo.Context, db *common.DB) (bool, error) {
+func keyAuthValidator(auth string, ctx echo.Context) (bool, error) {
 	realIP := ctx.RealIP()
 
-	user, err := validateUserFromCookie(ctx, db)
+	user, err := validateUserFromCookie(ctx)
 	if err != nil {
 		logMiddleware.Warn(
 			"Validate user from cookie failed: %v [real_ip=%s]",
@@ -115,24 +116,11 @@ func keyAuthValidator(auth string, ctx echo.Context, db *common.DB) (bool, error
 		)
 
 		// Try to get user directly from the API key
-		users, merr := db.User.Users.List()
+		var merr *errors.MasterError
+		user, merr = db.GetUserByApiKey(auth)
 		if merr != nil {
-			return false, merr.Err
+			return false, merr
 		}
-
-		// Find user by API key
-		var foundUser *shared.User
-		for _, u := range users {
-			if u.ApiKey == auth {
-				foundUser = u
-				break
-			}
-		}
-
-		if foundUser == nil {
-			return false, fmt.Errorf("invalid API key")
-		}
-		user = foundUser
 	}
 
 	logMiddleware.Debug(
@@ -145,14 +133,14 @@ func keyAuthValidator(auth string, ctx echo.Context, db *common.DB) (bool, error
 	return true, nil
 }
 
-func validateUserFromCookie(ctx echo.Context, db *common.DB) (*shared.User, error) {
+func validateUserFromCookie(ctx echo.Context) (*shared.User, error) {
 	realIP := ctx.RealIP()
 	httpCookie, err := ctx.Cookie(auth.CookieName)
 	if err != nil {
 		return nil, errors.Wrap(err, "get cookie")
 	}
 
-	cookie, merr := db.User.Cookies.GetByID(httpCookie.Value)
+	cookie, merr := db.GetCookieByValue(httpCookie.Value)
 	if merr != nil {
 		return nil, merr.Wrap("get cookie").Err
 	}
@@ -162,7 +150,7 @@ func validateUserFromCookie(ctx echo.Context, db *common.DB) (*shared.User, erro
 		return nil, fmt.Errorf("cookie has expired")
 	}
 
-	user, merr := db.User.Users.GetByID(cookie.UserID)
+	user, merr := db.GetUserByID(cookie.UserID)
 	if merr != nil {
 		return nil, merr.Wrap("validate user from API key").Err
 	}
@@ -174,12 +162,12 @@ func validateUserFromCookie(ctx echo.Context, db *common.DB) (*shared.User, erro
 		pathMatches = true
 	}
 
+	// Update last login time and cookie expiration if the path matches
 	if pathMatches {
 		cookie.LastLogin = shared.NewUnixMilli(time.Now())
 		httpCookie.Expires = cookie.ExpiredAtTime()
 
-		// Try to update cookie with lock
-		merr = db.User.Cookies.Update(cookie)
+		merr = db.UpdateCookie(cookie.Value, cookie)
 		if merr != nil {
 			logMiddleware.Error(
 				"Failed to update cookie: %v [user_name=%s, real_ip=%s]",

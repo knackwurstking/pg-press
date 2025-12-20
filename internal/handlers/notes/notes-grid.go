@@ -2,7 +2,6 @@ package notes
 
 import (
 	"github.com/knackwurstking/pg-press/internal/errors"
-	"github.com/knackwurstking/pg-press/internal/services/helper"
 
 	"github.com/labstack/echo/v4"
 )

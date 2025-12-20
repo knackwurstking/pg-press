@@ -2,24 +2,12 @@ package main
 
 import (
 	"github.com/knackwurstking/pg-press/internal/common"
-	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/db"
 
 	"github.com/SuperPaintman/nice/cli"
 
 	_ "github.com/mattn/go-sqlite3"
 )
-
-func openDB(dbPath string, createMode bool) (*common.DB, error) {
-	log.Debug("Opening database: %#v", dbPath)
-
-	db := common.NewDB(&shared.Config{
-		DriverName:       "sqlite3",
-		DatabaseLocation: dbPath,
-		CreateMode:       createMode,
-	})
-
-	return db, db.Setup()
-}
 
 // createDBPathOption creates a standardized database path CLI option
 func createDBPathOption(cmd *cli.Command) *string {
@@ -48,11 +36,10 @@ func createSimpleCommand(name, usage string, action func(*common.DB) error) cli.
 }
 
 // withDBOperation is a helper that handles common database operations
-func withDBOperation(customDBPath string, operation func(*common.DB) error) error {
-	r, err := openDB(customDBPath, false)
-	if err != nil {
+func withDBOperation(dbPath string, createMode bool, operation func() error) error {
+	if err := db.Open(dbPath, createMode); err != nil {
 		return err
 	}
 
-	return operation(r)
+	return operation()
 }

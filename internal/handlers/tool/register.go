@@ -3,7 +3,6 @@ package tool
 import (
 	"net/http"
 
-	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/logger"
 	ui "github.com/knackwurstking/ui/ui-templ"
@@ -11,13 +10,10 @@ import (
 )
 
 var (
-	DB  *common.DB
 	log = logger.New("handler: tool")
 )
 
-func Register(db *common.DB, e *echo.Echo, path string) {
-	DB = db
-
+func Register(e *echo.Echo, path string) {
 	ui.RegisterEchoRoutes(e, env.ServerPathPrefix, []*ui.EchoRoute{
 		// Main Page
 		ui.NewEchoRoute(http.MethodGet, path+"/:id", GetToolPage), // "is_cassette" defines the tool type
