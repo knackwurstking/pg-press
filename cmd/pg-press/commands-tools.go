@@ -58,7 +58,7 @@ func listToolsCommand() cli.Command {
 					if *idRange != "" {
 						var err error
 
-						tools, err = filterToolsByIDs[*shared.Tool](tools, *idRange)
+						tools, err = filterToolsByIDs(tools, *idRange)
 						if err != nil {
 							return errors.Wrap(err, "filter tools by IDs")
 						}
@@ -311,24 +311,13 @@ func deleteRegenerationCommand() cli.Command {
 			regenerationIDArg := cli.Int64Arg(cmd, "regeneration-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(*customDBPath, func(r *common.DB) error { // TODO: Continue refactoring here...
+				return withDBOperation(*customDBPath, false, func() error {
 					regenerationID := shared.EntityID(*regenerationIDArg)
 
-					// Get regeneration first to check if it exists and show info
-					regeneration, err := r.Tool.Regenerations.GetByID(regenerationID)
-					if err != nil {
-						return fmt.Errorf("find regeneration with ID %d: %v", regenerationID, err)
-					}
-
-					fmt.Printf("Deleting regeneration %d for tool %d...\n", regenerationID, regeneration.ToolID)
-
 					// Delete the regeneration
-					merr := r.Tool.Regenerations.Delete(regenerationID)
-					if merr != nil {
+					if merr := db.DeleteToolRegeneration(regenerationID); merr != nil {
 						return fmt.Errorf("delete regeneration: %v", merr)
 					}
-
-					fmt.Printf("Successfully deleted regeneration %d.\n", regenerationID)
 					return nil
 				})
 			}
@@ -341,7 +330,7 @@ func deleteRegenerationCommand() cli.Command {
 // -----------------------------------------------------------------------------
 
 // filterToolsByIDs filters tools based on ID range or comma-separated list
-func filterToolsByIDs[T shared.ModelTool](tools []T, idSpec string) ([]T, error) {
+func filterToolsByIDs(tools []*shared.Tool, idSpec string) ([]*shared.Tool, error) {
 	var targetIDs []shared.EntityID
 	var err error
 
@@ -366,9 +355,9 @@ func filterToolsByIDs[T shared.ModelTool](tools []T, idSpec string) ([]T, error)
 	}
 
 	// Filter tools
-	var filteredTools []shared.ModelTool
+	var filteredTools []*shared.Tool
 	for _, tool := range tools {
-		if idSet[tool.GetID()] {
+		if idSet[tool.ID] {
 			filteredTools = append(filteredTools, tool)
 		}
 	}

@@ -29,6 +29,21 @@ const (
 // Table Helpers: "tool_regenerations"
 // -----------------------------------------------------------------------------
 
+const SQLGetToolRegeneration string = `
+	SELECT id, tool_id, start, stop, cycles
+	FROM tool_regenerations
+	WHERE id = :id;
+`
+
+func GetToolRegeneration(id shared.EntityID) (*shared.ToolRegeneration, *errors.MasterError) {
+	row := DBUser.QueryRow(SQLGetToolRegeneration, sql.Named("id", int64(id)))
+	tr, merr := ScanToolRegeneration(row)
+	if merr != nil {
+		return nil, merr
+	}
+	return tr, nil
+}
+
 const SQLListToolRegenerations string = `
 	SELECT id, tool_id, start, stop, cycles
 	FROM tool_regenerations
@@ -53,6 +68,19 @@ func ListToolRegenerations(toolID shared.EntityID) ([]*shared.ToolRegeneration, 
 	rows.Close()
 
 	return trs, nil
+}
+
+const SQLDeleteToolRegeneration string = `
+	DELETE FROM tool_regenerations
+	WHERE id = :id;
+`
+
+func DeleteToolRegeneration(id shared.EntityID) *errors.MasterError {
+	_, err := DBTool.Exec(SQLDeleteToolRegeneration, sql.Named("id", int64(id)))
+	if err != nil {
+		return errors.NewMasterError(err, 0)
+	}
+	return nil
 }
 
 // -----------------------------------------------------------------------------

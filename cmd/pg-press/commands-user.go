@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/knackwurstking/pg-press/internal/common"
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/shared"
 
 	"github.com/SuperPaintman/nice/cli"
@@ -13,8 +13,8 @@ import (
 )
 
 func listUserCommand() cli.Command {
-	return createSimpleCommand("list", "List all users", func(r *common.DB) error {
-		users, merr := r.User.Users.List()
+	return createSimpleCommand("list", "List all users", func() error {
+		users, merr := db.ListUsers()
 		if merr != nil {
 			return merr
 		}

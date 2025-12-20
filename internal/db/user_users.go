@@ -47,6 +47,30 @@ func GetUserByApiKey(apiKey string) (user *shared.User, merr *errors.MasterError
 	return ScanUser(DBUser.QueryRow(SQLGetUserByApiKey, sql.Named("api_key", apiKey)))
 }
 
+const SQLListUsers string = `
+	SELECT id, name, api_key
+	FROM users
+	ORDER BY id ASC;
+`
+
+func ListUsers() (users []*shared.User, merr *errors.MasterError) {
+	rows, err := DBUser.Query(SQLListUsers)
+	if err != nil {
+		return nil, errors.NewMasterError(err, 0)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		user, merr := ScanUser(rows)
+		if merr != nil {
+			return nil, merr
+		}
+		users = append(users, user)
+	}
+
+	return users, nil
+}
+
 // -----------------------------------------------------------------------------
 // Scanners
 // -----------------------------------------------------------------------------
