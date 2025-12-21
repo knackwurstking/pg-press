@@ -14,7 +14,7 @@ type BindingSectionProps struct {
 
 templ BindingSection(props BindingSectionProps) {
 	<span id="binding-section" class="flex flex-col gap">
-		@components.SectionTitle(components.SectionTitleLevelSub, "Werkzeuge Binden")
+		@components.SectionTitle(components.SubTitle, "Werkzeuge Binden")
 		<span
 			class="flex gap flex-wrap"
 			if !props.IsAdmin {
@@ -81,8 +81,8 @@ templ BindingSection(props BindingSectionProps) {
 				if bindingTool != nil {
 					@components.CassetteAnchor(
 						components.CassetteAnchorProps{
-							Cassette: bindingTool,
-							Tool:     props.Tool,
+							Cassette:    bindingTool,
+							BindingTool: props.Tool,
 						},
 					)
 				} else {

@@ -42,7 +42,7 @@ const SQLListCookies string = `
 func ListCookies() (cookies []*shared.Cookie, merr *errors.MasterError) {
 	rows, err := DBUser.Query(SQLListCookies)
 	if err != nil {
-		return nil, errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err)
 	}
 	defer rows.Close()
 
@@ -67,7 +67,7 @@ const SQLListCookiesByUserID string = `
 func ListCookiesByUserID(userID shared.TelegramID) (cookies []*shared.Cookie, merr *errors.MasterError) {
 	rows, err := DBUser.Query(SQLListCookiesByUserID, sql.Named("user_id", userID))
 	if err != nil {
-		return nil, errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err)
 	}
 	defer rows.Close()
 
@@ -98,7 +98,7 @@ func ListCookiesByApiKey(apiKey string) (cookies []*shared.Cookie, merr *errors.
 
 	rows, err := DBUser.Query(SQLListCookiesByApiKey, sql.Named("user_id", user.ID))
 	if err != nil {
-		return nil, errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err)
 	}
 	defer rows.Close()
 
@@ -140,7 +140,7 @@ func AddCookie(cookie *shared.Cookie) *errors.MasterError {
 		sql.Named("last_login", cookie.LastLogin),
 	)
 	if err != nil {
-		return errors.NewMasterError(err, 0)
+		return errors.NewMasterError(err)
 	}
 	return nil
 }
@@ -168,7 +168,7 @@ func UpdateCookie(value string, cookie *shared.Cookie) *errors.MasterError {
 		sql.Named("value", value),
 	)
 	if err != nil {
-		return errors.NewMasterError(err, 0)
+		return errors.NewMasterError(err)
 	}
 	return nil
 }
@@ -181,7 +181,7 @@ const SQLDeleteCookie string = `
 func DeleteCookie(value string) *errors.MasterError {
 	_, err := DBUser.Exec(SQLDeleteCookie, sql.Named("value", value))
 	if err != nil {
-		return errors.NewMasterError(err, 0)
+		return errors.NewMasterError(err)
 	}
 	return nil
 }
@@ -194,7 +194,7 @@ const SQLDeleteCookiesByUserID string = `
 func DeleteCookiesByUserID(userID shared.TelegramID) *errors.MasterError {
 	_, err := DBUser.Exec(SQLDeleteCookiesByUserID, sql.Named("user_id", userID))
 	if err != nil {
-		return errors.NewMasterError(err, 0)
+		return errors.NewMasterError(err)
 	}
 	return nil
 }
@@ -212,7 +212,7 @@ func ScanCookie(row Scannable) (*shared.Cookie, *errors.MasterError) {
 		&c.LastLogin,
 	)
 	if err != nil {
-		return nil, errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err)
 	}
 	return &c, nil
 }

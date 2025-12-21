@@ -37,10 +37,10 @@ func handleUserNameChange(c echo.Context, user *shared.User) *errors.MasterError
 	}
 
 	if len(userName) < shared.UserNameMinLength || len(userName) > shared.UserNameMaxLength {
-		return errors.NewMasterError(
-			fmt.Errorf("username must be between 1 and 100 characters"),
-			http.StatusBadRequest,
-		)
+		return errors.NewValidationError(
+			"username must be between %d and %d characters",
+			shared.UserNameMinLength, shared.UserNameMaxLength,
+		).MasterError()
 	}
 
 	user.Name = userName
