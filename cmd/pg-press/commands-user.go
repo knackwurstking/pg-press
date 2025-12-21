@@ -110,8 +110,8 @@ func removeUserCommand() cli.Command {
 			telegramIDArg := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(*customDBPath, func(r *common.DB) error {
-					return r.User.Users.Delete(shared.TelegramID(*telegramIDArg))
+				return withDBOperation(*customDBPath, false, func() error {
+					return db.DeleteUser(shared.TelegramID(*telegramIDArg))
 				})
 			}
 		}),

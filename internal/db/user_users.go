@@ -88,6 +88,19 @@ func ListUsers() (users []*shared.User, merr *errors.MasterError) {
 	return users, nil
 }
 
+const SQLDeleteUser string = `
+	DELETE FROM users
+	WHERE id = :id;
+`
+
+func DeleteUser(id shared.TelegramID) *errors.MasterError {
+	_, err := DBUser.Exec(SQLDeleteUser, sql.Named("id", id))
+	if err != nil {
+		return errors.NewMasterError(err, 0)
+	}
+	return nil
+}
+
 // -----------------------------------------------------------------------------
 // Scanners
 // -----------------------------------------------------------------------------
