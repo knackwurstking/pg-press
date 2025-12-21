@@ -1,6 +1,7 @@
 package components
 
 import (
+	"fmt"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"strings"
 )
@@ -14,6 +15,10 @@ templ SmallBadge(classNames ...string) {
 
 templ ToolStateBadge(tool *shared.Tool, pressNumber shared.PressNumber, isRegenerating bool) {
 	{{
+		if tool.IsCassette() {
+			panic(fmt.Sprintf("tool expected, got %s", tool.Position.German()))
+		}
+
 		var color string
 		if isRegenerating {
 			color = "warning"
@@ -41,8 +46,12 @@ templ ToolStateBadge(tool *shared.Tool, pressNumber shared.PressNumber, isRegene
 	}
 }
 
-templ CassetteStateBadge(cassette *shared.Cassette, boundToTool *shared.Tool, isRegenerating bool) {
+templ CassetteStateBadge(cassette *shared.Tool, boundToTool *shared.Tool, isRegenerating bool) {
 	{{
+		if !cassette.IsCassette() {
+			panic(fmt.Sprintf("cassette expected, got %s", cassette.Position.German()))
+		}
+
 		var color string
 		if isRegenerating {
 			color = "warning"
