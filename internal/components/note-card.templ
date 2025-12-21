@@ -68,19 +68,18 @@ templ NoteCard(note *shared.Note, tools []*shared.Tool) {
 					{{ linked := note.GetLinked() }}
 					switch linked.Name {
 						case "tool":
-							for _, tool := range tools {
-								if tool.GetID() == shared.EntityID(linked.ID) {
-									{{ base := tool.GetBase() }}
+							for _, t := range tools {
+								if t.ID == shared.EntityID(linked.ID) {
 									<a
-										href={ urlb.UrlTool(base.ID, 0, 0).Page }
+										href={ urlb.UrlTool(t.ID, 0, 0).Page }
 										class="tool-link"
 									>
 										{ fmt.Sprintf(
 											"Werkzeug %dx%d %s %s (%s)", 
-											base.Width, base.Height, 
-											base.Type, 
-											base.Code, 
-											base.Position.German(),
+											t.Width, t.Height, 
+											t.Type, 
+											t.Code, 
+											t.Position.German(),
 										) }
 									</a>
 								}

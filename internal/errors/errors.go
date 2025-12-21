@@ -24,7 +24,7 @@ func (ve *ValidationError) Error() string {
 }
 
 func (ve *ValidationError) MasterError() *MasterError {
-	return NewMasterError(ve, 0)
+	return NewMasterError(ve)
 }
 
 type ExistsError struct {
@@ -40,7 +40,7 @@ func NewExistsError(name string, v any) *ExistsError {
 }
 
 func (ee *ExistsError) MasterError() *MasterError {
-	return NewMasterError(ee, 0)
+	return NewMasterError(ee)
 }
 
 func (ee *ExistsError) Error() string {
@@ -51,51 +51,49 @@ func (ee *ExistsError) Error() string {
 	return fmt.Sprintf("%s already exists", ee.Name)
 }
 
-// MasterError represents a unified error type that encompasses all error handling patterns
 type MasterError struct {
-	Err  error // Err is required
-	Code int   // Code is optional
+	err  error // Err is required
+	code int   // Code is optional
 }
 
-func NewMasterError(err error, code int) *MasterError {
+func NewMasterError(err error) *MasterError {
 	if err == nil {
 		panic("cannot create MasterError with nil error")
 	}
 
 	if e, ok := err.(*MasterError); ok {
-		if code == 0 {
-			code = e.Code
-		}
-		return &MasterError{
-			Err:  e.Err,
-			Code: code,
-		}
+		return e
 	}
 
-	if code == 0 {
-		switch err {
-		case sql.ErrNoRows:
-			code = http.StatusNotFound
+	code := http.StatusInternalServerError
+	switch err {
+	case sql.ErrNoRows:
+		code = http.StatusNotFound
+	default:
+		switch err.(type) {
+		case *ValidationError:
+			code = http.StatusBadRequest
+		case *ExistsError:
+			code = http.StatusConflict
 		default:
-			switch err.(type) {
-			case *ValidationError:
-				code = http.StatusBadRequest
-			case *ExistsError:
+			if strings.Contains(err.Error(), "UNIQUE constraint failed") {
 				code = http.StatusConflict
-			default:
-				if strings.Contains(err.Error(), "UNIQUE constraint failed") {
-					code = http.StatusConflict
-				} else {
-					code = http.StatusInternalServerError
-				}
 			}
 		}
 	}
 
 	return &MasterError{
-		Err:  err,
-		Code: code,
+		err:  err,
+		code: code,
 	}
+}
+
+func (e *MasterError) Err() error {
+	return e.err
+}
+
+func (e *MasterError) Code() int {
+	return e.code
 }
 
 func (e *MasterError) Error() string {
@@ -103,7 +101,7 @@ func (e *MasterError) Error() string {
 		panic("error is nil?")
 	}
 
-	return e.Err.Error()
+	return e.err.Error()
 }
 
 func (e *MasterError) Wrap(format string, a ...any) *MasterError {
@@ -111,25 +109,25 @@ func (e *MasterError) Wrap(format string, a ...any) *MasterError {
 	if msg == "" {
 		return e
 	}
-	wrapped := fmt.Errorf("%s: %w", msg, e.Err)
-	return &MasterError{Err: wrapped, Code: e.Code}
+	wrapped := fmt.Errorf("%s: %v", msg, e.err)
+	return &MasterError{err: wrapped, code: e.code}
 }
 
 func (e *MasterError) Echo() *echo.HTTPError {
-	return echo.NewHTTPError(e.Code, e.Err.Error())
+	return echo.NewHTTPError(e.code, e.err.Error())
 }
 
 func (e *MasterError) WrapEcho(format string, a ...any) *echo.HTTPError {
 	msg := fmt.Sprintf(format, a...)
-	return echo.NewHTTPError(e.Code, msg+": "+e.Err.Error())
+	return echo.NewHTTPError(e.code, msg+": "+e.err.Error())
 }
 
 func (e *MasterError) IsValidationError() bool {
-	_, ok := e.Err.(*ValidationError)
+	_, ok := e.err.(*ValidationError)
 	return ok
 }
 
 func (e *MasterError) IsExistsError() bool {
-	_, ok := e.Err.(*ExistsError)
+	_, ok := e.err.(*ExistsError)
 	return ok
 }

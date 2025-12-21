@@ -1,8 +1,8 @@
 package components
 
 const (
-	SectionTitleLevelMain SectionTitleLevel = 4
-	SectionTitleLevelSub  SectionTitleLevel = 5
+	MainTitle SectionTitleLevel = iota
+	SubTitle
 )
 
 type SectionTitleLevel int8
@@ -10,9 +10,9 @@ type SectionTitleLevel int8
 templ SectionTitle(level SectionTitleLevel, text string) {
 	<div class="flex justify-between items-center my">
 		switch level {
-			case SectionTitleLevelMain:
+			case MainTitle:
 				<h4>{ text }</h4>
-			case SectionTitleLevelSub:
+			case SubTitle:
 				<h5>{ text }</h5>
 			default:
 				{ text }

@@ -55,7 +55,7 @@ const SQLListTools string = `
 func ListTools() (tools []*shared.Tool, merr *errors.MasterError) {
 	r, err := DBTool.Query(SQLListTools)
 	if err != nil {
-		return nil, errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err)
 	}
 	defer r.Close()
 
@@ -77,7 +77,7 @@ const SQLDeleteTool string = `
 func DeleteTool(id shared.EntityID) *errors.MasterError {
 	_, err := DBTool.Exec(SQLDeleteTool, sql.Named("id", id))
 	if err != nil {
-		return errors.NewMasterError(err, 0)
+		return errors.NewMasterError(err)
 	}
 	return nil
 }
@@ -91,7 +91,7 @@ const SQLMarkToolAsDead string = `
 func MarkToolAsDead(id shared.EntityID) *errors.MasterError {
 	_, err := DBTool.Exec(SQLMarkToolAsDead, sql.Named("id", id))
 	if err != nil {
-		return errors.NewMasterError(err, 0)
+		return errors.NewMasterError(err)
 	}
 	return nil
 }
@@ -105,7 +105,7 @@ const SQLReviveTool string = `
 func ReviveTool(id shared.EntityID) *errors.MasterError {
 	_, err := DBTool.Exec(SQLReviveTool, sql.Named("id", id))
 	if err != nil {
-		return errors.NewMasterError(err, 0)
+		return errors.NewMasterError(err)
 	}
 	return nil
 }
@@ -131,7 +131,7 @@ func ScanTool(row Scannable) (*shared.Tool, *errors.MasterError) {
 		&t.MaxThickness,
 	)
 	if err != nil {
-		return nil, errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err)
 	}
 	return &t, nil
 }

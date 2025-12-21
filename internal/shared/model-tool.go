@@ -78,7 +78,7 @@ func (t *Tool) German() string {
 		if t.Code == "" {
 			return fmt.Sprintf("%dx%d %s (%.1f-%.1f mm)", t.Width, t.Height, t.Type, t.MinThickness, t.MaxThickness)
 		}
-		return fmt.Sprintf("%dx%d %s %s (%.1f-%.1f mm)", t.Width, t.Height, t.Type, T.Code, t.MinThickness, t.MaxThickness)
+		return fmt.Sprintf("%dx%d %s %s (%.1f-%.1f mm)", t.Width, t.Height, t.Type, t.Code, t.MinThickness, t.MaxThickness)
 	}
 	return fmt.Sprintf("%dx%d %s %s", t.Width, t.Height, t.Type, t.Code)
 }
@@ -103,8 +103,8 @@ func (t *Tool) Clone() *Tool {
 
 func (t *Tool) String() string {
 	return fmt.Sprintf(
-		"Tool{ID:%d, Width:%d, Height:%d, Position:%d, Type:%s, Code:%s, "+,
-		"CyclesOffset:%d, Cycles:%d, IsDead:%t, Cassette:%d, MinThickness:%.1f, MaxThickness:%.1f}",
+		"Tool{ID:%d, Width:%d, Height:%d, Position:%d, Type:%s, Code:%s, "+
+			"CyclesOffset:%d, Cycles:%d, IsDead:%t, Cassette:%d, MinThickness:%.1f, MaxThickness:%.1f}",
 		t.ID,
 		t.Width,
 		t.Height,
@@ -122,10 +122,6 @@ func (t *Tool) String() string {
 
 // Validate checks if the tool data is valid
 func (t *Tool) Validate() *errors.ValidationError {
-	if verr := t.BaseTool.Validate(); verr != nil {
-		return verr
-	}
-
 	if t.Cassette < 0 {
 		return errors.NewValidationError("Tool cassette ID cannot be negative")
 	}

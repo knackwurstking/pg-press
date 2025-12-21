@@ -89,7 +89,7 @@ func middlewareKeyAuth() echo.MiddlewareFunc {
 			)
 			merr := urlb.RedirectTo(c, urlb.UrlLogin("", nil).Page)
 			if merr != nil {
-				return merr.Err
+				return merr.Err()
 			}
 			return nil
 		},
@@ -141,7 +141,7 @@ func validateUserFromCookie(ctx echo.Context) (*shared.User, error) {
 
 	cookie, merr := db.GetCookie(httpCookie.Value)
 	if merr != nil {
-		return nil, merr.Wrap("get cookie").Err
+		return nil, merr.Wrap("get cookie").Err()
 	}
 
 	// Check if cookie has expired
@@ -151,7 +151,7 @@ func validateUserFromCookie(ctx echo.Context) (*shared.User, error) {
 
 	user, merr := db.GetUser(cookie.UserID)
 	if merr != nil {
-		return nil, merr.Wrap("validate user from API key").Err
+		return nil, merr.Wrap("validate user from API key").Err()
 	}
 
 	// Check if the path matches any of the tracked pages (ignoring prefix and query parameters)
