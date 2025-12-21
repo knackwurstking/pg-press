@@ -42,7 +42,7 @@ const SQLListNotesForLinked string = `
 func ListNotesForLinked(linked string, id shared.EntityID) ([]*shared.Note, *errors.MasterError) {
 	rows, err := DBNote.Query(SQLListNotesForLinked)
 	if err != nil {
-		return nil, errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err)
 	}
 	defer rows.Close()
 
@@ -82,7 +82,7 @@ func ScanNote(row Scannable) (*shared.Note, *errors.MasterError) {
 		&n.Linked,
 	)
 	if err != nil {
-		return nil, errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err)
 	}
 
 	return n, nil

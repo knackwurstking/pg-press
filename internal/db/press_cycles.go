@@ -39,7 +39,7 @@ const SQLListToolCycles string = `
 func ListToolCycles(toolID shared.EntityID) ([]*shared.Cycle, *errors.MasterError) {
 	rows, err := DBUser.Query(SQLListToolCycles, sql.Named("tool_id", int64(toolID)))
 	if err != nil {
-		return nil, errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err)
 	}
 
 	var cycles []*shared.Cycle
@@ -72,7 +72,7 @@ const SQLListCyclesByPressNumber string = `
 func ListCyclesByPressNumber(pressNumber shared.PressNumber) ([]*shared.Cycle, *errors.MasterError) {
 	rows, err := DBUser.Query(SQLListCyclesByPressNumber, sql.Named("press_number", int64(pressNumber)))
 	if err != nil {
-		return nil, errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err)
 	}
 	defer rows.Close()
 
@@ -103,7 +103,7 @@ const SQLDeleteCycle string = `
 func DeleteCycle(id shared.EntityID) *errors.MasterError {
 	_, err := DBUser.Exec(SQLDeleteCycle, sql.Named("id", int64(id)))
 	if err != nil {
-		return errors.NewMasterError(err, 0)
+		return errors.NewMasterError(err)
 	}
 	return nil
 }
@@ -147,7 +147,7 @@ func InjectPartialCycles(cycle *shared.Cycle) *errors.MasterError {
 		} else {
 			cycle.PartialCycles = 0
 		}
-		return errors.NewMasterError(err, 0)
+		return errors.NewMasterError(err)
 	}
 
 	cycle.PartialCycles = cycle.PressCycles - lastKnownCycles
@@ -169,7 +169,7 @@ func ScanCycle(row Scannable) (cycle *shared.Cycle, merr *errors.MasterError) {
 		&cycle.Stop,
 	)
 	if err != nil {
-		return nil, errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err)
 	}
 	return cycle, nil
 }

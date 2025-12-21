@@ -60,7 +60,7 @@ func PostLoginPage(c echo.Context) *echo.HTTPError {
 
 func processApiKeyLogin(apiKey string, ctx echo.Context) *errors.MasterError {
 	if len(apiKey) < shared.MinAPIKeyLength {
-		return errors.NewMasterError(fmt.Errorf("api key too short"), http.StatusBadRequest)
+		return errors.NewValidationError("API key too short").MasterError().Wrap("invalid api key")
 	}
 
 	user, merr := helper.GetUserForApiKey(DB, apiKey)

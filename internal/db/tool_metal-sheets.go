@@ -41,7 +41,7 @@ func ScanUpperMetalSheet(row Scannable) (*shared.UpperMetalSheet, *errors.Master
 		&ums.Value,
 	)
 	if err != nil {
-		return nil, errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err)
 	}
 	return &ums, nil
 }
@@ -59,7 +59,7 @@ func ScanLowerMetalSheet(row Scannable) (*shared.LowerMetalSheet, *errors.Master
 		&lms.Identifier,
 	)
 	if err != nil {
-		return nil, errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err)
 	}
 	return &lms, nil
 }

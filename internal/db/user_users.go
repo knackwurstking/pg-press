@@ -63,7 +63,7 @@ func AddUser(user *shared.User) *errors.MasterError {
 		sql.Named("api_key", user.ApiKey),
 	)
 	if err != nil {
-		return errors.NewMasterError(err, 0)
+		return errors.NewMasterError(err)
 	}
 	return nil
 }
@@ -86,7 +86,7 @@ func UpdateUser(user *shared.User) *errors.MasterError {
 		sql.Named("api_key", user.ApiKey),
 	)
 	if err != nil {
-		return errors.NewMasterError(err, 0)
+		return errors.NewMasterError(err)
 	}
 	return nil
 }
@@ -100,7 +100,7 @@ const SQLListUsers string = `
 func ListUsers() (users []*shared.User, merr *errors.MasterError) {
 	rows, err := DBUser.Query(SQLListUsers)
 	if err != nil {
-		return nil, errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err)
 	}
 	defer rows.Close()
 
@@ -123,7 +123,7 @@ const SQLDeleteUser string = `
 func DeleteUser(id shared.TelegramID) *errors.MasterError {
 	_, err := DBUser.Exec(SQLDeleteUser, sql.Named("id", id))
 	if err != nil {
-		return errors.NewMasterError(err, 0)
+		return errors.NewMasterError(err)
 	}
 	return nil
 }
@@ -140,7 +140,7 @@ func ScanUser(row Scannable) (*shared.User, *errors.MasterError) {
 		&u.ApiKey,
 	)
 	if err != nil {
-		return nil, errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err)
 	}
 	return &u, nil
 }

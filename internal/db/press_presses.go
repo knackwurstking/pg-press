@@ -45,7 +45,7 @@ func ScanPress(row Scannable) (press *shared.Press, merr *errors.MasterError) {
 		&press.Type,
 	)
 	if err != nil {
-		return nil, errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err)
 	}
 	return press, nil
 }

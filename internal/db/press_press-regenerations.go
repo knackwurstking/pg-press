@@ -41,7 +41,7 @@ func ScanPressRegeneration(row Scannable) (pr *shared.PressRegeneration, merr *e
 		&pr.Cycles,
 	)
 	if err != nil {
-		return nil, errors.NewMasterError(err, 0)
+		return nil, errors.NewMasterError(err)
 	}
 	return pr, nil
 }

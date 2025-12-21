@@ -1,8 +1,6 @@
 package dialogs
 
 import (
-	"fmt"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -98,33 +96,24 @@ func GetNoteFormData(c echo.Context) (*shared.Note, *errors.MasterError) {
 	// Parse level (required)
 	levelStr := c.FormValue("level")
 	if levelStr == "" {
-		return nil, errors.NewMasterError(
-			fmt.Errorf("level is required"),
-			http.StatusBadRequest,
-		)
+		return nil, errors.NewValidationError("level is required").MasterError()
 	}
 
 	levelInt, err := strconv.Atoi(levelStr)
 	if err != nil {
-		return nil, errors.NewMasterError(err, http.StatusBadRequest)
+		return nil, errors.NewValidationError("level must be an integer").MasterError()
 	}
 
 	// Validate level is within valid range (0=INFO, 1=ATTENTION, 2=BROKEN)
 	level := shared.NoteLevel(levelInt)
 	if !level.IsValid() {
-		return nil, errors.NewMasterError(
-			fmt.Errorf("invalid level value: %d", levelInt),
-			http.StatusBadRequest,
-		)
+		return nil, errors.NewValidationError("level is invalid").MasterError()
 	}
 
 	// Parse content (required)
 	content := strings.TrimSpace(c.FormValue("content"))
 	if content == "" {
-		return nil, errors.NewMasterError(
-			fmt.Errorf("content is required"),
-			http.StatusBadRequest,
-		)
+		return nil, errors.NewValidationError("content is required").MasterError()
 	}
 
 	return &shared.Note{
