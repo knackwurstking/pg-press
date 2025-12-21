@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/knackwurstking/pg-press/internal/common"
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
@@ -140,7 +139,7 @@ func validateUserFromCookie(ctx echo.Context) (*shared.User, error) {
 		return nil, errors.Wrap(err, "get cookie")
 	}
 
-	cookie, merr := db.GetCookieByValue(httpCookie.Value)
+	cookie, merr := db.GetCookie(httpCookie.Value)
 	if merr != nil {
 		return nil, merr.Wrap("get cookie").Err
 	}
@@ -150,7 +149,7 @@ func validateUserFromCookie(ctx echo.Context) (*shared.User, error) {
 		return nil, fmt.Errorf("cookie has expired")
 	}
 
-	user, merr := db.GetUserByID(cookie.UserID)
+	user, merr := db.GetUser(cookie.UserID)
 	if merr != nil {
 		return nil, merr.Wrap("validate user from API key").Err
 	}

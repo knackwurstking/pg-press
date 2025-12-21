@@ -11,20 +11,30 @@ import (
 )
 
 func listUserCommand() cli.Command {
-	return createSimpleCommand("list", "List all users", func() error {
-		users, merr := db.ListUsers()
-		if merr != nil {
-			return merr
-		}
+	return cli.Command{
+		Name:  "list",
+		Usage: cli.Usage("List all users"),
+		Action: cli.ActionFunc(func(cmd *cli.Command) cli.ActionRunner {
+			customDBPath := createDBPathOption(cmd)
 
-		fmt.Printf("%-15s %s\n", "Telegram ID", "User Name")
-		fmt.Printf("%-15s %s\n", "-----------", "---------")
-		for _, u := range users {
-			fmt.Printf("%-15d %s\n", u.ID, u.Name)
-		}
+			return func(cmd *cli.Command) error {
+				return withDBOperation(*customDBPath, false, func() error {
+					users, merr := db.ListUsers()
+					if merr != nil {
+						return merr
+					}
 
-		return nil
-	})
+					fmt.Printf("TELEGRAM ID\tUSER NAME\n")
+					fmt.Printf("-----------\t---------\n")
+					for _, u := range users {
+						fmt.Printf("%d\t%s\n", u.ID, u.Name)
+					}
+
+					return nil
+				})
+			}
+		}),
+	}
 }
 
 func showUserCommand() cli.Command {
@@ -128,8 +138,8 @@ func modUserCommand() cli.Command {
 			telegramID := cli.Int64Arg(cmd, "telegram-id", cli.Required)
 
 			return func(cmd *cli.Command) error {
-				return withDBOperation(*customDBPath, func(r *common.DB) error {
-					user, err := r.User.Users.GetByID(shared.TelegramID(*telegramID))
+				return withDBOperation(*customDBPath, false, func() error {
+					user, err := db.GetUser(shared.TelegramID(*telegramID))
 					if err != nil {
 						return err
 					}
@@ -142,7 +152,7 @@ func modUserCommand() cli.Command {
 						user.ApiKey = *apiKey
 					}
 
-					return r.User.Users.Update(user)
+					return db.UpdateUser(user)
 				})
 			}
 		}),

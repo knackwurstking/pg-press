@@ -129,6 +129,10 @@ const SQLAddCookie string = `
 `
 
 func AddCookie(cookie *shared.Cookie) *errors.MasterError {
+	if verr := cookie.Validate(); verr != nil {
+		return verr.MasterError().Wrap("invalid cookie data")
+	}
+
 	_, err := DBUser.Exec(SQLAddCookie,
 		sql.Named("user_agent", cookie.UserAgent),
 		sql.Named("value", cookie.Value),
@@ -153,6 +157,10 @@ const SQLUpdateCookie string = `
 
 // UpdateCookie updates the given cookie in the database, it just replaces all fields including the value.
 func UpdateCookie(value string, cookie *shared.Cookie) *errors.MasterError {
+	if verr := cookie.Validate(); verr != nil {
+		return verr.MasterError().Wrap("invalid cookie data")
+	}
+
 	_, err := DBUser.Exec(SQLUpdateCookie,
 		sql.Named("user_agent", cookie.UserAgent),
 		sql.Named("user_id", cookie.UserID),

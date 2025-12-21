@@ -53,7 +53,34 @@ const SQLAddUser string = `
 `
 
 func AddUser(user *shared.User) *errors.MasterError {
+	if verr := user.Validate(); verr != nil {
+		return verr.MasterError().Wrap("invalid user data")
+	}
+
 	_, err := DBUser.Exec(SQLAddUser,
+		sql.Named("id", user.ID),
+		sql.Named("name", user.Name),
+		sql.Named("api_key", user.ApiKey),
+	)
+	if err != nil {
+		return errors.NewMasterError(err, 0)
+	}
+	return nil
+}
+
+const SQLUpdateUser string = `
+	UPDATE users
+	SET name = :name,
+		api_key = :api_key
+	WHERE id = :id;
+`
+
+func UpdateUser(user *shared.User) *errors.MasterError {
+	if verr := user.Validate(); verr != nil {
+		return verr.MasterError().Wrap("invalid user data")
+	}
+
+	_, err := DBUser.Exec(SQLUpdateUser,
 		sql.Named("id", user.ID),
 		sql.Named("name", user.Name),
 		sql.Named("api_key", user.ApiKey),
