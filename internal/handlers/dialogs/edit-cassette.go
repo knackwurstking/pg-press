@@ -79,13 +79,13 @@ func PutCassette(c echo.Context) *echo.HTTPError {
 
 	log.Debug("Updating cassette: %v", tool.String())
 
-	merr = db.Tool.Cassettes.Update(cassette)
+	merr = db.UpdateTool(tool)
 	if merr != nil {
 		return merr.Echo()
 	}
 
 	// Set HX headers
-	urlb.SetHXRedirect(c, urlb.UrlTool(cassette.ID, 0, 0).Page)
+	urlb.SetHXRedirect(c, urlb.UrlTool(tool.ID, 0, 0).Page)
 
 	return nil
 }
