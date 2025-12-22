@@ -63,7 +63,7 @@ func processApiKeyLogin(apiKey string, ctx echo.Context) *errors.MasterError {
 		return errors.NewValidationError("API key too short").MasterError().Wrap("invalid api key")
 	}
 
-	user, merr := helper.GetUserForApiKey(DB, apiKey)
+	user, merr := db.GetUserByApiKey(apiKey)
 	if merr != nil {
 		return merr
 	}
