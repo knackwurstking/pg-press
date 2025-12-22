@@ -36,6 +36,35 @@ const (
 // Table Helpers: "tools"
 // -----------------------------------------------------------------------------
 
+const SQLAddTool string = `
+	INSERT INTO tools (width, height, position, type, code, cycles_offset, cycles, is_dead, cassette, min_thickness, max_thickness)
+	VALUES (:width, :height, :position, :type, :code, :cycles_offset, :cycles, :is_dead, :cassette, :min_thickness, :max_thickness);
+`
+
+func AddTool(tool *shared.Tool) *errors.MasterError {
+	if verr := tool.Validate(); verr != nil {
+		return verr.MasterError().Wrap("invalid tool data")
+	}
+
+	_, err := DBTool.Exec(SQLAddTool,
+		sql.Named("width", tool.Width),
+		sql.Named("height", tool.Height),
+		sql.Named("position", tool.Position),
+		sql.Named("type", tool.Type),
+		sql.Named("code", tool.Code),
+		sql.Named("cycles_offset", tool.CyclesOffset),
+		sql.Named("cycles", tool.Cycles),
+		sql.Named("is_dead", tool.IsDead),
+		sql.Named("cassette", tool.Cassette),
+		sql.Named("min_thickness", tool.MinThickness),
+		sql.Named("max_thickness", tool.MaxThickness),
+	)
+	if err != nil {
+		return errors.NewMasterError(err)
+	}
+	return nil
+}
+
 const SQLGetTool string = `
 	SELECT id, width, height, position, type, codee, cycles_offset, cycles, is_dead, cassette, min_thickness, max_thickness
 	FROM tools

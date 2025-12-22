@@ -122,12 +122,40 @@ func (t *Tool) String() string {
 
 // Validate checks if the tool data is valid
 func (t *Tool) Validate() *errors.ValidationError {
-	if t.Cassette < 0 {
-		return errors.NewValidationError("Tool cassette ID cannot be negative")
+	// Validate position to be upper/lower or cassette
+	switch t.Position {
+	case SlotUpper, SlotLower, SlotUpperCassette:
+	default:
+		return errors.NewValidationError("invalid position: %d", t.Position)
 	}
 
-	if t.Position != SlotUpper && t.Position != SlotLower {
-		return errors.NewValidationError("Tool position must be either upper or lower")
+	// Width and Height must be positive, zero is allowed for reason of special (placeholder) tools
+	if t.Width < 0 {
+		return errors.NewValidationError("width must be positive: %d", t.Width)
+	}
+	if t.Height < 0 {
+		return errors.NewValidationError("height must be positive: %d", t.Height)
+	}
+
+	// Type and Code must be set
+	if t.Type == "" {
+		return errors.NewValidationError("type is required")
+	}
+	if t.Code == "" {
+		return errors.NewValidationError("code is required")
+	}
+
+	// For cassettes, MinThickness must be less than MaxThickness
+	if t.IsCassette() {
+		if t.MinThickness <= 0 {
+			return errors.NewValidationError("min thickness must be positive: %.1f", t.MinThickness)
+		}
+		if t.MaxThickness <= 0 {
+			return errors.NewValidationError("max thickness must be positive: %.1f", t.MaxThickness)
+		}
+		if t.MinThickness >= t.MaxThickness {
+			return errors.NewValidationError("min thickness %.1f must be less than max thickness %.1f", t.MinThickness, t.MaxThickness)
+		}
 	}
 
 	return nil
