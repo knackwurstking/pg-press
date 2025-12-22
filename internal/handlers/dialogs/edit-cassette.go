@@ -1,9 +1,11 @@
 package dialogs
 
 import (
+	"net/http"
 	"strconv"
 	"strings"
 
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
@@ -13,31 +15,32 @@ import (
 )
 
 func GetCassetteDialog(c echo.Context) *echo.HTTPError {
-	var cassette *shared.Cassette
+	var tool *shared.Tool
 	id, _ := shared.ParseQueryInt64(c, "id")
 	if id > 0 {
 		var merr *errors.MasterError
-		cassette, merr = db.Tool.Cassettes.GetByID(shared.EntityID(id))
+		tool, merr = db.GetTool(shared.EntityID(id))
 		if merr != nil {
 			return merr.Echo()
 		}
+		if !tool.IsCassette() {
+			return echo.NewHTTPError(http.StatusBadRequest, "tool with ID %d is not a cassette", id)
+		}
 	}
 
-	var t templ.Component
-	var tName string
-	if cassette != nil {
-		t = EditCassetteDialog(cassette)
-		tName = "EditCassetteDialog"
-		log.Debug("Rendering edit cassette dialog: %#v", cassette.String())
-	} else {
-		t = NewCassetteDialog()
-		tName = "NewCassetteDialog"
-		log.Debug("Rendering new cassette dialog...")
+	if tool != nil {
+		log.Debug("Rendering edit cassette dialog: %#v", tool.String())
+		t := EditCassetteDialog(tool)
+		if err := t.Render(c.Request().Context(), c.Response()); err != nil {
+			return errors.NewRenderError(err, "EditCassetteDialog")
+		}
+		return nil
 	}
 
-	err := t.Render(c.Request().Context(), c.Response())
-	if err != nil {
-		return errors.NewRenderError(err, tName)
+	log.Debug("Rendering new cassette dialog...")
+	t := NewCassetteDialog()
+	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
+		return errors.NewRenderError(err, "NewCassetteDialog")
 	}
 
 	return nil
