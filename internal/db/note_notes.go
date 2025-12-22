@@ -33,6 +33,21 @@ const (
 // Table Helpers: "notes"
 // -----------------------------------------------------------------------------
 
+const SQLGetNote string = `
+	SELECT id, level, content, created_at, linked
+	FROM notes
+	WHERE id = ?;
+`
+
+func GetNote(id shared.EntityID) (*shared.Note, *errors.MasterError) {
+	row := DBNote.QueryRow(SQLGetNote, id)
+	note, merr := ScanNote(row)
+	if merr != nil {
+		return nil, merr
+	}
+	return note, nil
+}
+
 const SQLListNotesForLinked string = `
 	SELECT id, level, content, created_at, linked
 	FROM notes
