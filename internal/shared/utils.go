@@ -1,8 +1,6 @@
 package shared
 
 import (
-	"fmt"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -31,16 +29,12 @@ func MaskString(s string) string {
 func GetUserFromContext(c echo.Context) (*User, *errors.MasterError) {
 	u := c.Get("user")
 	if u == nil {
-		return nil, errors.NewMasterError(
-			fmt.Errorf("no user"), http.StatusUnauthorized,
-		)
+		return nil, errors.NewAuthorizationError("no user in context").MasterError()
 	}
 
 	user, ok := u.(*User)
 	if !ok || user.Validate() != nil {
-		return nil, errors.NewMasterError(
-			fmt.Errorf("invalid user"), http.StatusUnauthorized,
-		)
+		return nil, errors.NewAuthorizationError("invalid user in context").MasterError()
 	}
 
 	return user, nil
@@ -69,18 +63,12 @@ func ParseQueryBool(c echo.Context, paramName string) bool {
 func ParseQueryInt64(c echo.Context, paramName string) (int64, *errors.MasterError) {
 	idStr := c.QueryParam(paramName)
 	if idStr == "" {
-		return 0, errors.NewMasterError(
-			fmt.Errorf("missing %s query parameter", paramName),
-			http.StatusNotFound,
-		)
+		return 0, errors.NewNotFoundError("missing %s", paramName).MasterError()
 	}
 
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		return 0, errors.NewMasterError(
-			fmt.Errorf("invalid %s query parameter: must be a number", paramName),
-			http.StatusBadRequest,
-		)
+		return 0, errors.NewValidationError("invalid %s query parameter: must be a number", paramName).MasterError()
 	}
 
 	return id, nil
@@ -90,12 +78,12 @@ func ParseQueryInt64(c echo.Context, paramName string) (int64, *errors.MasterErr
 func ParseParamInt64(c echo.Context, paramName string) (int64, *errors.MasterError) {
 	idStr := c.Param(paramName)
 	if idStr == "" {
-		return 0, errors.NewMasterError(fmt.Errorf("missing %s", paramName), http.StatusBadRequest)
+		return 0, errors.NewNotFoundError("missing %s", paramName).MasterError()
 	}
 
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		return 0, errors.NewMasterError(fmt.Errorf("invalid %s", paramName), http.StatusBadRequest)
+		return 0, errors.NewValidationError("invalid %s: must be a number", paramName).MasterError()
 	}
 	return id, nil
 }
@@ -104,17 +92,12 @@ func ParseParamInt64(c echo.Context, paramName string) (int64, *errors.MasterErr
 func ParseParamInt8(c echo.Context, paramName string) (int8, *errors.MasterError) {
 	idStr := c.Param(paramName)
 	if idStr == "" {
-		return 0, errors.NewMasterError(
-			fmt.Errorf("missing %s", paramName), http.StatusNotFound,
-		)
+		return 0, errors.NewNotFoundError("missing %s", paramName).MasterError()
 	}
 
 	id, err := strconv.ParseInt(idStr, 10, 8)
 	if err != nil {
-		return 0, errors.NewMasterError(
-			fmt.Errorf("invalid %s", paramName), http.StatusBadRequest,
-		)
-
+		return 0, errors.NewValidationError("invalid %s: must be a number", paramName).MasterError()
 	}
 	return int8(id), nil
 }
@@ -123,7 +106,7 @@ func ParseParamInt8(c echo.Context, paramName string) (int8, *errors.MasterError
 func ParseQueryString(c echo.Context, paramName string) (string, *errors.MasterError) {
 	s := c.QueryParam(paramName)
 	if s == "" {
-		return s, errors.NewMasterError(fmt.Errorf("missing %s", paramName), http.StatusNotFound)
+		return s, errors.NewNotFoundError("missing %s", paramName).MasterError()
 	}
 
 	return s, nil
@@ -133,14 +116,12 @@ func ParseQueryString(c echo.Context, paramName string) (string, *errors.MasterE
 func ParseFormValueTime(c echo.Context, paramName string) (time.Time, *errors.MasterError) {
 	v := c.FormValue(paramName)
 	if v == "" {
-		return time.Time{}, errors.NewMasterError(
-			fmt.Errorf("missing %s", paramName), http.StatusNotFound,
-		)
+		return time.Time{}, errors.NewNotFoundError("missing %s", paramName).MasterError()
 	}
 
 	t, err := time.Parse("2006-01-02", v) // YYYY-MM-DD
 	if err != nil {
-		return t, errors.NewMasterError(errors.Wrap(err, "parsing date input"), http.StatusBadRequest)
+		return t, errors.NewValidationError("invalid %s format", paramName).MasterError()
 	}
 
 	return t, nil

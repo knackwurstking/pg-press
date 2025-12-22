@@ -4,10 +4,45 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/labstack/echo/v4"
 )
+
+type AuthorizationError struct {
+	Message string
+}
+
+func NewAuthorizationError(format string, v ...any) *AuthorizationError {
+	return &AuthorizationError{
+		Message: fmt.Sprintf(format, v...),
+	}
+}
+
+func (a *AuthorizationError) Error() string {
+	return a.Message
+}
+
+func (a *AuthorizationError) MasterError() *MasterError {
+	return NewMasterError(a).SetCode(http.StatusUnauthorized)
+}
+
+type NotFoundError struct {
+	Message string
+}
+
+func NewNotFoundError(format string, v ...any) *NotFoundError {
+	return &NotFoundError{
+		Message: fmt.Sprintf(format, v...),
+	}
+}
+
+func (n *NotFoundError) Error() string {
+	return n.Message
+}
+
+func (n *NotFoundError) MasterError() *MasterError {
+	return NewMasterError(n).SetCode(http.StatusNotFound)
+}
 
 type ValidationError struct {
 	Message string
@@ -24,7 +59,7 @@ func (ve *ValidationError) Error() string {
 }
 
 func (ve *ValidationError) MasterError() *MasterError {
-	return NewMasterError(ve)
+	return NewMasterError(ve).SetCode(http.StatusBadRequest)
 }
 
 type ExistsError struct {
@@ -39,16 +74,16 @@ func NewExistsError(name string, v any) *ExistsError {
 	}
 }
 
-func (ee *ExistsError) MasterError() *MasterError {
-	return NewMasterError(ee)
-}
-
 func (ee *ExistsError) Error() string {
 	if ee.Value != nil {
 		return fmt.Sprintf("%s with value %#v already exists", ee.Name, ee.Value)
 	}
 
 	return fmt.Sprintf("%s already exists", ee.Name)
+}
+
+func (ee *ExistsError) MasterError() *MasterError {
+	return NewMasterError(ee).SetCode(http.StatusConflict)
 }
 
 type MasterError struct {
@@ -69,23 +104,24 @@ func NewMasterError(err error) *MasterError {
 	switch err {
 	case sql.ErrNoRows:
 		code = http.StatusNotFound
-	default:
-		switch err.(type) {
-		case *ValidationError:
-			code = http.StatusBadRequest
-		case *ExistsError:
-			code = http.StatusConflict
-		default:
-			if strings.Contains(err.Error(), "UNIQUE constraint failed") {
-				code = http.StatusConflict
-			}
-		}
+	case sql.ErrConnDone:
+		code = http.StatusServiceUnavailable
+	case sql.ErrTxDone:
+		code = http.StatusConflict
 	}
 
 	return &MasterError{
 		err:  err,
 		code: code,
 	}
+}
+
+func (e *MasterError) Error() string {
+	if e == nil {
+		panic("error is nil?")
+	}
+
+	return e.err.Error()
 }
 
 func (e *MasterError) Err() error {
@@ -96,12 +132,9 @@ func (e *MasterError) Code() int {
 	return e.code
 }
 
-func (e *MasterError) Error() string {
-	if e == nil {
-		panic("error is nil?")
-	}
-
-	return e.err.Error()
+func (e *MasterError) SetCode(code int) *MasterError {
+	e.code = code
+	return e
 }
 
 func (e *MasterError) Wrap(format string, a ...any) *MasterError {

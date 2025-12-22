@@ -17,7 +17,7 @@ var log = logger.New("urlb")
 func RedirectTo(c echo.Context, path templ.SafeURL) *errors.MasterError {
 	err := c.Redirect(http.StatusSeeOther, string(path))
 	if err != nil {
-		return errors.NewMasterError(err, 0)
+		return errors.NewMasterError(err)
 	}
 	return nil
 }
