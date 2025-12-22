@@ -10,7 +10,6 @@ import (
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 
-	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 )
 
@@ -66,16 +65,15 @@ func PostCassette(c echo.Context) *echo.HTTPError {
 
 // PutCassette handles updating an existing cassette
 func PutCassette(c echo.Context) *echo.HTTPError {
-	id, merr := shared.ParseQueryInt64(c, "id")
-	if merr != nil {
-		return merr.Echo()
-	}
-
 	tool, verr := getCassetteDialogForm(c)
 	if verr != nil {
 		return verr.MasterError().Echo()
 	}
-	tool.ID = id
+	id, merr := shared.ParseQueryInt64(c, "id")
+	if merr != nil {
+		return merr.Echo()
+	}
+	tool.ID = shared.EntityID(id)
 
 	log.Debug("Updating cassette: %v", tool.String())
 
@@ -90,7 +88,7 @@ func PutCassette(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func getCassetteDialogForm(c echo.Context) (*shared.Cassette, *errors.ValidationError) {
+func getCassetteDialogForm(c echo.Context) (*shared.Tool, *errors.ValidationError) {
 	var (
 		vWidth        = c.FormValue("width")
 		vHeight       = c.FormValue("height")
@@ -131,15 +129,13 @@ func getCassetteDialogForm(c echo.Context) (*shared.Cassette, *errors.Validation
 		return nil, errors.NewValidationError("code is required")
 	}
 
-	cassette := &shared.Cassette{
-		BaseTool: shared.BaseTool{
-			Width:        width,
-			Height:       height,
-			Position:     shared.SlotUpperCassette,
-			Type:         vType,
-			Code:         vCode,
-			CyclesOffset: 0, // TODO: Maybe update the dialog to allow changing this?
-		},
+	cassette := &shared.Tool{
+		Width:        width,
+		Height:       height,
+		Position:     shared.SlotUpperCassette,
+		Type:         vType,
+		Code:         vCode,
+		CyclesOffset: 0, // TODO: Maybe update the dialog to allow changing this?
 		MinThickness: float32(minThickness),
 		MaxThickness: float32(maxThickness),
 	}
