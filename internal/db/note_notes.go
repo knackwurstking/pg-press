@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"fmt"
 
 	"github.com/knackwurstking/pg-press/internal/errors"
@@ -32,6 +33,28 @@ const (
 // -----------------------------------------------------------------------------
 // Table Helpers: "notes"
 // -----------------------------------------------------------------------------
+
+const SQLAddNote string = `
+	INSERT INTO notes (level, content, created_at, linked)
+	VALUES (:level, :content, :created_at, :linked);
+`
+
+func AddNote(note *shared.Note) *errors.MasterError {
+	if verr := note.Validate(); verr != nil {
+		return verr.MasterError().Wrap("invalid note data")
+	}
+
+	_, err := DBNote.Exec(SQLAddNote,
+		sql.Named("level", note.Level),
+		sql.Named("content", note.Content),
+		sql.Named("created_at", note.CreatedAt),
+		sql.Named("linked", note.Linked),
+	)
+	if err != nil {
+		return errors.NewMasterError(err)
+	}
+	return nil
+}
 
 const SQLGetNote string = `
 	SELECT id, level, content, created_at, linked
