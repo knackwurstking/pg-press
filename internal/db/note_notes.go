@@ -133,6 +133,19 @@ func ListNotesForLinked(linked string, id shared.EntityID) ([]*shared.Note, *err
 	return notes[:n], nil
 }
 
+const SQLDeleteNote string = `
+	DELETE FROM notes
+	WHERE id = :id;
+`
+
+func DeleteNote(id shared.EntityID) *errors.MasterError {
+	_, err := DBNote.Exec(SQLDeleteNote, sql.Named("id", id))
+	if err != nil {
+		return errors.NewMasterError(err)
+	}
+	return nil
+}
+
 // -----------------------------------------------------------------------------
 // Scan Helpers
 // -----------------------------------------------------------------------------
