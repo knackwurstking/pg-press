@@ -1,6 +1,7 @@
 package notes
 
 import (
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 
@@ -16,7 +17,7 @@ func DeleteNote(c echo.Context) *echo.HTTPError {
 	log.Debug("Deleting note with ID %d [user_name=%s]", id, c.Get("user_name"))
 
 	// Delete the note
-	merr = db.Notes.Delete(shared.EntityID(id))
+	merr = db.DeleteNote(shared.EntityID(id))
 	if merr != nil {
 		return merr.Echo()
 	}
