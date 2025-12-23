@@ -37,7 +37,7 @@ const SQLListToolCycles string = `
 `
 
 func ListToolCycles(toolID shared.EntityID) ([]*shared.Cycle, *errors.MasterError) {
-	rows, err := DBUser.Query(SQLListToolCycles, sql.Named("tool_id", int64(toolID)))
+	rows, err := dbPress.Query(SQLListToolCycles, sql.Named("tool_id", int64(toolID)))
 	if err != nil {
 		return nil, errors.NewMasterError(err)
 	}
@@ -70,7 +70,7 @@ const SQLListCyclesByPressNumber string = `
 `
 
 func ListCyclesByPressNumber(pressNumber shared.PressNumber) ([]*shared.Cycle, *errors.MasterError) {
-	rows, err := DBUser.Query(SQLListCyclesByPressNumber, sql.Named("press_number", int64(pressNumber)))
+	rows, err := dbPress.Query(SQLListCyclesByPressNumber, sql.Named("press_number", int64(pressNumber)))
 	if err != nil {
 		return nil, errors.NewMasterError(err)
 	}
@@ -101,7 +101,7 @@ const SQLDeleteCycle string = `
 `
 
 func DeleteCycle(id shared.EntityID) *errors.MasterError {
-	_, err := DBUser.Exec(SQLDeleteCycle, sql.Named("id", int64(id)))
+	_, err := dbPress.Exec(SQLDeleteCycle, sql.Named("id", int64(id)))
 	if err != nil {
 		return errors.NewMasterError(err)
 	}
@@ -139,7 +139,7 @@ const SQLGetPrevCycle string = `
 // TODO: Take into account the last press regeneration when calculating partial cycles
 func InjectPartialCycles(cycle *shared.Cycle) *errors.MasterError {
 	var lastKnownCycles int64 = 0
-	err := DBPress.QueryRow(SQLGetPrevCycle, cycle.PressNumber, cycle.Start).Scan(&lastKnownCycles)
+	err := dbPress.QueryRow(SQLGetPrevCycle, cycle.PressNumber, cycle.Start).Scan(&lastKnownCycles)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			// No previous cycles found, return full cycles

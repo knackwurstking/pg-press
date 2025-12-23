@@ -44,7 +44,7 @@ func AddNote(note *shared.Note) *errors.MasterError {
 		return verr.MasterError().Wrap("invalid note data")
 	}
 
-	_, err := DBNote.Exec(SQLAddNote,
+	_, err := dbNote.Exec(SQLAddNote,
 		sql.Named("level", note.Level),
 		sql.Named("content", note.Content),
 		sql.Named("created_at", note.CreatedAt),
@@ -70,7 +70,7 @@ func UpdateNote(note *shared.Note) *errors.MasterError {
 		return verr.MasterError().Wrap("invalid note data")
 	}
 
-	_, err := DBNote.Exec(SQLUpdateNote,
+	_, err := dbNote.Exec(SQLUpdateNote,
 		sql.Named("id", note.ID),
 		sql.Named("level", note.Level),
 		sql.Named("content", note.Content),
@@ -90,7 +90,7 @@ const SQLGetNote string = `
 `
 
 func GetNote(id shared.EntityID) (*shared.Note, *errors.MasterError) {
-	row := DBNote.QueryRow(SQLGetNote, id)
+	row := dbNote.QueryRow(SQLGetNote, id)
 	note, merr := ScanNote(row)
 	if merr != nil {
 		return nil, merr
@@ -105,7 +105,7 @@ const SQLListNotes string = `
 `
 
 func ListNotes() ([]*shared.Note, *errors.MasterError) {
-	rows, err := DBNote.Query(SQLListNotes)
+	rows, err := dbNote.Query(SQLListNotes)
 	if err != nil {
 		return nil, errors.NewMasterError(err)
 	}
@@ -129,7 +129,7 @@ const SQLListNotesForLinked string = `
 `
 
 func ListNotesForLinked(linked string, id shared.EntityID) ([]*shared.Note, *errors.MasterError) {
-	rows, err := DBNote.Query(SQLListNotesForLinked)
+	rows, err := dbNote.Query(SQLListNotesForLinked)
 	if err != nil {
 		return nil, errors.NewMasterError(err)
 	}
@@ -163,7 +163,7 @@ const SQLDeleteNote string = `
 `
 
 func DeleteNote(id shared.EntityID) *errors.MasterError {
-	_, err := DBNote.Exec(SQLDeleteNote, sql.Named("id", id))
+	_, err := dbNote.Exec(SQLDeleteNote, sql.Named("id", id))
 	if err != nil {
 		return errors.NewMasterError(err)
 	}

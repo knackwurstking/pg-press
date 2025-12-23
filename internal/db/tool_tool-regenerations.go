@@ -36,7 +36,7 @@ const SQLGetToolRegeneration string = `
 `
 
 func GetToolRegeneration(id shared.EntityID) (*shared.ToolRegeneration, *errors.MasterError) {
-	row := DBUser.QueryRow(SQLGetToolRegeneration, sql.Named("id", int64(id)))
+	row := dbTool.QueryRow(SQLGetToolRegeneration, sql.Named("id", int64(id)))
 	tr, merr := ScanToolRegeneration(row)
 	if merr != nil {
 		return nil, merr
@@ -51,7 +51,7 @@ const SQLListToolRegenerations string = `
 `
 
 func ListToolRegenerations(toolID shared.EntityID) ([]*shared.ToolRegeneration, *errors.MasterError) {
-	rows, err := DBUser.Query(SQLListToolRegenerations, sql.Named("tool_id", int64(toolID)))
+	rows, err := dbTool.Query(SQLListToolRegenerations, sql.Named("tool_id", int64(toolID)))
 	if err != nil {
 		return nil, errors.NewMasterError(err)
 	}
@@ -76,7 +76,7 @@ const SQLDeleteToolRegeneration string = `
 `
 
 func DeleteToolRegeneration(id shared.EntityID) *errors.MasterError {
-	_, err := DBTool.Exec(SQLDeleteToolRegeneration, sql.Named("id", int64(id)))
+	_, err := dbTool.Exec(SQLDeleteToolRegeneration, sql.Named("id", int64(id)))
 	if err != nil {
 		return errors.NewMasterError(err)
 	}

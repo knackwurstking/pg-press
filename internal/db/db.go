@@ -11,14 +11,14 @@ import (
 )
 
 type Scannable interface {
-	Scan(dest ...interface{}) error
+	Scan(dest ...any) error
 }
 
 var (
-	DBTool  *sql.DB
-	DBPress *sql.DB
-	DBNote  *sql.DB
-	DBUser  *sql.DB
+	dbTool  *sql.DB
+	dbPress *sql.DB
+	dbNote  *sql.DB
+	dbUser  *sql.DB
 )
 
 func Open(path string, allowCreate bool) error {
@@ -52,7 +52,7 @@ func Open(path string, allowCreate bool) error {
 
 			switch name {
 			case "tool":
-				DBTool = db
+				dbTool = db
 				if err = createTable(db, SQLCreateMetalSheetsTable); err != nil {
 					chErr <- err
 					return
@@ -65,8 +65,9 @@ func Open(path string, allowCreate bool) error {
 					chErr <- err
 					return
 				}
+
 			case "press":
-				DBPress = db
+				dbPress = db
 				if err = createTable(db, SQLCreateCyclesTable); err != nil {
 					chErr <- err
 					return
@@ -79,14 +80,16 @@ func Open(path string, allowCreate bool) error {
 					chErr <- err
 					return
 				}
+
 			case "note":
-				DBNote = db
+				dbNote = db
 				if err := createTable(db, SQLCreateNotesTable); err != nil {
 					chErr <- err
 					return
 				}
+
 			case "user":
-				DBUser = db
+				dbUser = db
 				if err := createTable(db, SQLCreateCookiesTable); err != nil {
 					chErr <- err
 					return
@@ -114,7 +117,7 @@ func Open(path string, allowCreate bool) error {
 }
 
 func Close() {
-	for _, db := range []*sql.DB{DBTool, DBPress, DBNote, DBUser} {
+	for _, db := range []*sql.DB{dbTool, dbPress, dbNote, dbUser} {
 		if db != nil {
 			db.Close()
 		}
