@@ -6,7 +6,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
-templ Page(notes []*shared.Note, tools []shared.ModelTool) {
+templ Page(notes []*shared.Note, tools []*shared.Tool) {
 	@components.Layout(
 		components.LayoutProps{
 			PageTitle:      "PG Presse | Notizen Verwaltung",
