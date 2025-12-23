@@ -1,16 +1,17 @@
 package notes
 
 import (
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 
 	"github.com/labstack/echo/v4"
 )
 
-// GetNotesPage serves the main notes page
+// GetPage serves the main notes page
 func GetPage(c echo.Context) *echo.HTTPError {
 	// Get all notes with defensive error handling
-	notes, merr := db.Notes.List()
+	notes, merr := db.ListNotes()
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -21,7 +22,7 @@ func GetPage(c echo.Context) *echo.HTTPError {
 	}
 
 	// Get all tools to show relationships
-	tools, merr := helper.ListTools(db)
+	tools, merr := db.ListTools()
 	if merr != nil {
 		return merr.Echo()
 	}
