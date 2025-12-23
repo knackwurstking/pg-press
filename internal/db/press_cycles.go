@@ -12,7 +12,7 @@ import (
 // -----------------------------------------------------------------------------
 
 const (
-	SQLCreateCyclesTable string = `
+	sqlCreateCyclesTable string = `
 		CREATE TABLE IF NOT EXISTS cycles (
 			id           INTEGER NOT NULL,
 			tool_id      INTEGER NOT NULL,
@@ -24,20 +24,39 @@ const (
 			PRIMARY KEY("id")
 		);
 	`
+
+	sqlListToolCycles string = `
+		SELECT id, tool_id, press_number, cycles, start, stop
+		FROM cycles
+		WHERE tool_id = :tool_id;
+	`
+
+	sqlListCyclesByPressNumber string = `
+		SELECT id, tool_id, press_number, cycles, start, stop
+		FROM cycles
+		WHERE press_number = :press_number;
+	`
+
+	sqlDeleteCycle string = `
+		DELETE FROM cycles
+		WHERE id = :id;
+	`
+
+	sqlGetPrevCycle string = `
+		SELECT cycles
+		FROM cycles
+		WHERE press_number = ? AND stop <= ?
+		ORDER BY stop DESC
+		LIMIT 1;
+	`
 )
 
 // -----------------------------------------------------------------------------
 // Table Helpers: "cycles"
 // -----------------------------------------------------------------------------
 
-const SQLListToolCycles string = `
-	SELECT id, tool_id, press_number, cycles, start, stop
-	FROM cycles
-	WHERE tool_id = :tool_id;
-`
-
 func ListToolCycles(toolID shared.EntityID) ([]*shared.Cycle, *errors.MasterError) {
-	rows, err := dbPress.Query(SQLListToolCycles, sql.Named("tool_id", int64(toolID)))
+	rows, err := dbPress.Query(sqlListToolCycles, sql.Named("tool_id", int64(toolID)))
 	if err != nil {
 		return nil, errors.NewMasterError(err)
 	}
@@ -63,14 +82,8 @@ func ListToolCycles(toolID shared.EntityID) ([]*shared.Cycle, *errors.MasterErro
 	return cycles, nil
 }
 
-const SQLListCyclesByPressNumber string = `
-	SELECT id, tool_id, press_number, cycles, start, stop
-	FROM cycles
-	WHERE press_number = :press_number;
-`
-
 func ListCyclesByPressNumber(pressNumber shared.PressNumber) ([]*shared.Cycle, *errors.MasterError) {
-	rows, err := dbPress.Query(SQLListCyclesByPressNumber, sql.Named("press_number", int64(pressNumber)))
+	rows, err := dbPress.Query(sqlListCyclesByPressNumber, sql.Named("press_number", int64(pressNumber)))
 	if err != nil {
 		return nil, errors.NewMasterError(err)
 	}
@@ -95,13 +108,8 @@ func ListCyclesByPressNumber(pressNumber shared.PressNumber) ([]*shared.Cycle, *
 	return cycles, nil
 }
 
-const SQLDeleteCycle string = `
-	DELETE FROM cycles
-	WHERE id = :id;
-`
-
 func DeleteCycle(id shared.EntityID) *errors.MasterError {
-	_, err := dbPress.Exec(SQLDeleteCycle, sql.Named("id", int64(id)))
+	_, err := dbPress.Exec(sqlDeleteCycle, sql.Named("id", int64(id)))
 	if err != nil {
 		return errors.NewMasterError(err)
 	}
@@ -126,20 +134,12 @@ func GetTotalToolCycles(id shared.EntityID) (int64, *errors.MasterError) {
 	return totalCycles, nil
 }
 
-const SQLGetPrevCycle string = `
-	SELECT cycles
-	FROM cycles
-	WHERE press_number = ? AND stop <= ?
-	ORDER BY stop DESC
-	LIMIT 1;
-`
-
 // InjectPartialCycles calculates and injects the partial cycles into the given cycle
 //
 // TODO: Take into account the last press regeneration when calculating partial cycles
 func InjectPartialCycles(cycle *shared.Cycle) *errors.MasterError {
 	var lastKnownCycles int64 = 0
-	err := dbPress.QueryRow(SQLGetPrevCycle, cycle.PressNumber, cycle.Start).Scan(&lastKnownCycles)
+	err := dbPress.QueryRow(sqlGetPrevCycle, cycle.PressNumber, cycle.Start).Scan(&lastKnownCycles)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			// No previous cycles found, return full cycles

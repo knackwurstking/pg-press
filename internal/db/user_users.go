@@ -12,7 +12,7 @@ import (
 // -----------------------------------------------------------------------------
 
 const (
-	SQLCreateUsersTable string = `
+	sqlCreateUsersTable string = `
 		CREATE TABLE IF NOT EXISTS users (
 			id 			INTEGER NOT NULL,
 			name 		TEXT NOT NULL,
@@ -21,43 +21,61 @@ const (
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
 	`
+
+	sqlGetUser string = `
+		SELECT id, name, api_key
+		FROM users
+		WHERE id = :id;
+	`
+
+	sqlGetUserByApiKey string = `
+		SELECT id, name, api_key
+		FROM users
+		WHERE api_key = :api_key;
+	`
+
+	sqlAddUser string = `
+		INSERT INTO users (id, name, api_key)
+		VALUES (:id, :name, :api_key);
+	`
+
+	sqlUpdateUser string = `
+		UPDATE users
+		SET name = :name,
+			api_key = :api_key
+		WHERE id = :id;
+	`
+
+	sqlListUsers string = `
+		SELECT id, name, api_key
+		FROM users
+		ORDER BY id ASC;
+	`
+
+	sqlDeleteUser string = `
+		DELETE FROM users
+		WHERE id = :id;
+	`
 )
 
 // -----------------------------------------------------------------------------
 // Table Helpers: "users"
 // -----------------------------------------------------------------------------
 
-const SQLGetUser string = `
-	SELECT id, name, api_key
-	FROM users
-	WHERE id = :id;
-`
-
 func GetUser(id shared.TelegramID) (*shared.User, *errors.MasterError) {
-	return ScanUser(dbUser.QueryRow(SQLGetUser, sql.Named("id", id)))
+	return ScanUser(dbUser.QueryRow(sqlGetUser, sql.Named("id", id)))
 }
-
-const SQLGetUserByApiKey string = `
-	SELECT id, name, api_key
-	FROM users
-	WHERE api_key = :api_key;
-`
 
 func GetUserByApiKey(apiKey string) (user *shared.User, merr *errors.MasterError) {
-	return ScanUser(dbUser.QueryRow(SQLGetUserByApiKey, sql.Named("api_key", apiKey)))
+	return ScanUser(dbUser.QueryRow(sqlGetUserByApiKey, sql.Named("api_key", apiKey)))
 }
-
-const SQLAddUser string = `
-	INSERT INTO users (id, name, api_key)
-	VALUES (:id, :name, :api_key);
-`
 
 func AddUser(user *shared.User) *errors.MasterError {
 	if verr := user.Validate(); verr != nil {
 		return verr.MasterError().Wrap("invalid user data")
 	}
 
-	_, err := dbUser.Exec(SQLAddUser,
+	_, err := dbUser.Exec(sqlAddUser,
 		sql.Named("id", user.ID),
 		sql.Named("name", user.Name),
 		sql.Named("api_key", user.ApiKey),
@@ -67,20 +85,13 @@ func AddUser(user *shared.User) *errors.MasterError {
 	}
 	return nil
 }
-
-const SQLUpdateUser string = `
-	UPDATE users
-	SET name = :name,
-		api_key = :api_key
-	WHERE id = :id;
-`
 
 func UpdateUser(user *shared.User) *errors.MasterError {
 	if verr := user.Validate(); verr != nil {
 		return verr.MasterError().Wrap("invalid user data")
 	}
 
-	_, err := dbUser.Exec(SQLUpdateUser,
+	_, err := dbUser.Exec(sqlUpdateUser,
 		sql.Named("id", user.ID),
 		sql.Named("name", user.Name),
 		sql.Named("api_key", user.ApiKey),
@@ -91,14 +102,8 @@ func UpdateUser(user *shared.User) *errors.MasterError {
 	return nil
 }
 
-const SQLListUsers string = `
-	SELECT id, name, api_key
-	FROM users
-	ORDER BY id ASC;
-`
-
 func ListUsers() (users []*shared.User, merr *errors.MasterError) {
-	rows, err := dbUser.Query(SQLListUsers)
+	rows, err := dbUser.Query(sqlListUsers)
 	if err != nil {
 		return nil, errors.NewMasterError(err)
 	}
@@ -115,13 +120,8 @@ func ListUsers() (users []*shared.User, merr *errors.MasterError) {
 	return users, nil
 }
 
-const SQLDeleteUser string = `
-	DELETE FROM users
-	WHERE id = :id;
-`
-
 func DeleteUser(id shared.TelegramID) *errors.MasterError {
-	_, err := dbUser.Exec(SQLDeleteUser, sql.Named("id", id))
+	_, err := dbUser.Exec(sqlDeleteUser, sql.Named("id", id))
 	if err != nil {
 		return errors.NewMasterError(err)
 	}

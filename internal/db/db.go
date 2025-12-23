@@ -53,48 +53,48 @@ func Open(path string, allowCreate bool) error {
 			switch name {
 			case "tool":
 				dbTool = db
-				if err = createTable(db, SQLCreateMetalSheetsTable); err != nil {
+				if err = createTable(db, sqlCreateMetalSheetsTable); err != nil {
 					chErr <- err
 					return
 				}
-				if err = createTable(db, SQLCreateToolRegenerationsTable); err != nil {
+				if err = createTable(db, sqlCreateToolRegenerationsTable); err != nil {
 					chErr <- err
 					return
 				}
-				if err = createTable(db, SQLCreateToolsTable); err != nil {
+				if err = createTable(db, sqlCreateToolsTable); err != nil {
 					chErr <- err
 					return
 				}
 
 			case "press":
 				dbPress = db
-				if err = createTable(db, SQLCreateCyclesTable); err != nil {
+				if err = createTable(db, sqlCreateCyclesTable); err != nil {
 					chErr <- err
 					return
 				}
-				if err = createTable(db, SQLCreatePressesTable); err != nil {
+				if err = createTable(db, sqlCreatePressesTable); err != nil {
 					chErr <- err
 					return
 				}
-				if err = createTable(db, SQLCreatePressRegenerationsTable); err != nil {
+				if err = createTable(db, sqlCreatePressRegenerationsTable); err != nil {
 					chErr <- err
 					return
 				}
 
 			case "note":
 				dbNote = db
-				if err := createTable(db, SQLCreateNotesTable); err != nil {
+				if err := createTable(db, sqlCreateNotesTable); err != nil {
 					chErr <- err
 					return
 				}
 
 			case "user":
 				dbUser = db
-				if err := createTable(db, SQLCreateCookiesTable); err != nil {
+				if err := createTable(db, sqlCreateCookiesTable); err != nil {
 					chErr <- err
 					return
 				}
-				if err := createTable(db, SQLCreateUsersTable); err != nil {
+				if err := createTable(db, sqlCreateUsersTable); err != nil {
 					chErr <- err
 					return
 				}

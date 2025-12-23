@@ -10,7 +10,7 @@ import (
 // -----------------------------------------------------------------------------
 
 const (
-	SQLCreatePressRegenerationsTable string = `
+	sqlCreatePressRegenerationsTable string = `
 		CREATE TABLE IF NOT EXISTS press_regenerations (
 			id 				INTEGER NOT NULL,
 			press_number 	INTEGER NOT NULL,

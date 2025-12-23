@@ -12,7 +12,7 @@ import (
 // ------------------------------------------------------------------------------
 
 const (
-	SQLCreateToolRegenerationsTable string = `
+	sqlCreateToolRegenerationsTable string = `
 		CREATE TABLE IF NOT EXISTS tool_regenerations (
 			id 		INTEGER NOT NULL,
 			tool_id INTEGER NOT NULL,
@@ -23,20 +23,31 @@ const (
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
 	`
+
+	sqlGetToolRegeneration string = `
+		SELECT id, tool_id, start, stop, cycles
+		FROM tool_regenerations
+		WHERE id = :id;
+	`
+
+	sqlListToolRegenerations string = `
+		SELECT id, tool_id, start, stop, cycles
+		FROM tool_regenerations
+		WHERE tool_id = :tool_id;
+	`
+
+	sqlDeleteToolRegeneration string = `
+		DELETE FROM tool_regenerations
+		WHERE id = :id;
+	`
 )
 
 // -----------------------------------------------------------------------------
 // Table Helpers: "tool_regenerations"
 // -----------------------------------------------------------------------------
 
-const SQLGetToolRegeneration string = `
-	SELECT id, tool_id, start, stop, cycles
-	FROM tool_regenerations
-	WHERE id = :id;
-`
-
 func GetToolRegeneration(id shared.EntityID) (*shared.ToolRegeneration, *errors.MasterError) {
-	row := dbTool.QueryRow(SQLGetToolRegeneration, sql.Named("id", int64(id)))
+	row := dbTool.QueryRow(sqlGetToolRegeneration, sql.Named("id", int64(id)))
 	tr, merr := ScanToolRegeneration(row)
 	if merr != nil {
 		return nil, merr
@@ -44,14 +55,8 @@ func GetToolRegeneration(id shared.EntityID) (*shared.ToolRegeneration, *errors.
 	return tr, nil
 }
 
-const SQLListToolRegenerations string = `
-	SELECT id, tool_id, start, stop, cycles
-	FROM tool_regenerations
-	WHERE tool_id = :tool_id;
-`
-
 func ListToolRegenerations(toolID shared.EntityID) ([]*shared.ToolRegeneration, *errors.MasterError) {
-	rows, err := dbTool.Query(SQLListToolRegenerations, sql.Named("tool_id", int64(toolID)))
+	rows, err := dbTool.Query(sqlListToolRegenerations, sql.Named("tool_id", int64(toolID)))
 	if err != nil {
 		return nil, errors.NewMasterError(err)
 	}
@@ -70,13 +75,8 @@ func ListToolRegenerations(toolID shared.EntityID) ([]*shared.ToolRegeneration, 
 	return trs, nil
 }
 
-const SQLDeleteToolRegeneration string = `
-	DELETE FROM tool_regenerations
-	WHERE id = :id;
-`
-
 func DeleteToolRegeneration(id shared.EntityID) *errors.MasterError {
-	_, err := dbTool.Exec(SQLDeleteToolRegeneration, sql.Named("id", int64(id)))
+	_, err := dbTool.Exec(sqlDeleteToolRegeneration, sql.Named("id", int64(id)))
 	if err != nil {
 		return errors.NewMasterError(err)
 	}

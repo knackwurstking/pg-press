@@ -10,7 +10,7 @@ import (
 // -----------------------------------------------------------------------------
 
 const (
-	SQLCreatePressesTable string = `
+	sqlCreatePressesTable string = `
 		CREATE TABLE IF NOT EXISTS presses (
 			id 					INTEGER NOT NULL,
 			slot_up 			INTEGER NOT NULL,

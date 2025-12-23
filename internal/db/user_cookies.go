@@ -12,7 +12,7 @@ import (
 // -----------------------------------------------------------------------------
 
 const (
-	SQLCreateCookiesTable string = `
+	sqlCreateCookiesTable string = `
 		CREATE TABLE IF NOT EXISTS cookies (
 			user_agent 	TEXT NOT NULL,
 			value 		TEXT NOT NULL,
@@ -27,20 +27,64 @@ const (
 		CREATE INDEX IF NOT EXISTS idx_cookies_user_id
 		ON cookies(user_id);
 	`
+
+	sqlListCookies string = `
+		SELECT user_agent, value, user_id, last_login
+		FROM cookies;
+	`
+
+	sqlListCookiesByUserID string = `
+		SELECT user_agent, value, user_id, last_login
+		FROM cookies
+		WHERE user_id = :user_id
+		ORDER BY last_login DESC;
+	`
+
+	sqlListCookiesByApiKey string = `
+		SELECT user_agent, value, user_id, last_login
+		FROM cookies
+		WHERE user_id = :user_id
+		ORDER BY last_login DESC;
+	`
+
+	sqlGetCookie string = `
+		SELECT user_agent, value, user_id, last_login
+		FROM cookies
+		WHERE value = :value;
+	`
+
+	sqlAddCookie string = `
+		INSERT INTO cookies (user_agent, value, user_id, last_login)
+		VALUES (:user_agent, :value, :user_id, :last_login);
+	`
+
+	sqlUpdateCookie string = `
+		UPDATE cookies
+		SET
+			user_agent = :user_agent,
+			value = :value
+			user_id = :user_id
+			last_login = :last_login
+		WHERE value = :value;
+	`
+
+	sqlDeleteCookie string = `
+		DELETE FROM cookies
+		WHERE value = :value;
+	`
+
+	sqlDeleteCookiesByUserID string = `
+		DELETE FROM cookies
+		WHERE user_id = :user_id;
+	`
 )
 
 // -----------------------------------------------------------------------------
 // Table Helpers: "cookies"
 // -----------------------------------------------------------------------------
 
-// ListCookies
-const SQLListCookies string = `
-	SELECT user_agent, value, user_id, last_login
-	FROM cookies;
-`
-
 func ListCookies() (cookies []*shared.Cookie, merr *errors.MasterError) {
-	rows, err := dbUser.Query(SQLListCookies)
+	rows, err := dbUser.Query(sqlListCookies)
 	if err != nil {
 		return nil, errors.NewMasterError(err)
 	}
@@ -56,16 +100,9 @@ func ListCookies() (cookies []*shared.Cookie, merr *errors.MasterError) {
 
 	return cookies, nil
 }
-
-const SQLListCookiesByUserID string = `
-	SELECT user_agent, value, user_id, last_login
-	FROM cookies
-	WHERE user_id = :user_id
-	ORDER BY last_login DESC;
-`
 
 func ListCookiesByUserID(userID shared.TelegramID) (cookies []*shared.Cookie, merr *errors.MasterError) {
-	rows, err := dbUser.Query(SQLListCookiesByUserID, sql.Named("user_id", userID))
+	rows, err := dbUser.Query(sqlListCookiesByUserID, sql.Named("user_id", userID))
 	if err != nil {
 		return nil, errors.NewMasterError(err)
 	}
@@ -81,13 +118,6 @@ func ListCookiesByUserID(userID shared.TelegramID) (cookies []*shared.Cookie, me
 
 	return cookies, nil
 }
-
-const SQLListCookiesByApiKey string = `
-	SELECT user_agent, value, user_id, last_login
-	FROM cookies
-	WHERE user_id = :user_id
-	ORDER BY last_login DESC;
-`
 
 func ListCookiesByApiKey(apiKey string) (cookies []*shared.Cookie, merr *errors.MasterError) {
 	// Get user id from the users table
@@ -96,7 +126,7 @@ func ListCookiesByApiKey(apiKey string) (cookies []*shared.Cookie, merr *errors.
 		return nil, merr
 	}
 
-	rows, err := dbUser.Query(SQLListCookiesByApiKey, sql.Named("user_id", user.ID))
+	rows, err := dbUser.Query(sqlListCookiesByApiKey, sql.Named("user_id", user.ID))
 	if err != nil {
 		return nil, errors.NewMasterError(err)
 	}
@@ -113,27 +143,16 @@ func ListCookiesByApiKey(apiKey string) (cookies []*shared.Cookie, merr *errors.
 	return cookies, nil
 }
 
-const SQLGetCookie string = `
-	SELECT user_agent, value, user_id, last_login
-	FROM cookies
-	WHERE value = :value;
-`
-
 func GetCookie(value string) (*shared.Cookie, *errors.MasterError) {
-	return ScanCookie(dbUser.QueryRow(SQLGetCookie, sql.Named("value", value)))
+	return ScanCookie(dbUser.QueryRow(sqlGetCookie, sql.Named("value", value)))
 }
-
-const SQLAddCookie string = `
-	INSERT INTO cookies (user_agent, value, user_id, last_login)
-	VALUES (:user_agent, :value, :user_id, :last_login);
-`
 
 func AddCookie(cookie *shared.Cookie) *errors.MasterError {
 	if verr := cookie.Validate(); verr != nil {
 		return verr.MasterError().Wrap("invalid cookie data")
 	}
 
-	_, err := dbUser.Exec(SQLAddCookie,
+	_, err := dbUser.Exec(sqlAddCookie,
 		sql.Named("user_agent", cookie.UserAgent),
 		sql.Named("value", cookie.Value),
 		sql.Named("user_id", cookie.UserID),
@@ -145,23 +164,13 @@ func AddCookie(cookie *shared.Cookie) *errors.MasterError {
 	return nil
 }
 
-const SQLUpdateCookie string = `
-	UPDATE cookies
-	SET
-		user_agent = :user_agent,
-		value = :value
-		user_id = :user_id
-		last_login = :last_login
-	WHERE value = :value;
-`
-
 // UpdateCookie updates the given cookie in the database, it just replaces all fields including the value.
 func UpdateCookie(value string, cookie *shared.Cookie) *errors.MasterError {
 	if verr := cookie.Validate(); verr != nil {
 		return verr.MasterError().Wrap("invalid cookie data")
 	}
 
-	_, err := dbUser.Exec(SQLUpdateCookie,
+	_, err := dbUser.Exec(sqlUpdateCookie,
 		sql.Named("user_agent", cookie.UserAgent),
 		sql.Named("user_id", cookie.UserID),
 		sql.Named("last_login", cookie.LastLogin),
@@ -173,26 +182,16 @@ func UpdateCookie(value string, cookie *shared.Cookie) *errors.MasterError {
 	return nil
 }
 
-const SQLDeleteCookie string = `
-	DELETE FROM cookies
-	WHERE value = :value;
-`
-
 func DeleteCookie(value string) *errors.MasterError {
-	_, err := dbUser.Exec(SQLDeleteCookie, sql.Named("value", value))
+	_, err := dbUser.Exec(sqlDeleteCookie, sql.Named("value", value))
 	if err != nil {
 		return errors.NewMasterError(err)
 	}
 	return nil
 }
 
-const SQLDeleteCookiesByUserID string = `
-	DELETE FROM cookies
-	WHERE user_id = :user_id;
-`
-
 func DeleteCookiesByUserID(userID shared.TelegramID) *errors.MasterError {
-	_, err := dbUser.Exec(SQLDeleteCookiesByUserID, sql.Named("user_id", userID))
+	_, err := dbUser.Exec(sqlDeleteCookiesByUserID, sql.Named("user_id", userID))
 	if err != nil {
 		return errors.NewMasterError(err)
 	}

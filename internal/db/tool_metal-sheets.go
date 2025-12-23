@@ -10,7 +10,7 @@ import (
 // ------------------------------------------------------------------------------
 
 const (
-	SQLCreateMetalSheetsTable string = `
+	sqlCreateMetalSheetsTable string = `
 		CREATE TABLE IF NOT EXISTS metal_sheets (
 			id 				INTEGER NOT NULL,
 			tool_id 		INTEGER NOT NULL,
