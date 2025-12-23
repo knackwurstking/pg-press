@@ -34,11 +34,11 @@ func Register(e *echo.Echo, path string) {
 		ui.NewEchoRoute(http.MethodGet, path+"/:id/cycles", GetCyclesSectionContent),
 		ui.NewEchoRoute(http.MethodGet, path+"/:id/total-cycles", HTMXGetToolTotalCycles),
 
-		// Delete a cycle table entry
-		ui.NewEchoRoute(http.MethodDelete, path+"/cycle/delete", HTMXDeleteToolCycle),
-
 		// Update tools binding data
 		ui.NewEchoRoute(http.MethodPatch, path+"/:id/bind", HTMXPatchToolBinding),
 		ui.NewEchoRoute(http.MethodPatch, path+"/:id/unbind", HTMXPatchToolUnBinding),
+
+		// Delete a cycle table entry
+		ui.NewEchoRoute(http.MethodDelete, path+"/cycle/delete", HTMXDeleteToolCycle),
 	})
 }

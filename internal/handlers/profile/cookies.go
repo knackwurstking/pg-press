@@ -3,8 +3,8 @@ package profile
 import (
 	"slices"
 
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
-	"github.com/knackwurstking/pg-press/internal/services/helper"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/labstack/echo/v4"
 )
@@ -19,7 +19,7 @@ func HTMXDeleteCookies(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	merr = DB.User.Cookies.Delete(value)
+	merr = db.DeleteCookie(value)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -38,7 +38,7 @@ func renderCookies(c echo.Context, oob bool) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	cookies, merr := helper.ListCookiesForApiKey(DB, user.ApiKey)
+	cookies, merr := db.ListCookiesByApiKey(user.ApiKey)
 	if merr != nil {
 		return merr.Echo()
 	}

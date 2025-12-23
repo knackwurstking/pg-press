@@ -1,9 +1,7 @@
 package profile
 
 import (
-	"fmt"
-	"net/http"
-
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 
@@ -44,7 +42,7 @@ func handleUserNameChange(c echo.Context, user *shared.User) *errors.MasterError
 	}
 
 	user.Name = userName
-	merr := DB.User.Users.Update(user)
+	merr := db.UpdateUser(user)
 	if merr != nil {
 		return merr
 	}
