@@ -50,7 +50,7 @@ func AddTool(tool *shared.Tool) *errors.MasterError {
 		return verr.MasterError().Wrap("invalid tool data")
 	}
 
-	_, err := DBTool.Exec(SQLAddTool,
+	_, err := dbTool.Exec(SQLAddTool,
 		sql.Named("width", tool.Width),
 		sql.Named("height", tool.Height),
 		sql.Named("position", tool.Position),
@@ -90,7 +90,7 @@ func UpdateTool(tool *shared.Tool) *errors.MasterError {
 		return verr.MasterError().Wrap("invalid tool data")
 	}
 
-	_, err := DBTool.Exec(SQLUpdateTool,
+	_, err := dbTool.Exec(SQLUpdateTool,
 		sql.Named("id", tool.ID),
 		sql.Named("width", tool.Width),
 		sql.Named("height", tool.Height),
@@ -117,7 +117,7 @@ const SQLGetTool string = `
 `
 
 func GetTool(id shared.EntityID) (*shared.Tool, *errors.MasterError) {
-	return ScanTool(DBTool.QueryRow(SQLGetTool, id))
+	return ScanTool(dbTool.QueryRow(SQLGetTool, id))
 }
 
 const SQLListTools string = `
@@ -127,7 +127,7 @@ const SQLListTools string = `
 `
 
 func ListTools() (tools []*shared.Tool, merr *errors.MasterError) {
-	r, err := DBTool.Query(SQLListTools)
+	r, err := dbTool.Query(SQLListTools)
 	if err != nil {
 		return nil, errors.NewMasterError(err)
 	}
@@ -149,7 +149,7 @@ const SQLDeleteTool string = `
 `
 
 func DeleteTool(id shared.EntityID) *errors.MasterError {
-	_, err := DBTool.Exec(SQLDeleteTool, sql.Named("id", id))
+	_, err := dbTool.Exec(SQLDeleteTool, sql.Named("id", id))
 	if err != nil {
 		return errors.NewMasterError(err)
 	}
@@ -163,7 +163,7 @@ const SQLMarkToolAsDead string = `
 `
 
 func MarkToolAsDead(id shared.EntityID) *errors.MasterError {
-	_, err := DBTool.Exec(SQLMarkToolAsDead, sql.Named("id", id))
+	_, err := dbTool.Exec(SQLMarkToolAsDead, sql.Named("id", id))
 	if err != nil {
 		return errors.NewMasterError(err)
 	}
@@ -177,7 +177,7 @@ const SQLReviveTool string = `
 `
 
 func ReviveTool(id shared.EntityID) *errors.MasterError {
-	_, err := DBTool.Exec(SQLReviveTool, sql.Named("id", id))
+	_, err := dbTool.Exec(SQLReviveTool, sql.Named("id", id))
 	if err != nil {
 		return errors.NewMasterError(err)
 	}
@@ -191,7 +191,7 @@ const SQLBindTool string = `
 `
 
 func BindTool(sourceID, targetID shared.EntityID) *errors.MasterError {
-	res, err := DBTool.Exec(SQLBindTool,
+	res, err := dbTool.Exec(SQLBindTool,
 		sql.Named("source_id", sourceID),
 		sql.Named("target_id", targetID),
 	)
@@ -217,7 +217,7 @@ const SQLUnbindTool string = `
 `
 
 func UnbindTool(sourceID shared.EntityID) *errors.MasterError {
-	_, err := DBTool.Exec(SQLUnbindTool,
+	_, err := dbTool.Exec(SQLUnbindTool,
 		sql.Named("source_id", sourceID),
 	)
 	if err != nil {

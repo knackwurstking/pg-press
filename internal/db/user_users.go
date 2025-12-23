@@ -34,7 +34,7 @@ const SQLGetUser string = `
 `
 
 func GetUser(id shared.TelegramID) (*shared.User, *errors.MasterError) {
-	return ScanUser(DBUser.QueryRow(SQLGetUser, sql.Named("id", id)))
+	return ScanUser(dbUser.QueryRow(SQLGetUser, sql.Named("id", id)))
 }
 
 const SQLGetUserByApiKey string = `
@@ -44,7 +44,7 @@ const SQLGetUserByApiKey string = `
 `
 
 func GetUserByApiKey(apiKey string) (user *shared.User, merr *errors.MasterError) {
-	return ScanUser(DBUser.QueryRow(SQLGetUserByApiKey, sql.Named("api_key", apiKey)))
+	return ScanUser(dbUser.QueryRow(SQLGetUserByApiKey, sql.Named("api_key", apiKey)))
 }
 
 const SQLAddUser string = `
@@ -57,7 +57,7 @@ func AddUser(user *shared.User) *errors.MasterError {
 		return verr.MasterError().Wrap("invalid user data")
 	}
 
-	_, err := DBUser.Exec(SQLAddUser,
+	_, err := dbUser.Exec(SQLAddUser,
 		sql.Named("id", user.ID),
 		sql.Named("name", user.Name),
 		sql.Named("api_key", user.ApiKey),
@@ -80,7 +80,7 @@ func UpdateUser(user *shared.User) *errors.MasterError {
 		return verr.MasterError().Wrap("invalid user data")
 	}
 
-	_, err := DBUser.Exec(SQLUpdateUser,
+	_, err := dbUser.Exec(SQLUpdateUser,
 		sql.Named("id", user.ID),
 		sql.Named("name", user.Name),
 		sql.Named("api_key", user.ApiKey),
@@ -98,7 +98,7 @@ const SQLListUsers string = `
 `
 
 func ListUsers() (users []*shared.User, merr *errors.MasterError) {
-	rows, err := DBUser.Query(SQLListUsers)
+	rows, err := dbUser.Query(SQLListUsers)
 	if err != nil {
 		return nil, errors.NewMasterError(err)
 	}
@@ -121,7 +121,7 @@ const SQLDeleteUser string = `
 `
 
 func DeleteUser(id shared.TelegramID) *errors.MasterError {
-	_, err := DBUser.Exec(SQLDeleteUser, sql.Named("id", id))
+	_, err := dbUser.Exec(SQLDeleteUser, sql.Named("id", id))
 	if err != nil {
 		return errors.NewMasterError(err)
 	}

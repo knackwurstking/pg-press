@@ -40,7 +40,7 @@ const SQLListCookies string = `
 `
 
 func ListCookies() (cookies []*shared.Cookie, merr *errors.MasterError) {
-	rows, err := DBUser.Query(SQLListCookies)
+	rows, err := dbUser.Query(SQLListCookies)
 	if err != nil {
 		return nil, errors.NewMasterError(err)
 	}
@@ -65,7 +65,7 @@ const SQLListCookiesByUserID string = `
 `
 
 func ListCookiesByUserID(userID shared.TelegramID) (cookies []*shared.Cookie, merr *errors.MasterError) {
-	rows, err := DBUser.Query(SQLListCookiesByUserID, sql.Named("user_id", userID))
+	rows, err := dbUser.Query(SQLListCookiesByUserID, sql.Named("user_id", userID))
 	if err != nil {
 		return nil, errors.NewMasterError(err)
 	}
@@ -96,7 +96,7 @@ func ListCookiesByApiKey(apiKey string) (cookies []*shared.Cookie, merr *errors.
 		return nil, merr
 	}
 
-	rows, err := DBUser.Query(SQLListCookiesByApiKey, sql.Named("user_id", user.ID))
+	rows, err := dbUser.Query(SQLListCookiesByApiKey, sql.Named("user_id", user.ID))
 	if err != nil {
 		return nil, errors.NewMasterError(err)
 	}
@@ -120,7 +120,7 @@ const SQLGetCookie string = `
 `
 
 func GetCookie(value string) (*shared.Cookie, *errors.MasterError) {
-	return ScanCookie(DBUser.QueryRow(SQLGetCookie, sql.Named("value", value)))
+	return ScanCookie(dbUser.QueryRow(SQLGetCookie, sql.Named("value", value)))
 }
 
 const SQLAddCookie string = `
@@ -133,7 +133,7 @@ func AddCookie(cookie *shared.Cookie) *errors.MasterError {
 		return verr.MasterError().Wrap("invalid cookie data")
 	}
 
-	_, err := DBUser.Exec(SQLAddCookie,
+	_, err := dbUser.Exec(SQLAddCookie,
 		sql.Named("user_agent", cookie.UserAgent),
 		sql.Named("value", cookie.Value),
 		sql.Named("user_id", cookie.UserID),
@@ -161,7 +161,7 @@ func UpdateCookie(value string, cookie *shared.Cookie) *errors.MasterError {
 		return verr.MasterError().Wrap("invalid cookie data")
 	}
 
-	_, err := DBUser.Exec(SQLUpdateCookie,
+	_, err := dbUser.Exec(SQLUpdateCookie,
 		sql.Named("user_agent", cookie.UserAgent),
 		sql.Named("user_id", cookie.UserID),
 		sql.Named("last_login", cookie.LastLogin),
@@ -179,7 +179,7 @@ const SQLDeleteCookie string = `
 `
 
 func DeleteCookie(value string) *errors.MasterError {
-	_, err := DBUser.Exec(SQLDeleteCookie, sql.Named("value", value))
+	_, err := dbUser.Exec(SQLDeleteCookie, sql.Named("value", value))
 	if err != nil {
 		return errors.NewMasterError(err)
 	}
@@ -192,7 +192,7 @@ const SQLDeleteCookiesByUserID string = `
 `
 
 func DeleteCookiesByUserID(userID shared.TelegramID) *errors.MasterError {
-	_, err := DBUser.Exec(SQLDeleteCookiesByUserID, sql.Named("user_id", userID))
+	_, err := dbUser.Exec(SQLDeleteCookiesByUserID, sql.Named("user_id", userID))
 	if err != nil {
 		return errors.NewMasterError(err)
 	}
