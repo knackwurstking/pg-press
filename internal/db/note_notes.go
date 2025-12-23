@@ -98,6 +98,30 @@ func GetNote(id shared.EntityID) (*shared.Note, *errors.MasterError) {
 	return note, nil
 }
 
+const SQLListNotes string = `
+	SELECT id, level, content, created_at, linked
+	FROM notes
+	ORDER BY created_at DESC;
+`
+
+func ListNotes() ([]*shared.Note, *errors.MasterError) {
+	rows, err := DBNote.Query(SQLListNotes)
+	if err != nil {
+		return nil, errors.NewMasterError(err)
+	}
+	defer rows.Close()
+
+	var notes []*shared.Note
+	for rows.Next() {
+		note, merr := ScanNote(rows)
+		if merr != nil {
+			return nil, merr
+		}
+		notes = append(notes, note)
+	}
+	return notes, nil
+}
+
 const SQLListNotesForLinked string = `
 	SELECT id, level, content, created_at, linked
 	FROM notes
