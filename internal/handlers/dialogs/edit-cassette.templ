@@ -14,7 +14,7 @@ templ NewCassetteDialog() {
 		ID:               "cassette-dialog",
 		SubmitButtonText: "Erstellen",
 	}) {
-		{{ cassette := &shared.Cassette{} }}
+		{{ cassette := &shared.Tool{} }}
 		@toolFormat(cassette.Width, cassette.Height)
 		@toolType(cassette.Type)
 		@toolCode(cassette.Code)
@@ -22,7 +22,7 @@ templ NewCassetteDialog() {
 	}
 }
 
-templ EditCassetteDialog(cassette *shared.Cassette) {
+templ EditCassetteDialog(cassette *shared.Tool) {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           "PUT",
 		Href:             urlb.UrlDialogs().EditCassette(cassette.ID),
