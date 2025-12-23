@@ -56,6 +56,33 @@ func AddNote(note *shared.Note) *errors.MasterError {
 	return nil
 }
 
+const SQLUpdateNote string = `
+	UPDATE notes
+	SET level 		= :level,
+		content 	= :content,
+		created_at 	= :created_at,
+		linked 		= :linked
+	WHERE id = :id;
+`
+
+func UpdateNote(note *shared.Note) *errors.MasterError {
+	if verr := note.Validate(); verr != nil {
+		return verr.MasterError().Wrap("invalid note data")
+	}
+
+	_, err := DBNote.Exec(SQLUpdateNote,
+		sql.Named("id", note.ID),
+		sql.Named("level", note.Level),
+		sql.Named("content", note.Content),
+		sql.Named("created_at", note.CreatedAt),
+		sql.Named("linked", note.Linked),
+	)
+	if err != nil {
+		return errors.NewMasterError(err)
+	}
+	return nil
+}
+
 const SQLGetNote string = `
 	SELECT id, level, content, created_at, linked
 	FROM notes
