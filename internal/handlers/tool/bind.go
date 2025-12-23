@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/labstack/echo/v4"
@@ -20,7 +21,7 @@ func HTMXPatchToolBinding(c echo.Context) *echo.HTTPError {
 	if merr != nil {
 		return merr.Echo()
 	}
-	tool, merr := DB.Tool.Tools.GetByID(shared.EntityID(id))
+	tool, merr := db.GetTool(shared.EntityID(id))
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -40,13 +41,13 @@ func HTMXPatchToolBinding(c echo.Context) *echo.HTTPError {
 			"invalid target_id",
 		)
 	}
-	cassette, merr := DB.Tool.Cassettes.GetByID(shared.EntityID(id))
+	cassette, merr := db.GetTool(shared.EntityID(id))
 	if merr != nil {
 		return merr.Echo()
 	}
 
 	// Bind tool to target, this will get an error if target already has a binding
-	merr = helper.BindCassetteToTool(DB, tool.ID, cassette.ID)
+	merr = db.BindTool(tool.ID, cassette.ID)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -55,15 +56,22 @@ func HTMXPatchToolBinding(c echo.Context) *echo.HTTPError {
 }
 
 func renderBindingSection(c echo.Context, tool *shared.Tool, user *shared.User) *echo.HTTPError {
-	cassettesForBinding, merr := helper.ListAvailableCassettesForBinding(DB, tool.ID)
+	bindableCassettes, merr := db.ListTools()
 	if merr != nil {
 		return merr.Echo()
 	}
+	i := 0
+	for _, t := range bindableCassettes {
+		if t.IsCassette() && t.Width == tool.Width && t.Height == tool.Width {
+			bindableCassettes = append(bindableCassettes, t)
+		}
+	}
+	bindableCassettes = bindableCassettes[i:]
 
 	// Render the template
 	t := BindingSection(BindingSectionProps{
 		Tool:                tool,
-		CassettesForBinding: cassettesForBinding,
+		CassettesForBinding: bindableCassettes,
 		IsAdmin:             user.IsAdmin(),
 	})
 	err := t.Render(c.Request().Context(), c.Response())
