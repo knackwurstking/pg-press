@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -9,7 +10,7 @@ import (
 
 // -----------------------------------------------------------------------------
 // Table Creation Statements
-// ------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 const (
 	SQLCreateToolsTable string = `
@@ -27,7 +28,10 @@ const (
 			min_thickness		REAL NOT NULL DEFAULT 0, 	-- Cassette
 			max_thickness		REAL NOT NULL DEFAULT 0, 	-- Cassette
 
-			PRIMARY KEY("id" AUTOINCREMENT)
+			PRIMARY KEY("id" AUTOINCREMENT),
+
+			-- FOREIGN KEY for cassette to tools.id
+			FOREIGN KEY(cassette) REFERENCES tools(id)
 		);
 	`
 )
@@ -174,6 +178,48 @@ const SQLReviveTool string = `
 
 func ReviveTool(id shared.EntityID) *errors.MasterError {
 	_, err := DBTool.Exec(SQLReviveTool, sql.Named("id", id))
+	if err != nil {
+		return errors.NewMasterError(err)
+	}
+	return nil
+}
+
+const SQLBindTool string = `
+	UPDATE tools
+	SET cassette = :target_id
+	WHERE id = :source_id AND cassette = 0;
+`
+
+func BindTool(sourceID, targetID shared.EntityID) *errors.MasterError {
+	res, err := DBTool.Exec(SQLBindTool,
+		sql.Named("source_id", sourceID),
+		sql.Named("target_id", targetID),
+	)
+	if err != nil {
+		return errors.NewMasterError(err)
+	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return errors.NewMasterError(err)
+	}
+	if rowsAffected == 0 {
+		return errors.NewMasterError(
+			fmt.Errorf("tool %d is already bound to a cassette", sourceID),
+		)
+	}
+	return nil
+}
+
+const SQLUnbindTool string = `
+	UPDATE tools
+	SET cassette = 0
+	WHERE id = :source_id;
+`
+
+func UnbindTool(sourceID shared.EntityID) *errors.MasterError {
+	_, err := DBTool.Exec(SQLUnbindTool,
+		sql.Named("source_id", sourceID),
+	)
 	if err != nil {
 		return errors.NewMasterError(err)
 	}
