@@ -1,18 +1,19 @@
 package notes
 
 import (
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 
 	"github.com/labstack/echo/v4"
 )
 
 func GetNotesGrid(c echo.Context) *echo.HTTPError {
-	notes, merr := db.Notes.List()
+	notes, merr := db.ListNotes()
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	tools, merr := helper.ListTools(db)
+	tools, merr := db.ListTools()
 	if merr != nil {
 		return merr.Echo()
 	}
