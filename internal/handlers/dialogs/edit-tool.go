@@ -4,11 +4,11 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 
-	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 )
 
@@ -17,27 +17,27 @@ func GetToolDialog(c echo.Context) *echo.HTTPError {
 	id, _ := shared.ParseQueryInt64(c, "id")
 	if id > 0 {
 		var merr *errors.MasterError
-		tool, merr = db.Tool.Tools.GetByID(shared.EntityID(id))
+		tool, merr = db.GetTool(shared.EntityID(id))
 		if merr != nil {
 			return merr.Echo()
 		}
 	}
 
-	var t templ.Component
-	var tName string
 	if tool != nil {
-		t = EditToolDialog(tool)
-		tName = "EditToolDialog"
 		log.Debug("Rendering edit tool dialog: %#v", tool.String())
-	} else {
-		t = NewToolDialog()
-		tName = "NewToolDialog"
-		log.Debug("Rendering new tool dialog...")
+		t := EditToolDialog(tool)
+		err := t.Render(c.Request().Context(), c.Response())
+		if err != nil {
+			return errors.NewRenderError(err, "EditToolDialog")
+		}
+		return nil
 	}
 
+	log.Debug("Rendering new tool dialog...")
+	t := NewToolDialog()
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return errors.NewRenderError(err, tName)
+		return errors.NewRenderError(err, "NewToolDialog")
 	}
 
 	return nil
@@ -51,7 +51,7 @@ func PostTool(c echo.Context) *echo.HTTPError {
 
 	log.Debug("Creating new tool: %#v", tool.String())
 
-	merr := db.Tool.Tools.Create(tool)
+	merr := db.AddTool(tool)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -77,7 +77,7 @@ func PutTool(c echo.Context) *echo.HTTPError {
 
 	log.Debug("Updating tool: %#v", tool.String())
 
-	merr = db.Tool.Tools.Update(tool)
+	merr = db.UpdateTool(tool)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -132,14 +132,13 @@ func getToolDialogForm(c echo.Context) (*shared.Tool, *errors.ValidationError) {
 	}
 
 	tool := &shared.Tool{
-		BaseTool: shared.BaseTool{
-			Width:        width,
-			Height:       height,
-			Position:     shared.Slot(position),
-			Type:         vType,
-			Code:         vCode,
-			CyclesOffset: 0, // TODO: Maybe update the dialog to allow changing this?
-		},
+		Width:        width,
+		Height:       height,
+		Position:     shared.Slot(position),
+		Type:         vType,
+		Code:         vCode,
+		CyclesOffset: 0, // TODO: Maybe update the dialog to allow changing this?
+		Cassette:     0,
 	}
 
 	if verr := tool.Validate(); verr != nil {
