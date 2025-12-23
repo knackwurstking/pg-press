@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
@@ -21,7 +22,7 @@ func GetEditNote(c echo.Context) *echo.HTTPError {
 		noteID := shared.EntityID(id)
 
 		var merr *errors.MasterError
-		note, merr = db.Notes.GetByID(noteID)
+		note, merr = db.GetNote(noteID)
 		if merr != nil {
 			return merr.Echo()
 		}
@@ -56,7 +57,7 @@ func PostEditNote(c echo.Context) *echo.HTTPError {
 
 	log.Debug("Creating new note [note=%v, user_name=%s]", note, c.Get("user-name"))
 
-	merr = db.Notes.Create(note)
+	merr = db.AddNote(note)
 	if merr != nil {
 		return merr.WrapEcho("failed to create note")
 	}
@@ -81,7 +82,7 @@ func PutEditNote(c echo.Context) *echo.HTTPError {
 	log.Debug("Updating note [note=%v, user_name=%s]", note, c.Get("user-name"))
 
 	// Update the note
-	merr = db.Notes.Update(note)
+	merr = db.UpdateNote(note)
 	if merr != nil {
 		return merr.WrapEcho("failed to update note")
 	}
