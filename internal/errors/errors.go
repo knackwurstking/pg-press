@@ -128,6 +128,7 @@ func (e *MasterError) Err() error {
 	return e.err
 }
 
+// Code returns the associated HTTP status code
 func (e *MasterError) Code() int {
 	return e.code
 }
