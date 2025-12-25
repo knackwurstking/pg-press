@@ -1,6 +1,8 @@
 package db
 
 import (
+	"database/sql"
+
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
@@ -23,11 +25,26 @@ const (
 			PRIMARY KEY("id")
 		);
 	`
+
+	sqlGetPressByToolID string = `
+		SELECT
+			id,
+		FROM presses
+		WHERE slot_up = :tool_id OR slot_down = :tool_id
+		LIMIT 1;
+	`
 )
 
-// -----------------------------------------------------------------------------
-// Table Helpers: "presses"
-// -----------------------------------------------------------------------------
+func GetPressNumberForTool(toolID shared.EntityID) (shared.PressNumber, *errors.MasterError) {
+	var pressNumber shared.PressNumber = -1
+
+	err := dbPress.QueryRow(sqlGetPressByToolID, sql.Named("tool_id", toolID)).Scan(&pressNumber)
+	if err != nil {
+		return pressNumber, errors.NewMasterError(err)
+	}
+
+	return pressNumber, nil
+}
 
 // -----------------------------------------------------------------------------
 // Scan Helpers
