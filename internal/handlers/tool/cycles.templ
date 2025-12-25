@@ -29,21 +29,21 @@ templ CyclesSection(oob bool, id shared.EntityID, isTool bool) {
 }
 
 type CyclesSectionContentProps struct {
-	Tool                shared.ModelTool
+	Tool                *shared.Tool
 	ToolCycles          []*shared.Cycle
 	ActivePressNumber   shared.PressNumber
-	CassettesForBinding []*shared.Cassette
+	CassettesForBinding []*shared.Tool
 	Regenerations       []*shared.ToolRegeneration
 	User                *shared.User
 }
 
 templ CyclesSectionContent(p CyclesSectionContentProps) {
-	@components.SectionTitle(components.SectionTitleLevelMain, "Werkzeugnutzung & Zyklen")
+	@components.SectionTitle(components.MainTitle, "Werkzeugnutzung & Zyklen")
 	<div class="flex flex-col gap">
 		@components.Section(templ.Attributes{
 			"id": "tool-status-section",
 		}) {
-			@components.SectionTitle(components.SectionTitleLevelSub, "Aktueller Status")
+			@components.SectionTitle(components.SubTitle, "Aktueller Status")
 			@toolStatus(p)
 		}
 		// For now tool cycles for top cassette tools are ignored
@@ -74,9 +74,9 @@ templ toolStatus(p CyclesSectionContentProps) {
 			}
 		</span>
 		// Skip the binding section for cassette type tools and for lower slot tools
-		if !p.Tool.IsCassette() && p.Tool.GetBase().Position == shared.SlotUpper {
+		if !p.Tool.IsCassette() && p.Tool.IsUpperTool() {
 			@BindingSection(BindingSectionProps{
-				Tool:                p.Tool.(*shared.Tool),
+				Tool:                p.Tool,
 				CassettesForBinding: p.CassettesForBinding,
 				IsAdmin:             p.User.IsAdmin(),
 			})
@@ -88,7 +88,7 @@ templ regenerations(p CyclesSectionContentProps) {
 	@components.Section(templ.Attributes{
 		"id": "regenerations-section",
 	}) {
-		@components.SectionTitle(components.SectionTitleLevelSub, "Regenerationen")
+		@components.SectionTitle(components.SubTitle, "Regenerationen")
 		if len(p.Regenerations) == 0 {
 			<span class="flex justify-center items-center">
 				<i><small>Keine Regenerationen verzeichnet für dieses Werkzeug</small></i>
@@ -150,10 +150,10 @@ templ cyclesTable(p CyclesSectionContentProps) {
 	@components.Section(templ.Attributes{
 		"id": "cycles-section",
 	}) {
-		@components.SectionTitle(components.SectionTitleLevelSub, "Pressennutzungsverlauf") {
+		@components.SectionTitle(components.SubTitle, "Pressennutzungsverlauf") {
 			<button
 				class="icon secondary small flex"
-				hx-get={ urlb.UrlDialogs().EditCycle(0, p.Tool.GetID(), false) }
+				hx-get={ urlb.UrlDialogs().EditCycle(0, p.Tool.ID, false) }
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"
@@ -171,7 +171,7 @@ templ cyclesTable(p CyclesSectionContentProps) {
 				Gesamtzyklen:
 			</h6>
 			<span>
-				@TotalCycles(p.Tool.GetBase().Cycles, true)
+				@TotalCycles(p.Tool.Cycles, true)
 			</span>
 		}
 		<figure class="w-full overflow-x-scroll">
