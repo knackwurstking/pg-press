@@ -56,7 +56,7 @@ func renderCyclesSectionContent(c echo.Context) *echo.HTTPError {
 	}
 
 	// Get regenerations for this tool
-	regenerations, merr := db.ListToolRegenerations(toolID)
+	regenerations, merr := db.ListToolRegenerationsByTool(toolID)
 	if merr != nil {
 		return merr.WrapEcho("could not get regenerations for tool")
 	}

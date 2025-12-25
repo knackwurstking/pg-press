@@ -3,6 +3,7 @@ package tool
 import (
 	"net/http"
 
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 
@@ -14,7 +15,7 @@ func RegenerationEditable(c echo.Context) *echo.HTTPError {
 	if merr != nil {
 		return merr.Echo()
 	}
-	tool, merr := helper.GetToolByID(DB, shared.EntityID(id))
+	tool, merr := db.GetTool(shared.EntityID(id))
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -32,7 +33,7 @@ func RegenerationNonEditable(c echo.Context) *echo.HTTPError {
 	if merr != nil {
 		return merr.Echo()
 	}
-	tool, merr := helper.GetToolByID(DB, shared.EntityID(id))
+	tool, merr := db.GetTool(shared.EntityID(id))
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -55,7 +56,7 @@ func Regeneration(c echo.Context) *echo.HTTPError {
 	if merr != nil {
 		return merr.Echo()
 	}
-	tool, merr := helper.GetToolByID(DB, shared.EntityID(id))
+	tool, merr := db.GetTool(shared.EntityID(id))
 	if merr != nil {
 		return merr.WrapEcho("getting tool by ID %d failed", id)
 	}
@@ -65,26 +66,26 @@ func Regeneration(c echo.Context) *echo.HTTPError {
 		return echo.NewHTTPError(http.StatusBadRequest, "status is required")
 	}
 
-	log.Debug("Regeneration status change requested: tool ID %d, status %s", tool.GetID(), statusStr)
+	log.Debug("Regeneration status change requested: tool ID %d, status %s", tool.ID, statusStr)
 
 	// Handle regeneration start/stop/abort only
 	switch statusStr {
 	case "regenerating":
-		merr = helper.StopToolRegeneration(DB, tool.GetID())
+		merr = db.StopToolRegeneration(tool.ID)
 		if merr != nil {
-			return merr.WrapEcho("stopping regeneration for tool ID %d failed", tool.GetID())
+			return merr.WrapEcho("stopping regeneration for tool ID %d failed", tool.ID)
 		}
 
 	case "active":
-		merr = helper.StartToolRegeneration(DB, tool.GetID())
+		merr = db.StartToolRegeneration(tool.ID)
 		if merr != nil {
-			return merr.WrapEcho("starting regeneration for tool ID %d failed", tool.GetID())
+			return merr.WrapEcho("starting regeneration for tool ID %d failed", tool.ID)
 		}
 
 	case "abort":
-		merr := helper.AbortToolRegeneration(DB, tool.GetID())
+		merr := db.AbortToolRegeneration(tool.ID)
 		if merr != nil {
-			return merr.WrapEcho("aborting regeneration for tool ID %d failed", tool.GetID())
+			return merr.WrapEcho("aborting regeneration for tool ID %d failed", tool.ID)
 		}
 
 	default:
@@ -95,9 +96,9 @@ func Regeneration(c echo.Context) *echo.HTTPError {
 	}
 
 	// Get updated tool and render status display
-	tool, merr = helper.GetToolByID(DB, tool.GetID())
+	tool, merr = db.GetTool(tool.ID)
 	if merr != nil {
-		return merr.WrapEcho("getting tool by ID %d failed", tool.GetID())
+		return merr.WrapEcho("getting tool by ID %d failed", tool.ID)
 	}
 
 	// Render the updated status component
@@ -109,7 +110,7 @@ func Regeneration(c echo.Context) *echo.HTTPError {
 	return renderCyclesSection(c, tool)
 }
 
-func renderRegenerationEdit(c echo.Context, tool shared.ModelTool, editable bool, user *shared.User) *echo.HTTPError {
+func renderRegenerationEdit(c echo.Context, tool *shared.Tool, editable bool, user *shared.User) *echo.HTTPError {
 	if user == nil {
 		var merr *errors.MasterError
 		user, merr = shared.GetUserFromContext(c)
@@ -118,8 +119,8 @@ func renderRegenerationEdit(c echo.Context, tool shared.ModelTool, editable bool
 		}
 	}
 
-	regenerations, merr := helper.GetRegenerationsForTool(DB, tool.GetID())
-	if merr != nil && merr.Code != http.StatusNotFound {
+	regenerations, merr := db.ListToolRegenerationsByTool(tool.ID)
+	if merr != nil && merr.Code() != http.StatusNotFound {
 		return merr.Echo()
 	}
 	isRegenerating := false
@@ -130,16 +131,21 @@ func renderRegenerationEdit(c echo.Context, tool shared.ModelTool, editable bool
 		}
 	}
 
+	pressNumber, merr := db.GetPressNumberForTool(tool.ID)
+	if merr != nil {
+		return merr.Echo()
+	}
+
 	t := RegenerationEdit(RegenerationEditProps{
 		Tool:              tool,
-		ActivePressNumber: helper.GetPressNumberForTool(DB, tool.GetID()),
+		ActivePressNumber: pressNumber,
 		IsRegenerating:    isRegenerating,
 		Editable:          editable,
 		UserHasPermission: user.IsAdmin(),
 	})
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return errors.NewRenderError(err, "ToolStatusEdit")
+		return errors.NewRenderError(err, "RegenerationEdit")
 	}
 	return nil
 }
