@@ -268,7 +268,7 @@ func listRegenerationsCommand() cli.Command {
 					fmt.Printf("Tool Information: %s\n\n", tool.String())
 
 					// Get regenerations for this tool
-					regenerations, merr := db.ListToolRegenerations(toolID)
+					regenerations, merr := db.ListToolRegenerationsByTool(toolID)
 					if merr != nil {
 						return merr.Wrap("retrieve regenerations")
 					}
