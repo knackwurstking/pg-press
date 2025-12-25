@@ -1,6 +1,7 @@
 package tool
 
 import (
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/labstack/echo/v4"
@@ -10,9 +11,9 @@ func GetCyclesSectionContent(c echo.Context) *echo.HTTPError {
 	return renderCyclesSectionContent(c)
 }
 
-func renderCyclesSection(c echo.Context, tool shared.ModelTool) *echo.HTTPError {
+func renderCyclesSection(c echo.Context, tool *shared.Tool) *echo.HTTPError {
 	// Render out-of-band swap for cycles section to trigger reload
-	t := CyclesSection(true, tool.GetID(), !tool.IsCassette())
+	t := CyclesSection(true, tool.ID, !tool.IsCassette())
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "CyclesSection")
@@ -28,31 +29,34 @@ func renderCyclesSectionContent(c echo.Context) *echo.HTTPError {
 	}
 	toolID := shared.EntityID(id)
 
-	tool, merr := helper.GetToolByID(DB, toolID)
+	tool, merr := db.GetTool(toolID)
 	if merr != nil {
 		return merr.WrapEcho("could not get tool by ID")
 	}
 
 	// Get cycles for this specific tool
-	toolCycles, merr := helper.ListCyclesForTool(DB, toolID)
+	toolCycles, merr := db.ListToolCycles(toolID)
 	if merr != nil {
 		return merr.WrapEcho("could not list cycles for tool")
 	}
 
 	// Get active press number for this tool, -1 if none
-	activePressNumber := helper.GetPressNumberForTool(DB, toolID)
+	activePressNumber, merr := db.GetPressNumberForTool(toolID)
+	if merr != nil {
+		return merr.WrapEcho("could not get active press number for tool")
+	}
 
 	// Get bindable cassettes for this tool, if it is a tool and not a cassette
-	var cassettesForBinding []*shared.Cassette
+	var cassettesForBinding []*shared.Tool
 	if !tool.IsCassette() {
-		cassettesForBinding, merr = helper.ListAvailableCassettesForBinding(DB, toolID)
+		cassettesForBinding, merr = db.ListBindableCassettes(toolID)
 		if merr != nil {
 			return merr.WrapEcho("could not list available cassettes for binding")
 		}
 	}
 
 	// Get regenerations for this tool
-	regenerations, merr := helper.GetRegenerationsForTool(DB, toolID)
+	regenerations, merr := db.ListToolRegenerations(toolID)
 	if merr != nil {
 		return merr.WrapEcho("could not get regenerations for tool")
 	}

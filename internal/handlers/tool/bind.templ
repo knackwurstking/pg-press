@@ -8,7 +8,7 @@ import (
 
 type BindingSectionProps struct {
 	Tool                *shared.Tool
-	CassettesForBinding []*shared.Cassette
+	CassettesForBinding []*shared.Tool
 	IsAdmin             bool
 }
 
@@ -70,7 +70,7 @@ templ BindingSection(props BindingSectionProps) {
 			<span>
 				// Display the binding tool
 				{{
-					var bindingTool *shared.Cassette
+					var bindingTool *shared.Tool // Cassette tool
 					for _, c := range props.CassettesForBinding {
 						if c.ID == props.Tool.Cassette {
 							bindingTool = c
