@@ -14,13 +14,13 @@ import (
 const (
 	sqlCreateMetalSheetsTable string = `
 		CREATE TABLE IF NOT EXISTS metal_sheets (
-			id 				INTEGER NOT NULL,
-			tool_id 		INTEGER NOT NULL,
+			id				INTEGER NOT NULL,
+			tool_id			INTEGER NOT NULL,
 			tile_height 	REAL NOT NULL,
-			value 			REAL NOT NULL,
-			type 			TEXT NOT NULL, 			-- 'upper' | 'lower'
+			value			REAL NOT NULL,
+			type			TEXT NOT NULL,			-- 'upper' | 'lower'
 			marke_height 	INTEGER,
-			stf 			REAL,
+			stf				REAL,
 			stf_max 		REAL,
 			identifier 		TEXT, 					-- e.g. 'SACMI' | 'SITI'
 
