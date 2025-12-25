@@ -1,6 +1,7 @@
 package tool
 
 import (
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/labstack/echo/v4"
@@ -11,8 +12,7 @@ func HTMXGetToolTotalCycles(c echo.Context) *echo.HTTPError {
 	if merr != nil {
 		return merr.Echo()
 	}
-
-	totalCycles, merr := helper.GetTotalCyclesForTool(DB, shared.EntityID(id))
+	totalCycles, merr := db.GetTotalToolCycles(shared.EntityID(id))
 	if merr != nil {
 		return merr.Echo()
 	}

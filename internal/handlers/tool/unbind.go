@@ -1,7 +1,9 @@
 package tool
 
 import (
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/shared"
+
 	"github.com/labstack/echo/v4"
 )
 
@@ -15,7 +17,7 @@ func HTMXPatchToolUnBinding(c echo.Context) *echo.HTTPError {
 	if merr != nil {
 		return merr.Echo()
 	}
-	merr = helper.UnbindCassetteFromTool(DB, shared.EntityID(id))
+	merr = db.UnbindTool(shared.EntityID(id))
 	if merr != nil {
 		return merr.Echo()
 	}
