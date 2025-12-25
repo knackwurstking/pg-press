@@ -2,10 +2,11 @@ package tool
 
 import (
 	"fmt"
+	"slices"
+
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"slices"
 )
 
 templ UppperMetalSheets(metalSheets []*shared.UpperMetalSheet, tool *shared.Tool, user *shared.User) {
@@ -20,7 +21,7 @@ templ UppperMetalSheets(metalSheets []*shared.UpperMetalSheet, tool *shared.Tool
 			return 0
 		})
 	}}
-	@components.SectionTitle(components.SectionTitleLevelMain, "Bleche") {
+	@components.SectionTitle(components.MainTitle, "Bleche") {
 		@newMetalSheetButton(tool.ID)
 	}
 	<div class="table-container">
@@ -40,7 +41,7 @@ templ LowerMetalSheets(metalSheets []*shared.LowerMetalSheet, tool *shared.Tool,
 			return 0
 		})
 	}}
-	@components.SectionTitle(components.SectionTitleLevelMain, "Bleche") {
+	@components.SectionTitle(components.MainTitle, "Bleche") {
 		@newMetalSheetButton(tool.ID)
 	}
 	<div class="table-container">
