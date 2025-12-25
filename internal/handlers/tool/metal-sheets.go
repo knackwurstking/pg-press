@@ -3,9 +3,11 @@ package tool
 import (
 	"net/http"
 
-	"github.com/a-h/templ"
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
+
+	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 )
 
@@ -19,34 +21,42 @@ func HTMXGetToolMetalSheets(c echo.Context) *echo.HTTPError {
 	if merr != nil {
 		return merr.Echo()
 	}
-	tool, merr := helper.GetToolByID(DB, shared.EntityID(id))
+	tool, merr := db.GetTool(shared.EntityID(id))
 	if merr != nil {
 		return merr.WrapEcho("could not get tool by ID")
 	}
 
 	var t templ.Component
 
-	// Fetch metal sheets for tool
-	switch p := tool.GetBase().Position; p {
-	case shared.SlotUpper:
-		metalSheets, merr := helper.ListUpperMetalSheetsForTool(DB, tool.GetID())
-		if merr != nil {
-			return merr.Echo()
-		}
-		t = UppperMetalSheets(metalSheets, tool.(*shared.Tool), user)
-	case shared.SlotLower:
-		metalSheets, merr := helper.ListLowerMetalSheetsForTool(DB, tool.GetID())
-		if merr != nil {
-			return merr.Echo()
-		}
-		t = LowerMetalSheets(metalSheets, tool.(*shared.Tool), user)
-	default:
+	if !tool.IsLowerTool() && !tool.IsUpperTool() {
 		return echo.NewHTTPError(http.StatusBadRequest, "Tool is not supported for metal sheets")
 	}
 
+	if tool.IsLowerTool() {
+		metalSheets, merr := db.ListLowerMetalSheetsByTool(tool.ID)
+		if merr != nil {
+			return merr.Echo()
+		}
+
+		t = LowerMetalSheets(metalSheets, tool, user)
+		err := t.Render(c.Request().Context(), c.Response())
+		if err != nil {
+			return errors.NewRenderError(err, "LowerMetalSheets")
+		}
+
+		return nil
+	}
+
+	metalSheets, merr := db.ListUpperMetalSheetsByTool(tool.ID)
+	if merr != nil {
+		return merr.Echo()
+	}
+
+	t = UppperMetalSheets(metalSheets, tool, user)
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return errors.NewRenderError(err, "MetalSheets")
+		return errors.NewRenderError(err, "LowerMetalSheets")
 	}
+
 	return nil
 }

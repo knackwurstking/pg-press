@@ -1,6 +1,7 @@
 package tool
 
 import (
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/labstack/echo/v4"
@@ -13,7 +14,7 @@ func HTMXDeleteToolCycle(c echo.Context) *echo.HTTPError {
 	}
 	cycleID := shared.EntityID(id)
 
-	merr = DB.Press.Cycles.Delete(cycleID)
+	merr = db.DeleteCycle(cycleID)
 	if merr != nil {
 		return merr.Echo()
 	}
