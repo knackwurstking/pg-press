@@ -8,7 +8,7 @@ import (
 )
 
 templ Notes(toolID shared.EntityID, notes []*shared.Note) {
-	@components.SectionTitle(components.SectionTitleLevelSub, "Notizen") {
+	@components.SectionTitle(components.SubTitle, "Notizen") {
 		<button
 			class="icon secondary small flex"
 			hx-get={ urlb.UrlDialogs().EditNote(0, fmt.Sprintf("tool_%d", toolID)) }

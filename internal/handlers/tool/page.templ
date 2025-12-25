@@ -9,23 +9,15 @@ import (
 )
 
 type PageProps struct {
-	Tool shared.ModelTool // ID of the tool or cassette
+	Tool *shared.Tool // ID of the tool or cassette
 	User *shared.User
 }
 
 templ Page(p *PageProps) {
-	{{
-		title := ""
-		if p.Tool.IsCassette() {
-			title = p.Tool.(*shared.Cassette).German()
-		} else {
-			title = p.Tool.(*shared.Tool).German()
-		}
-	}}
 	@components.Layout(
 		components.LayoutProps{
-			PageTitle:   fmt.Sprintf("PG Presse | %s", title),
-			AppBarTitle: fmt.Sprintf("%s", title),
+			PageTitle:   fmt.Sprintf("PG Presse | %s", p.Tool.German()),
+			AppBarTitle: fmt.Sprintf("%s", p.Tool.German()),
 			NavContent:  components.StandardNavContent(),
 		},
 	) {
@@ -35,7 +27,7 @@ templ Page(p *PageProps) {
 			}
 			@components.Section(templ.Attributes{
 				"id":                        "notes-section",
-				"hx-get":                    string(urlb.UrlTool(p.Tool.GetID(), 0, 0).Notes),
+				"hx-get":                    string(urlb.UrlTool(p.Tool.ID, 0, 0).Notes),
 				"hx-trigger":                "load, reload-notes from:body",
 				"hx-swap":                   "innerHTML",
 				"hx-on:htmx:response-error": "alert(event.detail.xhr.responseText)",
@@ -45,7 +37,7 @@ templ Page(p *PageProps) {
 			if !p.Tool.IsCassette() {
 				@components.Section(templ.Attributes{
 					"id":                        "metal-sheets-section",
-					"hx-get":                    string(urlb.UrlTool(p.Tool.GetID(), 0, 0).MetalSheets),
+					"hx-get":                    string(urlb.UrlTool(p.Tool.ID, 0, 0).MetalSheets),
 					"hx-trigger":                "load, reload-metal-sheets from:body",
 					"hx-swap":                   "innerHTML",
 					"hx-on:htmx:response-error": "alert(event.detail.xhr.responseText)",
@@ -53,19 +45,19 @@ templ Page(p *PageProps) {
 					@components.Spinner()
 				}
 			}
-			@CyclesSection(false, p.Tool.GetID(), !p.Tool.IsCassette())
+			@CyclesSection(false, p.Tool.ID, !p.Tool.IsCassette())
 		</main>
 	}
 }
 
 templ actionBarContent(p *PageProps) {
 	if p.User.IsAdmin() {
-		if p.Tool.GetBase().IsDead {
+		if p.Tool.IsDead {
 			// TODO: Revive tool/cassette button here
 		} else {
 			<button
 				class="destructive flex gap"
-				hx-patch={ urlb.UrlTools(p.Tool.GetID(), p.Tool.IsCassette()).MarkDead }
+				hx-patch={ urlb.UrlTools(p.Tool.ID, p.Tool.IsCassette()).MarkDead }
 				hx-trigger="click"
 				hx-confirm="Sind Sie sicher, dass Sie dieses Werkzeug löschen möchten?"
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
@@ -78,9 +70,9 @@ templ actionBarContent(p *PageProps) {
 	<button
 		class="primary flex gap"
 		if p.Tool.IsCassette() {
-			hx-get={ urlb.UrlDialogs().EditCassette(p.Tool.GetID()) }
+			hx-get={ urlb.UrlDialogs().EditCassette(p.Tool.ID) }
 		} else {
-			hx-get={ urlb.UrlDialogs().EditTool(p.Tool.GetID()) }
+			hx-get={ urlb.UrlDialogs().EditTool(p.Tool.ID) }
 		}
 		hx-trigger="click"
 		hx-target="body"

@@ -1,6 +1,7 @@
 package tool
 
 import (
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 
@@ -18,7 +19,7 @@ func GetToolPage(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	tool, merr := helper.GetToolByID(DB, shared.EntityID(id))
+	tool, merr := db.GetTool(shared.EntityID(id))
 	if merr != nil {
 		return merr.WrapEcho("could not get tool by ID")
 	}

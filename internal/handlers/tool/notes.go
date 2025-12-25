@@ -1,6 +1,7 @@
 package tool
 
 import (
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/labstack/echo/v4"
@@ -12,7 +13,7 @@ func HTMXGetToolNotes(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 	toolID := shared.EntityID(id)
-	notes, merr := helper.ListNotesForLinked(DB, "tool", toolID)
+	notes, merr := db.ListNotesForLinked("tool", toolID)
 	if merr != nil {
 		return merr.Echo()
 	}
