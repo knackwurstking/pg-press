@@ -74,7 +74,7 @@ func ListToolCycles(toolID shared.EntityID) ([]*shared.Cycle, *errors.MasterErro
 
 	var merr *errors.MasterError
 	for _, c := range cycles {
-		if merr = InjectPartialCycles(c); merr != nil {
+		if merr = InjectPartialCyclesIntoCycle(c); merr != nil {
 			return nil, merr.Wrap("failed to inject partial cycles for ID %d", c.ID)
 		}
 	}
@@ -100,7 +100,7 @@ func ListCyclesByPressNumber(pressNumber shared.PressNumber) ([]*shared.Cycle, *
 
 	var merr *errors.MasterError
 	for _, c := range cycles {
-		if merr = InjectPartialCycles(c); merr != nil {
+		if merr = InjectPartialCyclesIntoCycle(c); merr != nil {
 			return nil, merr.Wrap("failed to inject partial cycles for ID %d", c.ID)
 		}
 	}
@@ -134,10 +134,10 @@ func GetTotalToolCycles(id shared.EntityID) (int64, *errors.MasterError) {
 	return totalCycles, nil
 }
 
-// InjectPartialCycles calculates and injects the partial cycles into the given cycle
+// InjectPartialCyclesIntoCycle calculates and injects the partial cycles into the given cycle
 //
 // TODO: Take into account the last press regeneration when calculating partial cycles
-func InjectPartialCycles(cycle *shared.Cycle) *errors.MasterError {
+func InjectPartialCyclesIntoCycle(cycle *shared.Cycle) *errors.MasterError {
 	var lastKnownCycles int64 = 0
 	err := dbPress.QueryRow(sqlGetPrevCycle, cycle.PressNumber, cycle.Start).Scan(&lastKnownCycles)
 	if err != nil {

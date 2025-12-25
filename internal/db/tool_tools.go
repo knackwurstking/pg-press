@@ -22,7 +22,6 @@ const (
 			type 				TEXT NOT NULL, 				-- Base Tool
 			code 				TEXT NOT NULL, 				-- Base Tool
 			cycles_offset 		INTEGER NOT NULL DEFAULT 0, -- Base Tool
-			cycles 				INTEGER NOT NULL DEFAULT 0, -- Base Tool
 			is_dead 			INTEGER NOT NULL DEFAULT 0, -- Base Tool
 			cassette			INTEGER NOT NULL DEFAULT 0, -- Tool
 			min_thickness		REAL NOT NULL DEFAULT 0, 	-- Cassette
@@ -36,8 +35,8 @@ const (
 	`
 
 	sqlAddTool string = `
-		INSERT INTO tools (width, height, position, type, code, cycles_offset, cycles, is_dead, cassette, min_thickness, max_thickness)
-		VALUES (:width, :height, :position, :type, :code, :cycles_offset, :cycles, :is_dead, :cassette, :min_thickness, :max_thickness);
+		INSERT INTO tools (width, height, position, type, code, cycles_offset, is_dead, cassette, min_thickness, max_thickness)
+		VALUES (:width, :height, :position, :type, :code, :cycles_offset, :is_dead, :cassette, :min_thickness, :max_thickness);
 	`
 
 	sqlUpdateTool string = `
@@ -48,7 +47,6 @@ const (
 			type 			= :type,
 			code 			= :code,
 			cycles_offset 	= :cycles_offset,
-			cycles 			= :cycles,
 			is_dead 		= :is_dead,
 			cassette 		= :cassette,
 			min_thickness 	= :min_thickness,
@@ -57,13 +55,13 @@ const (
 	`
 
 	sqlGetTool string = `
-		SELECT id, width, height, position, type, codee, cycles_offset, cycles, is_dead, cassette, min_thickness, max_thickness
+		SELECT id, width, height, position, type, codee, cycles_offset, is_dead, cassette, min_thickness, max_thickness
 		FROM tools
 		WHERE id = :id;
 	`
 
 	sqlListTools string = `
-		SELECT id, width, height, position, type, codee, cycles_offset, cycles, is_dead, cassette, min_thickness, max_thickness
+		SELECT id, width, height, position, type, codee, cycles_offset, is_dead, cassette, min_thickness, max_thickness
 		FROM tools
 		ORDER BY id ASC;
 	`
@@ -114,7 +112,6 @@ func AddTool(tool *shared.Tool) *errors.MasterError {
 		sql.Named("type", tool.Type),
 		sql.Named("code", tool.Code),
 		sql.Named("cycles_offset", tool.CyclesOffset),
-		sql.Named("cycles", tool.Cycles),
 		sql.Named("is_dead", tool.IsDead),
 		sql.Named("cassette", tool.Cassette),
 		sql.Named("min_thickness", tool.MinThickness),
@@ -123,6 +120,7 @@ func AddTool(tool *shared.Tool) *errors.MasterError {
 	if err != nil {
 		return errors.NewMasterError(err)
 	}
+
 	return nil
 }
 
@@ -139,7 +137,6 @@ func UpdateTool(tool *shared.Tool) *errors.MasterError {
 		sql.Named("type", tool.Type),
 		sql.Named("code", tool.Code),
 		sql.Named("cycles_offset", tool.CyclesOffset),
-		sql.Named("cycles", tool.Cycles),
 		sql.Named("is_dead", tool.IsDead),
 		sql.Named("cassette", tool.Cassette),
 		sql.Named("min_thickness", tool.MinThickness),
@@ -152,7 +149,17 @@ func UpdateTool(tool *shared.Tool) *errors.MasterError {
 }
 
 func GetTool(id shared.EntityID) (*shared.Tool, *errors.MasterError) {
-	return ScanTool(dbTool.QueryRow(sqlGetTool, id))
+	tool, merr := ScanTool(dbTool.QueryRow(sqlGetTool, id))
+	if merr != nil {
+		return tool, merr
+	}
+
+	merr = InjectCyclesIntoTool(tool)
+	if merr != nil {
+		return nil, merr
+	}
+
+	return tool, nil
 }
 
 func ListTools() (tools []*shared.Tool, merr *errors.MasterError) {
@@ -160,15 +167,24 @@ func ListTools() (tools []*shared.Tool, merr *errors.MasterError) {
 	if err != nil {
 		return nil, errors.NewMasterError(err)
 	}
-	defer r.Close()
 
 	for r.Next() {
 		tool, merr := ScanTool(r)
 		if merr != nil {
+			r.Close()
 			return nil, merr
 		}
 		tools = append(tools, tool)
 	}
+	r.Close()
+
+	for _, tool := range tools {
+		merr = InjectCyclesIntoTool(tool)
+		if merr != nil {
+			return nil, merr
+		}
+	}
+
 	return tools, nil
 }
 
@@ -248,6 +264,15 @@ func UnbindTool(sourceID shared.EntityID) *errors.MasterError {
 	return nil
 }
 
+func InjectCyclesIntoTool(tool *shared.Tool) *errors.MasterError {
+	cycles, merr := GetTotalToolCycles(tool.ID)
+	if merr != nil {
+		return merr.Wrap("could not get total cycles for tool ID %d", tool.ID)
+	}
+	tool.Cycles = cycles
+	return nil
+}
+
 // -----------------------------------------------------------------------------
 // Scan Helpers
 // -----------------------------------------------------------------------------
@@ -262,7 +287,6 @@ func ScanTool(row Scannable) (*shared.Tool, *errors.MasterError) {
 		&t.Type,
 		&t.Code,
 		&t.CyclesOffset,
-		&t.Cycles,
 		&t.IsDead,
 		&t.Cassette,
 		&t.MinThickness,
