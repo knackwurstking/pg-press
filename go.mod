@@ -8,12 +8,12 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/knackwurstking/ui v1.1.2-0.20251215030959-89e254e3017e
 	github.com/labstack/echo/v4 v4.13.4
-	github.com/labstack/gommon v0.4.2
 	github.com/mattn/go-sqlite3 v1.14.32
 	github.com/williepotgieter/keymaker v1.0.0
 )
 
 require (
+	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
