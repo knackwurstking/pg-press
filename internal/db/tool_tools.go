@@ -155,7 +155,24 @@ func GetTool(id shared.EntityID) (*shared.Tool, *errors.MasterError) {
 	return ScanTool(dbTool.QueryRow(sqlGetTool, id))
 }
 
-func GetBindableCassettes(id shared.EntityID) (cassettes []*shared.Tool, merr *errors.MasterError) {
+func ListTools() (tools []*shared.Tool, merr *errors.MasterError) {
+	r, err := dbTool.Query(sqlListTools)
+	if err != nil {
+		return nil, errors.NewMasterError(err)
+	}
+	defer r.Close()
+
+	for r.Next() {
+		tool, merr := ScanTool(r)
+		if merr != nil {
+			return nil, merr
+		}
+		tools = append(tools, tool)
+	}
+	return tools, nil
+}
+
+func ListBindableCassettes(id shared.EntityID) (cassettes []*shared.Tool, merr *errors.MasterError) {
 	tool, merr := GetTool(id)
 	if merr != nil {
 		return nil, merr
@@ -175,23 +192,6 @@ func GetBindableCassettes(id shared.EntityID) (cassettes []*shared.Tool, merr *e
 		cassettes = append(cassettes, t)
 	}
 	return cassettes, nil
-}
-
-func ListTools() (tools []*shared.Tool, merr *errors.MasterError) {
-	r, err := dbTool.Query(sqlListTools)
-	if err != nil {
-		return nil, errors.NewMasterError(err)
-	}
-	defer r.Close()
-
-	for r.Next() {
-		tool, merr := ScanTool(r)
-		if merr != nil {
-			return nil, merr
-		}
-		tools = append(tools, tool)
-	}
-	return tools, nil
 }
 
 func DeleteTool(id shared.EntityID) *errors.MasterError {
