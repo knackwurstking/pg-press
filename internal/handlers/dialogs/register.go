@@ -27,8 +27,8 @@ func Register(e *echo.Echo, path string) {
 
 		// Edit note dialog
 		ui.NewEchoRoute(http.MethodGet, path+"/edit-note", GetEditNote),
-		ui.NewEchoRoute(http.MethodPost, path+"/edit-note", PostEditNote),
-		ui.NewEchoRoute(http.MethodPut, path+"/edit-note", PutEditNote),
+		ui.NewEchoRoute(http.MethodPost, path+"/edit-note", PostNote),
+		ui.NewEchoRoute(http.MethodPut, path+"/edit-note", PutNote),
 
 		// Edit cycle dialog
 		//ui.NewEchoRoute(http.MethodGet, path+"/edit-cycle", h.GetEditCycle),
@@ -36,9 +36,11 @@ func Register(e *echo.Echo, path string) {
 		//ui.NewEchoRoute(http.MethodPut, path+"/edit-cycle", h.PutEditCycle),
 
 		// Edit metal sheet dialog
-		//ui.NewEchoRoute(http.MethodGet, path+"/edit-metal-sheet", h.GetEditMetalSheet),
-		//ui.NewEchoRoute(http.MethodPost, path+"/edit-metal-sheet", h.PostEditMetalSheet),
-		//ui.NewEchoRoute(http.MethodPut, path+"/edit-metal-sheet", h.PutEditMetalSheet),		// Edit tool regeneration dialog
+		ui.NewEchoRoute(http.MethodGet, path+"/edit-metal-sheet", GetEditMetalSheet),
+		ui.NewEchoRoute(http.MethodPost, path+"/edit-metal-sheet", PostMetalSheet),
+		ui.NewEchoRoute(http.MethodPut, path+"/edit-metal-sheet", PutMetalSheet),
+
+		// Edit tool regeneration dialog
 		//ui.NewEchoRoute(http.MethodGet, path+"/edit-tool-regeneration", h.GetEditToolRegeneration),
 		//ui.NewEchoRoute(http.MethodPut, path+"/edit-tool-regeneration", h.PutEditToolRegeneration),
 
