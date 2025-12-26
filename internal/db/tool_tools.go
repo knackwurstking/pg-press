@@ -55,13 +55,13 @@ const (
 	`
 
 	sqlGetTool string = `
-		SELECT id, width, height, position, type, codee, cycles_offset, is_dead, cassette, min_thickness, max_thickness
+		SELECT id, width, height, position, type, code, cycles_offset, is_dead, cassette, min_thickness, max_thickness
 		FROM tools
 		WHERE id = :id;
 	`
 
 	sqlListTools string = `
-		SELECT id, width, height, position, type, codee, cycles_offset, is_dead, cassette, min_thickness, max_thickness
+		SELECT id, width, height, position, type, code, cycles_offset, is_dead, cassette, min_thickness, max_thickness
 		FROM tools
 		ORDER BY id ASC;
 	`
