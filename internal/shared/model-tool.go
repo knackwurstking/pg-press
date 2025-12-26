@@ -76,9 +76,9 @@ func (t *Tool) IsLowerTool() bool {
 func (t *Tool) German() string {
 	if t.IsCassette() {
 		if t.Code == "" {
-			return fmt.Sprintf("%dx%d %s (%.1f-%.1f mm)", t.Width, t.Height, t.Type, t.MinThickness, t.MaxThickness)
+			return fmt.Sprintf("%dx%d %s (%.1f-%.1fmm)", t.Width, t.Height, t.Type, t.MinThickness, t.MaxThickness)
 		}
-		return fmt.Sprintf("%dx%d %s %s (%.1f-%.1f mm)", t.Width, t.Height, t.Type, t.Code, t.MinThickness, t.MaxThickness)
+		return fmt.Sprintf("%dx%d %s %s (%.1f-%.1fmm)", t.Width, t.Height, t.Type, t.Code, t.MinThickness, t.MaxThickness)
 	}
 	return fmt.Sprintf("%dx%d %s %s", t.Width, t.Height, t.Type, t.Code)
 }
@@ -141,8 +141,8 @@ func (t *Tool) Validate() *errors.ValidationError {
 	if t.Type == "" {
 		return errors.NewValidationError("type is required")
 	}
-	if t.Code == "" {
-		return errors.NewValidationError("code is required")
+	if !t.IsCassette() && t.Code == "" {
+		return errors.NewValidationError("code is required for all tools not being cassettes")
 	}
 
 	// For cassettes, MinThickness must be less than MaxThickness
