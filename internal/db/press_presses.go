@@ -28,8 +28,7 @@ const (
 	`
 
 	sqlGetPressNumberForTool string = `
-		SELECT
-			id,
+		SELECT id
 		FROM presses
 		WHERE slot_up = :tool_id OR slot_down = :tool_id
 		LIMIT 1;
