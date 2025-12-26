@@ -166,7 +166,7 @@ func validateUserFromCookie(ctx echo.Context) (*shared.User, error) {
 		cookie.LastLogin = shared.NewUnixMilli(time.Now())
 		httpCookie.Expires = cookie.ExpiredAtTime()
 
-		merr = db.UpdateCookie(cookie.Value, cookie)
+		merr = db.UpdateCookie(cookie)
 		if merr != nil {
 			logMiddleware.Error(
 				"Failed to update cookie: %v [user_name=%s, real_ip=%s]",

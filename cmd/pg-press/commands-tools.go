@@ -96,7 +96,7 @@ func listToolsCommand() cli.Command {
 						if !t.IsCassette() {
 							continue
 						}
-						fmt.Printf("%d\t%dx%d\t%d\t%s\t%s\t%d\t%d\t%d\t%d\t%t\n",
+						fmt.Printf("%d\t%dx%d\t%d\t%s\t%s\t%d\t%d\t%.1f\t%.1f\t%t\n",
 							t.ID,
 							t.Width, t.Height,
 							t.Position,
