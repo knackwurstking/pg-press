@@ -37,8 +37,8 @@ func Open(path string, allowCreate bool) error {
 	chErr := make(chan error, 4)
 	for _, name := range []string{"tool", "press", "note", "user"} {
 		wg.Go(func() {
-			path = fmt.Sprintf(
-				"file:%s.sqlite?cache=shared&mode=%s&_journal=WAL&_sync=0",
+			path := fmt.Sprintf(
+				"file:%s.sqlite?cache=shared&mode=%s&journal=WAL&synchronous=1",
 				filepath.Join(path, name), mode,
 			)
 			db, err := sql.Open("sqlite3", path)
@@ -115,7 +115,10 @@ func Open(path string, allowCreate bool) error {
 		}
 	}
 
-	return fmt.Errorf("%s", strings.Join(errs, "\n"))
+	if len(errs) > 0 {
+		return fmt.Errorf("%s", strings.Join(errs, "\n"))
+	}
+	return nil
 }
 
 func Close() {
