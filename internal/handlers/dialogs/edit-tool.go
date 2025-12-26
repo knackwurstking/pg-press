@@ -127,9 +127,6 @@ func getToolDialogForm(c echo.Context) (*shared.Tool, *errors.ValidationError) {
 	if vType == "" {
 		return nil, errors.NewValidationError("type is required")
 	}
-	if vCode == "" {
-		return nil, errors.NewValidationError("code is required")
-	}
 
 	tool := &shared.Tool{
 		Width:        width,

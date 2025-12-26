@@ -51,7 +51,7 @@ func PostCassette(c echo.Context) *echo.HTTPError {
 		return verr.MasterError().Echo()
 	}
 
-	log.Debug("Creating new cassette: %#v", tool.String())
+	log.Debug("Creating new cassette: %v", tool.String())
 
 	merr := db.AddTool(tool)
 	if merr != nil {
