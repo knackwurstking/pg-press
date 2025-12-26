@@ -3,6 +3,7 @@ package tools
 import (
 	"sync"
 
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 
@@ -15,37 +16,35 @@ func ToolsSection(c echo.Context) *echo.HTTPError {
 
 func renderToolsSection(c echo.Context) *echo.HTTPError {
 	var (
-		tools     []*shared.Tool
-		cassettes []*shared.Cassette
-		errCh     = make(chan *echo.HTTPError, 4)
+		tools              []*shared.Tool
+		cassettes          []*shared.Tool
+		errCh              = make(chan *echo.HTTPError, 3)
+		isRegenerating     = make(map[shared.EntityID]bool)
+		regenerationsCount = 0
 	)
 
 	wg := &sync.WaitGroup{}
 
+	// Load all tools
 	wg.Go(func() {
-		var merr *errors.MasterError
-		tools, merr = DB.Tool.Tools.List()
+		allTools, merr := db.ListTools()
 		if merr != nil {
 			errCh <- merr.Echo()
 			return
+		}
+		// Filter tools into cassettes and non-cassettes
+		for _, t := range allTools {
+			if t.IsCassette() {
+				cassettes = append(cassettes, t)
+			} else {
+				tools = append(tools, t)
+			}
 		}
 		errCh <- nil
 	})
 
 	wg.Go(func() {
-		var merr *errors.MasterError
-		cassettes, merr = DB.Tool.Cassettes.List()
-		if merr != nil {
-			errCh <- merr.Echo()
-			return
-		}
-		errCh <- nil
-	})
-
-	isRegenerating := make(map[shared.EntityID]bool)
-	regenerationsCount := 0
-	wg.Go(func() {
-		regenerations, merr := DB.Tool.Regenerations.List()
+		regenerations, merr := db.ListToolRegenerations()
 		if merr != nil {
 			errCh <- merr.Echo()
 			return
@@ -61,7 +60,7 @@ func renderToolsSection(c echo.Context) *echo.HTTPError {
 
 	notesCount := 0
 	wg.Go(func() {
-		notes, merr := DB.Notes.List()
+		notes, merr := db.ListNotes()
 		if merr != nil {
 			errCh <- merr.Echo()
 			return
