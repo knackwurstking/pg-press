@@ -115,13 +115,13 @@ func renderRegenerationEdit(c echo.Context, tool *shared.Tool, editable bool, us
 		var merr *errors.MasterError
 		user, merr = shared.GetUserFromContext(c)
 		if merr != nil {
-			return merr.Echo()
+			return merr.Wrap("getting user from context failed").Echo()
 		}
 	}
 
 	regenerations, merr := db.ListToolRegenerationsByTool(tool.ID)
 	if merr != nil && merr.Code() != http.StatusNotFound {
-		return merr.Echo()
+		return merr.Wrap("listing regenerations for tool ID %d failed", tool.ID).Echo()
 	}
 	isRegenerating := false
 	for _, r := range regenerations {
@@ -133,7 +133,7 @@ func renderRegenerationEdit(c echo.Context, tool *shared.Tool, editable bool, us
 
 	pressNumber, merr := db.GetPressNumberForTool(tool.ID)
 	if merr != nil {
-		return merr.Echo()
+		return merr.Wrap("getting press number for tool ID %d failed", tool.ID).Echo()
 	}
 
 	t := RegenerationEdit(RegenerationEditProps{
