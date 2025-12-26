@@ -34,7 +34,7 @@ func GetLoginPage(c echo.Context) *echo.HTTPError {
 }
 
 func PostLoginPage(c echo.Context) *echo.HTTPError {
-	log.Debug("Login attempt from IP: %#v", c.RealIP())
+	log.Debug("Login attempt from IP: %s", c.RealIP())
 
 	apiKey := c.FormValue("api-key")
 
