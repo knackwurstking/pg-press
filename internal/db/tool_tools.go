@@ -92,7 +92,7 @@ const (
 	sqlUnbindTool string = `
 		UPDATE tools
 		SET cassette = 0
-		WHERE id = :source_id;
+		WHERE id = :id;
 	`
 )
 
@@ -256,7 +256,7 @@ func BindTool(sourceID, targetID shared.EntityID) *errors.MasterError {
 
 func UnbindTool(sourceID shared.EntityID) *errors.MasterError {
 	_, err := dbTool.Exec(sqlUnbindTool,
-		sql.Named("source_id", sourceID),
+		sql.Named("id", sourceID),
 	)
 	if err != nil {
 		return errors.NewMasterError(err)
