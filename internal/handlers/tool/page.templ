@@ -26,21 +26,19 @@ templ Page(p *PageProps) {
 				@actionBarContent(p)
 			}
 			@components.Section(templ.Attributes{
-				"id":                        "notes-section",
-				"hx-get":                    string(urlb.UrlTool(p.Tool.ID, 0, 0).Notes),
-				"hx-trigger":                "load, reload-notes from:body",
-				"hx-swap":                   "innerHTML",
-				"hx-on:htmx:response-error": "alert(event.detail.xhr.responseText)",
+				"id":         "notes-section",
+				"hx-get":     string(urlb.UrlTool(p.Tool.ID, 0, 0).Notes),
+				"hx-trigger": "load, reload-notes from:body",
+				"hx-swap":    "innerHTML",
 			}) {
 				@components.Spinner()
 			}
 			if !p.Tool.IsCassette() {
 				@components.Section(templ.Attributes{
-					"id":                        "metal-sheets-section",
-					"hx-get":                    string(urlb.UrlTool(p.Tool.ID, 0, 0).MetalSheets),
-					"hx-trigger":                "load, reload-metal-sheets from:body",
-					"hx-swap":                   "innerHTML",
-					"hx-on:htmx:response-error": "alert(event.detail.xhr.responseText)",
+					"id":         "metal-sheets-section",
+					"hx-get":     string(urlb.UrlTool(p.Tool.ID, 0, 0).MetalSheets),
+					"hx-trigger": "load, reload-metal-sheets from:body",
+					"hx-swap":    "innerHTML",
 				}) {
 					@components.Spinner()
 				}
@@ -60,7 +58,6 @@ templ actionBarContent(p *PageProps) {
 				hx-patch={ urlb.UrlTools(p.Tool.ID, p.Tool.IsCassette()).MarkDead }
 				hx-trigger="click"
 				hx-confirm="Sind Sie sicher, dass Sie dieses Werkzeug löschen möchten?"
-				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 			>
 				<i class="bi bi-trash"></i>
 				Löschen
@@ -77,7 +74,6 @@ templ actionBarContent(p *PageProps) {
 		hx-trigger="click"
 		hx-target="body"
 		hx-swap="beforeend"
-		hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 	>
 		<i class="bi bi-pencil"></i>
 		Bearbeiten

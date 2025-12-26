@@ -144,7 +144,6 @@ templ newMetalSheetButton(toolID shared.EntityID) {
 		hx-trigger="click"
 		hx-target="body"
 		hx-swap="beforeend"
-		hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 		title="Neues Blech hinzufügen"
 	>
 		<i class="bi bi-plus-lg"></i>
