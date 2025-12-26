@@ -121,14 +121,6 @@ func getCassetteDialogForm(c echo.Context) (*shared.Tool, *errors.ValidationErro
 		return nil, errors.NewValidationError("invalid max thickness: %s", vMaxThickness)
 	}
 
-	// Type and Code have to be set
-	if vType == "" {
-		return nil, errors.NewValidationError("type is required")
-	}
-	if vCode == "" {
-		return nil, errors.NewValidationError("code is required")
-	}
-
 	cassette := &shared.Tool{
 		Width:        width,
 		Height:       height,
