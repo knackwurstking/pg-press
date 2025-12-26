@@ -204,7 +204,7 @@ func StopToolRegeneration(toolID shared.EntityID) *errors.MasterError {
 }
 
 func AbortToolRegeneration(toolID shared.EntityID) *errors.MasterError {
-	merr := DeleteToolRegeneration(toolID)
+	merr := DeleteToolRegenerationByTool(toolID)
 	if merr != nil {
 		return merr.Wrap("deleting tool regeneration failed")
 	}
