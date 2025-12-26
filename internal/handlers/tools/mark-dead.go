@@ -1,51 +1,25 @@
 package tools
 
 import (
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/labstack/echo/v4"
 )
 
-// MarkAsDead marks a tools, or cassette if "is_cassette" query parameter is set to true, as dead.
+// MarkAsDead marks a tool as dead
 func MarkAsDead(c echo.Context) *echo.HTTPError {
-	isCassette := shared.ParseQueryBool(c, "is_cassette")
-
 	id, merr := shared.ParseQueryInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
 	toolID := shared.EntityID(id)
-
-	var tool shared.ModelTool
-	if isCassette {
-		tool, merr = DB.Tool.Cassettes.GetByID(toolID)
-		if merr != nil {
-			return merr.WrapEcho("failed to get cassette by ID")
-		}
-	} else {
-		tool, merr = DB.Tool.Tools.GetByID(toolID)
-		if merr != nil {
-			return merr.WrapEcho("failed to get tool by ID")
-		}
+	merr = db.MarkToolAsDead(toolID)
+	if merr != nil {
+		return merr.Echo()
 	}
 
-	if tool.GetBase().IsDead {
-		return nil
-	}
-	tool.GetBase().IsDead = true
+	urlb.SetHXRedirect(c, urlb.UrlTool(toolID, 0, 0).Page)
 
-	if isCassette {
-		merr = DB.Tool.Cassettes.Update(tool.(*shared.Cassette))
-		if merr != nil {
-			return merr.WrapEcho("failed to update cassette")
-		}
-	} else {
-		merr = DB.Tool.Tools.Update(tool.(*shared.Tool))
-		if merr != nil {
-			return merr.WrapEcho("failed to update tool")
-		}
-	}
-
-	urlb.SetHXRedirect(c, urlb.UrlTool(tool.GetID(), 0, 0).Page)
 	return nil
 }
