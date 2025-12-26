@@ -1,6 +1,7 @@
 package tools
 
 import (
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/labstack/echo/v4"
@@ -11,7 +12,7 @@ func PressSection(c echo.Context) *echo.HTTPError {
 }
 
 func renderPressSection(c echo.Context) *echo.HTTPError {
-	pressUtilizations, merr := helper.GetPressUtilizations(DB, shared.AllPressNumbers)
+	pressUtilizations, merr := db.GetPressUtilizations(shared.AllPressNumbers...)
 	if merr != nil {
 		return merr.Echo()
 	}
