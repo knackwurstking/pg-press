@@ -8,19 +8,19 @@ import (
 )
 
 func HTMXPatchToolUnBinding(c echo.Context) *echo.HTTPError {
-	user, merr := shared.GetUserFromContext(c)
-	if merr != nil {
-		return merr.Echo()
-	}
-
 	id, merr := shared.ParseParamInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
-	merr = db.UnbindTool(shared.EntityID(id))
+	toolID := shared.EntityID(id)
+	merr = db.UnbindTool(toolID)
+	if merr != nil {
+		return merr.Echo()
+	}
+	tool, merr := db.GetTool(toolID)
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	return renderBindingSection(c, nil, user)
+	return renderBindingSection(c, tool)
 }

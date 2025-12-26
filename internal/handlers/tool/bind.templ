@@ -59,7 +59,7 @@ templ BindingSection(props BindingSectionProps) {
 				hx-target="#binding-section"
 				hx-swap="outerHTML"
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText);"
-				if props.Tool.Cassette > 0 {
+				if props.Tool.Cassette <= 0 {
 					disabled
 				}
 			>
