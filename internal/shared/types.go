@@ -63,6 +63,15 @@ func NewUnixMilli(t time.Time) UnixMilli {
 	return UnixMilli(t.UnixMilli())
 }
 
+func (mt MachineType) String() string {
+	return string(mt)
+}
+
+// PressNumber methods
+func (p PressNumber) String() string {
+	return fmt.Sprintf("%d", p)
+}
+
 // EntityID methods
 func (id EntityID) String() string {
 	return fmt.Sprintf("%d", id)
@@ -71,11 +80,6 @@ func (id EntityID) String() string {
 // TelegramID methods
 func (id TelegramID) String() string {
 	return fmt.Sprintf("%d", id)
-}
-
-// PressNumber methods
-func (p PressNumber) String() string {
-	return fmt.Sprintf("%d", p)
 }
 
 func (p PressNumber) IsValid() bool {

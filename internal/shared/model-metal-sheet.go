@@ -72,6 +72,7 @@ func (u *LowerMetalSheet) String() string {
 
 type UpperMetalSheet struct {
 	BaseMetalSheet
+	// NOTE: MachineType field is not needed for the upper metal sheet type
 }
 
 // Validate checks if the upper metal sheet has valid data

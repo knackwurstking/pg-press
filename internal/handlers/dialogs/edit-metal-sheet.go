@@ -1,10 +1,7 @@
 package dialogs
 
 import (
-	"fmt"
 	"log/slog"
-	"net/http"
-	"strconv"
 
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"

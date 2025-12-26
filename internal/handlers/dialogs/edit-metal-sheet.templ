@@ -10,7 +10,7 @@ import (
 	ui "github.com/knackwurstking/ui/ui-templ"
 )
 
-templ NewMetalSheetDialog(
+templ NewUpperMetalSheetDialog(
 	tool *shared.Tool,
 ) {
 	@ui.Dialog(ui.DialogOptions{
@@ -19,17 +19,25 @@ templ NewMetalSheetDialog(
 		ID:               "metal-sheet-dialog",
 		SubmitButtonText: "Erstellen",
 	}) {
-		switch tool.Position {
-			case shared.SlotUpper:
-				@metalSheetContentPositionTop(nil)
-			case shared.SlotLower:
-				@metalSheetContentPositionBottom(nil)
-		}
+		@metalSheetContentPositionTop(nil)
 	}
 }
 
-templ EditMetalSheetDialog(
-	metalSheet *shared.MetalSheet,
+templ NewLowerMetalSheetDialog(
+	tool *shared.Tool,
+) {
+	@ui.Dialog(ui.DialogOptions{
+		Method:           http.MethodPost,
+		Href:             urlb.UrlDialogs().EditMetalSheet(0, tool.ID),
+		ID:               "metal-sheet-dialog",
+		SubmitButtonText: "Erstellen",
+	}) {
+		@metalSheetContentPositionBottom(nil)
+	}
+}
+
+templ EditUpperMetalSheetDialog(
+	metalSheet *shared.UpperMetalSheet,
 	tool *shared.Tool,
 ) {
 	@ui.Dialog(ui.DialogOptions{
@@ -38,16 +46,25 @@ templ EditMetalSheetDialog(
 		ID:               "metal-sheet-edit-dialog",
 		SubmitButtonText: "Aktualisieren",
 	}) {
-		switch tool.Position {
-			case shared.SlotUpper:
-				@metalSheetContentPositionTop(metalSheet)
-			case shared.SlotLower:
-				@metalSheetContentPositionBottom(metalSheet)
-		}
+		@metalSheetContentPositionTop(metalSheet)
 	}
 }
 
-templ metalSheetContentPositionTop(metalSheet *shared.MetalSheet) {
+templ EditLowerMetalSheetDialog(
+	metalSheet *shared.LowerMetalSheet,
+	tool *shared.Tool,
+) {
+	@ui.Dialog(ui.DialogOptions{
+		Method:           http.MethodPut,
+		Href:             urlb.UrlDialogs().EditMetalSheet(metalSheet.ID, 0),
+		ID:               "metal-sheet-edit-dialog",
+		SubmitButtonText: "Aktualisieren",
+	}) {
+		@metalSheetContentPositionBottom(metalSheet)
+	}
+}
+
+templ metalSheetContentPositionTop(metalSheet *shared.UpperMetalSheet) {
 	<div class="flex flex-col">
 		<label for="tile-height">Stärke (mm)</label>
 		<input
@@ -74,33 +91,9 @@ templ metalSheetContentPositionTop(metalSheet *shared.MetalSheet) {
 			}
 		/>
 	</div>
-	<div class="flex flex-col">
-		<label for="identifier">Maschinentyp</label>
-		<select
-			id="identifier"
-			name="identifier"
-			required
-		>
-			if metalSheet == nil {
-				<option value="" disabled selected>Pressen Typ</option>
-			}
-			<option
-				value="SACMI"
-				if metalSheet != nil && metalSheet.Identifier.String() == "SACMI" {
-					selected
-				}
-			>SACMI</option>
-			<option
-				value="SITI"
-				if metalSheet != nil && metalSheet.Identifier.String() == "SITI" {
-					selected
-				}
-			>SITI</option>
-		</select>
-	</div>
 }
 
-templ metalSheetContentPositionBottom(metalSheet *shared.MetalSheet) {
+templ metalSheetContentPositionBottom(metalSheet *shared.LowerMetalSheet) {
 	<div class="flex flex-col">
 		<label for="tile-height">Stärke (mm)</label>
 		<input
@@ -177,17 +170,16 @@ templ metalSheetContentPositionBottom(metalSheet *shared.MetalSheet) {
 			}
 			<option
 				value="SACMI"
-				if metalSheet != nil && metalSheet.Identifier.String() == "SACMI" {
+				if metalSheet != nil && metalSheet.Identifier == "SACMI" {
 					selected
 				}
 			>SACMI</option>
 			<option
 				value="SITI"
-				if metalSheet != nil && metalSheet.Identifier.String() == "SITI" {
+				if metalSheet != nil && metalSheet.Identifier == "SITI" {
 					selected
 				}
 			>SITI</option>
 		</select>
 	</div>
 }
-
