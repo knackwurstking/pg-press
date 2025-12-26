@@ -62,8 +62,8 @@ const (
 		UPDATE cookies
 		SET
 			user_agent = :user_agent,
-			value = :value
-			user_id = :user_id
+			value = :value,
+			user_id = :user_id,
 			last_login = :last_login
 		WHERE value = :value;
 	`
