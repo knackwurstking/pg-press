@@ -2,15 +2,16 @@ package tools
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"strings"
 )
 
 type SectionToolsProps struct {
 	Tools              []*shared.Tool
-	Cassettes          []*shared.Cassette
+	Cassettes          []*shared.Tool
 	User               *shared.User
 	IsRegenerating     map[shared.EntityID]bool
 	RegenerationsCount int
@@ -98,7 +99,7 @@ templ ToolsList(p SectionToolsProps) {
 				}
 				<li id={ fmt.Sprintf("tool-%d", t.ID) } class="tool-item" style="display: none;">
 					{{
-						var cassette *shared.Cassette
+						var cassette *shared.Tool
 						for _, c := range p.Cassettes {
 							if c.ID == t.Cassette {
 								cassette = c
@@ -113,7 +114,7 @@ templ ToolsList(p SectionToolsProps) {
 					}}
 					@components.ToolAnchor(components.ToolAnchorProps{
 						Tool:               t,
-						Cassette:           cassette,
+						BindingCassette:    cassette,
 						IsRegenerating:     isRegenerating,
 						RegenerationsCount: p.RegenerationsCount,
 						NotesCount:         p.NotesCount,
@@ -149,7 +150,7 @@ templ ToolsList(p SectionToolsProps) {
 					}}
 					@components.CassetteAnchor(components.CassetteAnchorProps{
 						Cassette:           c,
-						Tool:               boundTool,
+						BindingTool:        boundTool,
 						IsRegenerating:     isRegenerating,
 						RegenerationsCount: p.RegenerationsCount,
 						NotesCount:         p.NotesCount,
