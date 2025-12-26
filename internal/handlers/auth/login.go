@@ -89,7 +89,10 @@ func createSession(ctx echo.Context, userID shared.TelegramID) *errors.MasterErr
 	}
 
 	if cookieContext, _ := ctx.Cookie(CookieName); cookieContext != nil && cookieContext.Value != "" {
-		return db.UpdateCookie(cookieContext.Value, cookie)
+		merr := db.DeleteCookie(cookie.Value)
+		if merr != nil {
+			return merr
+		}
 	}
 
 	merr := db.AddCookie(cookie)

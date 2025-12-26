@@ -62,7 +62,6 @@ const (
 		UPDATE cookies
 		SET
 			user_agent = :user_agent,
-			value = :value,
 			user_id = :user_id,
 			last_login = :last_login
 		WHERE value = :value;
@@ -165,7 +164,7 @@ func AddCookie(cookie *shared.Cookie) *errors.MasterError {
 }
 
 // UpdateCookie updates the given cookie in the database, it just replaces all fields including the value.
-func UpdateCookie(value string, cookie *shared.Cookie) *errors.MasterError {
+func UpdateCookie(cookie *shared.Cookie) *errors.MasterError {
 	if verr := cookie.Validate(); verr != nil {
 		return verr.MasterError().Wrap("invalid cookie data")
 	}
@@ -174,7 +173,7 @@ func UpdateCookie(value string, cookie *shared.Cookie) *errors.MasterError {
 		sql.Named("user_agent", cookie.UserAgent),
 		sql.Named("user_id", cookie.UserID),
 		sql.Named("last_login", cookie.LastLogin),
-		sql.Named("value", value),
+		sql.Named("value", cookie.Value),
 	)
 	if err != nil {
 		return errors.NewMasterError(err)
