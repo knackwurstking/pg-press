@@ -44,7 +44,7 @@ func GetToolDialog(c echo.Context) *echo.HTTPError {
 }
 
 func PostTool(c echo.Context) *echo.HTTPError {
-	tool, verr := getToolDialogForm(c, nil)
+	tool, verr := parseToolForm(c, nil)
 	if verr != nil {
 		return verr.MasterError().Echo()
 	}
@@ -72,7 +72,7 @@ func PutTool(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	tool, verr := getToolDialogForm(c, tool)
+	tool, verr := parseToolForm(c, tool)
 	if verr != nil {
 		return verr.MasterError().Echo()
 	}
@@ -90,7 +90,7 @@ func PutTool(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func getToolDialogForm(c echo.Context, tool *shared.Tool) (*shared.Tool, *errors.ValidationError) {
+func parseToolForm(c echo.Context, tool *shared.Tool) (*shared.Tool, *errors.ValidationError) {
 	if tool == nil {
 		tool = &shared.Tool{}
 	}

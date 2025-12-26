@@ -49,8 +49,8 @@ func GetEditNote(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func PostEditNote(c echo.Context) *echo.HTTPError {
-	note, merr := GetNoteFormData(c)
+func PostNote(c echo.Context) *echo.HTTPError {
+	note, merr := parseNoteForm(c)
 	if merr != nil {
 		return merr.WrapEcho("failed to get note form data")
 	}
@@ -67,8 +67,8 @@ func PostEditNote(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func PutEditNote(c echo.Context) *echo.HTTPError {
-	note, merr := GetNoteFormData(c)
+func PutNote(c echo.Context) *echo.HTTPError {
+	note, merr := parseNoteForm(c)
 	if merr != nil {
 		return merr.WrapEcho("failed to get note form data")
 	}
@@ -93,7 +93,7 @@ func PutEditNote(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func GetNoteFormData(c echo.Context) (*shared.Note, *errors.MasterError) {
+func parseNoteForm(c echo.Context) (*shared.Note, *errors.MasterError) {
 	// Parse level (required)
 	levelStr := c.FormValue("level")
 	if levelStr == "" {

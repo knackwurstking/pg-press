@@ -46,7 +46,7 @@ func GetCassetteDialog(c echo.Context) *echo.HTTPError {
 }
 
 func PostCassette(c echo.Context) *echo.HTTPError {
-	tool, verr := getCassetteDialogForm(c, nil)
+	tool, verr := parseCassetteForm(c, nil)
 	if verr != nil {
 		return verr.MasterError().Echo()
 	}
@@ -74,7 +74,7 @@ func PutCassette(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	tool, verr := getCassetteDialogForm(c, tool)
+	tool, verr := parseCassetteForm(c, tool)
 	if verr != nil {
 		return verr.MasterError().Echo()
 	}
@@ -92,7 +92,7 @@ func PutCassette(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func getCassetteDialogForm(c echo.Context, tool *shared.Tool) (*shared.Tool, *errors.ValidationError) {
+func parseCassetteForm(c echo.Context, tool *shared.Tool) (*shared.Tool, *errors.ValidationError) {
 	if tool == nil {
 		tool = &shared.Tool{
 			Position: shared.SlotUpperCassette,
