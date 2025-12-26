@@ -52,7 +52,7 @@ func GetPressNumberForTool(toolID shared.EntityID) (shared.PressNumber, *errors.
 	var pressNumber shared.PressNumber = -1
 
 	err := dbPress.QueryRow(sqlGetPressNumberForTool, sql.Named("tool_id", toolID)).Scan(&pressNumber)
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		return pressNumber, errors.NewMasterError(err)
 	}
 
