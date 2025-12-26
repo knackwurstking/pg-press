@@ -177,9 +177,6 @@ func UrlTools(toolID shared.EntityID, isCassette bool) (url struct {
 	if toolID != 0 {
 		params["id"] = fmt.Sprintf("%d", toolID)
 	}
-	if isCassette {
-		params["is_cassette"] = "true"
-	}
 
 	url.Page = BuildURL("/tools")
 	url.Delete = BuildURLWithParams("/tools/delete", params)
