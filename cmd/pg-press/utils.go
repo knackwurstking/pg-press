@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/knackwurstking/pg-press/internal/db"
 
 	"github.com/SuperPaintman/nice/cli"
@@ -22,7 +24,10 @@ func createDBPathOption(cmd *cli.Command) *string {
 // withDBOperation is a helper that handles common database operations
 func withDBOperation(dbPath string, createMode bool, operation func() error) error {
 	if err := db.Open(dbPath, createMode); err != nil {
-		return err
+		return fmt.Errorf(
+			"Error: could not open database %s (createMode: %t): %v\n",
+			dbPath, createMode, err,
+		)
 	}
 
 	return operation()
