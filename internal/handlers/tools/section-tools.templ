@@ -18,6 +18,7 @@ type SectionToolsProps struct {
 	NotesCount         int
 }
 
+// TODO: This needs to be triggered on page back
 templ SectionTools(p SectionToolsProps) {
 	<span
 		hx-get={ urlb.UrlTools(0, false).SectionTools }
