@@ -9,8 +9,7 @@ import (
 // EditorType represents the type of editor for different entities
 type EditorType string
 
-// PressType represents the type of press machine
-type PressType string
+type MachineType string
 
 // PressNumber represents a press machine number
 type PressNumber int8
@@ -31,8 +30,8 @@ const (
 
 // Constants for press types
 const (
-	PressTypeSACMI PressType = "SACMI"
-	PressTypeSITI  PressType = "SITI"
+	MachineTypeSACMI MachineType = "SACMI"
+	MachineTypeSITI  MachineType = "SITI"
 )
 
 // Press number constants

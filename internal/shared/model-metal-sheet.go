@@ -6,13 +6,6 @@ import (
 	"github.com/knackwurstking/pg-press/internal/errors"
 )
 
-const (
-	MachineTypeSACMI MachineType = "SACMI"
-	MachineTypeSITI  MachineType = "SITI"
-)
-
-type MachineType string
-
 type BaseMetalSheet struct {
 	ID         EntityID `json:"id"`
 	ToolID     EntityID `json:"tool_id"`     // Currently assigned tool
