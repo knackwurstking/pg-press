@@ -8,6 +8,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/knackwurstking/pg-press/internal/errors"
 )
 
 type Scannable interface {
@@ -54,48 +56,48 @@ func Open(path string, allowCreate bool) error {
 			case "tool":
 				dbTool = db
 				if err = createTable(db, sqlCreateMetalSheetsTable); err != nil {
-					chErr <- err
+					chErr <- errors.Wrap(err, "failed to create metal_sheets table")
 					return
 				}
 				if err = createTable(db, sqlCreateToolRegenerationsTable); err != nil {
-					chErr <- err
+					chErr <- errors.Wrap(err, "failed to create tool_regenerations table")
 					return
 				}
 				if err = createTable(db, sqlCreateToolsTable); err != nil {
-					chErr <- err
+					chErr <- errors.Wrap(err, "failed to create tools table")
 					return
 				}
 
 			case "press":
 				dbPress = db
 				if err = createTable(db, sqlCreateCyclesTable); err != nil {
-					chErr <- err
+					chErr <- errors.Wrap(err, "failed to create cycles table")
 					return
 				}
 				if err = createTable(db, sqlCreatePressesTable); err != nil {
-					chErr <- err
+					chErr <- errors.Wrap(err, "failed to create presses table")
 					return
 				}
 				if err = createTable(db, sqlCreatePressRegenerationsTable); err != nil {
-					chErr <- err
+					chErr <- errors.Wrap(err, "failed to create press_regenerations table")
 					return
 				}
 
 			case "note":
 				dbNote = db
 				if err := createTable(db, sqlCreateNotesTable); err != nil {
-					chErr <- err
+					chErr <- errors.Wrap(err, "failed to create notes table")
 					return
 				}
 
 			case "user":
 				dbUser = db
 				if err := createTable(db, sqlCreateCookiesTable); err != nil {
-					chErr <- err
+					chErr <- errors.Wrap(err, "failed to create cookies table")
 					return
 				}
 				if err := createTable(db, sqlCreateUsersTable); err != nil {
-					chErr <- err
+					chErr <- errors.Wrap(err, "failed to create users table")
 					return
 				}
 			}
