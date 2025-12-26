@@ -83,9 +83,15 @@ func (p PressNumber) IsValid() bool {
 }
 
 func (um UnixMilli) FormatDate() string {
+	if um == 0 {
+		return ""
+	}
 	return time.UnixMilli(int64(um)).Format(DateFormat)
 }
 
 func (um UnixMilli) FormatDateTime() string {
+	if um == 0 {
+		return ""
+	}
 	return time.UnixMilli(int64(um)).Format(fmt.Sprintf("%s %s", DateFormat, TimeFormat))
 }
