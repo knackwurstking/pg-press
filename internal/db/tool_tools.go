@@ -281,9 +281,9 @@ func ScanTool(row Scannable) (*shared.Tool, *errors.MasterError) {
 	var t shared.Tool
 	err := row.Scan(
 		&t.ID,
-		&t.Position,
 		&t.Width,
 		&t.Height,
+		&t.Position,
 		&t.Type,
 		&t.Code,
 		&t.CyclesOffset,
