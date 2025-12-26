@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -26,24 +27,115 @@ const (
 		);
 	`
 
-	sqlGetPressByToolID string = `
+	sqlGetPressNumberForTool string = `
 		SELECT
 			id,
 		FROM presses
 		WHERE slot_up = :tool_id OR slot_down = :tool_id
 		LIMIT 1;
 	`
+
+	sqlGetPressUtilizations string = `
+		SELECT
+			id,
+			slot_up,
+			slot_down,
+			type
+		FROM presses;
+	`
 )
+
+// -----------------------------------------------------------------------------
+// Press Functions
+// -----------------------------------------------------------------------------
 
 func GetPressNumberForTool(toolID shared.EntityID) (shared.PressNumber, *errors.MasterError) {
 	var pressNumber shared.PressNumber = -1
 
-	err := dbPress.QueryRow(sqlGetPressByToolID, sql.Named("tool_id", toolID)).Scan(&pressNumber)
+	err := dbPress.QueryRow(sqlGetPressNumberForTool, sql.Named("tool_id", toolID)).Scan(&pressNumber)
 	if err != nil {
 		return pressNumber, errors.NewMasterError(err)
 	}
 
 	return pressNumber, nil
+}
+
+func GetPressUtilizations(pressNumbers ...shared.PressNumber) (
+	pu map[shared.PressNumber]*shared.PressUtilization, merr *errors.MasterError,
+) {
+	pu = make(map[shared.PressNumber]*shared.PressUtilization)
+
+	r, err := dbPress.Query(sqlGetPressUtilizations)
+	if err != nil {
+		return nil, errors.NewMasterError(fmt.Errorf("error querying press utilizations: %v", err))
+	}
+	defer r.Close()
+
+	for r.Next() {
+		var (
+			pressNumber shared.PressNumber
+			slotUp      shared.EntityID
+			slotDown    shared.EntityID
+			pressType   shared.MachineType
+		)
+		err := r.Scan(
+			&pressNumber,
+			&slotUp,
+			&slotDown,
+			&pressType,
+		)
+		if err != nil {
+			return pu, errors.NewMasterError(err)
+		}
+
+		pu[pressNumber] = &shared.PressUtilization{
+			PressNumber: pressNumber,
+			Type:        pressType,
+		}
+		if slotUp > 0 {
+			pu[pressNumber].SlotUpper = &shared.Tool{ID: slotUp}
+		}
+		if slotDown > 0 {
+			pu[pressNumber].SlotLower = &shared.Tool{ID: slotDown}
+		}
+	}
+
+	for _, v := range pu {
+		if v.SlotUpper != nil {
+			tool, merr := GetTool(v.SlotUpper.ID)
+			if merr != nil {
+				return nil, merr
+			}
+			v.SlotUpper = tool
+
+			if tool.Cassette > 0 {
+				cassette, merr := GetTool(tool.Cassette)
+				if merr != nil {
+					return nil, merr.Wrap(
+						"error getting upper cassette tool (%d) for tool ID %d",
+						tool.Cassette, tool.ID,
+					)
+				}
+				v.SlotUpperCassette = cassette
+			}
+		}
+
+		if v.SlotLower != nil {
+			tool, merr := GetTool(v.SlotLower.ID)
+			if merr != nil {
+				return nil, merr
+			}
+			v.SlotLower = tool
+
+			// NOTE: Only to upper tool can contain a cassette for now
+		}
+	}
+
+	if err = r.Err(); err != nil {
+		return nil, errors.NewMasterError(fmt.Errorf("error iterating over press utilizations: %v", err))
+	}
+
+	return pu, nil
 }
 
 // -----------------------------------------------------------------------------

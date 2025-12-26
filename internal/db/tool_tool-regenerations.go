@@ -32,6 +32,13 @@ const (
 		WHERE id = :id;
 	`
 
+	sqlListToolRegenerations string = `
+		SELECT id, tool_id, start, stop, cycles
+		FROM tool_regenerations
+		ORDER BY start DESC
+	;
+	`
+
 	sqlListToolRegenerationsByTool string = `
 		SELECT id, tool_id, start, stop, cycles
 		FROM tool_regenerations
@@ -78,6 +85,25 @@ func GetToolRegeneration(id shared.EntityID) (*shared.ToolRegeneration, *errors.
 		return nil, merr
 	}
 	return tr, nil
+}
+
+func ListToolRegenerations() ([]*shared.ToolRegeneration, *errors.MasterError) {
+	r, err := dbTool.Query(sqlListToolRegenerations)
+	if err != nil {
+		return nil, errors.NewMasterError(err)
+	}
+	defer r.Close()
+
+	var trs []*shared.ToolRegeneration
+	for r.Next() {
+		tr, merr := ScanToolRegeneration(r)
+		if merr != nil {
+			return nil, merr
+		}
+		trs = append(trs, tr)
+	}
+
+	return trs, nil
 }
 
 func ListToolRegenerationsByTool(toolID shared.EntityID) ([]*shared.ToolRegeneration, *errors.MasterError) {
