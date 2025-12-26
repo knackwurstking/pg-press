@@ -46,7 +46,7 @@ func GetCassetteDialog(c echo.Context) *echo.HTTPError {
 }
 
 func PostCassette(c echo.Context) *echo.HTTPError {
-	tool, verr := getCassetteDialogForm(c)
+	tool, verr := getCassetteDialogForm(c, nil)
 	if verr != nil {
 		return verr.MasterError().Echo()
 	}
@@ -65,15 +65,19 @@ func PostCassette(c echo.Context) *echo.HTTPError {
 
 // PutCassette handles updating an existing cassette
 func PutCassette(c echo.Context) *echo.HTTPError {
-	tool, verr := getCassetteDialogForm(c)
-	if verr != nil {
-		return verr.MasterError().Echo()
-	}
 	id, merr := shared.ParseQueryInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
-	tool.ID = shared.EntityID(id)
+	tool, merr := db.GetTool(shared.EntityID(id))
+	if merr != nil {
+		return merr.Echo()
+	}
+
+	tool, verr := getCassetteDialogForm(c, tool)
+	if verr != nil {
+		return verr.MasterError().Echo()
+	}
 
 	log.Debug("Updating cassette: %v", tool.String())
 
@@ -88,53 +92,44 @@ func PutCassette(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func getCassetteDialogForm(c echo.Context) (*shared.Tool, *errors.ValidationError) {
-	var (
-		vWidth        = c.FormValue("width")
-		vHeight       = c.FormValue("height")
-		vType         = strings.Trim(c.FormValue("type"), " ")
-		vCode         = strings.Trim(c.FormValue("code"), " ")
-		vMinThickness = c.FormValue("min_thickness")
-		vMaxThickness = c.FormValue("max_thickness")
-	)
-
-	log.Debug("Cassette dialog form values: width=%s, height=%s, type=%s, code=%s, min_thickness=%s, max_thickness=%s",
-		vWidth, vHeight, vType, vCode, vMinThickness, vMaxThickness)
+func getCassetteDialogForm(c echo.Context, tool *shared.Tool) (*shared.Tool, *errors.ValidationError) {
+	if tool == nil {
+		tool = &shared.Tool{
+			Position: shared.SlotUpperCassette,
+		}
+	}
+	tool.Type = strings.Trim(c.FormValue("type"), " ")
+	tool.Code = strings.Trim(c.FormValue("code"), " ")
 
 	// Convert vWidth and vHeight to integers
-	width, err := strconv.Atoi(vWidth)
+	var err error
+	tool.Width, err = strconv.Atoi(c.FormValue("width"))
 	if err != nil {
-		return nil, errors.NewValidationError("invalid width: %s", vWidth)
+		return nil, errors.NewValidationError("invalid width: %s", c.FormValue("width"))
 	}
-	height, err := strconv.Atoi(vHeight)
+	tool.Height, err = strconv.Atoi(c.FormValue("height"))
 	if err != nil {
-		return nil, errors.NewValidationError("invalid height: %s", vHeight)
+		return nil, errors.NewValidationError("invalid height: %s", c.FormValue("height"))
 	}
 
 	// Convert thickness values to floats
-	minThickness, err := strconv.ParseFloat(vMinThickness, 32)
+	minThickness, err := strconv.ParseFloat(c.FormValue("min_thickness"), 32)
 	if err != nil {
-		return nil, errors.NewValidationError("invalid min thickness: %s", vMinThickness)
+		return nil, errors.NewValidationError("invalid min thickness: %s", c.FormValue("min_thickness"))
 	}
-	maxThickness, err := strconv.ParseFloat(vMaxThickness, 32)
+	tool.MinThickness = float32(minThickness)
+
+	maxThickness, err := strconv.ParseFloat(c.FormValue("max_thickness"), 32)
 	if err != nil {
-		return nil, errors.NewValidationError("invalid max thickness: %s", vMaxThickness)
+		return nil, errors.NewValidationError("invalid max thickness: %s", c.FormValue("max_thickness"))
+	}
+	tool.MaxThickness = float32(maxThickness)
+
+	log.Debug("Cassette dialog form values: tool=%v", tool)
+
+	if verr := tool.Validate(); verr != nil {
+		return tool, verr
 	}
 
-	cassette := &shared.Tool{
-		Width:        width,
-		Height:       height,
-		Position:     shared.SlotUpperCassette,
-		Type:         vType,
-		Code:         vCode,
-		CyclesOffset: 0, // TODO: Maybe update the dialog to allow changing this?
-		MinThickness: float32(minThickness),
-		MaxThickness: float32(maxThickness),
-	}
-
-	if verr := cassette.Validate(); verr != nil {
-		return cassette, verr
-	}
-
-	return cassette, nil
+	return tool, nil
 }
