@@ -29,11 +29,15 @@ const (
 		);
 	`
 
+	// TODO: GetUpperMetalSheet
+
 	sqlListUpperMetalSheetsByTool string = `
 		SELECT id, tool_id, tile_height, value
 		FROM metal_sheets
 		WHERE tool_id = :tool_id AND type = 'upper';
 	`
+
+	// TODO: GetLowerMetalSheet
 
 	sqlListLowerMetalSheetsByTool string = `
 		SELECT id, tool_id, tile_height, value, marke_height, stf, stf_max, identifier
@@ -41,6 +45,12 @@ const (
 		WHERE tool_id = :tool_id AND type = 'lower';
 	`
 )
+
+// -----------------------------------------------------------------------------
+// Upper Metal Sheets
+// -----------------------------------------------------------------------------
+
+// TODO: GetUpperMetalSheet
 
 func ListUpperMetalSheetsByTool(toolID shared.EntityID) ([]*shared.UpperMetalSheet, *errors.MasterError) {
 	rows, err := dbTool.Query(sqlListUpperMetalSheetsByTool, sql.Named("tool_id", int64(toolID)))
@@ -59,6 +69,12 @@ func ListUpperMetalSheetsByTool(toolID shared.EntityID) ([]*shared.UpperMetalShe
 	}
 	return metalSheets, nil
 }
+
+// -----------------------------------------------------------------------------
+// Lower Metal Sheets
+// -----------------------------------------------------------------------------
+
+// TODO: GetLowerMetalSheet
 
 func ListLowerMetalSheetsByTool(toolID shared.EntityID) ([]*shared.LowerMetalSheet, *errors.MasterError) {
 	rows, err := dbTool.Query(sqlListLowerMetalSheetsByTool, sql.Named("tool_id", int64(toolID)))
