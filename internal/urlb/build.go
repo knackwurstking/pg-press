@@ -276,7 +276,7 @@ func UrlDialogs() (url struct {
 	EditCycle             func(cycleID shared.EntityID, toolID shared.EntityID, toolChangeMode bool) templ.SafeURL
 	EditTool              func(toolID shared.EntityID) templ.SafeURL
 	EditCassette          func(cassetteID shared.EntityID) templ.SafeURL
-	EditMetalSheet        func(metalSheetID shared.EntityID, toolID shared.EntityID) templ.SafeURL
+	EditMetalSheet        func(metalSheetID shared.EntityID, toolID shared.EntityID, position shared.Slot) templ.SafeURL
 	EditNote              func(noteID shared.EntityID, linked string) templ.SafeURL
 	EditToolRegeneration  func(toolRegenerationID shared.EntityID) templ.SafeURL
 	EditPressRegeneration func(pressRegenerationID shared.EntityID) templ.SafeURL
@@ -328,10 +328,11 @@ func urlEditCassetteDialog(cassetteID shared.EntityID) templ.SafeURL {
 }
 
 // urlEditMetalSheetDialog constructs edit metal sheet dialog URL
-func urlEditMetalSheetDialog(metalSheetID shared.EntityID, toolID shared.EntityID) templ.SafeURL {
+func urlEditMetalSheetDialog(metalSheetID shared.EntityID, toolID shared.EntityID, position shared.Slot) templ.SafeURL {
 	params := map[string]string{}
 	if metalSheetID != 0 {
 		params["id"] = fmt.Sprintf("%d", metalSheetID)
+		params["position"] = fmt.Sprintf("%d", position)
 	}
 	if toolID != 0 {
 		params["tool_id"] = fmt.Sprintf("%d", toolID)
