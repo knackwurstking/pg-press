@@ -40,9 +40,19 @@ func GetUserFromContext(c echo.Context) (*User, *errors.MasterError) {
 	return user, nil
 }
 
-/*******************************************************************************
- * Echo Parse Utils
- ******************************************************************************/
+// -----------------------------------------------------------------------------
+// Query Parameter Parsing
+// -----------------------------------------------------------------------------
+
+// ParseQueryString parses a string query parameter from the request
+func ParseQueryString(c echo.Context, paramName string) (string, *errors.MasterError) {
+	s := c.QueryParam(paramName)
+	if s == "" {
+		return s, errors.NewNotFoundError("missing %s", paramName).MasterError()
+	}
+
+	return s, nil
+}
 
 // ParseQueryBool parses a boolean query parameter from the request
 func ParseQueryBool(c echo.Context, paramName string) bool {
@@ -74,6 +84,24 @@ func ParseQueryInt64(c echo.Context, paramName string) (int64, *errors.MasterErr
 	return id, nil
 }
 
+func ParseQueryInt(c echo.Context, paramName string) (int, *errors.MasterError) {
+	idStr := c.QueryParam(paramName)
+	if idStr == "" {
+		return 0, errors.NewNotFoundError("missing %s", paramName).MasterError()
+	}
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return 0, errors.NewValidationError("invalid %s query parameter: must be a number", paramName).MasterError()
+	}
+
+	return id, nil
+}
+
+// -----------------------------------------------------------------------------
+// Path Parameter Parsing
+// -----------------------------------------------------------------------------
+
 // ParseParamInt64 parses an int64 parameter from the request
 func ParseParamInt64(c echo.Context, paramName string) (int64, *errors.MasterError) {
 	idStr := c.Param(paramName)
@@ -100,29 +128,4 @@ func ParseParamInt8(c echo.Context, paramName string) (int8, *errors.MasterError
 		return 0, errors.NewValidationError("invalid %s: must be a number", paramName).MasterError()
 	}
 	return int8(id), nil
-}
-
-// ParseQueryString parses a string query parameter from the request
-func ParseQueryString(c echo.Context, paramName string) (string, *errors.MasterError) {
-	s := c.QueryParam(paramName)
-	if s == "" {
-		return s, errors.NewNotFoundError("missing %s", paramName).MasterError()
-	}
-
-	return s, nil
-}
-
-// ParseFormValueTime parses a date from a form value
-func ParseFormValueTime(c echo.Context, paramName string) (time.Time, *errors.MasterError) {
-	v := c.FormValue(paramName)
-	if v == "" {
-		return time.Time{}, errors.NewNotFoundError("missing %s", paramName).MasterError()
-	}
-
-	t, err := time.Parse("2006-01-02", v) // YYYY-MM-DD
-	if err != nil {
-		return t, errors.NewValidationError("invalid %s format", paramName).MasterError()
-	}
-
-	return t, nil
 }
