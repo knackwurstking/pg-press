@@ -3,6 +3,7 @@ package dialogs
 import (
 	"log/slog"
 
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/labstack/echo/v4"
@@ -10,49 +11,87 @@ import (
 
 func GetEditMetalSheet(c echo.Context) *echo.HTTPError {
 	// Check if we're editing an existing metal sheet (has ID) or creating new one
-	metalSheetIDQuery, _ := utils.ParseQueryInt64(c, "id")
-	if metalSheetIDQuery > 0 {
-		metalSheetID := models.MetalSheetID(metalSheetIDQuery)
+	idQuery, merr := shared.ParseQueryInt64(c, "id")
+	if merr != nil {
+		return merr.Echo()
+	}
 
-		// Fetch existing metal sheet for editing
-		metalSheet, merr := h.registry.MetalSheets.Get(metalSheetID)
+	if metalSheetID := shared.EntityID(idQuery); metalSheetID > 0 {
+		positionQuery, merr := shared.ParseQueryInt(c, "position")
 		if merr != nil {
 			return merr.Echo()
 		}
+		switch shared.Slot(positionQuery) {
+		case shared.SlotUpper:
+			metalSheet, merr := db.GetUpperMetalSheet(metalSheetID)
+			if merr != nil {
+				return merr.Echo()
+			}
+			tool, merr := db.GetTool(metalSheet.ToolID)
+			if merr != nil {
+				return merr.Echo()
+			}
 
-		// Fetch the associated tool for the dialog
-		tool, merr := h.registry.Tools.Get(metalSheet.ToolID)
-		if merr != nil {
-			return merr.Echo()
-		}
+			t := EditUpperMetalSheetDialog(metalSheet, tool)
+			err := t.Render(c.Request().Context(), c.Response())
+			if err != nil {
+				return errors.NewRenderError(err, "EditUpperMetalSheetDialog")
+			}
+			return nil
 
-		t := EditMetalSheetDialog(metalSheet, tool)
-		err := t.Render(c.Request().Context(), c.Response())
-		if err != nil {
-			return errors.NewRenderError(err, "EditMetalSheetDialog")
+		case shared.SlotLower:
+			metalSheet, merr := db.GetLowerMetalSheet(metalSheetID)
+			if merr != nil {
+				return merr.Echo()
+			}
+			tool, merr := db.GetTool(metalSheet.ToolID)
+			if merr != nil {
+				return merr.Echo()
+			}
+
+			t := EditLowerMetalSheetDialog(metalSheet, tool)
+			err := t.Render(c.Request().Context(), c.Response())
+			if err != nil {
+				return errors.NewRenderError(err, "EditLowerMetalSheetDialog")
+			}
+			return nil
+
+		default:
+			return errors.NewValidationError("invalid slot position").MasterError().Echo()
 		}
-		return nil
 	}
 
 	// Creating new metal sheet, get tool_id from query
-	toolIDQuery, merr := utils.ParseQueryInt64(c, "tool_id")
+	toolIDQuery, merr := shared.ParseQueryInt64(c, "tool_id")
 	if merr != nil {
 		return merr.Echo()
 	}
-	toolID := models.ToolID(toolIDQuery)
-
 	// Fetch the associated tool for the dialog
-	tool, merr := h.registry.Tools.Get(toolID)
+	tool, merr := db.GetTool(shared.EntityID(toolIDQuery))
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	t := NewMetalSheetDialog(tool)
-	err := t.Render(c.Request().Context(), c.Response())
-	if err != nil {
-		return errors.NewRenderError(err, "NewMetalSheetDialog")
+	switch tool.Position {
+	case shared.SlotUpper:
+		t := NewUpperMetalSheetDialog(tool)
+		err := t.Render(c.Request().Context(), c.Response())
+		if err != nil {
+			return errors.NewRenderError(err, "NewUpperMetalSheetDialog")
+		}
+		return nil
+
+	case shared.SlotLower:
+		t := NewLowerMetalSheetDialog(tool)
+		err := t.Render(c.Request().Context(), c.Response())
+		if err != nil {
+			return errors.NewRenderError(err, "NewLowerMetalSheetDialog")
+		}
+		return nil
+
+	default:
+		return errors.NewValidationError("invalid slot position").MasterError().Echo()
 	}
-	return nil
 }
 
 func PostMetalSheet(c echo.Context) *echo.HTTPError {
