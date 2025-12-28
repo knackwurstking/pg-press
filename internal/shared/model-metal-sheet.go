@@ -21,6 +21,15 @@ type LowerMetalSheet struct {
 	Identifier  MachineType `json:"identifier"`   // Machine type identifier ("SACMI" or "SITI")
 }
 
+type UpperMetalSheet struct {
+	BaseMetalSheet
+	// NOTE: MachineType field is not needed for the upper metal sheet type
+}
+
+// -----------------------------------------------------------------------------
+// Lower Metal Sheets
+// -----------------------------------------------------------------------------
+
 // Validate checks if the lower metal sheet has valid data
 func (u *LowerMetalSheet) Validate() *errors.ValidationError {
 	if u.MarkeHeight <= 0 {
@@ -70,10 +79,9 @@ func (u *LowerMetalSheet) String() string {
 	)
 }
 
-type UpperMetalSheet struct {
-	BaseMetalSheet
-	// NOTE: MachineType field is not needed for the upper metal sheet type
-}
+// -----------------------------------------------------------------------------
+// Upper Metal Sheets
+// -----------------------------------------------------------------------------
 
 // Validate checks if the upper metal sheet has valid data
 func (u *UpperMetalSheet) Validate() *errors.ValidationError {
