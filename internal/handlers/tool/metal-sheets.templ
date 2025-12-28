@@ -25,7 +25,7 @@ templ UppperMetalSheets(metalSheets []*shared.UpperMetalSheet, tool *shared.Tool
 		@newMetalSheetButton(tool.ID)
 	}
 	<div class="table-container">
-		@metalSheetTableForUpperSlot(metalSheets, user)
+		@metalSheetTableForUpperSlot(tool.Position, metalSheets, user)
 	</div>
 }
 
@@ -45,11 +45,11 @@ templ LowerMetalSheets(metalSheets []*shared.LowerMetalSheet, tool *shared.Tool,
 		@newMetalSheetButton(tool.ID)
 	}
 	<div class="table-container">
-		@metalSheetTableForLowerSlot(metalSheets, user)
+		@metalSheetTableForLowerSlot(tool.Position, metalSheets, user)
 	</div>
 }
 
-templ metalSheetTableForUpperSlot(metalSheets []*shared.UpperMetalSheet, user *shared.User) {
+templ metalSheetTableForUpperSlot(position shared.Slot, metalSheets []*shared.UpperMetalSheet, user *shared.User) {
 	<figure class="w-full overflow-x-scroll">
 		<table class="table borderless compact">
 			<thead>
@@ -73,7 +73,7 @@ templ metalSheetTableForUpperSlot(metalSheets []*shared.UpperMetalSheet, user *s
 							<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
 							<td class="button-group flex justify-end items-center">
 								@components.TableActions(components.TableActionsOptions{
-									EditHref:        urlb.UrlDialogs().EditMetalSheet(sheet.ID, 0),
+									EditHref:        urlb.UrlDialogs().EditMetalSheet(sheet.ID, 0, position),
 									EditAdminOnly:   false,
 									DeleteHref:      urlb.UrlMetalSheets(sheet.ID).Delete,
 									DeleteAdminOnly: true,
@@ -88,7 +88,7 @@ templ metalSheetTableForUpperSlot(metalSheets []*shared.UpperMetalSheet, user *s
 	</figure>
 }
 
-templ metalSheetTableForLowerSlot(metalSheets []*shared.LowerMetalSheet, user *shared.User) {
+templ metalSheetTableForLowerSlot(position shared.Slot, metalSheets []*shared.LowerMetalSheet, user *shared.User) {
 	<figure class="w-full overflow-x-scroll">
 		<table class="table borderless compact">
 			<thead>
@@ -122,7 +122,7 @@ templ metalSheetTableForLowerSlot(metalSheets []*shared.LowerMetalSheet, user *s
 							</td>
 							<td class="button-group flex justify-end items-center">
 								@components.TableActions(components.TableActionsOptions{
-									EditHref:        urlb.UrlDialogs().EditMetalSheet(sheet.ID, 0),
+									EditHref:        urlb.UrlDialogs().EditMetalSheet(sheet.ID, 0, position),
 									EditAdminOnly:   false,
 									DeleteHref:      urlb.UrlMetalSheets(sheet.ID).Delete,
 									DeleteAdminOnly: true,
@@ -140,7 +140,7 @@ templ metalSheetTableForLowerSlot(metalSheets []*shared.LowerMetalSheet, user *s
 templ newMetalSheetButton(toolID shared.EntityID) {
 	<button
 		class="icon secondary small flex"
-		hx-get={ urlb.UrlDialogs().EditMetalSheet(0, toolID) }
+		hx-get={ urlb.UrlDialogs().EditMetalSheet(0, toolID, shared.SlotUnknown) }
 		hx-trigger="click"
 		hx-target="body"
 		hx-swap="beforeend"

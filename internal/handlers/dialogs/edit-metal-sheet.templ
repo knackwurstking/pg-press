@@ -15,7 +15,7 @@ templ NewUpperMetalSheetDialog(
 ) {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPost,
-		Href:             urlb.UrlDialogs().EditMetalSheet(0, tool.ID),
+		Href:             urlb.UrlDialogs().EditMetalSheet(0, tool.ID, tool.Position),
 		ID:               "metal-sheet-dialog",
 		SubmitButtonText: "Erstellen",
 	}) {
@@ -28,7 +28,7 @@ templ NewLowerMetalSheetDialog(
 ) {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPost,
-		Href:             urlb.UrlDialogs().EditMetalSheet(0, tool.ID),
+		Href:             urlb.UrlDialogs().EditMetalSheet(0, tool.ID, tool.Position),
 		ID:               "metal-sheet-dialog",
 		SubmitButtonText: "Erstellen",
 	}) {
@@ -42,7 +42,7 @@ templ EditUpperMetalSheetDialog(
 ) {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPut,
-		Href:             urlb.UrlDialogs().EditMetalSheet(metalSheet.ID, 0),
+		Href:             urlb.UrlDialogs().EditMetalSheet(metalSheet.ID, 0, tool.Position),
 		ID:               "metal-sheet-edit-dialog",
 		SubmitButtonText: "Aktualisieren",
 	}) {
@@ -56,7 +56,7 @@ templ EditLowerMetalSheetDialog(
 ) {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPut,
-		Href:             urlb.UrlDialogs().EditMetalSheet(metalSheet.ID, 0),
+		Href:             urlb.UrlDialogs().EditMetalSheet(metalSheet.ID, 0, tool.Position),
 		ID:               "metal-sheet-edit-dialog",
 		SubmitButtonText: "Aktualisieren",
 	}) {
