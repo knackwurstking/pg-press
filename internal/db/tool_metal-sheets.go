@@ -29,20 +29,44 @@ const (
 		);
 	`
 
-	// TODO: GetUpperMetalSheet
+	// -----------------------------------------------------------------------------
+	// Upper Metal Sheets Queries
+	// -----------------------------------------------------------------------------
+
+	// TODO: sqlAddUpperMetalSheet
+
+	sqlGetUpperMetalSheet string = `
+		SELECT id, tool_id, tile_height, value
+		FROM metal_sheets
+		WHERE id = :id AND type = 'upper'
+		ORDER BY tile_height ASC, value ASC;
+	`
 
 	sqlListUpperMetalSheetsByTool string = `
 		SELECT id, tool_id, tile_height, value
 		FROM metal_sheets
-		WHERE tool_id = :tool_id AND type = 'upper';
+		WHERE tool_id = :tool_id AND type = 'upper'
+		ORDER BY tile_height ASC, value ASC;
 	`
 
-	// TODO: GetLowerMetalSheet
+	// -----------------------------------------------------------------------------
+	// Lower Metal Sheets Queries
+	// -----------------------------------------------------------------------------
+
+	// TODO: sqlAddLowerMetalSheet
+
+	sqlGetLowerMetalSheet string = `
+		SELECT id, tool_id, tile_height, value, marke_height, stf, stf_max, identifier
+		FROM metal_sheets
+		WHERE id = :id AND type = 'lower'
+		ORDER BY tile_height ASC, value ASC;
+	`
 
 	sqlListLowerMetalSheetsByTool string = `
 		SELECT id, tool_id, tile_height, value, marke_height, stf, stf_max, identifier
 		FROM metal_sheets
-		WHERE tool_id = :tool_id AND type = 'lower';
+		WHERE tool_id = :tool_id AND type = 'lower'
+		ORDER BY tile_height ASC, value ASC;
 	`
 )
 
@@ -50,10 +74,19 @@ const (
 // Upper Metal Sheets
 // -----------------------------------------------------------------------------
 
-// TODO: GetUpperMetalSheet
+// TODO: AddUpperMetalSheet
+
+func GetUpperMetalSheet(metalSheetID shared.EntityID) (*shared.UpperMetalSheet, *errors.MasterError) {
+	r := dbTool.QueryRow(sqlGetUpperMetalSheet, sql.Named("id", metalSheetID))
+	ums, merr := ScanUpperMetalSheet(r)
+	if merr != nil {
+		return nil, merr
+	}
+	return ums, nil
+}
 
 func ListUpperMetalSheetsByTool(toolID shared.EntityID) ([]*shared.UpperMetalSheet, *errors.MasterError) {
-	rows, err := dbTool.Query(sqlListUpperMetalSheetsByTool, sql.Named("tool_id", int64(toolID)))
+	rows, err := dbTool.Query(sqlListUpperMetalSheetsByTool, sql.Named("tool_id", toolID))
 	if err != nil {
 		return nil, errors.NewMasterError(err)
 	}
@@ -74,10 +107,19 @@ func ListUpperMetalSheetsByTool(toolID shared.EntityID) ([]*shared.UpperMetalShe
 // Lower Metal Sheets
 // -----------------------------------------------------------------------------
 
-// TODO: GetLowerMetalSheet
+// TODO: AddLowerMetalSheet
+
+func GetLowerMetalSheet(metalSheetID shared.EntityID) (*shared.LowerMetalSheet, *errors.MasterError) {
+	r := dbTool.QueryRow(sqlGetLowerMetalSheet, sql.Named("id", metalSheetID))
+	lms, merr := ScanLowerMetalSheet(r)
+	if merr != nil {
+		return nil, merr
+	}
+	return lms, nil
+}
 
 func ListLowerMetalSheetsByTool(toolID shared.EntityID) ([]*shared.LowerMetalSheet, *errors.MasterError) {
-	rows, err := dbTool.Query(sqlListLowerMetalSheetsByTool, sql.Named("tool_id", int64(toolID)))
+	rows, err := dbTool.Query(sqlListLowerMetalSheetsByTool, sql.Named("tool_id", toolID))
 	if err != nil {
 		return nil, errors.NewMasterError(err)
 	}

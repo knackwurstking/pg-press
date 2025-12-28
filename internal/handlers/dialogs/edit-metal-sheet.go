@@ -4,8 +4,11 @@ import (
 	"log/slog"
 
 	"github.com/knackwurstking/pg-press/internal/db"
+	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/pg-press/models"
 	"github.com/labstack/echo/v4"
 )
 
@@ -95,52 +98,50 @@ func GetEditMetalSheet(c echo.Context) *echo.HTTPError {
 }
 
 func PostMetalSheet(c echo.Context) *echo.HTTPError {
-	slog.Info("Metal sheet creation request received")
-
-	// Get current user for feed creation
-	user, merr := utils.GetUserFromContext(c)
-	if merr != nil {
-		return merr.Echo()
-	}
-
 	// Extract tool ID from query parameters
-	toolIDQuery, merr := utils.ParseQueryInt64(c, "tool_id")
+	id, merr := shared.ParseQueryInt64(c, "tool_id")
 	if merr != nil {
 		return merr.Echo()
 	}
-	toolID := models.ToolID(toolIDQuery)
-
 	// Fetch the associated tool
-	tool, merr := h.registry.Tools.Get(toolID)
+	tool, merr := db.GetTool(shared.EntityID(id))
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	// Parse form data into metal sheet model
-	metalSheet, merr := GetMetalSheetDialogForm(c)
-	if merr != nil {
-		return merr.Echo()
+	switch tool.Position {
+	case shared.SlotUpper:
+		ums, merr := parseUpperMetalSheetForm(c, nil)
+		if merr != nil {
+			return merr.Wrap("could not parse upper metal sheet form").Echo()
+		}
+		ums.ToolID = tool.ID
+		merr = db.AddUpperMetalSheet(ums)
+		if merr != nil {
+			return merr.Wrap("could not add upper metal sheet to database").Echo()
+		}
+
+	case shared.SlotLower:
+		lms, merr := parseLowerMetalSheetForm(c, nil)
+		if merr != nil {
+			return merr.Wrap("could not parse lower metal sheet form").Echo()
+		}
+		lms.ToolID = tool.ID
+		merr = db.AddLowerMetalSheet(lms)
+		if merr != nil {
+			return merr.Wrap("could not add lower metal sheet to database").Echo()
+		}
+
+	default:
+		return errors.NewValidationError("invalid tool position").MasterError().Echo()
 	}
 
-	// Associate metal sheet with the tool
-	metalSheet.ToolID = toolID
-
-	// Save new metal sheet to database
-	_, merr = h.registry.MetalSheets.Add(metalSheet)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	h.createNewMetalSheetFeed(user, tool, metalSheet)
-
-	utils.SetHXTrigger(c, env.HXGlobalTrigger)
+	urlb.SetHXTrigger(c, "reload-metal-sheets")
 
 	return nil
 }
 
 func PutMetalSheet(c echo.Context) *echo.HTTPError {
-	slog.Info("Updating metal sheet")
-
 	// Get current user for feed creation
 	user, merr := utils.GetUserFromContext(c)
 	if merr != nil {
