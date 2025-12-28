@@ -3,15 +3,14 @@ package shared
 import (
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/labstack/echo/v4"
 )
 
-/*******************************************************************************
- * String Utils
- ******************************************************************************/
+// -----------------------------------------------------------------------------
+// String Masking
+// -----------------------------------------------------------------------------
 
 // MaskString masks sensitive strings by showing only the first and last 4 characters.
 // For strings with 8 or fewer characters, all characters are masked.
@@ -22,9 +21,9 @@ func MaskString(s string) string {
 	return s[:4] + strings.Repeat("*", len(s)-8) + s[len(s)-4:]
 }
 
-/*******************************************************************************
- * Handler Utils
- ******************************************************************************/
+// -----------------------------------------------------------------------------
+// User Retrieval from Context
+// -----------------------------------------------------------------------------
 
 func GetUserFromContext(c echo.Context) (*User, *errors.MasterError) {
 	u := c.Get("user")
