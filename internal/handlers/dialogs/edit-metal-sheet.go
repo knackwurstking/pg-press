@@ -1,14 +1,11 @@
 package dialogs
 
 import (
-	"log/slog"
-
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"github.com/knackwurstking/pg-press/models"
 	"github.com/labstack/echo/v4"
 )
 
@@ -142,58 +139,64 @@ func PostMetalSheet(c echo.Context) *echo.HTTPError {
 }
 
 func PutMetalSheet(c echo.Context) *echo.HTTPError {
-	// Get current user for feed creation
-	user, merr := utils.GetUserFromContext(c)
-	if merr != nil {
-		return merr.Echo()
-	}
-
 	// Extract metal sheet ID from query parameters
-	metalSheetIDQuery, merr := utils.ParseQueryInt64(c, "id")
+	id, merr := shared.ParseQueryInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
-	metalSheetID := models.MetalSheetID(metalSheetIDQuery)
-
-	// Fetch the existing metal sheet to preserve ID and tool association
-	existingSheet, merr := h.registry.MetalSheets.Get(metalSheetID)
+	position, merr := shared.ParseQueryInt(c, "position")
 	if merr != nil {
 		return merr.Echo()
 	}
+	switch shared.Slot(position) {
+	case shared.SlotUpper:
+		ums, merr := db.GetUpperMetalSheet(shared.EntityID(id))
+		if merr != nil {
+			return merr.Wrap("could not fetch existing upper metal sheet").Echo()
+		}
+		ums, merr = parseUpperMetalSheetForm(c, ums)
+		if merr != nil {
+			return merr.Wrap("could not parse upper metal sheet form").Echo()
+		}
+		merr = db.UpdateUpperMetalSheet(ums)
+		if merr != nil {
+			return merr.Wrap("could not update upper metal sheet in database").Echo()
+		}
 
-	// Fetch the associated tool for feed creation
-	tool, merr := h.registry.Tools.Get(existingSheet.ToolID)
-	if merr != nil {
-		return merr.Echo()
+	case shared.SlotLower:
+		lms, merr := db.GetLowerMetalSheet(shared.EntityID(id))
+		if merr != nil {
+			return merr.Wrap("could not fetch existing upper metal sheet").Echo()
+		}
+		lms, merr = parseLowerMetalSheetForm(c, lms)
+		if merr != nil {
+			return merr.Wrap("could not parse lower metal sheet form").Echo()
+		}
+		merr = db.UpdateLowerMetalSheet(lms)
+		if merr != nil {
+			return merr.Wrap("could not update upper metal sheet in database").Echo()
+		}
+
+	default:
+		return errors.NewValidationError("invalid slot position").MasterError().Echo()
 	}
 
-	// Parse updated form data
-	metalSheet, merr := GetMetalSheetDialogForm(c)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	// Preserve the original ID and tool association
-	metalSheet.ID = existingSheet.ID
-	metalSheet.ToolID = existingSheet.ToolID
-
-	// Update the metal sheet in database
-	merr = h.registry.MetalSheets.Update(metalSheet)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	utils.SetHXTrigger(c, env.HXGlobalTrigger)
+	urlb.SetHXTrigger(c, "reload-metal-sheets")
 
 	return nil
 }
 
 func parseUpperMetalSheetForm(c echo.Context, ms *shared.UpperMetalSheet) (*shared.UpperMetalSheet, *errors.MasterError) {
+	var (
+		tileHeightStr = c.FormValue("tile_height")
+		valueStr      = c.FormValue("value")
+	)
+
 	// ...
 }
 
 func parseLowerMetalSheetForm(c echo.Context, ms *shared.LowerMetalSheet) (*shared.LowerMetalSheet, *errors.MasterError) {
-	// ...
+	// TODO: ...
 }
 
 //func getMetalSheetDialogForm(c echo.Context) (*shared.MetalSheet, *errors.MasterError) {
