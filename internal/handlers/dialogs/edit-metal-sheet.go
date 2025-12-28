@@ -1,8 +1,10 @@
 package dialogs
 
 import (
+	"strconv"
+	"strings"
+
 	"github.com/knackwurstking/pg-press/internal/db"
-	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
@@ -186,65 +188,76 @@ func PutMetalSheet(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func parseUpperMetalSheetForm(c echo.Context, ms *shared.UpperMetalSheet) (*shared.UpperMetalSheet, *errors.MasterError) {
+func parseUpperMetalSheetForm(c echo.Context, ums *shared.UpperMetalSheet) (*shared.UpperMetalSheet, *errors.MasterError) {
+	if ums == nil {
+		ums = &shared.UpperMetalSheet{}
+	}
+
 	var (
 		tileHeightStr = c.FormValue("tile_height")
 		valueStr      = c.FormValue("value")
+		err           error
 	)
 
-	// ...
+	ums.TileHeight, err = strconv.ParseFloat(tileHeightStr, 64)
+	if err != nil {
+		return nil, errors.NewValidationError("invalid tile height: %v", err).MasterError()
+	}
+
+	ums.Value, err = strconv.ParseFloat(valueStr, 64)
+	if err != nil {
+		return nil, errors.NewValidationError("invalid value: %v", err).MasterError()
+	}
+
+	return ums, nil
 }
 
-func parseLowerMetalSheetForm(c echo.Context, ms *shared.LowerMetalSheet) (*shared.LowerMetalSheet, *errors.MasterError) {
-	// TODO: ...
-}
+func parseLowerMetalSheetForm(c echo.Context, lms *shared.LowerMetalSheet) (*shared.LowerMetalSheet, *errors.MasterError) {
+	if lms == nil {
+		lms = &shared.LowerMetalSheet{}
+	}
 
-//func getMetalSheetDialogForm(c echo.Context) (*shared.MetalSheet, *errors.MasterError) {
-//	metalSheet := &models.MetalSheet{}
-//
-//	// Parse required tile height field
-//	tileHeight, err := strconv.ParseFloat(c.FormValue("tile_height"), 64)
-//	if err != nil {
-//		return nil, errors.NewMasterError(err, http.StatusBadRequest)
-//	}
-//	metalSheet.TileHeight = tileHeight
-//
-//	// Parse required value field
-//	value, err := strconv.ParseFloat(c.FormValue("value"), 64)
-//	if err != nil {
-//		return nil, errors.NewMasterError(err, http.StatusBadRequest)
-//	}
-//	metalSheet.Value = value
-//
-//	// Parse optional marke height field
-//	if markeHeightStr := c.FormValue("marke_height"); markeHeightStr != "" {
-//		if markeHeight, err := strconv.Atoi(markeHeightStr); err == nil {
-//			metalSheet.MarkeHeight = markeHeight
-//		}
-//	}
-//
-//	// Parse optional STF field
-//	if stfStr := c.FormValue("stf"); stfStr != "" {
-//		if stf, err := strconv.ParseFloat(stfStr, 64); err == nil {
-//			metalSheet.STF = stf
-//		}
-//	}
-//
-//	// Parse optional STF Max field
-//	if stfMaxStr := c.FormValue("stf_max"); stfMaxStr != "" {
-//		if stfMax, err := strconv.ParseFloat(stfMaxStr, 64); err == nil {
-//			metalSheet.STFMax = stfMax
-//		}
-//	}
-//
-//	// Parse identifier field with validation
-//	identifierStr := c.FormValue("identifier")
-//	if machineType, err := models.ParseMachineType(identifierStr); err == nil {
-//		metalSheet.Identifier = machineType
-//	} else {
-//		// Log the invalid value but don't fail - default to SACMI
-//		metalSheet.Identifier = models.MachineTypeSACMI // Default to SACMI
-//	}
-//
-//	return metalSheet, nil
-//}
+	var (
+		tileHeightStr  = c.FormValue("tile_height")
+		valueStr       = c.FormValue("value")
+		markeHeightStr = c.FormValue("marke_height")
+		stfStr         = c.FormValue("stf")
+		stfMaxStr      = c.FormValue("stf_max")
+		identifierStr  = strings.ToUpper(strings.TrimSpace(c.FormValue("identifier")))
+		err            error
+	)
+
+	lms.TileHeight, err = strconv.ParseFloat(tileHeightStr, 64)
+	if err != nil {
+		return nil, errors.NewValidationError("invalid tile height: %v", err).MasterError()
+	}
+
+	lms.Value, err = strconv.ParseFloat(valueStr, 64)
+	if err != nil {
+		return nil, errors.NewValidationError("invalid value: %v", err).MasterError()
+	}
+
+	lms.MarkeHeight, err = strconv.Atoi(markeHeightStr)
+	if err != nil {
+		return nil, errors.NewValidationError("invalid marke height: %v", err).MasterError()
+	}
+
+	lms.STF, err = strconv.ParseFloat(stfStr, 64)
+	if err != nil {
+		return nil, errors.NewValidationError("invalid STF value: %v", err).MasterError()
+	}
+
+	lms.STFMax, err = strconv.ParseFloat(stfMaxStr, 64)
+	if err != nil {
+		return nil, errors.NewValidationError("invalid STF max value: %v", err).MasterError()
+	}
+
+	switch v := shared.MachineType(identifierStr); v {
+	case shared.MachineTypeSACMI, shared.MachineTypeSITI:
+		lms.Identifier = v
+	default:
+		return nil, errors.NewValidationError("identifier must be either 'SACMI' or 'SITI'").MasterError()
+	}
+
+	return lms, nil
+}
