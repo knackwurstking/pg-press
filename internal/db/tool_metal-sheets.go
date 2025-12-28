@@ -33,7 +33,19 @@ const (
 	// Upper Metal Sheets Queries
 	// -----------------------------------------------------------------------------
 
-	// TODO: sqlAddUpperMetalSheet
+	sqlAddUpperMetalSheet string = `
+		INSERT INTO metal_sheets (tool_id, tile_height, value, type)
+		VALUES (:tool_id, :tile_height, :value, 'upper');
+	`
+
+	sqlUpdateUpperMetalSheet string = `
+		UPDATE metal_sheets
+		SET 
+			tool_id 	= :tool_id,
+			tile_height = :tile_height,
+			value 		= :value
+		WHERE id = :id AND type = 'upper';
+	`
 
 	sqlGetUpperMetalSheet string = `
 		SELECT id, tool_id, tile_height, value
@@ -53,7 +65,23 @@ const (
 	// Lower Metal Sheets Queries
 	// -----------------------------------------------------------------------------
 
-	// TODO: sqlAddLowerMetalSheet
+	sqlAddLowerMetalSheet string = `
+		INSERT INTO metal_sheets (tool_id, tile_height, value, type, marke_height, stf, stf_max, identifier)
+		VALUES (:tool_id, :tile_height, :value, 'lower', :marke_height, :stf, :stf_max, :identifier);
+	`
+
+	sqlUpdateLowerMetalSheet string = `
+		UPDATE metal_sheets
+		SET 
+			tool_id 		= :tool_id,
+			tile_height 	= :tile_height,
+			value 			= :value,
+			marke_height 	= :marke_height,
+			stf 			= :stf,
+			stf_max 		= :stf_max,
+			identifier 		= :identifier
+		WHERE id = :id AND type = 'lower';
+	`
 
 	sqlGetLowerMetalSheet string = `
 		SELECT id, tool_id, tile_height, value, marke_height, stf, stf_max, identifier
@@ -74,7 +102,38 @@ const (
 // Upper Metal Sheets
 // -----------------------------------------------------------------------------
 
-// TODO: AddUpperMetalSheet
+func AddUpperMetalSheet(ums *shared.UpperMetalSheet) *errors.MasterError {
+	if verr := ums.Validate(); verr != nil {
+		return verr.MasterError().Wrap("invalid upper metal sheet")
+	}
+
+	_, err := dbTool.Exec(sqlAddUpperMetalSheet,
+		sql.Named("tool_id", ums.ToolID),
+		sql.Named("tile_height", ums.TileHeight),
+		sql.Named("value", ums.Value),
+	)
+	if err != nil {
+		return errors.NewMasterError(err)
+	}
+	return nil
+}
+
+func UpdateUpperMetalSheet(ums *shared.UpperMetalSheet) *errors.MasterError {
+	if verr := ums.Validate(); verr != nil {
+		return verr.MasterError().Wrap("invalid upper metal sheet")
+	}
+
+	_, err := dbTool.Exec(sqlUpdateUpperMetalSheet,
+		sql.Named("id", ums.ID),
+		sql.Named("tool_id", ums.ToolID),
+		sql.Named("tile_height", ums.TileHeight),
+		sql.Named("value", ums.Value),
+	)
+	if err != nil {
+		return errors.NewMasterError(err)
+	}
+	return nil
+}
 
 func GetUpperMetalSheet(metalSheetID shared.EntityID) (*shared.UpperMetalSheet, *errors.MasterError) {
 	r := dbTool.QueryRow(sqlGetUpperMetalSheet, sql.Named("id", metalSheetID))
@@ -107,7 +166,46 @@ func ListUpperMetalSheetsByTool(toolID shared.EntityID) ([]*shared.UpperMetalShe
 // Lower Metal Sheets
 // -----------------------------------------------------------------------------
 
-// TODO: AddLowerMetalSheet
+func AddLowerMetalSheet(lms *shared.LowerMetalSheet) *errors.MasterError {
+	if verr := lms.Validate(); verr != nil {
+		return verr.MasterError().Wrap("invalid lower metal sheet")
+	}
+
+	_, err := dbTool.Exec(sqlAddLowerMetalSheet,
+		sql.Named("tool_id", lms.ToolID),
+		sql.Named("tile_height", lms.TileHeight),
+		sql.Named("value", lms.Value),
+		sql.Named("marke_height", lms.MarkeHeight),
+		sql.Named("stf", lms.STF),
+		sql.Named("stf_max", lms.STFMax),
+		sql.Named("identifier", lms.Identifier),
+	)
+	if err != nil {
+		return errors.NewMasterError(err)
+	}
+	return nil
+}
+
+func UpdateLowerMetalSheet(lms *shared.LowerMetalSheet) *errors.MasterError {
+	if verr := lms.Validate(); verr != nil {
+		return verr.MasterError().Wrap("invalid lower metal sheet")
+	}
+
+	_, err := dbTool.Exec(sqlUpdateLowerMetalSheet,
+		sql.Named("id", lms.ID),
+		sql.Named("tool_id", lms.ToolID),
+		sql.Named("tile_height", lms.TileHeight),
+		sql.Named("value", lms.Value),
+		sql.Named("marke_height", lms.MarkeHeight),
+		sql.Named("stf", lms.STF),
+		sql.Named("stf_max", lms.STFMax),
+		sql.Named("identifier", lms.Identifier),
+	)
+	if err != nil {
+		return errors.NewMasterError(err)
+	}
+	return nil
+}
 
 func GetLowerMetalSheet(metalSheetID shared.EntityID) (*shared.LowerMetalSheet, *errors.MasterError) {
 	r := dbTool.QueryRow(sqlGetLowerMetalSheet, sql.Named("id", metalSheetID))
