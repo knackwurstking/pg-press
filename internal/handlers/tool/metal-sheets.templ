@@ -50,6 +50,10 @@ templ LowerMetalSheets(metalSheets []*shared.LowerMetalSheet, tool *shared.Tool,
 }
 
 templ metalSheetTableForUpperSlot(position shared.Slot, metalSheets []*shared.UpperMetalSheet, user *shared.User) {
+	if len(metalSheets) == 0 {
+		@components.NotFoundSectionText("Keine Bleche für dieses Werkzeug gefunden")
+		{{ return }}
+	}
 	<figure class="w-full overflow-x-scroll">
 		<table class="table borderless compact">
 			<thead>
@@ -60,28 +64,20 @@ templ metalSheetTableForUpperSlot(position shared.Slot, metalSheets []*shared.Up
 				</tr>
 			</thead>
 			<tbody>
-				if len(metalSheets) == 0 {
+				for _, sheet := range metalSheets {
 					<tr>
-						<td colspan="4" class="text-center">
-							<i><small>Keine Bleche für dieses Werkzeug gefunden</small></i>
+						<td>{ fmt.Sprintf("%.1f", sheet.TileHeight) }</td>
+						<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
+						<td class="button-group flex justify-end items-center">
+							@components.TableActions(components.TableActionsOptions{
+								EditHref:        urlb.UrlDialogs().EditMetalSheet(sheet.ID, 0, position),
+								EditAdminOnly:   false,
+								DeleteHref:      urlb.UrlMetalSheets(sheet.ID).Delete,
+								DeleteAdminOnly: true,
+								User:            user,
+							})
 						</td>
 					</tr>
-				} else {
-					for _, sheet := range metalSheets {
-						<tr>
-							<td>{ fmt.Sprintf("%.1f", sheet.TileHeight) }</td>
-							<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
-							<td class="button-group flex justify-end items-center">
-								@components.TableActions(components.TableActionsOptions{
-									EditHref:        urlb.UrlDialogs().EditMetalSheet(sheet.ID, 0, position),
-									EditAdminOnly:   false,
-									DeleteHref:      urlb.UrlMetalSheets(sheet.ID).Delete,
-									DeleteAdminOnly: true,
-									User:            user,
-								})
-							</td>
-						</tr>
-					}
 				}
 			</tbody>
 		</table>
@@ -89,6 +85,10 @@ templ metalSheetTableForUpperSlot(position shared.Slot, metalSheets []*shared.Up
 }
 
 templ metalSheetTableForLowerSlot(position shared.Slot, metalSheets []*shared.LowerMetalSheet, user *shared.User) {
+	if len(metalSheets) == 0 {
+		@components.NotFoundSectionText("Keine Blech für dieses Werkzeug gefunden")
+		{{ return }}
+	}
 	<figure class="w-full overflow-x-scroll">
 		<table class="table borderless compact">
 			<thead>
@@ -103,34 +103,26 @@ templ metalSheetTableForLowerSlot(position shared.Slot, metalSheets []*shared.Lo
 				</tr>
 			</thead>
 			<tbody>
-				if len(metalSheets) == 0 {
+				for _, sheet := range metalSheets {
 					<tr>
-						<td colspan="7" class="text-center">
-							<i><small>Keine Bleche für dieses Werkzeug gefunden</small></i>
+						<td>{ fmt.Sprintf("%.1f", sheet.TileHeight) }</td>
+						<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
+						<td>{ fmt.Sprintf("%d", sheet.MarkeHeight) }</td>
+						<td>{ fmt.Sprintf("%.1f", sheet.STF) }</td>
+						<td>{ fmt.Sprintf("%.1f", sheet.STFMax) }</td>
+						<td>
+							<span class="badge small">{ sheet.Identifier }</span>
+						</td>
+						<td class="button-group flex justify-end items-center">
+							@components.TableActions(components.TableActionsOptions{
+								EditHref:        urlb.UrlDialogs().EditMetalSheet(sheet.ID, 0, position),
+								EditAdminOnly:   false,
+								DeleteHref:      urlb.UrlMetalSheets(sheet.ID).Delete,
+								DeleteAdminOnly: true,
+								User:            user,
+							})
 						</td>
 					</tr>
-				} else {
-					for _, sheet := range metalSheets {
-						<tr>
-							<td>{ fmt.Sprintf("%.1f", sheet.TileHeight) }</td>
-							<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
-							<td>{ fmt.Sprintf("%d", sheet.MarkeHeight) }</td>
-							<td>{ fmt.Sprintf("%.1f", sheet.STF) }</td>
-							<td>{ fmt.Sprintf("%.1f", sheet.STFMax) }</td>
-							<td>
-								<span class="badge small">{ sheet.Identifier }</span>
-							</td>
-							<td class="button-group flex justify-end items-center">
-								@components.TableActions(components.TableActionsOptions{
-									EditHref:        urlb.UrlDialogs().EditMetalSheet(sheet.ID, 0, position),
-									EditAdminOnly:   false,
-									DeleteHref:      urlb.UrlMetalSheets(sheet.ID).Delete,
-									DeleteAdminOnly: true,
-									User:            user,
-								})
-							</td>
-						</tr>
-					}
 				}
 			</tbody>
 		</table>
