@@ -31,9 +31,9 @@ func Register(e *echo.Echo, path string) {
 		ui.NewEchoRoute(http.MethodPut, path+"/edit-note", PutNote),
 
 		// Edit cycle dialog
-		//ui.NewEchoRoute(http.MethodGet, path+"/edit-cycle", h.GetEditCycle),
-		//ui.NewEchoRoute(http.MethodPost, path+"/edit-cycle", h.PostEditCycle),
-		//ui.NewEchoRoute(http.MethodPut, path+"/edit-cycle", h.PutEditCycle),
+		ui.NewEchoRoute(http.MethodGet, path+"/edit-cycle", GetEditCycle),
+		ui.NewEchoRoute(http.MethodPost, path+"/edit-cycle", PostCycle),
+		ui.NewEchoRoute(http.MethodPut, path+"/edit-cycle", PutCycle),
 
 		// Edit metal sheet dialog
 		ui.NewEchoRoute(http.MethodGet, path+"/edit-metal-sheet", GetEditMetalSheet),
