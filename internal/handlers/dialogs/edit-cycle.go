@@ -10,7 +10,6 @@ import (
 
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
-	"github.com/knackwurstking/pg-press/internal/handlers/dialogs/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 
@@ -92,12 +91,12 @@ func (h *Handler) GetEditCycle(c echo.Context) *echo.HTTPError {
 	var t templ.Component
 	var tName string
 	if cycle != nil {
-		t = templates.EditCycleDialog(
+		t = EditCycleDialog(
 			tool, cycle, tools, inputPressNumber, inputTotalCycles, originalDate,
 		)
 		tName = "EditCycleDialog"
 	} else {
-		t = templates.NewCycleDialog(
+		t = NewCycleDialog(
 			tool, inputPressNumber, inputTotalCycles, originalDate,
 		)
 		tName = "NewCycleDialog"

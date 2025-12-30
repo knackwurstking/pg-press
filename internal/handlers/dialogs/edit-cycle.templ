@@ -123,7 +123,7 @@ templ EditCycleDialog(
 	inputPressNumber *shared.PressNumber,
 	inputTotalCycles int64,
 	start *time.Time,
-	stop *time.Time
+	stop *time.Time,
 ) {
 	{{ toolChangeMode := len(tools) > 0 }}
 	@ui.Dialog(ui.DialogOptions{
