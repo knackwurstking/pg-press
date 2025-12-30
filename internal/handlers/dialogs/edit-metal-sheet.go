@@ -13,11 +13,7 @@ import (
 
 func GetEditMetalSheet(c echo.Context) *echo.HTTPError {
 	// Check if we're editing an existing metal sheet (has ID) or creating new one
-	idQuery, merr := shared.ParseQueryInt64(c, "id")
-	if merr != nil {
-		return merr.Echo()
-	}
-
+	idQuery, _ := shared.ParseQueryInt64(c, "id")
 	if metalSheetID := shared.EntityID(idQuery); metalSheetID > 0 {
 		positionQuery, merr := shared.ParseQueryInt(c, "position")
 		if merr != nil {
