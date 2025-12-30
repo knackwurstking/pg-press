@@ -174,37 +174,33 @@ templ cyclesTable(p CyclesSectionContentProps) {
 				@TotalCycles(p.Tool.Cycles, true)
 			</span>
 		}
-		<figure class="w-full overflow-x-scroll">
-			<table
-				name="tool-cycles-table"
-				class="table borderless compact"
-				title="Zyklusverlauf"
-			>
-				<thead>
-					<tr>
-						<th name="press">Presse</th>
-						<th name="start">Start</th>
-						<th name="stop">Stop</th>
-						<th name="press_cycles">Zyklen</th>
-						<th name="partial_cycles">Zyklen (Teil)</th>
-						<th></th>
-					</tr>
-				</thead>
-				<tbody>
-					if len(p.ToolCycles) == 0 {
+		if len(p.ToolCycles) == 0 {
+			@components.NotFoundText("Kein Pressenverlauf verfügbar")
+		} else {
+			<figure class="w-full overflow-x-scroll">
+				<table
+					name="tool-cycles-table"
+					class="table borderless compact"
+					title="Zyklusverlauf"
+				>
+					<thead>
 						<tr>
-							<td colspan="5" class="text-center">
-								<i><small>Kein Pressenverlauf verfügbar</small></i>
-							</td>
+							<th name="press">Presse</th>
+							<th name="start">Start</th>
+							<th name="stop">Stop</th>
+							<th name="press_cycles">Zyklen</th>
+							<th name="partial_cycles">Zyklen (Teil)</th>
+							<th></th>
 						</tr>
-					} else {
+					</thead>
+					<tbody>
 						for _, cycle := range p.ToolCycles {
 							@cycleTableRow(cycle, lastRegeneration, p.User)
 						}
-					}
-				</tbody>
-			</table>
-		</figure>
+					</tbody>
+				</table>
+			</figure>
+		}
 	}
 }
 
