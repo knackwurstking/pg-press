@@ -51,7 +51,7 @@ templ LowerMetalSheets(metalSheets []*shared.LowerMetalSheet, tool *shared.Tool,
 
 templ metalSheetTableForUpperSlot(position shared.Slot, metalSheets []*shared.UpperMetalSheet, user *shared.User) {
 	if len(metalSheets) == 0 {
-		@components.NotFoundSectionText("Keine Bleche für dieses Werkzeug gefunden")
+		@components.NotFoundText("Keine Bleche für dieses Werkzeug gefunden")
 		{{ return }}
 	}
 	<figure class="w-full overflow-x-scroll">
@@ -86,7 +86,7 @@ templ metalSheetTableForUpperSlot(position shared.Slot, metalSheets []*shared.Up
 
 templ metalSheetTableForLowerSlot(position shared.Slot, metalSheets []*shared.LowerMetalSheet, user *shared.User) {
 	if len(metalSheets) == 0 {
-		@components.NotFoundSectionText("Keine Blech für dieses Werkzeug gefunden")
+		@components.NotFoundText("Keine Blech für dieses Werkzeug gefunden")
 		{{ return }}
 	}
 	<figure class="w-full overflow-x-scroll">
