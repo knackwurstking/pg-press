@@ -2,13 +2,11 @@ package dialogs
 
 import (
 	"fmt"
-	"log/slog"
 	"net/http"
 	"sort"
 	"strconv"
 
 	"github.com/knackwurstking/pg-press/internal/db"
-	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
@@ -100,8 +98,6 @@ func GetEditCycle(c echo.Context) *echo.HTTPError {
 }
 
 func PostEditCycle(c echo.Context) *echo.HTTPError {
-	slog.Info("Cycle creation request received")
-
 	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
@@ -129,6 +125,8 @@ func PostEditCycle(c echo.Context) *echo.HTTPError {
 
 	pc.Date = form.Date
 
+	log.Debug("Create a new press cycles entry. [cycle=%s]", pc)
+
 	_, merr = h.registry.PressCycles.Add(
 		pc.PressNumber, pc.ToolID, pc.ToolPosition, pc.TotalCycles, pc.PerformedBy,
 	)
@@ -136,41 +134,12 @@ func PostEditCycle(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	// Handle regeneration if requested
-	if form.Regenerating {
-		slog.Info("Starting tool regeneration", "tool_id", tool.ID, "user", user.Name)
-
-		_, merr = h.registry.ToolRegenerations.StartToolRegeneration(tool.ID, "", user)
-		if merr != nil {
-			slog.Error(
-				"Failed to start tool regeneration",
-				"tool_id", tool.ID, "user", user.Name, "error", merr,
-			)
-		}
-	}
-
-	// Create Feed
-	title := fmt.Sprintf("Neuer Zyklus hinzugefügt für %s", tool.String())
-	content := fmt.Sprintf("Presse: %d\nWerkzeug: %s\nGesamtzyklen: %d\nDatum: %s",
-		*form.PressNumber, tool.String(), form.TotalCycles, form.Date.Format("2006-01-02 15:04:05"))
-
-	if form.Regenerating {
-		content += "\nRegenerierung gestartet"
-	}
-
-	merr = h.registry.Feeds.Add(title, content, user.TelegramID)
-	if merr != nil {
-		slog.Warn("Failed to create feed for cycle creation", "error", merr)
-	}
-
-	urlb.SetHXTrigger(c, env.HXGlobalTrigger)
+	urlb.SetHXTrigger(c, "reload-cycles")
 
 	return nil
 }
 
 func PutEditCycle(c echo.Context) *echo.HTTPError {
-	slog.Info("Updating cycle")
-
 	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
@@ -225,6 +194,8 @@ func PutEditCycle(c echo.Context) *echo.HTTPError {
 		form.Date,
 	)
 
+	log.Debug("Update existing cycle with ID %d. [cycle=%v]", cycle.ID, cycle)
+
 	merr = h.registry.PressCycles.Update(
 		pc.ID,
 		pc.PressNumber,
@@ -238,39 +209,7 @@ func PutEditCycle(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	// Handle regeneration if requested
-	if form.Regenerating {
-		_, merr = h.registry.ToolRegenerations.Add(tool.ID, pc.ID, "", user)
-		if merr != nil {
-			slog.Error("Failed to add tool regeneration", "error", merr)
-		}
-	}
-
-	// Create Feed
-	var title string
-	var content string
-	if form.ToolID != nil {
-		// Tool change occurred
-		title = "Zyklus aktualisiert mit Werkzeugwechsel"
-		content = fmt.Sprintf("Presse: %d\nAltes Werkzeug: %s\nNeues Werkzeug: %s\nGesamtzyklen: %d\nDatum: %s",
-			*form.PressNumber, originalTool.String(), tool.String(), form.TotalCycles, form.Date.Format("2006-01-02 15:04:05"))
-	} else {
-		// Regular cycle update
-		title = fmt.Sprintf("Zyklus aktualisiert für %s", tool.String())
-		content = fmt.Sprintf("Presse: %d\nWerkzeug: %s\nGesamtzyklen: %d\nDatum: %s",
-			*form.PressNumber, tool.String(), form.TotalCycles, form.Date.Format("2006-01-02 15:04:05"))
-	}
-
-	if form.Regenerating {
-		content += "\nRegenerierung abgeschlossen"
-	}
-
-	merr = h.registry.Feeds.Add(title, content, user.TelegramID)
-	if merr != nil {
-		slog.Warn("Failed to create feed for cycle update", "error", merr)
-	}
-
-	urlb.SetHXTrigger(c, env.HXGlobalTrigger)
+	urlb.SetHXTrigger(c, "reload-cycles")
 
 	return nil
 }
