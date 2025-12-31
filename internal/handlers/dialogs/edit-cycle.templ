@@ -3,7 +3,6 @@ package dialogs
 import (
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -67,22 +66,7 @@ templ NewCycleDialog(
 				}
 			</select>
 		}
-		@components.Section(templ.Attributes{
-			"class": "original-date flex flex-col gap-sm",
-		}) {
-			// TODO: Start -> Stop date
-			<label>Ursprüngliches Datum</label>
-			<input
-				name="original_date"
-				type="text"
-				if originalDate == nil {
-					value={ time.Now().Format(shared.DateFormat) }
-				} else {
-					value={ originalDate.Format(shared.DateFormat) }
-				}
-				title="Datum des ursprünglichen Eintrags (wird nicht geändert)"
-			/>
-		}
+		@cycleStartStop(start, stop)
 		@components.Section(templ.Attributes{
 			"class": "total-cycles flex flex-col gap-sm",
 		}) {
@@ -196,22 +180,7 @@ templ EditCycleDialog(
 				}
 			</select>
 		}
-		@components.Section(templ.Attributes{
-			"class": "original-date flex flex-col gap-sm",
-		}) {
-			// TODO: Start -> Stop date
-			<label for="original_date">Ursprüngliches Datum</label>
-			<input
-				name="original_date"
-				type="text"
-				if originalDate == nil {
-					value={ time.Now().Format(shared.DateFormat) }
-				} else {
-					value={ originalDate.Format(shared.DateFormat) }
-				}
-				title="Datum des ursprünglichen Eintrags (wird nicht geändert)"
-			/>
-		}
+		@cycleStartStop(start, stop)
 		@components.Section(templ.Attributes{
 			"class": "total-cycles flex flex-col gap-sm",
 		}) {
@@ -227,6 +196,31 @@ templ EditCycleDialog(
 					value={ fmt.Sprintf("%d", inputTotalCycles) }
 				}
 				required
+			/>
+		}
+	}
+}
+
+templ cycleStartStop(start, stop shared.UnixMilli) {
+	@components.Section(templ.Attributes{
+		"class": "original-date flex flex-col gap-sm",
+	}) {
+		<label for="start">Start</label>
+		<input
+			name="start"
+			type="text"
+			if start > 0 {
+				value={ start.FormatDate() }
+			}
+			readonly
+		/>
+		if stop > 0 {
+			<label for="stop">Stop</label>
+			<input
+				name="stop"
+				type="text"
+				value={ stop.FormatDate() }
+				readonly
 			/>
 		}
 	}
