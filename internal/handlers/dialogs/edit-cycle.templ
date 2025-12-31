@@ -21,7 +21,7 @@ templ NewCycleDialog(
 ) {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPost,
-		Href:             urlb.UrlDialogs().EditCycle(0, tool.ID, nil),
+		Href:             urlb.UrlDialogs().EditCycle(0, tool.ID, false),
 		ID:               "cycle-dialog",
 		SubmitButtonText: "Erstellen",
 	}) {
@@ -55,7 +55,7 @@ templ NewCycleDialog(
 				>
 					Presse auswählen
 				</option>
-				for _, p := range shared.AllPressesNumbers {
+				for _, p := range shared.AllPressNumbers {
 					<option
 						value={ p }
 						selected?={ (inputPressNumber != nil && *inputPressNumber == p) ||
@@ -128,7 +128,7 @@ templ EditCycleDialog(
 	{{ toolChangeMode := len(tools) > 0 }}
 	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPut,
-		Href:             urlb.UrlDialogs().EditCycle(cycle.ID, 0, &toolChangeMode),
+		Href:             urlb.UrlDialogs().EditCycle(cycle.ID, 0, toolChangeMode),
 		ID:               "cycle-edit-dialog",
 		SubmitButtonText: "Aktualisieren",
 	}) {
@@ -153,9 +153,6 @@ templ EditCycleDialog(
 								statusText := ""
 								if currentPressNumber != nil {
 									statusText = fmt.Sprintf(" [P%d]", *currentPressNumber)
-								}
-								if t.Regenerating {
-									statusText += " [Reg.]"
 								}
 								if t.IsDead {
 									statusText += " [✗]"
@@ -182,7 +179,7 @@ templ EditCycleDialog(
 				>
 					Presse auswählen
 				</option>
-				for _, i := range shared.AllPressesNumbers {
+				for _, i := range shared.AllPressNumbers {
 					<option
 						value={ fmt.Sprintf("%d", i) }
 						selected?={ (inputPressNumber != nil && *inputPressNumber == i) ||
@@ -194,6 +191,7 @@ templ EditCycleDialog(
 			</select>
 		</section>
 		<section class="original-date flex flex-col gap-sm">
+			// TODO: Start -> Stop date
 			<label>Ursprüngliches Datum</label>
 			<input
 				name="original_date"
@@ -220,19 +218,6 @@ templ EditCycleDialog(
 				}
 				required
 			/>
-		</section>
-		<section class="regeneration">
-			<label class="flex flex-row justify-between items-center">
-				<span>
-					Werkzeug in den Regenerationszustand versetzen
-				</span>
-				// TODO: Need to set checked state based on current cycle/tool regeneration state
-				<input
-					name="regenerating"
-					type="checkbox"
-					onchange="if (this.checked && !confirm('Sicher, diesen Zustand ändern?')) this.checked = false;"
-				/>
-			</label>
 		</section>
 	}
 }
