@@ -3,6 +3,7 @@ package dialogs
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -13,11 +14,7 @@ import (
 
 templ NewCycleDialog(
 	tool *shared.Tool,
-	currentPressNumber *shared.PressNumber,
-	inputPressNumber *shared.PressNumber,
-	inputTotalCycles int64,
-	start shared.UnixMilli,
-	stop shared.UnixMilli,
+	pressNumber shared.PressNumber,
 ) {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPost,
@@ -43,75 +40,18 @@ templ NewCycleDialog(
 				</div>
 			</div>
 		}
-		@components.Section(templ.Attributes{
-			"class": "press flex flex-col gap-sm",
-		}) {
-			<label for="press">Presse</label>
-			<select id="press" name="press_number" required>
-				<option
-					value=""
-					disabled
-					selected?={ currentPressNumber == nil && inputPressNumber == nil }
-				>
-					Presse auswählen
-				</option>
-				for _, p := range shared.AllPressNumbers {
-					<option
-						value={ p }
-						selected?={ (inputPressNumber != nil && *inputPressNumber == p) ||
-							(inputPressNumber == nil && currentPressNumber != nil && *currentPressNumber == p) }
-					>
-						Presse { p }
-					</option>
-				}
-			</select>
-		}
-		@cycleStartStop(start, stop)
-		@components.Section(templ.Attributes{
-			"class": "total-cycles flex flex-col gap-sm",
-		}) {
-			<label for="total_cycles">Gesamtzyklen</label>
-			<input
-				type="number"
-				min="0"
-				step="1"
-				id="total_cycles"
-				name="total_cycles"
-				placeholder="Gesamtzyklen"
-				if inputTotalCycles != 0 {
-					value={ fmt.Sprintf("%d", inputTotalCycles) }
-				}
-				required
-			/>
-		}
-		@components.Section(templ.Attributes{
-			"class": "regeneration",
-		}) {
-			<label class="flex flex-row justify-between items-center">
-				<span>
-					Werkzeug in den Regenerationszustand versetzen
-				</span>
-				<input
-					name="regenerating"
-					type="checkbox"
-					onchange="if (this.checked && !confirm('Sicher, diesen Zustand ändern?')) this.checked = false;"
-				/>
-			</label>
-		}
+		@cyclePressNumber(pressNumber)
+		@cycleStartStop(0, 0)
+		@cycleTotalCycles(0)
 	}
 }
 
 templ EditCycleDialog(
-	tool *shared.Tool,
 	cycle *shared.Cycle,
-	tools []*shared.Tool,
-	currentPressNumber *shared.PressNumber,
-	inputPressNumber *shared.PressNumber,
-	inputTotalCycles int64,
-	start shared.UnixMilli,
-	stop shared.UnixMilli,
+	tool *shared.Tool,
+	availableTools []*shared.Tool,
 ) {
-	{{ toolChangeMode := len(tools) > 0 }}
+	{{ toolChangeMode := len(availableTools) > 0 }}
 	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPut,
 		Href:             urlb.UrlDialogs().EditCycle(cycle.ID, 0, toolChangeMode),
@@ -134,7 +74,7 @@ templ EditCycleDialog(
 					required
 					class="w-full max-w-full min-w-0 text-sm overflow-hidden text-ellipsis"
 				>
-					for _, t := range tools {
+					for _, t := range availableTools {
 						<option
 							value={ fmt.Sprintf("%d", t.ID) }
 							selected?={ t.ID == tool.ID }
@@ -142,66 +82,49 @@ templ EditCycleDialog(
 								class="text-gray-500 italic"
 							}
 						>
-							{{
-								statusText := ""
-								if currentPressNumber != nil {
-									statusText = fmt.Sprintf(" [P%d]", *currentPressNumber)
-								}
-								if t.IsDead {
-									statusText += " [✗]"
-								}
-							}}
-							{ fmt.Sprintf("%s %dx%d %s", t.Code, t.Width, t.Height, statusText) }
+							{ t.German() }
 						</option>
 					}
 				</select>
 			}
 		}
-		@components.Section(templ.Attributes{
-			"class": "press flex flex-col gap-sm",
-		}) {
-			<label for="press">Presse</label>
-			<select id="press" name="press_number" required>
+		@cyclePressNumber(cycle.PressNumber)
+		@cycleStartStop(cycle.Start, cycle.Stop)
+		@cycleTotalCycles(cycle.PressCycles)
+	}
+}
+
+templ cyclePressNumber(pressNumber shared.PressNumber) {
+	@components.Section(templ.Attributes{
+		"class": "press flex flex-col gap-sm",
+	}) {
+		<label for="press">Presse</label>
+		<select id="press" name="press_number" required>
+			<option
+				value=""
+				disabled
+				selected?={ !pressNumber.IsValid() }
+			>
+				Presse auswählen
+			</option>
+			for _, p := range shared.AllPressNumbers {
 				<option
-					value=""
-					disabled
-					selected?={ currentPressNumber == nil && inputPressNumber == nil }
+					value={ p }
+					selected?={ pressNumber == p }
 				>
-					Presse auswählen
+					Presse { p }
 				</option>
-				for _, i := range shared.AllPressNumbers {
-					<option
-						value={ fmt.Sprintf("%d", i) }
-						selected?={ (inputPressNumber != nil && *inputPressNumber == i) ||
-							(inputPressNumber == nil && currentPressNumber != nil && *currentPressNumber == i) }
-					>
-						Presse { fmt.Sprintf("%d", i) }
-					</option>
-				}
-			</select>
-		}
-		@cycleStartStop(start, stop)
-		@components.Section(templ.Attributes{
-			"class": "total-cycles flex flex-col gap-sm",
-		}) {
-			<label for="total_cycles">Gesamtzyklen</label>
-			<input
-				type="number"
-				min="0"
-				step="1"
-				id="total_cycles"
-				name="total_cycles"
-				placeholder="Gesamtzyklen"
-				if inputTotalCycles != 0 {
-					value={ fmt.Sprintf("%d", inputTotalCycles) }
-				}
-				required
-			/>
-		}
+			}
+		</select>
 	}
 }
 
 templ cycleStartStop(start, stop shared.UnixMilli) {
+	{{
+		if start == 0 {
+			start = shared.NewUnixMilli(time.Now())
+		}
+	}}
 	@components.Section(templ.Attributes{
 		"class": "original-date flex flex-col gap-sm",
 	}) {
@@ -223,5 +146,25 @@ templ cycleStartStop(start, stop shared.UnixMilli) {
 				readonly
 			/>
 		}
+	}
+}
+
+templ cycleTotalCycles(value int64) {
+	@components.Section(templ.Attributes{
+		"class": "total-cycles flex flex-col gap-sm",
+	}) {
+		<label for="total_cycles">Gesamtzyklen</label>
+		<input
+			type="number"
+			min="0"
+			step="1"
+			id="total_cycles"
+			name="total_cycles"
+			placeholder="Gesamtzyklen"
+			if value > 0 {
+				value={ fmt.Sprintf("%d", value) }
+			}
+			required
+		/>
 	}
 }

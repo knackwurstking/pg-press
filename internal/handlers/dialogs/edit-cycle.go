@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -17,7 +18,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func (h *Handler) GetEditCycle(c echo.Context) *echo.HTTPError {
+func GetEditCycle(c echo.Context) *echo.HTTPError {
 	// Check if we're in tool change mode
 	toolChangeMode := shared.ParseQueryBool(c, "tool_change_mode")
 
@@ -110,7 +111,7 @@ func (h *Handler) GetEditCycle(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func (h *Handler) PostEditCycle(c echo.Context) *echo.HTTPError {
+func PostEditCycle(c echo.Context) *echo.HTTPError {
 	slog.Info("Cycle creation request received")
 
 	user, merr := shared.GetUserFromContext(c)
@@ -179,7 +180,7 @@ func (h *Handler) PostEditCycle(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func (h *Handler) PutEditCycle(c echo.Context) *echo.HTTPError {
+func PutEditCycle(c echo.Context) *echo.HTTPError {
 	slog.Info("Updating cycle")
 
 	user, merr := shared.GetUserFromContext(c)
@@ -286,72 +287,38 @@ func (h *Handler) PutEditCycle(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-type EditCycleFormData struct {
-	TotalCycles  int64 // TotalCycles form field name "total_cycles"
-	PressNumber  *shared.PressNumber
-	Date         time.Time // OriginalDate form field name "original_date"
-	Regenerating bool
-	ToolID       *shared.EntityID // ToolID form field name "tool_id" (for tool change mode)
-}
+func parseCycleForm(c echo.Context) (*shared.Cycle, *shared.Tool, *errors.MasterError) {
+	var (
+		cycle = &shared.Cycle{}
+		tool  *shared.Tool
+	)
 
-func GetEditCycleFormData(c echo.Context) (*EditCycleFormData, *errors.MasterError) {
-	form := &EditCycleFormData{}
-
-	// Parse press number
-	if pressString := c.FormValue("press_number"); pressString != "" {
-		press, err := strconv.Atoi(pressString)
-		if err != nil {
-			return nil, errors.NewMasterError(err, http.StatusBadRequest)
-		}
-		pn := shared.PressNumber(press)
-		form.PressNumber = &pn
-
-		if !form.PressNumber.IsValid() {
-			return nil, errors.NewMasterError(
-				fmt.Errorf("press_number must be a valid integer"),
-				http.StatusBadRequest,
-			)
-		}
-	}
-
-	// Parse date
-	if dateString := c.FormValue("original_date"); dateString != "" {
-		var err error
-		form.Date, err = time.Parse(shared.DateFormat, dateString)
-		if err != nil {
-			return nil, errors.NewMasterError(err, http.StatusBadRequest)
-		}
-	} else {
-		form.Date = time.Now()
-	}
-
-	// Parse total cycles (required)
-	totalCyclesString := c.FormValue("total_cycles")
-	if totalCyclesString == "" {
-		return nil, errors.NewMasterError(
-			fmt.Errorf("form value total_cycles is required"),
-			http.StatusBadRequest,
-		)
-	}
-
-	var err error
-	form.TotalCycles, err = strconv.ParseInt(totalCyclesString, 10, 64)
+	// Tool
+	toolID, err := strconv.ParseInt(c.FormValue("original_tool_id"), 10, 64)
 	if err != nil {
-		return nil, errors.NewMasterError(err, http.StatusBadRequest)
+		return cycle, tool, errors.NewMasterError(err).Wrap("original_tool_id")
 	}
-
-	// Parse regenerating flag
-	form.Regenerating = c.FormValue("regenerating") != ""
-
-	// Parse tool_id if present (for tool change mode)
-	if toolIDString := c.FormValue("tool_id"); toolIDString != "" {
-		toolIDParsed, err := strconv.ParseInt(toolIDString, 10, 64)
+	if c.FormValue("tool_id") != "" {
+		newToolID, err := strconv.ParseInt(c.FormValue("tool_id"), 10, 64)
 		if err != nil {
-			return nil, errors.NewMasterError(err, http.StatusBadRequest)
+			return cycle, tool, errors.NewMasterError(err).Wrap("tool_id")
 		}
-		toolID := shared.EntityID(toolIDParsed)
-		form.ToolID = &toolID
+		cycle.ToolID = shared.EntityID(newToolID)
+	} else {
+		cycle.ToolID = shared.EntityID(toolID)
+	}
+	tool, merr := db.GetTool(cycle.ToolID)
+	if merr != nil {
+		return cycle, tool, merr
 	}
 
-	return form, nil
+	// TODO: Press Number
+
+	// TODO: Total Cycles
+
+	// TODO: Start
+
+	// TODO: Stop
+
+	return cycle, tool, nil
 }
