@@ -25,6 +25,12 @@ const (
 		);
 	`
 
+	sqlGetCycle string = `
+		SELECT id, tool_id, press_number, cycles, start, stop
+		FROM cycles
+		WHERE id = :id
+	`
+
 	sqlListToolCycles string = `
 		SELECT id, tool_id, press_number, cycles, start, stop
 		FROM cycles
@@ -54,6 +60,10 @@ const (
 // -----------------------------------------------------------------------------
 // Table Helpers: "cycles"
 // -----------------------------------------------------------------------------
+
+func GetCycle(id shared.EntityID) (*shared.Cycle, *errors.MasterError) {
+	return ScanCycle(dbPress.QueryRow(sqlGetCycle, sql.Named("id", id)))
+}
 
 func ListToolCycles(toolID shared.EntityID) ([]*shared.Cycle, *errors.MasterError) {
 	rows, err := dbPress.Query(sqlListToolCycles, sql.Named("tool_id", int64(toolID)))
