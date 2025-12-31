@@ -312,13 +312,33 @@ func parseCycleForm(c echo.Context) (*shared.Cycle, *shared.Tool, *errors.Master
 		return cycle, tool, merr
 	}
 
-	// TODO: Press Number
+	// Press Number
+	pressNumber, err := strconv.ParseInt(c.FormValue("press_number"), 10, 8)
+	if err != nil {
+		return cycle, tool, errors.NewMasterError(err).Wrap("press_number")
+	}
+	cycle.PressNumber = shared.PressNumber(pressNumber)
 
-	// TODO: Total Cycles
+	// Total Cycles
+	totalCycles, err := strconv.ParseInt(c.FormValue("total_cycles"), 10, 64)
+	if err != nil {
+		return cycle, tool, errors.NewMasterError(err).Wrap("total_cycles")
+	}
+	cycle.PressCycles = totalCycles
 
-	// TODO: Start
+	// Start
+	start, err := strconv.ParseInt(c.FormValue("start"), 10, 64)
+	if err != nil {
+		return cycle, tool, errors.NewMasterError(err).Wrap("start")
+	}
+	cycle.Start = shared.UnixMilli(start)
 
-	// TODO: Stop
+	// Stop
+	stop, err := strconv.ParseInt(c.FormValue("stop"), 10, 64)
+	if err != nil {
+		return cycle, tool, errors.NewMasterError(err).Wrap("stop")
+	}
+	cycle.Stop = shared.UnixMilli(stop)
 
 	return cycle, tool, nil
 }

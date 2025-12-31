@@ -98,8 +98,8 @@ templ cyclePressNumber(pressNumber shared.PressNumber) {
 	@components.Section(templ.Attributes{
 		"class": "press flex flex-col gap-sm",
 	}) {
-		<label for="press">Presse</label>
-		<select id="press" name="press_number" required>
+		<label for="press_number">Presse</label>
+		<select id="press_number" name="press_number" required>
 			<option
 				value=""
 				disabled
@@ -130,6 +130,7 @@ templ cycleStartStop(start, stop shared.UnixMilli) {
 	}) {
 		<label for="start">Start</label>
 		<input
+			id="start"
 			name="start"
 			type="text"
 			if start > 0 {
@@ -140,6 +141,7 @@ templ cycleStartStop(start, stop shared.UnixMilli) {
 		if stop > 0 {
 			<label for="stop">Stop</label>
 			<input
+				id="stop"
 				name="stop"
 				type="text"
 				value={ stop.FormatDate() }
