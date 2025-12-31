@@ -78,11 +78,11 @@ templ EditCycleDialog(
 						<option
 							value={ fmt.Sprintf("%d", t.ID) }
 							selected?={ t.ID == tool.ID }
-							if t.IsDead {
-								class="text-gray-500 italic"
-							}
 						>
 							{ t.German() }
+							if t.IsDead {
+								&nbsp;[Removed]
+							}
 						</option>
 					}
 				</select>

@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
-	"time"
 
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/env"
@@ -14,7 +13,6 @@ import (
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 
-	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 )
 
@@ -22,16 +20,7 @@ func GetEditCycle(c echo.Context) *echo.HTTPError {
 	// Check if we're in tool change mode
 	toolChangeMode := shared.ParseQueryBool(c, "tool_change_mode")
 
-	var (
-		tool             *shared.Tool
-		cycle            *shared.Cycle
-		tools            []*shared.Tool
-		inputPressNumber *shared.PressNumber
-		inputTotalCycles int64
-		start            *time.Time
-		stop             *time.Time
-	)
-
+	// Edit Cycle Dialog
 	if c.QueryParam("id") != "" {
 		cycleIDQuery, merr := shared.ParseQueryInt64(c, "id")
 		if merr != nil {
@@ -39,34 +28,32 @@ func GetEditCycle(c echo.Context) *echo.HTTPError {
 		}
 
 		// Get cycle data from the database
-		cycle, merr = h.db.Press.Cycle.GetByID(shared.EntityID(cycleIDQuery))
+		cycle, merr := db.GetCycle(shared.EntityID(cycleIDQuery))
 		if merr != nil {
 			return merr.Echo()
 		}
-		inputPressNumber = &(cycle.PressNumber)
-		inputTotalCycles = cycle.Cycles
-		start = time.UnixMilli(cycle.Start)
-		stop = time.UnixMilli(cycle.Stop)
 
 		// Set the cycles (original) tool to props
-		tool, merr = h.registry.Tools.Get(cycle.ToolID)
+		tool, merr := db.GetTool(cycle.ToolID)
 		if merr != nil {
 			return merr.Echo()
 		}
 
 		// If in tool change mode, load all available tools for this press
+		var tools []*shared.Tool
 		if toolChangeMode {
 			// Get all tools
-			allTools, merr := h.registry.Tools.List()
+			tools, merr = db.ListTools()
 			if merr != nil {
 				return merr.Echo()
 			}
 
 			// Filter out tools not matching the original tools position
-			for _, t := range allTools {
-				if t.Position == tool.Position {
-					tools = append(tools, t)
+			for _, t := range tools {
+				if t.Position != tool.Position {
+					continue
 				}
+				tools = append(tools, t)
 			}
 
 			// Sort tools alphabetically by code
@@ -74,38 +61,39 @@ func GetEditCycle(c echo.Context) *echo.HTTPError {
 				return tools[i].String() < tools[j].String()
 			})
 		}
-	} else if c.QueryParam("tool_id") != "" {
-		toolIDQuery, merr := shared.ParseQueryInt64(c, "tool_id")
-		if merr != nil {
-			return merr.Echo()
-		}
-		toolID := shared.EntityID(toolIDQuery)
 
-		tool, merr = h.registry.Tools.Get(toolID)
-		if merr != nil {
-			return merr.Echo()
+		t := EditCycleDialog(cycle, tool, tools)
+		err := t.Render(c.Request().Context(), c.Response())
+		if err != nil {
+			return errors.NewRenderError(err, "EditCycleDialog")
 		}
-	} else {
+
+		return nil
+	}
+
+	// New Cycle Dialog
+	if c.QueryParam("tool_id") == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "missing tool or cycle ID")
 	}
 
-	var t templ.Component
-	var tName string
-	if cycle != nil {
-		t = EditCycleDialog(
-			tool, cycle, tools, inputPressNumber, inputTotalCycles, originalDate,
-		)
-		tName = "EditCycleDialog"
-	} else {
-		t = NewCycleDialog(
-			tool, inputPressNumber, inputTotalCycles, originalDate,
-		)
-		tName = "NewCycleDialog"
+	id, merr := shared.ParseQueryInt64(c, "tool_id")
+	if merr != nil {
+		return merr.Echo()
+	}
+	tool, merr := db.GetTool(shared.EntityID(id))
+	if merr != nil {
+		return merr.Echo()
 	}
 
+	pressNumber, merr := db.GetPressNumberForTool(tool.ID)
+	if merr != nil {
+		return merr.Echo()
+	}
+
+	t := NewCycleDialog(tool, pressNumber)
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return errors.NewRenderError(err, tName)
+		return errors.NewRenderError(err, "NewCycleDialog")
 	}
 
 	return nil
