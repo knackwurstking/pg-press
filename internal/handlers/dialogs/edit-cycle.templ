@@ -17,7 +17,8 @@ templ NewCycleDialog(
 	currentPressNumber *shared.PressNumber,
 	inputPressNumber *shared.PressNumber,
 	inputTotalCycles int64,
-	originalDate *time.Time,
+	start shared.UnixMilli,
+	stop shared.UnixMilli,
 ) {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPost,
@@ -25,6 +26,11 @@ templ NewCycleDialog(
 		ID:               "cycle-dialog",
 		SubmitButtonText: "Erstellen",
 	}) {
+		<input
+			type="hidden"
+			name="original_tool_id"
+			value={ fmt.Sprintf("%d", tool.ID) }
+		/>
 		@components.Section(templ.Attributes{
 			"class": "tool-info flex flex-col gap-sm",
 		}) {
@@ -38,11 +44,6 @@ templ NewCycleDialog(
 				</div>
 			</div>
 		}
-		<input
-			type="hidden"
-			name="original_tool_id"
-			value={ fmt.Sprintf("%d", tool.ID) }
-		/>
 		@components.Section(templ.Attributes{
 			"class": "press flex flex-col gap-sm",
 		}) {
@@ -69,6 +70,7 @@ templ NewCycleDialog(
 		@components.Section(templ.Attributes{
 			"class": "original-date flex flex-col gap-sm",
 		}) {
+			// TODO: Start -> Stop date
 			<label>Ursprüngliches Datum</label>
 			<input
 				name="original_date"
@@ -122,8 +124,8 @@ templ EditCycleDialog(
 	currentPressNumber *shared.PressNumber,
 	inputPressNumber *shared.PressNumber,
 	inputTotalCycles int64,
-	start *time.Time,
-	stop *time.Time,
+	start shared.UnixMilli,
+	stop shared.UnixMilli,
 ) {
 	{{ toolChangeMode := len(tools) > 0 }}
 	@ui.Dialog(ui.DialogOptions{
@@ -132,8 +134,15 @@ templ EditCycleDialog(
 		ID:               "cycle-edit-dialog",
 		SubmitButtonText: "Aktualisieren",
 	}) {
+		<input
+			type="hidden"
+			name="original_tool_id"
+			value={ fmt.Sprintf("%d", tool.ID) }
+		/>
 		if toolChangeMode {
-			<section class="tool-selection flex flex-col gap-sm min-w-0">
+			@components.Section(templ.Attributes{
+				"class": "tool-selection flex flex-col gap-sm min-w-0",
+			}) {
 				<label for="tool_id">Werkzeug auswählen</label>
 				<select
 					id="tool_id"
@@ -162,14 +171,11 @@ templ EditCycleDialog(
 						</option>
 					}
 				</select>
-			</section>
+			}
 		}
-		<input
-			type="hidden"
-			name="original_tool_id"
-			value={ fmt.Sprintf("%d", tool.ID) }
-		/>
-		<section class="press flex flex-col gap-sm">
+		@components.Section(templ.Attributes{
+			"class": "press flex flex-col gap-sm",
+		}) {
 			<label for="press">Presse</label>
 			<select id="press" name="press_number" required>
 				<option
@@ -189,10 +195,12 @@ templ EditCycleDialog(
 					</option>
 				}
 			</select>
-		</section>
-		<section class="original-date flex flex-col gap-sm">
+		}
+		@components.Section(templ.Attributes{
+			"class": "original-date flex flex-col gap-sm",
+		}) {
 			// TODO: Start -> Stop date
-			<label>Ursprüngliches Datum</label>
+			<label for="original_date">Ursprüngliches Datum</label>
 			<input
 				name="original_date"
 				type="text"
@@ -203,8 +211,10 @@ templ EditCycleDialog(
 				}
 				title="Datum des ursprünglichen Eintrags (wird nicht geändert)"
 			/>
-		</section>
-		<section class="total-cycles flex flex-col gap-sm">
+		}
+		@components.Section(templ.Attributes{
+			"class": "total-cycles flex flex-col gap-sm",
+		}) {
 			<label for="total_cycles">Gesamtzyklen</label>
 			<input
 				type="number"
@@ -218,6 +228,6 @@ templ EditCycleDialog(
 				}
 				required
 			/>
-		</section>
+		}
 	}
 }
