@@ -89,7 +89,16 @@ templ regenerations(p CyclesSectionContentProps) {
 		"id": "regenerations-section",
 	}) {
 		@components.SectionTitle(components.SubTitle, "Regenerationen") {
-			// TODO: Actions: add custom regeneration
+			<button
+				class="icon secondary small"
+				hx-get={ urlb.UrlDialogToolRegeneration(p.Tool.ID) }
+				hx-trigger="click"
+				hx-target="body"
+				hx-swap="beforeend"
+				title="Neue Regeneration"
+			>
+				<i class="bi bi-plus-lg"></i>
+			</button>
 		}
 		if len(p.Regenerations) == 0 {
 			<span class="flex justify-center items-center">
@@ -159,7 +168,6 @@ templ cyclesTable(p CyclesSectionContentProps) {
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"
-				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 				title="Neuen Eintrag hinzufügen"
 				if !p.User.IsAdmin() {
 					disabled
