@@ -1,2 +1,35 @@
 package dialogs
 
+import (
+	"net/http"
+
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/ui/ui-templ"
+)
+
+templ NewToolRegenerationDialog(toolID shared.EntityID) {
+	@ui.Dialog(ui.DialogOptions{
+		Method:           http.MethodPost,
+		Href:             urlb.UrlDialogToolRegeneration(toolID),
+		ID:               "tool-regeneration-dialog",
+		SubmitButtonText: "Erstellen",
+	}) {
+		@toolRegenerationContent(nil)
+	}
+}
+
+templ EditToolRegenerationDialog(tool *shared.ToolRegeneration) {
+	@ui.Dialog(ui.DialogOptions{
+		Method:           http.MethodPut,
+		Href:             urlb.UrlDialogToolRegeneration(tool.ID),
+		ID:               "tool-regeneration-dialog",
+		SubmitButtonText: "Bearbeiten",
+	}) {
+		@toolRegenerationContent(tool)
+	}
+}
+
+templ toolRegenerationContent(tool *shared.ToolRegeneration) {
+	// TODO: Continue here
+}
