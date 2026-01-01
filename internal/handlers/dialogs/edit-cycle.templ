@@ -33,7 +33,7 @@ templ NewCycleDialog(
 			<label>Aktives Werkzeug</label>
 			<div class="flex flex-col gap-xs">
 				<div class="text-sm">
-					<strong>Werkzeug:</strong> { tool.String() }
+					<strong>Werkzeug:</strong> { tool.German() }
 				</div>
 				<div class="text-sm">
 					<strong>Position:</strong> { tool.Position.German() }
@@ -41,7 +41,7 @@ templ NewCycleDialog(
 			</div>
 		}
 		@cyclePressNumber(pressNumber)
-		@cycleStartStop(0, 0)
+		@cycleStartStop(0)
 		@cycleTotalCycles(0)
 	}
 }
@@ -89,7 +89,7 @@ templ EditCycleDialog(
 			}
 		}
 		@cyclePressNumber(cycle.PressNumber)
-		@cycleStartStop(cycle.Start, cycle.Stop)
+		@cycleStartStop(cycle.Stop)
 		@cycleTotalCycles(cycle.PressCycles)
 	}
 }
@@ -119,35 +119,25 @@ templ cyclePressNumber(pressNumber shared.PressNumber) {
 	}
 }
 
-templ cycleStartStop(start, stop shared.UnixMilli) {
+templ cycleStartStop(date shared.UnixMilli) {
 	{{
-		if start == 0 {
-			start = shared.NewUnixMilli(time.Now())
+		if date == 0 {
+			date = shared.NewUnixMilli(time.Now())
 		}
 	}}
 	@components.Section(templ.Attributes{
-		"class": "original-date flex flex-col gap-sm",
+		"class": "original-date flex gap justify-evenly items-center",
 	}) {
-		<label for="start">Start</label>
-		<input
-			id="start"
-			name="start"
-			type="text"
-			if start > 0 {
-				value={ start.FormatDate() }
-			}
-			readonly
-		/>
-		if stop > 0 {
-			<label for="stop">Stop</label>
+		<span class="flex flex-col gap-0">
+			<label for="date">Ablesedatum</label>
 			<input
-				id="stop"
-				name="stop"
-				type="text"
-				value={ stop.FormatDate() }
-				readonly
+				id="date"
+				name="date"
+				class="w-fit"
+				type="date"
+				value={ date }
 			/>
-		}
+		</span>
 	}
 }
 
@@ -155,13 +145,13 @@ templ cycleTotalCycles(value int64) {
 	@components.Section(templ.Attributes{
 		"class": "total-cycles flex flex-col gap-sm",
 	}) {
-		<label for="total_cycles">Gesamtzyklen</label>
+		<label for="press_cycles">Press Zyklen</label>
 		<input
 			type="number"
 			min="0"
 			step="1"
-			id="total_cycles"
-			name="total_cycles"
+			id="press_cycles"
+			name="press_cycles"
 			placeholder="Gesamtzyklen"
 			if value > 0 {
 				value={ fmt.Sprintf("%d", value) }
