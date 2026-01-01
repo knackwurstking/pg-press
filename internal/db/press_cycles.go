@@ -30,7 +30,16 @@ const (
 		VALUES (:tool_id, :press_number, :cycles, :start, :stop)
 	`
 
-	// TODO: Add sqlUpdateCycle
+	sqlUpdateCycle string = `
+		UPDATE cycles
+		SET
+			tool_id = :tool_id,
+			press_number = :press_number
+			cycles = :cycles
+			start = :start
+			stop = :stop
+		WHERE id = :id
+	`
 
 	sqlDeleteCycle string = `
 		DELETE FROM cycles
@@ -87,7 +96,24 @@ func AddCycle(cycle *shared.Cycle) *errors.MasterError {
 	return nil
 }
 
-// TODO: Add UpdateCycle
+func UpdateCycle(cycle *shared.Cycle) *errors.MasterError {
+	if verr := cycle.Validate(); verr != nil {
+		return verr.MasterError()
+	}
+
+	_, err := dbPress.Exec(sqlUpdateCycle,
+		sql.Named("id", cycle.ID),
+		sql.Named("tool_id", cycle.ToolID),
+		sql.Named("press_number", cycle.PressNumber),
+		sql.Named("cycles", cycle.PressCycles),
+		sql.Named("start", cycle.Start),
+		sql.Named("stop", cycle.Stop),
+	)
+	if err != nil {
+		return errors.NewMasterError(err)
+	}
+	return nil
+}
 
 func DeleteCycle(id shared.EntityID) *errors.MasterError {
 	_, err := dbPress.Exec(sqlDeleteCycle, sql.Named("id", int64(id)))
