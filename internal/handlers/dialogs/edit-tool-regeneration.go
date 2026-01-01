@@ -14,8 +14,10 @@ func GetEditToolRegeneration(c echo.Context) *echo.HTTPError {
 	}
 
 	if id > 0 {
-		// TODO: If ID is valid
+		// TODO: If ID is valid, Create `EditToolRegenerationDialog` with just the tool ID
 	}
+
+	// TODO: Else, create `EditToolRegenerationDialog` for an existing tool regeneration
 }
 
 func PostToolRegeneration(c echo.Context) *echo.HTTPError {
