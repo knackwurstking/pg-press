@@ -25,6 +25,11 @@ const (
 		);
 	`
 
+	sqlAddCycle string = `
+		INSERT INTO cycles (tool_id, press_number, cycles, start, stop)
+		VALUES (:tool_id, :press_number, :cycles, :start, :stop)
+	`
+
 	sqlGetCycle string = `
 		SELECT id, tool_id, press_number, cycles, start, stop
 		FROM cycles
@@ -60,6 +65,25 @@ const (
 // -----------------------------------------------------------------------------
 // Table Helpers: "cycles"
 // -----------------------------------------------------------------------------
+
+func AddCycle(cycle *shared.Cycle) *errors.MasterError {
+	if verr := cycle.Validate(); verr != nil {
+		return verr.MasterError()
+	}
+
+	_, err := dbPress.Exec(sqlAddCycle,
+		sql.Named("tool_id", cycle.ToolID),
+		sql.Named("press_number", cycle.PressNumber),
+		sql.Named("cycles", cycle.PressCycles),
+		sql.Named("start", cycle.Start),
+		sql.Named("stop", cycle.Stop),
+	)
+	if err != nil {
+		return errors.NewMasterError(err)
+	}
+
+	return nil
+}
 
 func GetCycle(id shared.EntityID) (*shared.Cycle, *errors.MasterError) {
 	return ScanCycle(dbPress.QueryRow(sqlGetCycle, sql.Named("id", id)))

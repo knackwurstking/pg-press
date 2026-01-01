@@ -1,7 +1,6 @@
 package dialogs
 
 import (
-	"fmt"
 	"net/http"
 	"sort"
 	"strconv"
@@ -97,39 +96,15 @@ func GetEditCycle(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func PostEditCycle(c echo.Context) *echo.HTTPError {
-	user, merr := shared.GetUserFromContext(c)
+func PostCycle(c echo.Context) *echo.HTTPError {
+	cycle, merr := parseCycleForm(c)
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	toolIDQuery, merr := shared.ParseQueryInt64(c, "tool_id")
-	if merr != nil {
-		return merr.Echo()
-	}
-	toolID := shared.EntityID(toolIDQuery)
+	log.Debug("Create a new press cycles entry. [cycle=%v]", cycle)
 
-	tool, merr := h.registry.Tools.Get(toolID)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	// Parse form data
-	form, merr := GetEditCycleFormData(c)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	pc := shared.NewCycle(*form.PressNumber, tool.ID, tool.Position,
-		form.TotalCycles, user.TelegramID)
-
-	pc.Date = form.Date
-
-	log.Debug("Create a new press cycles entry. [cycle=%s]", pc)
-
-	_, merr = h.registry.PressCycles.Add(
-		pc.PressNumber, pc.ToolID, pc.ToolPosition, pc.TotalCycles, pc.PerformedBy,
-	)
+	merr = db.AddCycle(cycle)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -139,72 +114,15 @@ func PostEditCycle(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func PutEditCycle(c echo.Context) *echo.HTTPError {
-	user, merr := shared.GetUserFromContext(c)
+func PutCycle(c echo.Context) *echo.HTTPError {
+	cycle, merr := parseCycleForm(c)
 	if merr != nil {
 		return merr.Echo()
 	}
-
-	cycleIDQuery, err := shared.ParseQueryInt64(c, "id")
-	if err != nil {
-		return errors.NewMasterError(err, http.StatusBadRequest).Echo()
-	}
-	cycleID := shared.EntityID(cycleIDQuery)
-
-	cycle, merr := h.registry.PressCycles.Get(cycleID)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	// Get original tool
-	originalTool, merr := h.registry.Tools.Get(cycle.ToolID)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	form, merr := GetEditCycleFormData(c)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	if !form.PressNumber.IsValid() {
-		return errors.NewMasterError(fmt.Errorf("press_number must be a valid integer"), http.StatusBadRequest).Echo()
-	}
-
-	// Determine which tool to use for the cycle
-	var tool *shared.Tool
-	if form.ToolID != nil {
-		// Tool change requested - get the new tool
-		newTool, merr := h.registry.Tools.Get(*form.ToolID)
-		if merr != nil {
-			return merr.Echo()
-		}
-		tool = newTool
-	} else {
-		// No tool change - use original tool
-		tool = originalTool
-	}
-
-	// Update the cycle
-	pc := shared.NewCycleWithID(
-		cycle.ID,
-		*form.PressNumber,
-		tool.ID, tool.Position, form.TotalCycles,
-		user.TelegramID,
-		form.Date,
-	)
 
 	log.Debug("Update existing cycle with ID %d. [cycle=%v]", cycle.ID, cycle)
 
-	merr = h.registry.PressCycles.Update(
-		pc.ID,
-		pc.PressNumber,
-		pc.ToolID,
-		pc.ToolPosition,
-		pc.TotalCycles,
-		pc.Date,
-		pc.PerformedBy,
-	)
+	merr = db.UpdateCycle(cycle)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -214,58 +132,51 @@ func PutEditCycle(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func parseCycleForm(c echo.Context) (*shared.Cycle, *shared.Tool, *errors.MasterError) {
-	var (
-		cycle = &shared.Cycle{}
-		tool  *shared.Tool
-	)
+func parseCycleForm(c echo.Context) (*shared.Cycle, *errors.MasterError) {
+	cycle := &shared.Cycle{}
 
 	// Tool
-	toolID, err := strconv.ParseInt(c.FormValue("original_tool_id"), 10, 64)
+	originalToolID, err := strconv.ParseInt(c.FormValue("original_tool_id"), 10, 64)
 	if err != nil {
-		return cycle, tool, errors.NewMasterError(err).Wrap("original_tool_id")
+		return cycle, errors.NewMasterError(err).Wrap("original_tool_id")
 	}
 	if c.FormValue("tool_id") != "" {
 		newToolID, err := strconv.ParseInt(c.FormValue("tool_id"), 10, 64)
 		if err != nil {
-			return cycle, tool, errors.NewMasterError(err).Wrap("tool_id")
+			return cycle, errors.NewMasterError(err).Wrap("tool_id")
 		}
 		cycle.ToolID = shared.EntityID(newToolID)
 	} else {
-		cycle.ToolID = shared.EntityID(toolID)
-	}
-	tool, merr := db.GetTool(cycle.ToolID)
-	if merr != nil {
-		return cycle, tool, merr
+		cycle.ToolID = shared.EntityID(originalToolID)
 	}
 
 	// Press Number
 	pressNumber, err := strconv.ParseInt(c.FormValue("press_number"), 10, 8)
 	if err != nil {
-		return cycle, tool, errors.NewMasterError(err).Wrap("press_number")
+		return cycle, errors.NewMasterError(err).Wrap("press_number")
 	}
 	cycle.PressNumber = shared.PressNumber(pressNumber)
 
 	// Total Cycles
 	totalCycles, err := strconv.ParseInt(c.FormValue("total_cycles"), 10, 64)
 	if err != nil {
-		return cycle, tool, errors.NewMasterError(err).Wrap("total_cycles")
+		return cycle, errors.NewMasterError(err).Wrap("total_cycles")
 	}
 	cycle.PressCycles = totalCycles
 
 	// Start
 	start, err := strconv.ParseInt(c.FormValue("start"), 10, 64)
 	if err != nil {
-		return cycle, tool, errors.NewMasterError(err).Wrap("start")
+		return cycle, errors.NewMasterError(err).Wrap("start")
 	}
 	cycle.Start = shared.UnixMilli(start)
 
 	// Stop
 	stop, err := strconv.ParseInt(c.FormValue("stop"), 10, 64)
 	if err != nil {
-		return cycle, tool, errors.NewMasterError(err).Wrap("stop")
+		return cycle, errors.NewMasterError(err).Wrap("stop")
 	}
 	cycle.Stop = shared.UnixMilli(stop)
 
-	return cycle, tool, nil
+	return cycle, nil
 }

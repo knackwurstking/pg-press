@@ -153,7 +153,7 @@ templ cyclesTable(p CyclesSectionContentProps) {
 		@components.SectionTitle(components.SubTitle, "Pressennutzungsverlauf") {
 			<button
 				class="icon secondary small flex"
-				hx-get={ urlb.UrlDialogs().EditCycle(0, p.Tool.ID, false) }
+				hx-get={ urlb.UrlDialogEditCycle(0, p.Tool.ID, false).Get }
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"
@@ -227,7 +227,7 @@ templ cycleTableRow(cycle *shared.Cycle, lastRegeneration *shared.ToolRegenerati
 		</td>
 		<td>
 			@components.TableActions(components.TableActionsOptions{
-				EditHref:        urlb.UrlDialogs().EditCycle(cycle.ID, cycle.ToolID, false),
+				EditHref:        urlb.UrlDialogEditCycle(cycle.ID, cycle.ToolID, false).Get,
 				EditAdminOnly:   true,
 				DeleteHref:      urlb.UrlTool(0, 0, cycle.ID).CycleDelete,
 				DeleteAdminOnly: true,

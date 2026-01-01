@@ -271,29 +271,13 @@ func UrlPressRegeneration(press shared.PressNumber, pressRegenerationID shared.E
 	return url
 }
 
-// UrlDialogs constructs dialog URLs
-func UrlDialogs() (url struct {
-	EditCycle             func(cycleID shared.EntityID, toolID shared.EntityID, toolChangeMode bool) templ.SafeURL
-	EditTool              func(toolID shared.EntityID) templ.SafeURL
-	EditCassette          func(cassetteID shared.EntityID) templ.SafeURL
-	EditMetalSheet        func(metalSheetID shared.EntityID, toolID shared.EntityID, position shared.Slot) templ.SafeURL
-	EditNote              func(noteID shared.EntityID, linked string) templ.SafeURL
-	EditToolRegeneration  func(toolRegenerationID shared.EntityID) templ.SafeURL
-	EditPressRegeneration func(pressRegenerationID shared.EntityID) templ.SafeURL
+func UrlDialogEditCycle(
+	cycleID shared.EntityID, toolID shared.EntityID, toolChangeMode bool,
+) (url struct {
+	Get  templ.SafeURL
+	Post templ.SafeURL
+	Put  templ.SafeURL
 }) {
-	url.EditCycle = urlEditCycleDialog
-	url.EditTool = urlEditToolDialog
-	url.EditCassette = urlEditCassetteDialog
-	url.EditMetalSheet = urlEditMetalSheetDialog
-	url.EditNote = urlEditNoteDialog
-	url.EditToolRegeneration = urlEditToolRegenerationDialog
-	url.EditPressRegeneration = urlEditPressRegenerationDialog
-
-	return url
-}
-
-// urlEditCycleDialog constructs edit cycle dialog URL
-func urlEditCycleDialog(cycleID shared.EntityID, toolID shared.EntityID, toolChangeMode bool) templ.SafeURL {
 	params := map[string]string{}
 	if cycleID != 0 {
 		params["id"] = fmt.Sprintf("%d", cycleID)
@@ -305,7 +289,30 @@ func urlEditCycleDialog(cycleID shared.EntityID, toolID shared.EntityID, toolCha
 		params["tool_change_mode"] = "true"
 	}
 
-	return BuildURLWithParams("/dialog/edit-cycle", params)
+	url.Get = BuildURLWithParams("/dialog/edit-cycle", params)
+	url.Post = BuildURL("/dialog/edit-cycle")
+	url.Put = BuildURL("/dialog/edit-cycle")
+
+	return url
+}
+
+// UrlDialogs constructs dialog URLs
+func UrlDialogs() (url struct {
+	EditTool              func(toolID shared.EntityID) templ.SafeURL
+	EditCassette          func(cassetteID shared.EntityID) templ.SafeURL
+	EditMetalSheet        func(metalSheetID shared.EntityID, toolID shared.EntityID, position shared.Slot) templ.SafeURL
+	EditNote              func(noteID shared.EntityID, linked string) templ.SafeURL
+	EditToolRegeneration  func(toolRegenerationID shared.EntityID) templ.SafeURL
+	EditPressRegeneration func(pressRegenerationID shared.EntityID) templ.SafeURL
+}) {
+	url.EditTool = urlEditToolDialog
+	url.EditCassette = urlEditCassetteDialog
+	url.EditMetalSheet = urlEditMetalSheetDialog
+	url.EditNote = urlEditNoteDialog
+	url.EditToolRegeneration = urlEditToolRegenerationDialog
+	url.EditPressRegeneration = urlEditPressRegenerationDialog
+
+	return url
 }
 
 // urlEditToolDialog constructs edit tool dialog URL
