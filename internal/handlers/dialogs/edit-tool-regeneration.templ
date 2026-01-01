@@ -8,10 +8,10 @@ import (
 	"github.com/knackwurstking/ui/ui-templ"
 )
 
-templ NewToolRegenerationDialog(toolID shared.EntityID) {
+templ NewToolRegenerationDialog(trID shared.EntityID) {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPost,
-		Href:             urlb.UrlDialogToolRegeneration(toolID),
+		Href:             urlb.UrlDialogToolRegeneration(trID),
 		ID:               "tool-regeneration-dialog",
 		SubmitButtonText: "Erstellen",
 	}) {
@@ -19,18 +19,18 @@ templ NewToolRegenerationDialog(toolID shared.EntityID) {
 	}
 }
 
-templ EditToolRegenerationDialog(tool *shared.ToolRegeneration) {
+templ EditToolRegenerationDialog(tr *shared.ToolRegeneration) {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPut,
-		Href:             urlb.UrlDialogToolRegeneration(tool.ID),
+		Href:             urlb.UrlDialogToolRegeneration(tr.ID),
 		ID:               "tool-regeneration-dialog",
 		SubmitButtonText: "Bearbeiten",
 	}) {
-		@toolRegenerationContent(tool)
+		@toolRegenerationContent(tr)
 	}
 }
 
-templ toolRegenerationContent(tool *shared.ToolRegeneration) {
+templ toolRegenerationContent(tr *shared.ToolRegeneration) {
 	<span class="flex flex-row gap justify-between items-start">
 		<span class="flex flex-col gap-0">
 			<label for="start">Start</label>
@@ -39,7 +39,7 @@ templ toolRegenerationContent(tool *shared.ToolRegeneration) {
 				name="start"
 				class="w-fit"
 				type="date"
-				value={ tool.Start }
+				value={ tr.Start }
 			/>
 		</span>
 		<span class="flex flex-col gap-0">
@@ -49,7 +49,7 @@ templ toolRegenerationContent(tool *shared.ToolRegeneration) {
 				name="start"
 				class="w-fit"
 				type="date"
-				value={ tool.Stop }
+				value={ tr.Stop }
 			/>
 		</span>
 	</span>
