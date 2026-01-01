@@ -88,7 +88,9 @@ templ regenerations(p CyclesSectionContentProps) {
 	@components.Section(templ.Attributes{
 		"id": "regenerations-section",
 	}) {
-		@components.SectionTitle(components.SubTitle, "Regenerationen")
+		@components.SectionTitle(components.SubTitle, "Regenerationen") {
+			// TODO: Actions: add custom regeneration
+		}
 		if len(p.Regenerations) == 0 {
 			<span class="flex justify-center items-center">
 				<i><small>Keine Regenerationen verzeichnet für dieses Werkzeug</small></i>

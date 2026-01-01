@@ -41,6 +41,8 @@ func Register(e *echo.Echo, path string) {
 		ui.NewEchoRoute(http.MethodPut, path+"/edit-metal-sheet", PutMetalSheet),
 
 		// Edit tool regeneration dialog
+		// TODO: Add custom tool regeneration
+		// TODO: Update start/stop for existing tool regenerations
 		//ui.NewEchoRoute(http.MethodGet, path+"/edit-tool-regeneration", h.GetEditToolRegeneration),
 		//ui.NewEchoRoute(http.MethodPut, path+"/edit-tool-regeneration", h.PutEditToolRegeneration),
 
