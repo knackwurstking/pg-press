@@ -26,9 +26,19 @@ const (
 		);
 	`
 
-	// TODO: sqlAddToolRegeneration
+	sqlAddToolRegeneration string = `
+		INSERT INTO tool_regenerations (tool_id, start, stop, cycles)
+		VALUES (:tool_id, :start, :stop, :cycles);
+	`
 
-	// TODO: sqlUpdateToolRegeneration
+	sqlUpdateToolRegeneration string = `
+		UPDATE tool_regenerations
+		SET tool_id = :tool_id,
+			start = :start,
+			stop = :stop,
+			cycles = :cycles
+		WHERE id = :id;
+	`
 
 	sqlGetToolRegeneration string = `
 		SELECT id, tool_id, start, stop, cycles
@@ -82,9 +92,40 @@ const (
 // Table Helpers: "tool_regenerations"
 // -----------------------------------------------------------------------------
 
-// TODO: AddToolRegeneration
+func AddToolRegeneration(tr *shared.ToolRegeneration) *errors.MasterError {
+	if verr := tr.Validate(); verr != nil {
+		return errors.NewMasterError(verr)
+	}
 
-// TODO: UpdateToolRegeneration
+	_, err := dbTool.Exec(sqlAddToolRegeneration,
+		sql.Named("tool_id", tr.ToolID),
+		sql.Named("start", tr.Start),
+		sql.Named("stop", tr.Stop),
+		sql.Named("cycles", tr.Cycles),
+	)
+	if err != nil {
+		return errors.NewMasterError(err)
+	}
+	return nil
+}
+
+func UpdateToolRegeneration(tr *shared.ToolRegeneration) *errors.MasterError {
+	if verr := tr.Validate(); verr != nil {
+		return errors.NewMasterError(verr)
+	}
+
+	_, err := dbTool.Exec(sqlUpdateToolRegeneration,
+		sql.Named("id", tr.ID),
+		sql.Named("tool_id", tr.ToolID),
+		sql.Named("start", tr.Start),
+		sql.Named("stop", tr.Stop),
+		sql.Named("cycles", tr.Cycles),
+	)
+	if err != nil {
+		return errors.NewMasterError(err)
+	}
+	return nil
+}
 
 func GetToolRegeneration(id shared.EntityID) (*shared.ToolRegeneration, *errors.MasterError) {
 	row := dbTool.QueryRow(sqlGetToolRegeneration, sql.Named("id", int64(id)))
