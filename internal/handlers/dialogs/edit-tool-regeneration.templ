@@ -31,5 +31,26 @@ templ EditToolRegenerationDialog(tool *shared.ToolRegeneration) {
 }
 
 templ toolRegenerationContent(tool *shared.ToolRegeneration) {
-	// TODO: Continue here
+	<span class="flex flex-row gap justify-between items-start">
+		<span class="flex flex-col gap-0">
+			<label for="start">Start</label>
+			<input
+				id="start"
+				name="start"
+				class="w-fit"
+				type="date"
+				value={ tool.Start }
+			/>
+		</span>
+		<span class="flex flex-col gap-0">
+			<label for="start">Stop</label>
+			<input
+				id="start"
+				name="start"
+				class="w-fit"
+				type="date"
+				value={ tool.Stop }
+			/>
+		</span>
+	</span>
 }
