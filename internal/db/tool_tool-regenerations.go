@@ -26,6 +26,10 @@ const (
 		);
 	`
 
+	// TODO: sqlAddToolRegeneration
+
+	// TODO: sqlUpdateToolRegeneration
+
 	sqlGetToolRegeneration string = `
 		SELECT id, tool_id, start, stop, cycles
 		FROM tool_regenerations
@@ -77,6 +81,10 @@ const (
 // -----------------------------------------------------------------------------
 // Table Helpers: "tool_regenerations"
 // -----------------------------------------------------------------------------
+
+// TODO: AddToolRegeneration
+
+// TODO: UpdateToolRegeneration
 
 func GetToolRegeneration(id shared.EntityID) (*shared.ToolRegeneration, *errors.MasterError) {
 	row := dbTool.QueryRow(sqlGetToolRegeneration, sql.Named("id", int64(id)))
