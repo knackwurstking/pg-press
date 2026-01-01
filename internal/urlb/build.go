@@ -296,9 +296,9 @@ func UrlDialogEditCycle(
 	return url
 }
 
-func UrlDialogToolRegeneration(toolID shared.EntityID) templ.SafeURL {
+func UrlDialogToolRegeneration(trID shared.EntityID) templ.SafeURL {
 	return BuildURLWithParams("/dialog/edit-regeneration", map[string]string{
-		"id": fmt.Sprintf("%d", toolID),
+		"id": fmt.Sprintf("%d", trID),
 	})
 }
 
