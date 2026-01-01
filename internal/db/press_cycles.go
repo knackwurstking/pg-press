@@ -53,13 +53,15 @@ const (
 	sqlListToolCycles string = `
 		SELECT id, tool_id, press_number, cycles, stop
 		FROM cycles
-		WHERE tool_id = :tool_id;
+		WHERE tool_id = :tool_id
+		ORDER BY stop DESC;
 	`
 
 	sqlListCyclesByPressNumber string = `
 		SELECT id, tool_id, press_number, cycles, stop
 		FROM cycles
-		WHERE press_number = :press_number;
+		WHERE press_number = :press_number
+		ORDER BY stop DESC;
 	`
 
 	sqlGetPrevCycle string = `
@@ -124,13 +126,13 @@ func GetCycle(id shared.EntityID) (*shared.Cycle, *errors.MasterError) {
 }
 
 // TotalToolCycles since last tool regeneration
-//
-// TODO: Take into account tool regenerations
 func GetTotalToolCycles(id shared.EntityID) (int64, *errors.MasterError) {
 	cycles, merr := ListToolCycles(id)
 	if merr != nil {
 		return 0, merr.Wrap("failed to list tool cycles for tool ID %d", id)
 	}
+
+	// TODO: Get last tool regeneration
 
 	// Inject partial cycles for each cycle
 	var totalCycles int64 = 0
@@ -195,8 +197,6 @@ func ListCyclesByPressNumber(pressNumber shared.PressNumber) ([]*shared.Cycle, *
 }
 
 // CycleInject injects "start" and `PartialCycles` into cycle
-//
-// TODO: Take into account the last press regeneration when calculating partial cycles
 func CycleInject(cycle *shared.Cycle) *errors.MasterError {
 	var lastCycles int64 = 0
 	var lastStop int64 = 0
@@ -210,6 +210,8 @@ func CycleInject(cycle *shared.Cycle) *errors.MasterError {
 		}
 		return errors.NewMasterError(err)
 	}
+
+	// TODO: Check press regenerations before calculating the partial cycles here
 
 	cycle.Start = shared.UnixMilli(lastStop)
 	cycle.PartialCycles = cycle.PressCycles - lastCycles
