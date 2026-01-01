@@ -12,8 +12,8 @@ type Cycle struct {
 	PressNumber   PressNumber `json:"press_number"`   // PressNumber indicates which press machine performed the cycles
 	PressCycles   int64       `json:"cycles"`         // PressCycles is the number of cycles completed during this time period
 	PartialCycles int64       `json:"partial_cycles"` // PartialCycles are the completed cycles during this time period (calculated)
-	Start         UnixMilli   `json:"start"`          // Start timestamp in milliseconds
-	Stop          UnixMilli   `json:"stop"`           // Stop timestamp in milliseconds
+	Start         UnixMilli   `json:"start"`          // Start timestamp in milliseconds (injected)
+	Stop          UnixMilli   `json:"stop"`           // Stop timestamp in milliseconds, should be the date were the press cycles got read
 }
 
 func (c *Cycle) Validate() *errors.ValidationError {

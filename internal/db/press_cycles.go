@@ -18,7 +18,6 @@ const (
 			tool_id      INTEGER NOT NULL,
 			press_number INTEGER NOT NULL,
 			cycles       INTEGER NOT NULL, -- Cycles at stop time
-			start        INTEGER NOT NULL,
 			stop         INTEGER NOT NULL,
 
 			PRIMARY KEY("id")
@@ -26,8 +25,8 @@ const (
 	`
 
 	sqlAddCycle string = `
-		INSERT INTO cycles (tool_id, press_number, cycles, start, stop)
-		VALUES (:tool_id, :press_number, :cycles, :start, :stop)
+		INSERT INTO cycles (tool_id, press_number, cycles, stop)
+		VALUES (:tool_id, :press_number, :cycles, :stop)
 	`
 
 	sqlUpdateCycle string = `
@@ -36,7 +35,6 @@ const (
 			tool_id = :tool_id,
 			press_number = :press_number
 			cycles = :cycles
-			start = :start
 			stop = :stop
 		WHERE id = :id
 	`
@@ -47,27 +45,27 @@ const (
 	`
 
 	sqlGetCycle string = `
-		SELECT id, tool_id, press_number, cycles, start, stop
+		SELECT id, tool_id, press_number, cycles, stop
 		FROM cycles
 		WHERE id = :id
 	`
 
 	sqlListToolCycles string = `
-		SELECT id, tool_id, press_number, cycles, start, stop
+		SELECT id, tool_id, press_number, cycles, stop
 		FROM cycles
 		WHERE tool_id = :tool_id;
 	`
 
 	sqlListCyclesByPressNumber string = `
-		SELECT id, tool_id, press_number, cycles, start, stop
+		SELECT id, tool_id, press_number, cycles, stop
 		FROM cycles
 		WHERE press_number = :press_number;
 	`
 
 	sqlGetPrevCycle string = `
-		SELECT cycles
+		SELECT cycles, stop
 		FROM cycles
-		WHERE press_number = ? AND stop <= ?
+		WHERE press_number = ? AND stop < ?
 		ORDER BY stop DESC
 		LIMIT 1;
 	`
@@ -86,7 +84,6 @@ func AddCycle(cycle *shared.Cycle) *errors.MasterError {
 		sql.Named("tool_id", cycle.ToolID),
 		sql.Named("press_number", cycle.PressNumber),
 		sql.Named("cycles", cycle.PressCycles),
-		sql.Named("start", cycle.Start),
 		sql.Named("stop", cycle.Stop),
 	)
 	if err != nil {
@@ -106,7 +103,6 @@ func UpdateCycle(cycle *shared.Cycle) *errors.MasterError {
 		sql.Named("tool_id", cycle.ToolID),
 		sql.Named("press_number", cycle.PressNumber),
 		sql.Named("cycles", cycle.PressCycles),
-		sql.Named("start", cycle.Start),
 		sql.Named("stop", cycle.Stop),
 	)
 	if err != nil {
@@ -164,8 +160,8 @@ func ListToolCycles(toolID shared.EntityID) ([]*shared.Cycle, *errors.MasterErro
 
 	var merr *errors.MasterError
 	for _, c := range cycles {
-		if merr = InjectPartialCyclesIntoCycle(c); merr != nil {
-			return nil, merr.Wrap("failed to inject partial cycles for ID %d", c.ID)
+		if merr = CycleInject(c); merr != nil {
+			return nil, merr.Wrap("failed to inject into cycle with ID %d", c.ID)
 		}
 	}
 
@@ -190,20 +186,21 @@ func ListCyclesByPressNumber(pressNumber shared.PressNumber) ([]*shared.Cycle, *
 
 	var merr *errors.MasterError
 	for _, c := range cycles {
-		if merr = InjectPartialCyclesIntoCycle(c); merr != nil {
-			return nil, merr.Wrap("failed to inject partial cycles for ID %d", c.ID)
+		if merr = CycleInject(c); merr != nil {
+			return nil, merr.Wrap("failed to inject into cycle with ID %d", c.ID)
 		}
 	}
 
 	return cycles, nil
 }
 
-// InjectPartialCyclesIntoCycle calculates and injects the partial cycles into the given cycle
+// CycleInject injects "start" and `PartialCycles` into cycle
 //
 // TODO: Take into account the last press regeneration when calculating partial cycles
-func InjectPartialCyclesIntoCycle(cycle *shared.Cycle) *errors.MasterError {
-	var lastKnownCycles int64 = 0
-	err := dbPress.QueryRow(sqlGetPrevCycle, cycle.PressNumber, cycle.Start).Scan(&lastKnownCycles)
+func CycleInject(cycle *shared.Cycle) *errors.MasterError {
+	var lastCycles int64 = 0
+	var lastStop int64 = 0
+	err := dbPress.QueryRow(sqlGetPrevCycle, cycle.PressNumber, cycle.Stop).Scan(&lastCycles, &lastStop)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			// No previous cycles found, return full cycles
@@ -214,7 +211,8 @@ func InjectPartialCyclesIntoCycle(cycle *shared.Cycle) *errors.MasterError {
 		return errors.NewMasterError(err)
 	}
 
-	cycle.PartialCycles = cycle.PressCycles - lastKnownCycles
+	cycle.Start = shared.UnixMilli(lastStop)
+	cycle.PartialCycles = cycle.PressCycles - lastCycles
 	return nil
 }
 
@@ -229,7 +227,6 @@ func ScanCycle(row Scannable) (cycle *shared.Cycle, merr *errors.MasterError) {
 		&cycle.ToolID,
 		&cycle.PressNumber,
 		&cycle.PressCycles,
-		&cycle.Start,
 		&cycle.Stop,
 	)
 	if err != nil {
