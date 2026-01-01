@@ -30,6 +30,13 @@ const (
 		VALUES (:tool_id, :press_number, :cycles, :start, :stop)
 	`
 
+	// TODO: Add sqlUpdateCycle
+
+	sqlDeleteCycle string = `
+		DELETE FROM cycles
+		WHERE id = :id;
+	`
+
 	sqlGetCycle string = `
 		SELECT id, tool_id, press_number, cycles, start, stop
 		FROM cycles
@@ -46,11 +53,6 @@ const (
 		SELECT id, tool_id, press_number, cycles, start, stop
 		FROM cycles
 		WHERE press_number = :press_number;
-	`
-
-	sqlDeleteCycle string = `
-		DELETE FROM cycles
-		WHERE id = :id;
 	`
 
 	sqlGetPrevCycle string = `
@@ -85,8 +87,36 @@ func AddCycle(cycle *shared.Cycle) *errors.MasterError {
 	return nil
 }
 
+// TODO: Add UpdateCycle
+
+func DeleteCycle(id shared.EntityID) *errors.MasterError {
+	_, err := dbPress.Exec(sqlDeleteCycle, sql.Named("id", int64(id)))
+	if err != nil {
+		return errors.NewMasterError(err)
+	}
+	return nil
+}
+
 func GetCycle(id shared.EntityID) (*shared.Cycle, *errors.MasterError) {
 	return ScanCycle(dbPress.QueryRow(sqlGetCycle, sql.Named("id", id)))
+}
+
+// TotalToolCycles since last tool regeneration
+//
+// TODO: Take into account tool regenerations
+func GetTotalToolCycles(id shared.EntityID) (int64, *errors.MasterError) {
+	cycles, merr := ListToolCycles(id)
+	if merr != nil {
+		return 0, merr.Wrap("failed to list tool cycles for tool ID %d", id)
+	}
+
+	// Inject partial cycles for each cycle
+	var totalCycles int64 = 0
+	for _, c := range cycles {
+		totalCycles += c.PartialCycles
+	}
+
+	return totalCycles, nil
 }
 
 func ListToolCycles(toolID shared.EntityID) ([]*shared.Cycle, *errors.MasterError) {
@@ -140,32 +170,6 @@ func ListCyclesByPressNumber(pressNumber shared.PressNumber) ([]*shared.Cycle, *
 	}
 
 	return cycles, nil
-}
-
-func DeleteCycle(id shared.EntityID) *errors.MasterError {
-	_, err := dbPress.Exec(sqlDeleteCycle, sql.Named("id", int64(id)))
-	if err != nil {
-		return errors.NewMasterError(err)
-	}
-	return nil
-}
-
-// TotalToolCycles since last tool regeneration
-//
-// TODO: Take into account tool regenerations
-func GetTotalToolCycles(id shared.EntityID) (int64, *errors.MasterError) {
-	cycles, merr := ListToolCycles(id)
-	if merr != nil {
-		return 0, merr.Wrap("failed to list tool cycles for tool ID %d", id)
-	}
-
-	// Inject partial cycles for each cycle
-	var totalCycles int64 = 0
-	for _, c := range cycles {
-		totalCycles += c.PartialCycles
-	}
-
-	return totalCycles, nil
 }
 
 // InjectPartialCyclesIntoCycle calculates and injects the partial cycles into the given cycle
