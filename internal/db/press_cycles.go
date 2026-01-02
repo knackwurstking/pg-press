@@ -206,15 +206,16 @@ func CycleInject(cycle *shared.Cycle) *errors.MasterError {
 			// No previous cycles found, return full cycles
 			cycle.PartialCycles = cycle.PressCycles
 		} else {
-			cycle.PartialCycles = 0
+			return errors.NewMasterError(err)
 		}
-		return errors.NewMasterError(err)
+	} else {
+		cycle.PartialCycles = cycle.PressCycles - lastCycles
 	}
 
 	// TODO: Check press regenerations before calculating the partial cycles here
 
 	cycle.Start = shared.UnixMilli(lastStop)
-	cycle.PartialCycles = cycle.PressCycles - lastCycles
+
 	return nil
 }
 

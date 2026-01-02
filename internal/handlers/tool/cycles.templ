@@ -206,7 +206,7 @@ templ cyclesTable(p CyclesSectionContentProps) {
 
 templ cycleTableRow(cycle *shared.Cycle, lastRegeneration *shared.ToolRegeneration, user *shared.User) {
 	<tr
-		if lastRegeneration.Start >= cycle.Stop {
+		if lastRegeneration != nil && lastRegeneration.Start >= cycle.Stop {
 			style="color: var(--ui-muted);"
 		}
 	>
