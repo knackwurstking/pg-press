@@ -158,10 +158,15 @@ func (e *MasterError) WrapEcho(format string, a ...any) *echo.HTTPError {
 
 func (e *MasterError) IsValidationError() bool {
 	_, ok := e.err.(*ValidationError)
-	return ok
+	return ok || e.code == http.StatusBadRequest
 }
 
 func (e *MasterError) IsExistsError() bool {
 	_, ok := e.err.(*ExistsError)
-	return ok
+	return ok || e.code == http.StatusConflict
+}
+
+func (e *MasterError) IsNotFoundError() bool {
+	_, ok := e.err.(*NotFoundError)
+	return ok || e.code == http.StatusNotFound
 }
