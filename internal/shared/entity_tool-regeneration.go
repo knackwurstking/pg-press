@@ -43,5 +43,3 @@ func (tr *ToolRegeneration) String() string {
 		tr.ID, tr.ToolID, tr.Start, tr.Stop,
 	)
 }
-
-var _ Entity[*ToolRegeneration] = (*ToolRegeneration)(nil)

@@ -9,17 +9,11 @@ import (
 
 templ Notes(toolID shared.EntityID, notes []*shared.Note) {
 	@components.SectionTitle(components.SubTitle, "Notizen") {
-		<button
-			class="icon secondary small flex"
-			hx-get={ urlb.UrlDialogs().EditNote(0, fmt.Sprintf("tool_%d", toolID)) }
-			hx-trigger="click"
-			hx-target="body"
-			hx-swap="beforeend"
-			hx-on::response-error="alert(event.detail.xhr.responseText)"
-			title="Neue Notiz hinzufügen"
-		>
-			<i class="bi bi-plus-lg"></i>
-		</button>
+		@components.SectionDialogAction(components.SectionDialogActionProps{
+			Url:   urlb.UrlDialogs().EditNote(0, fmt.Sprintf("tool_%d", toolID)),
+			Icon:  "plus-lg",
+			Title: "Neue Notiz hinzufügen",
+		})
 	}
 	if len(notes) > 0 {
 		<div class="notes-list flex flex-col gap">

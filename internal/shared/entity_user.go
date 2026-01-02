@@ -59,8 +59,6 @@ func (u *User) IsAdmin() bool {
 	return slices.Contains(strings.Split(env.Admins, ","), fmt.Sprintf("%d", u.ID))
 }
 
-var _ Entity[*User] = (*User)(nil)
-
 // ValidateAPIKey validates an API key according to the minimum length requirement
 func ValidateAPIKey(apiKey string) bool {
 	return len(apiKey) >= MinAPIKeyLength

@@ -22,3 +22,23 @@ templ SectionTitle(level SectionTitleLevel, text string) {
 		</span>
 	</div>
 }
+
+type SectionDialogActionProps struct {
+	Url   templ.SafeURL
+	Icon  string
+	Title string
+}
+
+templ SectionDialogAction(p SectionDialogActionProps) {
+	<button
+		class="icon secondary small"
+		hx-get={ p.Url }
+		hx-trigger="click"
+		hx-target="body"
+		hx-swap="beforeend"
+		hx-on::response-error="alert(event.detail.xhr.responseText)"
+		title={ p.Title }
+	>
+		<i class={ "bi bi-" + p.Icon }></i>
+	</button>
+}

@@ -54,5 +54,3 @@ func (p *Press) String() string {
 		p.ID, p.SlotUp, p.SlotDown, p.LastRegeneration, p.StartCycles, p.Cycles, p.Type,
 	)
 }
-
-var _ Entity[*Press] = (*Press)(nil)

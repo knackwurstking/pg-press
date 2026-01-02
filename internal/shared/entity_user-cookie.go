@@ -52,5 +52,3 @@ func (e *Cookie) ExpiredAtTime() time.Time {
 func (e *Cookie) String() string {
 	return "Cookie{UserID:" + e.UserID.String() + ", Value:" + MaskString(e.Value) + "}"
 }
-
-var _ Entity[*Cookie] = (*Cookie)(nil)

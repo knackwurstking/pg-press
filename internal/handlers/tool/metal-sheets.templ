@@ -22,7 +22,11 @@ templ UppperMetalSheets(metalSheets []*shared.UpperMetalSheet, tool *shared.Tool
 		})
 	}}
 	@components.SectionTitle(components.MainTitle, "Bleche") {
-		@newMetalSheetButton(tool.ID)
+		@components.SectionDialogAction(components.SectionDialogActionProps{
+			Url:   urlb.UrlDialogs().EditMetalSheet(0, tool.ID, shared.SlotUnknown),
+			Icon:  "plus-lg",
+			Title: "Neues Blech hinzufügen",
+		})
 	}
 	<div class="table-container">
 		@metalSheetTableForUpperSlot(tool.Position, metalSheets, user)
@@ -42,7 +46,11 @@ templ LowerMetalSheets(metalSheets []*shared.LowerMetalSheet, tool *shared.Tool,
 		})
 	}}
 	@components.SectionTitle(components.MainTitle, "Bleche") {
-		@newMetalSheetButton(tool.ID)
+		@components.SectionDialogAction(components.SectionDialogActionProps{
+			Url:   urlb.UrlDialogs().EditMetalSheet(0, tool.ID, shared.SlotUnknown),
+			Icon:  "plus-lg",
+			Title: "Neues Blech hinzufügen",
+		})
 	}
 	<div class="table-container">
 		@metalSheetTableForLowerSlot(tool.Position, metalSheets, user)
@@ -127,18 +135,4 @@ templ metalSheetTableForLowerSlot(position shared.Slot, metalSheets []*shared.Lo
 			</tbody>
 		</table>
 	</figure>
-}
-
-templ newMetalSheetButton(toolID shared.EntityID) {
-	<button
-		class="icon secondary small flex"
-		hx-get={ urlb.UrlDialogs().EditMetalSheet(0, toolID, shared.SlotUnknown) }
-		hx-trigger="click"
-		hx-target="body"
-		hx-swap="beforeend"
-		hx-on::response-error="alert(event.detail.xhr.responseText)"
-		title="Neues Blech hinzufügen"
-	>
-		<i class="bi bi-plus-lg"></i>
-	</button>
 }

@@ -52,5 +52,3 @@ func (pr *PressRegeneration) String() string {
 		pr.ID, pr.PressNumber, pr.Cycles, pr.Start, pr.Stop,
 	)
 }
-
-var _ Entity[*PressRegeneration] = (*PressRegeneration)(nil)

@@ -110,6 +110,3 @@ func (u *UpperMetalSheet) String() string {
 		u.Value,
 	)
 }
-
-var _ Entity[*UpperMetalSheet] = (*UpperMetalSheet)(nil)
-var _ Entity[*LowerMetalSheet] = (*LowerMetalSheet)(nil)

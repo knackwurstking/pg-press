@@ -60,5 +60,3 @@ func (c *Cycle) String() string {
 		c.ID, c.ToolID, c.PressNumber, c.PressCycles, c.PartialCycles, c.Start, c.Stop,
 	)
 }
-
-var _ Entity[*Cycle] = (*Cycle)(nil)

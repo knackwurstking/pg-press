@@ -83,5 +83,3 @@ func (n *Note) GetLinked() Linked {
 	id, _ := strconv.ParseInt(s[1], 10, 64)
 	return Linked{Name: s[0], ID: id}
 }
-
-var _ Entity[*Note] = (*Note)(nil)

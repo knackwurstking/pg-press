@@ -2,6 +2,7 @@ package tool
 
 import (
 	"fmt"
+
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
@@ -88,22 +89,14 @@ templ regenerations(p CyclesSectionContentProps) {
 		"id": "regenerations-section",
 	}) {
 		@components.SectionTitle(components.SubTitle, "Regenerationen") {
-			<button
-				class="icon secondary small"
-				hx-get={ urlb.BuildURLWithParams(
-                    "/dialog/edit-tool-regeneration",
-                    map[string]string{
-                        "tool_id": p.Tool.ID.String(),
-                    },
-                ) }
-				hx-trigger="click"
-				hx-target="body"
-				hx-swap="beforeend"
-				hx-on::response-error="alert(event.detail.xhr.responseText)"
-				title="Neue Regeneration"
-			>
-				<i class="bi bi-plus-lg"></i>
-			</button>
+			@components.SectionDialogAction(components.SectionDialogActionProps{
+				Icon: "plus-lg",
+				Url: urlb.BuildURLWithParams("/dialog/edit-tool-regeneration",
+					map[string]string{
+						"tool_id": p.Tool.ID.String(),
+					}),
+				Title: "Neue Regeneration",
+			})
 		}
 		if len(p.Regenerations) == 0 {
 			<span class="flex justify-center items-center">
@@ -167,20 +160,11 @@ templ cyclesTable(p CyclesSectionContentProps) {
 		"id": "cycles-section",
 	}) {
 		@components.SectionTitle(components.SubTitle, "Pressennutzungsverlauf") {
-			<button
-				class="icon secondary small flex"
-				hx-get={ urlb.UrlDialogEditCycle(0, p.Tool.ID, false).Get }
-				hx-trigger="click"
-				hx-target="body"
-				hx-swap="beforeend"
-				hx-on::response-error="alert(event.detail.xhr.responseText)"
-				title="Neuen Eintrag hinzufügen"
-				if !p.User.IsAdmin() {
-					disabled
-				}
-			>
-				<i class="bi bi-plus-lg"></i>
-			</button>
+			@components.SectionDialogAction(components.SectionDialogActionProps{
+				Icon:  "plus-lg",
+				Url:   urlb.UrlDialogEditCycle(0, p.Tool.ID, false).Get,
+				Title: "Neuen Eintrag hinzufügen",
+			})
 		}
 		@components.Section(nil) {
 			<h6 class="mb">
