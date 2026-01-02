@@ -120,7 +120,7 @@ func renderRegenerationEdit(c echo.Context, tool *shared.Tool, editable bool, us
 	}
 
 	regenerations, merr := db.ListToolRegenerationsByTool(tool.ID)
-	if merr != nil && merr.Code() != http.StatusNotFound {
+	if merr != nil && !merr.IsNotFoundError() {
 		return merr.Wrap("listing regenerations for tool ID %d failed", tool.ID).Echo()
 	}
 	isRegenerating := false

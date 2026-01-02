@@ -304,14 +304,12 @@ func UrlDialogs() (url struct {
 	EditCassette          func(cassetteID shared.EntityID) templ.SafeURL
 	EditMetalSheet        func(metalSheetID shared.EntityID, toolID shared.EntityID, position shared.Slot) templ.SafeURL
 	EditNote              func(noteID shared.EntityID, linked string) templ.SafeURL
-	EditToolRegeneration  func(toolRegenerationID shared.EntityID) templ.SafeURL
 	EditPressRegeneration func(pressRegenerationID shared.EntityID) templ.SafeURL
 }) {
 	url.EditTool = urlEditToolDialog
 	url.EditCassette = urlEditCassetteDialog
 	url.EditMetalSheet = urlEditMetalSheetDialog
 	url.EditNote = urlEditNoteDialog
-	url.EditToolRegeneration = urlEditToolRegenerationDialog
 	url.EditPressRegeneration = urlEditPressRegenerationDialog
 
 	return url
@@ -360,16 +358,6 @@ func urlEditNoteDialog(noteID shared.EntityID, linked string) templ.SafeURL {
 	}
 
 	return BuildURLWithParams("/dialog/edit-note", params)
-}
-
-// urlEditToolRegenerationDialog constructs edit tool regeneration dialog URL
-func urlEditToolRegenerationDialog(toolRegenerationID shared.EntityID) templ.SafeURL {
-	params := map[string]string{}
-	if toolRegenerationID != 0 {
-		params["id"] = fmt.Sprintf("%d", toolRegenerationID)
-	}
-
-	return BuildURLWithParams("/dialog/edit-tool-regeneration", params)
 }
 
 // urlEditPressRegenerationDialog constructs edit press regeneration dialog URL

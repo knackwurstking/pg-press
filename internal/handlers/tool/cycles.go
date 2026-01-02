@@ -1,11 +1,10 @@
 package tool
 
 import (
-	"net/http"
-
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
+
 	"github.com/labstack/echo/v4"
 )
 
@@ -44,7 +43,7 @@ func renderCyclesSectionContent(c echo.Context) *echo.HTTPError {
 
 	// Get active press number for this tool, -1 if none
 	activePressNumber, merr := db.GetPressNumberForTool(toolID)
-	if merr != nil && merr.Code() != http.StatusNotFound {
+	if merr != nil && !merr.IsNotFoundError() {
 		return merr.WrapEcho("could not get active press number for tool")
 	}
 

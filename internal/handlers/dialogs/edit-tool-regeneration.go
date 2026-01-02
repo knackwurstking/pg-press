@@ -13,7 +13,7 @@ import (
 
 func GetEditToolRegeneration(c echo.Context) *echo.HTTPError {
 	id, merr := shared.ParseQueryInt64(c, "id")
-	if merr != nil && merr.IsNotFoundError() {
+	if merr != nil && !merr.IsNotFoundError() {
 		return merr.Echo()
 	}
 

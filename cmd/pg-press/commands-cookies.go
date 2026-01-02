@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 
 	"github.com/knackwurstking/pg-press/internal/db"
@@ -31,7 +30,7 @@ func removeCookiesCommand() cli.Command {
 						user, merr := db.GetUserByApiKey(*value)
 						if merr != nil {
 							fmt.Fprintf(os.Stderr, "Failed to get user by api key: %v\n", merr)
-							if merr.Code() == http.StatusNotFound {
+							if merr.IsNotFoundError() {
 								os.Exit(exitCodeNotFound)
 							}
 							os.Exit(exitCodeGeneric)
@@ -40,7 +39,7 @@ func removeCookiesCommand() cli.Command {
 						merr = db.DeleteCookiesByUserID(user.ID)
 						if merr != nil {
 							fmt.Fprintf(os.Stderr, "Failed to remove cookies for user: %v\n", merr)
-							if merr.Code() == http.StatusNotFound {
+							if merr.IsNotFoundError() {
 								os.Exit(exitCodeNotFound)
 							}
 							os.Exit(exitCodeGeneric)
@@ -50,7 +49,7 @@ func removeCookiesCommand() cli.Command {
 					merr := db.DeleteCookie(*value)
 					if merr != nil {
 						fmt.Fprintf(os.Stderr, "Failed to remove cookie: %v\n", merr)
-						if merr.Code() == http.StatusNotFound {
+						if merr.IsNotFoundError() {
 							os.Exit(exitCodeNotFound)
 						}
 						os.Exit(exitCodeGeneric)
