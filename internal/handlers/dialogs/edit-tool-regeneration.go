@@ -1,6 +1,8 @@
 package dialogs
 
 import (
+	"strconv"
+
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -45,7 +47,12 @@ func PostToolRegeneration(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	// TODO: ...
+	formData, merr := GetEditToolRegenerationForm(c)
+	if merr != nil {
+		return merr.Echo()
+	}
+
+	// TODO: Continue here... Update database, hx trigger "reload-tool-regenerations"
 }
 
 func PutToolRegeneration(c echo.Context) *echo.HTTPError {
@@ -55,4 +62,33 @@ func PutToolRegeneration(c echo.Context) *echo.HTTPError {
 	}
 
 	// TODO: ...
+}
+
+type EditToolRegenerationForm struct {
+	Start shared.UnixMilli
+	Stop  shared.UnixMilli
+}
+
+func GetEditToolRegenerationForm(c echo.Context) (data EditToolRegenerationForm, merr *errors.MasterError) {
+	// Parse start and stop dates from HTML input fields (type "date")
+	vStart := c.FormValue("start")
+	vStop := c.FormValue("stop")
+
+	if vStart == "" || vStop == "" {
+		return data, errors.NewValidationError("missing start or stop").MasterError()
+	}
+
+	startInt, err := strconv.ParseInt(vStart, 10, 64)
+	if err != nil {
+		return data, errors.NewValidationError("invalid start date").MasterError()
+	}
+	stopInt, err := strconv.ParseInt(vStop, 10, 64)
+	if err != nil {
+		return data, errors.NewValidationError("invalid stop date").MasterError()
+	}
+
+	data.Start = shared.UnixMilli(startInt)
+	data.Stop = shared.UnixMilli(stopInt)
+
+	return data, nil
 }

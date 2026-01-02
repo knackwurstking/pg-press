@@ -15,6 +15,7 @@ templ Notes(toolID shared.EntityID, notes []*shared.Note) {
 			hx-trigger="click"
 			hx-target="body"
 			hx-swap="beforeend"
+			hx-on::response-error="alert(event.detail.xhr.responseText)"
 			title="Neue Notiz hinzufügen"
 		>
 			<i class="bi bi-plus-lg"></i>
