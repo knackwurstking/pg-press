@@ -16,8 +16,8 @@ type PageProps struct {
 templ Page(p *PageProps) {
 	@components.Layout(
 		components.LayoutProps{
-			PageTitle:   fmt.Sprintf("PG Presse | %s", p.Tool.German()),
-			AppBarTitle: fmt.Sprintf("%s", p.Tool.German()),
+			PageTitle:   fmt.Sprintf("PG Presse | %s %s", p.Tool.German(), p.Tool.Position.German()),
+			AppBarTitle: fmt.Sprintf("%s %s", p.Tool.German(), p.Tool.Position.German()),
 			NavContent:  components.StandardNavContent(),
 		},
 	) {
