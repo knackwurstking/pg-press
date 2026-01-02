@@ -30,6 +30,8 @@ func BuildURLWithParams(path string, params map[string]string) templ.SafeURL {
 	return BuildURL(path)
 }
 
+// TODO: Remove all of this url builders here
+
 // UrlLogin constructs login URL with optional API key and invalid flag
 func UrlLogin(apiKey string, invalid *bool) (url struct {
 	Page templ.SafeURL
