@@ -40,9 +40,19 @@ func GetEditToolRegeneration(c echo.Context) *echo.HTTPError {
 }
 
 func PostToolRegeneration(c echo.Context) *echo.HTTPError {
+	id, merr := shared.ParseQueryInt64(c, "tool_id")
+	if merr != nil {
+		return merr.Echo()
+	}
+
 	// TODO: ...
 }
 
 func PutToolRegeneration(c echo.Context) *echo.HTTPError {
+	id, merr := shared.ParseQueryInt64(c, "id")
+	if merr != nil {
+		return merr.Echo()
+	}
+
 	// TODO: ...
 }
