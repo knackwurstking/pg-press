@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
+	"time"
 
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
@@ -158,25 +159,18 @@ func parseCycleForm(c echo.Context) (*shared.Cycle, *errors.MasterError) {
 	cycle.PressNumber = shared.PressNumber(pressNumber)
 
 	// Total Cycles
-	totalCycles, err := strconv.ParseInt(c.FormValue("total_cycles"), 10, 64)
+	totalCycles, err := strconv.ParseInt(c.FormValue("press_cycles"), 10, 64)
 	if err != nil {
-		return cycle, errors.NewMasterError(err).Wrap("total_cycles")
+		return cycle, errors.NewMasterError(err).Wrap("press_cycles")
 	}
 	cycle.PressCycles = totalCycles
 
-	// Start
-	start, err := strconv.ParseInt(c.FormValue("start"), 10, 64)
-	if err != nil {
-		return cycle, errors.NewMasterError(err).Wrap("start")
-	}
-	cycle.Start = shared.UnixMilli(start)
-
 	// Stop
-	stop, err := strconv.ParseInt(c.FormValue("stop"), 10, 64)
+	stop, err := time.Parse("2006-01-02", c.FormValue("stop"))
 	if err != nil {
 		return cycle, errors.NewMasterError(err).Wrap("stop")
 	}
-	cycle.Stop = shared.UnixMilli(stop)
+	cycle.Stop = shared.NewUnixMilli(stop)
 
 	return cycle, nil
 }

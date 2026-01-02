@@ -41,7 +41,7 @@ templ NewCycleDialog(
 			</div>
 		}
 		@cyclePressNumber(pressNumber)
-		@cycleDate(0)
+		@cycleStop(0)
 		@cycleTotalCycles(0)
 	}
 }
@@ -89,7 +89,7 @@ templ EditCycleDialog(
 			}
 		}
 		@cyclePressNumber(cycle.PressNumber)
-		@cycleDate(cycle.Stop)
+		@cycleStop(cycle.Stop)
 		@cycleTotalCycles(cycle.PressCycles)
 	}
 }
@@ -119,7 +119,7 @@ templ cyclePressNumber(pressNumber shared.PressNumber) {
 	}
 }
 
-templ cycleDate(date shared.UnixMilli) {
+templ cycleStop(date shared.UnixMilli) {
 	{{
 		if date == 0 {
 			date = shared.NewUnixMilli(time.Now())
@@ -129,10 +129,10 @@ templ cycleDate(date shared.UnixMilli) {
 		"class": "original-date flex gap",
 	}) {
 		<span class="flex flex-col gap-0">
-			<label for="date">Ablesedatum</label>
+			<label for="stop">Ablesedatum</label>
 			<input
-				id="date"
-				name="date"
+				id="stop"
+				name="stop"
 				class="w-fit"
 				type="date"
 				value={ date }
