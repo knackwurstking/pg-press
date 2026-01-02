@@ -18,6 +18,7 @@ templ NewUpperMetalSheetDialog(
 		Href:             urlb.UrlDialogs().EditMetalSheet(0, tool.ID, tool.Position),
 		ID:               "metal-sheet-dialog",
 		SubmitButtonText: "Erstellen",
+		FormClasses:      templ.CSSClasses{"container"},
 	}) {
 		@metalSheetContentPositionTop(nil)
 	}
@@ -31,6 +32,7 @@ templ NewLowerMetalSheetDialog(
 		Href:             urlb.UrlDialogs().EditMetalSheet(0, tool.ID, tool.Position),
 		ID:               "metal-sheet-dialog",
 		SubmitButtonText: "Erstellen",
+		FormClasses:      templ.CSSClasses{"container"},
 	}) {
 		@metalSheetContentPositionBottom(nil)
 	}
@@ -65,101 +67,39 @@ templ EditLowerMetalSheetDialog(
 }
 
 templ metalSheetContentPositionTop(metalSheet *shared.UpperMetalSheet) {
-	<div class="flex flex-col">
-		<label for="tile-height">Stärke (mm)</label>
-		<input
-			style="width: 10ch"
-			type="number"
-			id="tile-height"
-			name="tile_height"
-			step="0.1"
-			required
-			if metalSheet != nil {
-				value={ fmt.Sprintf("%.1f", metalSheet.TileHeight) }
-			}
-		/>
-	</div>
-	<div class="flex flex-col">
-		<label for="value">Blech (mm)</label>
-		<input
-			style="width: 10ch"
-			type="number"
-			id="value"
-			name="value"
-			step="0.1"
-			required
-			if metalSheet != nil {
-				value={ fmt.Sprintf("%.1f", metalSheet.Value) }
-			}
-		/>
+	<div class="flex gap w-full">
+		<div class="flex flex-col w-full">
+			<label for="tile-height">Stärke (mm)</label>
+			<input
+				class="w-full"
+				type="number"
+				id="tile-height"
+				name="tile_height"
+				step="0.1"
+				required
+				if metalSheet != nil {
+					value={ fmt.Sprintf("%.1f", metalSheet.TileHeight) }
+				}
+			/>
+		</div>
+		<div class="flex flex-col w-full">
+			<label for="value">Blech (mm)</label>
+			<input
+				class="w-full"
+				type="number"
+				id="value"
+				name="value"
+				step="0.1"
+				required
+				if metalSheet != nil {
+					value={ fmt.Sprintf("%.1f", metalSheet.Value) }
+				}
+			/>
+		</div>
 	</div>
 }
 
 templ metalSheetContentPositionBottom(metalSheet *shared.LowerMetalSheet) {
-	<div class="flex flex-col">
-		<label for="tile-height">Stärke (mm)</label>
-		<input
-			type="number"
-			id="tile-height"
-			name="tile_height"
-			step="0.1"
-			required
-			if metalSheet != nil {
-				value={ fmt.Sprintf("%.1f", metalSheet.TileHeight) }
-			}
-		/>
-	</div>
-	<div class="flex flex-col">
-		<label for="value">Blech (mm)</label>
-		<input
-			type="number"
-			id="value"
-			name="value"
-			step="0.1"
-			required
-			if metalSheet != nil {
-				value={ fmt.Sprintf("%.1f", metalSheet.Value) }
-			}
-		/>
-	</div>
-	<div class="flex flex-col">
-		<label for="marke-height">Marke (mm)</label>
-		<input
-			type="number"
-			id="marke-height"
-			name="marke_height"
-			required
-			if metalSheet != nil {
-				value={ fmt.Sprintf("%d", metalSheet.MarkeHeight) }
-			}
-		/>
-	</div>
-	<div class="flex flex-col">
-		<label for="stf">Stf.</label>
-		<input
-			type="number"
-			id="stf"
-			name="stf"
-			step="0.1"
-			required
-			if metalSheet != nil {
-				value={ fmt.Sprintf("%.1f", metalSheet.STF) }
-			}
-		/>
-	</div>
-	<div class="flex flex-col">
-		<label for="stf-max">Hubende</label>
-		<input
-			type="number"
-			id="stf-max"
-			name="stf_max"
-			step="0.1"
-			required
-			if metalSheet != nil {
-				value={ fmt.Sprintf("%.1f", metalSheet.STFMax) }
-			}
-		/>
-	</div>
 	<div class="flex flex-col">
 		<label for="identifier">Maschinentyp</label>
 		<select
@@ -184,4 +124,77 @@ templ metalSheetContentPositionBottom(metalSheet *shared.LowerMetalSheet) {
 			>SITI</option>
 		</select>
 	</div>
+	<span class="flex gap w-full">
+		<div class="flex flex-col w-full">
+			<label for="tile-height">Stärke (mm)</label>
+			<input
+				class="w-full"
+				id="tile-height"
+				name="tile_height"
+				type="number"
+				step="0.1"
+				required
+				if metalSheet != nil {
+					value={ fmt.Sprintf("%.1f", metalSheet.TileHeight) }
+				}
+			/>
+		</div>
+		<div class="flex flex-col w-full">
+			<label for="stf">Stf.</label>
+			<input
+				class="w-full"
+				id="stf"
+				name="stf"
+				type="number"
+				step="0.1"
+				required
+				if metalSheet != nil {
+					value={ fmt.Sprintf("%.1f", metalSheet.STF) }
+				}
+			/>
+		</div>
+		<div class="flex flex-col w-full">
+			<label for="stf-max">Hubende</label>
+			<input
+				class="w-full"
+				id="stf-max"
+				name="stf_max"
+				type="number"
+				step="0.1"
+				required
+				if metalSheet != nil {
+					value={ fmt.Sprintf("%.1f", metalSheet.STFMax) }
+				}
+			/>
+		</div>
+	</span>
+	<span class="flex gap w-full">
+		<div class="flex flex-col w-full">
+			<label for="marke-height">Marke (mm)</label>
+			<input
+				class="w-full"
+				id="marke-height"
+				name="marke_height"
+				type="number"
+				required
+				if metalSheet != nil {
+					value={ fmt.Sprintf("%d", metalSheet.MarkeHeight) }
+				}
+			/>
+		</div>
+		<div class="flex flex-col w-full">
+			<label for="value">Blech (mm)</label>
+			<input
+				class="w-full"
+				id="value"
+				name="value"
+				type="number"
+				step="0.1"
+				required
+				if metalSheet != nil {
+					value={ fmt.Sprintf("%.1f", metalSheet.Value) }
+				}
+			/>
+		</div>
+	</span>
 }
