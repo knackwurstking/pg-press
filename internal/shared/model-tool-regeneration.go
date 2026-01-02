@@ -12,7 +12,6 @@ type ToolRegeneration struct {
 	ToolID EntityID  `json:"tool_id"` // ToolID indicates which tool has regenerated
 	Start  UnixMilli `json:"start"`   // Start timestamp in milliseconds
 	Stop   UnixMilli `json:"stop"`    // Stop timestamp in milliseconds
-	Cycles int64     `json:"cycles"`  // Cycles indicates the number cycles done before regeneration
 }
 
 func (tr *ToolRegeneration) Validate() *errors.ValidationError {
@@ -35,14 +34,13 @@ func (tr *ToolRegeneration) Clone() *ToolRegeneration {
 		ToolID: tr.ToolID,
 		Start:  tr.Start,
 		Stop:   tr.Stop,
-		Cycles: tr.Cycles,
 	}
 }
 
 func (tr *ToolRegeneration) String() string {
 	return fmt.Sprintf(
-		"ToolRegeneration{ID:%d, ToolID:%d, Cycles:%d, Start:%d, Stop:%d}",
-		tr.ID, tr.ToolID, tr.Cycles, tr.Start, tr.Stop,
+		"ToolRegeneration{ID:%d, ToolID:%d, Start:%d, Stop:%d}",
+		tr.ID, tr.ToolID, tr.Start, tr.Stop,
 	)
 }
 

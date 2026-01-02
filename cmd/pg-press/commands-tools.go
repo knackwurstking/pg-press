@@ -281,16 +281,15 @@ func listRegenerationsCommand() cli.Command {
 					}
 
 					w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-					fmt.Fprintln(w, "ID\tTOOL ID\tSTART\tSTOP\tCYCLES")
-					fmt.Fprintln(w, "--\t-------\t-----\t----\t------")
+					fmt.Fprintln(w, "ID\tTOOL ID\tSTART\tSTOP")
+					fmt.Fprintln(w, "--\t-------\t-----\t----")
 
 					for _, regen := range regenerations {
-						fmt.Fprintf(w, "%d\t%d\t%s\t%s\t%d\n",
+						fmt.Fprintf(w, "%d\t%d\t%s\t%s\n",
 							regen.ID,
 							regen.ToolID,
 							regen.Start.FormatDate(),
 							regen.Stop.FormatDate(),
-							regen.Cycles,
 						)
 					}
 					w.Flush()

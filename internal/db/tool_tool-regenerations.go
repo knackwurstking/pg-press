@@ -20,41 +20,40 @@ const (
 			tool_id INTEGER NOT NULL,
 			start 	INTEGER NOT NULL,
 			stop 	INTEGER NOT NULL DEFAULT 0,
-			cycles 	INTEGER NOT NULL,
 
 			PRIMARY KEY("id" AUTOINCREMENT)
 		);
 	`
 
 	sqlAddToolRegeneration string = `
-		INSERT INTO tool_regenerations (tool_id, start, stop, cycles)
-		VALUES (:tool_id, :start, :stop, :cycles);
+		INSERT INTO tool_regenerations (tool_id, start, stop)
+		VALUES (:tool_id, :start, :stop);
 	`
 
 	sqlUpdateToolRegeneration string = `
 		UPDATE tool_regenerations
-		SET tool_id = :tool_id,
+		SET 
+			tool_id = :tool_id,
 			start = :start,
 			stop = :stop,
-			cycles = :cycles
 		WHERE id = :id;
 	`
 
 	sqlGetToolRegeneration string = `
-		SELECT id, tool_id, start, stop, cycles
+		SELECT id, tool_id, start, stop 
 		FROM tool_regenerations
 		WHERE id = :id;
 	`
 
 	sqlListToolRegenerations string = `
-		SELECT id, tool_id, start, stop, cycles
+		SELECT id, tool_id, start, stop 
 		FROM tool_regenerations
 		ORDER BY start DESC
 	;
 	`
 
 	sqlListToolRegenerationsByTool string = `
-		SELECT id, tool_id, start, stop, cycles
+		SELECT id, tool_id, start, stop 
 		FROM tool_regenerations
 		WHERE tool_id = :tool_id;
 	`
@@ -77,13 +76,13 @@ const (
 	`
 
 	sqlStartToolRegeneration string = `
-		INSERT INTO tool_regenerations (tool_id, start, cycles)
-		VALUES (:tool_id, :start, :cycles);
+		INSERT INTO tool_regenerations (tool_id, start)
+		VALUES (:tool_id, :start);
 	`
 
 	sqlStopToolRegeneration string = `
 		UPDATE tool_regenerations
-		SET stop = :stop, cycles = :cycles
+		SET stop = :stop
 		WHERE tool_id = :tool_id AND stop = 0;
 	`
 )
@@ -101,7 +100,6 @@ func AddToolRegeneration(tr *shared.ToolRegeneration) *errors.MasterError {
 		sql.Named("tool_id", tr.ToolID),
 		sql.Named("start", tr.Start),
 		sql.Named("stop", tr.Stop),
-		sql.Named("cycles", tr.Cycles),
 	)
 	if err != nil {
 		return errors.NewMasterError(err)
@@ -119,7 +117,6 @@ func UpdateToolRegeneration(tr *shared.ToolRegeneration) *errors.MasterError {
 		sql.Named("tool_id", tr.ToolID),
 		sql.Named("start", tr.Start),
 		sql.Named("stop", tr.Stop),
-		sql.Named("cycles", tr.Cycles),
 	)
 	if err != nil {
 		return errors.NewMasterError(err)
@@ -217,7 +214,6 @@ func StartToolRegeneration(toolID shared.EntityID) *errors.MasterError {
 	_, err := dbTool.Exec(sqlStartToolRegeneration,
 		sql.Named("tool_id", tool.ID),
 		sql.Named("start", shared.NewUnixMilli(time.Now())),
-		sql.Named("cycles", tool.Cycles),
 	)
 	if err != nil {
 		return errors.NewMasterError(err)
@@ -235,7 +231,6 @@ func StopToolRegeneration(toolID shared.EntityID) *errors.MasterError {
 	_, err := dbTool.Exec(sqlStopToolRegeneration,
 		sql.Named("tool_id", toolID),
 		sql.Named("stop", shared.NewUnixMilli(time.Now())),
-		sql.Named("cycles", 0), // Reset cycles to zero after regeneration
 	)
 	if err != nil {
 		return errors.NewMasterError(err)
@@ -271,7 +266,6 @@ func ScanToolRegeneration(row Scannable) (*shared.ToolRegeneration, *errors.Mast
 		&tr.ToolID,
 		&tr.Start,
 		&tr.Stop,
-		&tr.Cycles,
 	)
 	if err != nil {
 		return nil, errors.NewMasterError(err)

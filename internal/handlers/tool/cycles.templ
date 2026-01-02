@@ -116,14 +116,13 @@ templ regenerations(p CyclesSectionContentProps) {
 						<tr>
 							<th name="start">Start</th>
 							<th name="stop">Stop</th>
-							<th name="cycles">Zyklen</th>
 							<th name="actions"></th>
 						</tr>
 					</thead>
 					<tbody>
 						if len(p.Regenerations) == 0 {
 							<tr>
-								<td colspan="4" class="text-center">
+								<td colspan="3" class="text-center">
 									<i><small>Keine Regenerationen verzeichnet</small></i>
 								</td>
 							</tr>
@@ -146,9 +145,6 @@ templ regenerationsTableRow(r *shared.ToolRegeneration, u *shared.User) {
 		</td>
 		<td>
 			<span>{ r.Stop.FormatDate() }</span>
-		</td>
-		<td>
-			<span>{ r.Cycles }</span>
 		</td>
 		<td>
 			@components.TableActions(components.TableActionsOptions{

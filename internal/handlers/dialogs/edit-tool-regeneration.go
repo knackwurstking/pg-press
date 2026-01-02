@@ -6,6 +6,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 
 	"github.com/labstack/echo/v4"
 )
@@ -52,7 +53,18 @@ func PostToolRegeneration(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	// TODO: Continue here... Update database, hx trigger "reload-tool-regenerations"
+	merr = db.AddToolRegeneration(&shared.ToolRegeneration{
+		ToolID: shared.EntityID(id),
+		Start:  formData.Start,
+		Stop:   formData.Stop,
+	})
+	if merr != nil {
+		return merr.Echo()
+	}
+
+	urlb.SetHXTrigger(c, "reload-tool-regenerations")
+
+	return nil
 }
 
 func PutToolRegeneration(c echo.Context) *echo.HTTPError {
@@ -61,7 +73,24 @@ func PutToolRegeneration(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	// TODO: ...
+	formData, merr := GetEditToolRegenerationForm(c)
+	if merr != nil {
+		return merr.Echo()
+	}
+
+	merr = db.UpdateToolRegeneration(&shared.ToolRegeneration{
+		ID:     shared.EntityID(id),
+		ToolID: shared.EntityID(id),
+		Start:  formData.Start,
+		Stop:   formData.Stop,
+	})
+	if merr != nil {
+		return merr.Echo()
+	}
+
+	urlb.SetHXTrigger(c, "reload-tool-regenerations")
+
+	return nil
 }
 
 type EditToolRegenerationForm struct {
