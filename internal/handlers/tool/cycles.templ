@@ -91,7 +91,12 @@ templ regenerations(p CyclesSectionContentProps) {
 		@components.SectionTitle(components.SubTitle, "Regenerationen") {
 			<button
 				class="icon secondary small"
-				hx-get={ urlb.UrlDialogToolRegeneration(p.Tool.ID) }
+				hx-get={ urlb.BuildURLWithParams(
+                    "/dialog/edit-tool-regeneration",
+                    map[string]string{
+                        "tool_id": p.Tool.ID.String(),
+                    },
+                ) }
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"

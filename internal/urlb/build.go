@@ -296,12 +296,6 @@ func UrlDialogEditCycle(
 	return url
 }
 
-func UrlDialogToolRegeneration(trID shared.EntityID) templ.SafeURL {
-	return BuildURLWithParams("/dialog/edit-regeneration", map[string]string{
-		"id": fmt.Sprintf("%d", trID),
-	})
-}
-
 // UrlDialogs constructs dialog URLs
 func UrlDialogs() (url struct {
 	EditTool              func(toolID shared.EntityID) templ.SafeURL

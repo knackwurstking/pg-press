@@ -5,13 +5,18 @@ import (
 
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"github.com/knackwurstking/ui/ui-templ"
+	ui "github.com/knackwurstking/ui/ui-templ"
 )
 
-templ NewToolRegenerationDialog(trID shared.EntityID) {
+templ NewToolRegenerationDialog(toolID shared.EntityID) {
 	@ui.Dialog(ui.DialogOptions{
-		Method:           http.MethodPost,
-		Href:             urlb.UrlDialogToolRegeneration(trID),
+		Method: http.MethodPost,
+		Href: urlb.BuildURLWithParams(
+			"/dialog/edit-tool-regeneration",
+			map[string]string{
+				"tool_id": toolID.String(),
+			},
+		),
 		ID:               "tool-regeneration-dialog",
 		SubmitButtonText: "Erstellen",
 	}) {
@@ -21,8 +26,13 @@ templ NewToolRegenerationDialog(trID shared.EntityID) {
 
 templ EditToolRegenerationDialog(tr *shared.ToolRegeneration) {
 	@ui.Dialog(ui.DialogOptions{
-		Method:           http.MethodPut,
-		Href:             urlb.UrlDialogToolRegeneration(tr.ID),
+		Method: http.MethodPut,
+		Href: urlb.BuildURLWithParams(
+			"/dialog/edit-tool-regeneration",
+			map[string]string{
+				"id": tr.ID.String(),
+			},
+		),
 		ID:               "tool-regeneration-dialog",
 		SubmitButtonText: "Bearbeiten",
 	}) {
