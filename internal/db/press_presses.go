@@ -18,13 +18,22 @@ const (
 			id 					INTEGER NOT NULL,
 			slot_up 			INTEGER NOT NULL,
 			slot_down 			INTEGER NOT NULL,
-			last_regeneration 	INTEGER NOT NULL,
-			start_cycles 		INTEGER NOT NULL,
-			cycles 				INTEGER NOT NULL,
+			cycles_offset 		INTEGER NOT NULL,
 			type 				TEXT NOT NULL,
 
 			PRIMARY KEY("id")
 		);
+	`
+
+	sqlGetPress string = `
+		SELECT
+			id,
+			slot_up,
+			slot_down,
+			cycles_offset,
+			type
+		FROM presses
+		WHERE id = :id
 	`
 
 	sqlGetPressNumberForTool string = `
@@ -47,6 +56,10 @@ const (
 // -----------------------------------------------------------------------------
 // Press Functions
 // -----------------------------------------------------------------------------
+
+func GetPress(id shared.EntityID) (*shared.Press, *errors.MasterError) {
+	return ScanPress(dbPress.QueryRow(sqlGetPress, sql.Named("id", id)))
+}
 
 func GetPressNumberForTool(toolID shared.EntityID) (shared.PressNumber, *errors.MasterError) {
 	var pressNumber shared.PressNumber = -1
@@ -147,9 +160,7 @@ func ScanPress(row Scannable) (press *shared.Press, merr *errors.MasterError) {
 		&press.ID,
 		&press.SlotUp,
 		&press.SlotDown,
-		&press.LastRegeneration,
-		&press.StartCycles,
-		&press.Cycles,
+		&press.CyclesOffset,
 		&press.Type,
 	)
 	if err != nil {

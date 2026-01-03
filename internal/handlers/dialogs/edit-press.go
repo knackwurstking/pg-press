@@ -3,6 +3,7 @@ package dialogs
 import (
 	"strconv"
 
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/labstack/echo/v4"
@@ -15,20 +16,33 @@ func GetEditPress(c echo.Context) *echo.HTTPError {
 	}
 
 	if id > 0 {
-		// TODO: Render edit press dialog
+		press, merr := db.GetPress(shared.EntityID(id))
+		if merr != nil {
+			return merr.Echo()
+		}
 
+		t := EditPressDialog(press)
+		err := t.Render(c.Request().Context(), c.Response())
+		if err != nil {
+			return errors.NewRenderError(err, "EditPressDialog")
+		}
 		return nil
 	}
 
-	// TODO: Render new press dialog
-
+	t := NewPressDialog()
+	err := t.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "NewPressDialog")
+	}
 	return nil
 }
 
 func PostPress(c echo.Context) *echo.HTTPError {
+	// TODO: ...
 }
 
 func PutPress(c echo.Context) *echo.HTTPError {
+	// TODO: ...
 }
 
 type EditPressFormData struct {
