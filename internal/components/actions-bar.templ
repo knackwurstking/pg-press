@@ -1,7 +1,18 @@
 package components
 
-templ ActionBar() {
-	<div class="flex flex-row gap justify-end p">
+templ ActionBar(attr templ.Attributes) {
+	{{
+		if attr == nil {
+			attr = templ.Attributes{}
+		}
+
+		if c, ok := attr["class"]; ok {
+			attr["class"] = "flex flex-row gap justify-end p " + c.(string)
+		} else {
+			attr["class"] = "flex flex-row gap justify-end p"
+		}
+	}}
+	<div { attr... }>
 		{ children... }
 	</div>
 }

@@ -22,7 +22,7 @@ templ Page(p *PageProps) {
 		},
 	) {
 		<main class="container fluid flex flex-col gap">
-			@components.ActionBar() {
+			@components.ActionBar(nil) {
 				@actionBarContent(p)
 			}
 			@components.Section(templ.Attributes{

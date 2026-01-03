@@ -11,14 +11,26 @@ type SectionPressProps struct {
 	PressUtilizations map[shared.PressNumber]*shared.PressUtilization
 }
 
-// TODO: The trigger "pageLoaded from:body" needs to be removed and replaced with something more specific.
 templ SectionPress(p SectionPressProps) {
 	<span
 		hx-get={ urlb.UrlTools(0, false).SectionPress }
 		hx-trigger="pageLoaded from:body"
 		hx-target="#tab-content"
 	></span>
-	<ul class="flex flex-col gap m-0 p-0" style="list-style: none;">
+	@components.ActionBar(nil) {
+		<button
+			hx-get={ urlb.BuildURLWithParams(
+                "/dialog/edit-press", map[string]string{},
+            ) }
+			hx-trigger="click"
+			hx-target="body"
+			hx-swap="beforeend"
+			class="flex gap small"
+		>
+			<i class="bi bi-plus-lg"></i> Presse hinzufügen
+		</button>
+	}
+	<div id="press-container" class="flex flex-col gap">
 		for pn, u := range p.PressUtilizations {
 			if u == nil {
 				@listPressItem(listPressItemProps{
@@ -33,7 +45,7 @@ templ SectionPress(p SectionPressProps) {
 				})
 			}
 		}
-	</ul>
+	</div>
 }
 
 type listPressItemProps struct {
