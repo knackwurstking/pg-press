@@ -2,6 +2,7 @@ package shared
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/knackwurstking/pg-press/internal/errors"
 )
@@ -20,11 +21,8 @@ type Press struct {
 }
 
 func (p *Press) Validate() *errors.ValidationError {
-	if p.SlotUp <= 0 {
-		return errors.NewValidationError("upper tool id cannot be lower or equal 0")
-	}
-	if p.SlotDown <= 0 {
-		return errors.NewValidationError("lower tool id cannot be lower or equal 0")
+	if !slices.Contains([]MachineType{MachineTypeSACMI, MachineTypeSITI}, p.Type) {
+		return errors.NewValidationError("invalid press type: %s", p.Type)
 	}
 
 	return nil
