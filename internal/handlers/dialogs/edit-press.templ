@@ -60,8 +60,8 @@ templ PressContent(press *shared.Press) {
 					vlaue=""
 					disabled
 					selected?={ !slices.Contains(
-                    []shared.MachineType{"SACMI", "SITI"}, press.Type,
-                ) }
+                        []shared.MachineType{"SACMI", "SITI"}, press.Type,
+                    ) }
 				>
 					Bitte Wählen
 				</option>
