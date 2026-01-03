@@ -14,6 +14,7 @@ templ NewPressDialog() {
 		Href:             urlb.BuildURL("/dialog/edit-press"),
 		ID:               "notes-dialog",
 		SubmitButtonText: "Erstellen",
+		FormClasses:      templ.CSSClasses{"container"},
 	}) {
 		@PressContent(nil)
 	}
@@ -29,6 +30,7 @@ templ EditPressDialog(press *shared.Press) {
 		),
 		ID:               "notes-edit-dialog",
 		SubmitButtonText: "Aktualisieren",
+		FormClasses:      templ.CSSClasses{"container"},
 	}) {
 		@PressContent(press)
 	}
@@ -52,7 +54,7 @@ templ PressContent(press *shared.Press) {
 			/>
 		</label>
 		<label for="machine_type" class="flex flex-col">
-			<span>Maschine Typ</span>
+			<span>Maschinen Typ</span>
 			<select id="machine_type" name="machine_type" required>
 				<option
 					vlaue=""
@@ -61,7 +63,7 @@ templ PressContent(press *shared.Press) {
                     []shared.MachineType{"SACMI", "SITI"}, press.Type,
                 ) }
 				>
-					Bitte wählen
+					Bitte Wählen
 				</option>
 				<option value="SACMI" selected?={ press.Type == "SACMI" }>
 					SACMI
