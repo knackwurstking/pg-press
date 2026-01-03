@@ -1,0 +1,30 @@
+package dialogs
+
+import (
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/ui/ui-templ"
+	"net/http"
+)
+
+templ NewPressDialog(linked string, user *shared.User) {
+	@ui.Dialog(ui.DialogOptions{
+		Method:           http.MethodPost,
+		Href:             urlb.UrlDialogs().EditNote(0, linked),
+		ID:               "notes-dialog",
+		SubmitButtonText: "Erstellen",
+	}) {
+		// TODO: ...
+	}
+}
+
+templ EditPressDialog(note *shared.Note, linked string, user *shared.User) {
+	@ui.Dialog(ui.DialogOptions{
+		Method:           http.MethodPut,
+		Href:             urlb.UrlDialogs().EditNote(note.ID, linked),
+		ID:               "notes-edit-dialog",
+		SubmitButtonText: "Aktualisieren",
+	}) {
+		// TODO: ...
+	}
+}
