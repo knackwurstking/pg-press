@@ -48,7 +48,7 @@ func PostToolRegeneration(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	formData, merr := GetEditToolRegenerationForm(c)
+	formData, merr := GetEditToolRegenerationFormData(c)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -73,7 +73,7 @@ func PutToolRegeneration(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	formData, merr := GetEditToolRegenerationForm(c)
+	formData, merr := GetEditToolRegenerationFormData(c)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -93,12 +93,12 @@ func PutToolRegeneration(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-type EditToolRegenerationForm struct {
+type EditToolRegenerationFormData struct {
 	Start shared.UnixMilli
 	Stop  shared.UnixMilli
 }
 
-func GetEditToolRegenerationForm(c echo.Context) (data EditToolRegenerationForm, merr *errors.MasterError) {
+func GetEditToolRegenerationFormData(c echo.Context) (data EditToolRegenerationFormData, merr *errors.MasterError) {
 	// Parse start and stop dates from HTML input fields (type "date")
 	vStart := c.FormValue("start")
 	vStop := c.FormValue("stop")
