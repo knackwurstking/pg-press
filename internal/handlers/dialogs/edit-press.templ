@@ -5,26 +5,69 @@ import (
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/knackwurstking/ui/ui-templ"
 	"net/http"
+	"slices"
 )
 
-templ NewPressDialog(linked string, user *shared.User) {
+templ NewPressDialog() {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPost,
-		Href:             urlb.UrlDialogs().EditNote(0, linked),
+		Href:             urlb.BuildURL("/dialog/edit-press"),
 		ID:               "notes-dialog",
 		SubmitButtonText: "Erstellen",
 	}) {
-		// TODO: ...
+		@PressContent(nil)
 	}
 }
 
-templ EditPressDialog(note *shared.Note, linked string, user *shared.User) {
+templ EditPressDialog(press *shared.Press) {
 	@ui.Dialog(ui.DialogOptions{
-		Method:           http.MethodPut,
-		Href:             urlb.UrlDialogs().EditNote(note.ID, linked),
+		Method: http.MethodPut,
+		Href: urlb.BuildURLWithParams(
+			"/dialog/edit-press", map[string]string{
+				"id": press.ID.String(),
+			},
+		),
 		ID:               "notes-edit-dialog",
 		SubmitButtonText: "Aktualisieren",
 	}) {
-		// TODO: ...
+		@PressContent(press)
 	}
+}
+
+templ PressContent(press *shared.Press) {
+	{{
+		if press == nil {
+			press = &shared.Press{}
+		}
+	}}
+	<label for="press_number" class="flex flex-col">
+		<span>Pressen Number</span>
+		<input
+			type="number"
+			name="press_number"
+			step="1"
+			value={ press.ID }
+			required
+		/>
+	</label>
+	<label for="machine_type" class="flex flex-col">
+		Maschine Typ
+		<select id="machine_type" name="machine_type" required>
+			<option
+				vlaue=""
+				disabled
+				selected?={ !slices.Contains(
+                    []shared.MachineType{"SACMI", "SITI"}, press.Type,
+                ) }
+			>
+				Bitte wählen
+			</option>
+			<option value="SACMI" selected?={ press.Type == "SACMI" }>
+				SACMI
+			</option>
+			<option value="SITI" selected?={ press.Type == "SITI" }>
+				SITI
+			</option>
+		</select>
+	</label>
 }
