@@ -7,7 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func HTMXGetToolTotalCycles(c echo.Context) *echo.HTTPError {
+func GetToolTotalCycles(c echo.Context) *echo.HTTPError {
 	id, merr := shared.ParseParamInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()

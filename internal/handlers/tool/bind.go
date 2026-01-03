@@ -11,7 +11,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func HTMXPatchToolBinding(c echo.Context) *echo.HTTPError {
+func ToolBinding(c echo.Context) *echo.HTTPError {
 	id, merr := shared.ParseParamInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()

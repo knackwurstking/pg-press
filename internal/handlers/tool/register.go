@@ -29,18 +29,18 @@ func Register(e *echo.Echo, path string) {
 		ui.NewEchoRoute(http.MethodPut, path+"/:id/regeneration", Regeneration),
 
 		// Section loading
-		ui.NewEchoRoute(http.MethodGet, path+"/:id/notes", HTMXGetToolNotes),
-		ui.NewEchoRoute(http.MethodGet, path+"/:id/metal-sheets", HTMXGetToolMetalSheets),
+		ui.NewEchoRoute(http.MethodGet, path+"/:id/notes", GetToolNotes),
+		ui.NewEchoRoute(http.MethodGet, path+"/:id/metal-sheets", GetToolMetalSheets),
 
 		// Cycles table rows
 		ui.NewEchoRoute(http.MethodGet, path+"/:id/cycles", GetCyclesSectionContent),
-		ui.NewEchoRoute(http.MethodGet, path+"/:id/total-cycles", HTMXGetToolTotalCycles),
+		ui.NewEchoRoute(http.MethodGet, path+"/:id/total-cycles", GetToolTotalCycles),
 
 		// Update tools binding data
-		ui.NewEchoRoute(http.MethodPatch, path+"/:id/bind", HTMXPatchToolBinding),
-		ui.NewEchoRoute(http.MethodPatch, path+"/:id/unbind", HTMXPatchToolUnBinding),
+		ui.NewEchoRoute(http.MethodPatch, path+"/:id/bind", ToolBinding),
+		ui.NewEchoRoute(http.MethodPatch, path+"/:id/unbind", ToolUnBinding),
 
 		// Delete a cycle table entry
-		ui.NewEchoRoute(http.MethodDelete, path+"/cycle/delete", HTMXDeleteToolCycle),
+		ui.NewEchoRoute(http.MethodDelete, path+"/cycle/delete", DeleteToolCycle),
 	})
 }

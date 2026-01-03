@@ -11,7 +11,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func HTMXGetToolMetalSheets(c echo.Context) *echo.HTTPError {
+func GetToolMetalSheets(c echo.Context) *echo.HTTPError {
 	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
