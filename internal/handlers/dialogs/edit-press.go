@@ -6,6 +6,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/labstack/echo/v4"
 )
 
@@ -52,6 +53,8 @@ func PostPress(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
+	urlb.SetHXTrigger(c, "tools-tab")
+
 	return nil
 }
 
@@ -74,6 +77,9 @@ func PutPress(c echo.Context) *echo.HTTPError {
 	if merr != nil {
 		return merr.Echo()
 	}
+
+	urlb.SetHXTrigger(c, "tools-tab")
+
 	return nil
 }
 

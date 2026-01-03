@@ -10,7 +10,7 @@ import (
 )
 
 // HX Triggers:
-// - loadTabContent: Custom trigger to load tab content when a tab is clicked.
+// - load-tab-content: Custom trigger to load tab content when a tab is clicked.
 //   This trigger targets the `#tab-content` div and loads the corresponding section content.
 
 type PageProps struct {
@@ -42,7 +42,7 @@ templ Page(p PageProps) {
 						data-index="0"
 						class="tab secondary ghost"
 						hx-get={ urlb.UrlTools(0, false).AdminOverlappingTools }
-						hx-trigger="loadTabContent"
+						hx-trigger="load-tab-content"
 						hx-target="#tab-content"
 						onclick="toggleTab(event)"
 					>
@@ -54,7 +54,7 @@ templ Page(p PageProps) {
 					data-index="1"
 					class="tab secondary ghost"
 					hx-get={ urlb.UrlTools(0, false).SectionPress }
-					hx-trigger="loadTabContent"
+					hx-trigger="load-tab-content"
 					hx-target="#tab-content"
 					onclick="toggleTab(event)"
 				>
@@ -65,7 +65,7 @@ templ Page(p PageProps) {
 					data-index="2"
 					class="tab secondary ghost"
 					hx-get={ urlb.UrlTools(0, false).SectionTools }
-					hx-trigger="loadTabContent"
+					hx-trigger="load-tab-content"
 					hx-target="#tab-content"
 					onclick="toggleTab(event)"
 				>
