@@ -9,6 +9,20 @@ import (
 )
 
 func GetEditPress(c echo.Context) *echo.HTTPError {
+	id, merr := shared.ParseQueryInt64(c, "id")
+	if merr != nil && !merr.IsNotFoundError() {
+		return merr.Echo()
+	}
+
+	if id > 0 {
+		// TODO: Render edit press dialog
+
+		return nil
+	}
+
+	// TODO: Render new press dialog
+
+	return nil
 }
 
 func PostPress(c echo.Context) *echo.HTTPError {
