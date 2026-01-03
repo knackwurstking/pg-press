@@ -45,8 +45,8 @@ func PostPress(c echo.Context) *echo.HTTPError {
 
 	merr = db.AddPress(&shared.Press{
 		ID:           data.PressNumber,
-		CyclesOffset: data.CyclesOffset,
 		Type:         data.MachineType,
+		CyclesOffset: data.CyclesOffset,
 	})
 	if merr != nil {
 		return merr.Echo()
@@ -56,7 +56,25 @@ func PostPress(c echo.Context) *echo.HTTPError {
 }
 
 func PutPress(c echo.Context) *echo.HTTPError {
-	// TODO: ...
+	id, merr := shared.ParseQueryInt64(c, "id")
+	if merr != nil {
+		return merr.Echo()
+	}
+
+	data, merr := GetEditPressFormData(c)
+	if merr != nil {
+		return merr.Echo()
+	}
+
+	merr = db.UpdatePress(&shared.Press{
+		ID:           shared.PressNumber(id),
+		Type:         data.MachineType,
+		CyclesOffset: data.CyclesOffset,
+	})
+	if merr != nil {
+		return merr.Echo()
+	}
+	return nil
 }
 
 type EditPressFormData struct {
