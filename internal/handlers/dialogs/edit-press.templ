@@ -59,9 +59,9 @@ templ PressContent(press *shared.Press) {
 				<option
 					vlaue=""
 					disabled
-					selected?={ !slices.Contains(
-                        []shared.MachineType{"SACMI", "SITI"}, press.Type,
-                    ) }
+					selected?={ !slices.Contains( 
+						[]shared.MachineType{"SACMI", "SITI"}, press.Type,
+					) }
 				>
 					Bitte Wählen
 				</option>
