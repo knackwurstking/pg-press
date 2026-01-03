@@ -41,7 +41,15 @@ const (
 		)
 	`
 
-	// TODO: sqlUpdatePress
+	sqlUpdatePress string = `
+		UPDATE presses 
+		SET
+			slot_up = :slot_up,
+			slot_down = :slot_down,
+			cycles_offset = :cycles_offset,
+			type = :type
+		WHERE id = :id
+	`
 
 	sqlGetPress string = `
 		SELECT
@@ -93,7 +101,23 @@ func AddPress(press *shared.Press) *errors.MasterError {
 	return nil
 }
 
-// TODO: UpdatePress
+func UpdatePress(press *shared.Press) *errors.MasterError {
+	if verr := press.Validate(); verr != nil {
+		return verr.MasterError()
+	}
+
+	_, err := dbPress.Exec(sqlUpdatePress,
+		sql.Named("id", press.ID),
+		sql.Named("slot_up", press.SlotUp),
+		sql.Named("slot_down", press.SlotDown),
+		sql.Named("cycles_offset", press.CyclesOffset),
+		sql.Named("type", press.Type),
+	)
+	if err != nil {
+		return errors.NewMasterError(err)
+	}
+	return nil
+}
 
 func GetPress(id shared.EntityID) (*shared.Press, *errors.MasterError) {
 	return ScanPress(dbPress.QueryRow(sqlGetPress, sql.Named("id", id)))
