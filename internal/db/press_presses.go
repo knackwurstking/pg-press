@@ -41,6 +41,8 @@ const (
 		)
 	`
 
+	// TODO: sqlUpdatePress
+
 	sqlGetPress string = `
 		SELECT
 			id,
@@ -90,6 +92,8 @@ func AddPress(press *shared.Press) *errors.MasterError {
 	}
 	return nil
 }
+
+// TODO: UpdatePress
 
 func GetPress(id shared.EntityID) (*shared.Press, *errors.MasterError) {
 	return ScanPress(dbPress.QueryRow(sqlGetPress, sql.Named("id", id)))
