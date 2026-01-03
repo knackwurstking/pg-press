@@ -3,45 +3,50 @@ package press
 import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/components"
-	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/utils"
 )
 
-templ Page(press models.PressNumber, user *models.User) {
-	{{ title := fmt.Sprintf("Presse %d", press) }}
+type PageProps struct {
+	PressNumber shared.PressNumber
+	User        *shared.User
+}
+
+templ Page(p PageProps) {
+	{{ title := fmt.Sprintf("Presse %d", p.PressNumber) }}
 	@components.Layout(
-		components.LayoutOptions{
+		components.LayoutProps{
 			PageTitle:   title,
 			AppBarTitle: title,
 			NavContent:  components.StandardNavContent(),
 		},
 	) {
 		<main class="container fluid flex flex-col gap-lg py">
-			@sectionActions(press, user)
-			@sectionNotes(press)
-			@sectionActiveTools(press)
-			@sectionMetalSheets(press)
-			@sectionRegenerations(press)
-			@sectionCycles(press)
+			@sectionActions(p)
+			@sectionNotes(p)
+			@sectionActiveTools(p)
+			@sectionMetalSheets(p)
+			@sectionRegenerations(p)
+			@sectionCycles(p)
 		</main>
 	}
 }
 
 // Actions section - contains buttons for umbau and regeneration
-templ sectionActions(press models.PressNumber, user *models.User) {
+templ sectionActions(p PageProps) {
 	@components.ActionBar() {
 		<a
 			role="button"
 			class="primary"
-			href={ utils.UrlUmbau(press).Page }
+			href={ utils.UrlUmbau(p.PressNumber).Page }
 		>
 			Umbau
 		</a>
 		<a
 			role="button"
 			class="secondary"
-			href={ utils.UrlPressRegeneration(press, 0).Page }
-			disabled?={ !user.IsAdmin() }
+			href={ utils.UrlPressRegeneration(p.PressNumber, 0).Page }
+			disabled?={ !p.User.IsAdmin() }
 		>
 			Regeneration
 		</a>
@@ -49,7 +54,7 @@ templ sectionActions(press models.PressNumber, user *models.User) {
 }
 
 // Notes section - displays notes for the press
-templ sectionNotes(press models.PressNumber) {
+templ sectionNotes(p PageProps) {
 	@components.Section(templ.Attributes{
 		"id":    "notes-section",
 		"class": "mt",
@@ -59,7 +64,7 @@ templ sectionNotes(press models.PressNumber) {
 		</div>
 		<div
 			id="notes-content"
-			hx-get={ utils.UrlPress(press).Notes }
+			hx-get={ utils.UrlPress(p.PressNumber).Notes }
 			hx-trigger="load, pageLoaded from:body"
 			hx-on:htmx:response-error="alert('Fehler beim Laden der Notizen: ' + event.detail.xhr.responseText)"
 		>
@@ -69,7 +74,7 @@ templ sectionNotes(press models.PressNumber) {
 }
 
 // Active tools section - displays active tools on the press
-templ sectionActiveTools(press models.PressNumber) {
+templ sectionActiveTools(p PageProps) {
 	@components.Section(templ.Attributes{
 		"id":    "tool-state-section",
 		"class": "mt",
@@ -79,7 +84,7 @@ templ sectionActiveTools(press models.PressNumber) {
 		</div>
 		<div
 			id="active-tools-content"
-			hx-get={ utils.UrlPress(press).ActiveTools }
+			hx-get={ utils.UrlPress(p.PressNumber).ActiveTools }
 			hx-trigger="load, pageLoaded from:body"
 			hx-on:htmx:response-error="alert('Fehler beim Laden der Werkzeuge: ' + event.detail.xhr.responseText)"
 		>
@@ -89,7 +94,7 @@ templ sectionActiveTools(press models.PressNumber) {
 }
 
 // Metal sheets section - displays metal sheets for the press
-templ sectionMetalSheets(press models.PressNumber) {
+templ sectionMetalSheets(p PageProps) {
 	@components.Section(templ.Attributes{
 		"id": "metal-sheets-section",
 	}) {
@@ -98,7 +103,7 @@ templ sectionMetalSheets(press models.PressNumber) {
 		</div>
 		<div
 			id="metal-sheets-content"
-			hx-get={ utils.UrlPress(press).MetalSheets }
+			hx-get={ utils.UrlPress(p.PressNumber).MetalSheets }
 			hx-trigger="load, pageLoaded from:body"
 			hx-on:htmx:response-error="alert('Fehler beim Laden der Blech Listen: ' + event.detail.xhr.responseText)"
 		>
@@ -107,7 +112,7 @@ templ sectionMetalSheets(press models.PressNumber) {
 	}
 }
 
-templ sectionRegenerations(press models.PressNumber) {
+templ sectionRegenerations(p PageProps) {
 	@components.Section(templ.Attributes{
 		"id": "press-regenerations-section",
 	}) {
@@ -116,7 +121,7 @@ templ sectionRegenerations(press models.PressNumber) {
 		</div>
 		<div
 			id="press-regenerations-section-content"
-			hx-get={ utils.UrlPress(press).PressRegenerations }
+			hx-get={ utils.UrlPress(p.PressNumber).PressRegenerations }
 			hx-trigger="load, pageLoaded from:body"
 			hx-on::response-error="alert('Fehler beim laden: ' + event.detail.xhr.responseText)"
 		>
@@ -126,7 +131,7 @@ templ sectionRegenerations(press models.PressNumber) {
 }
 
 // Cycles section - displays press cycle history
-templ sectionCycles(press models.PressNumber) {
+templ sectionCycles(p PageProps) {
 	@components.Section(templ.Attributes{
 		"id":    "cycle-table-section",
 		"class": "mt",
@@ -141,13 +146,13 @@ templ sectionCycles(press models.PressNumber) {
 			<button
 				role="button"
 				class="info"
-				onclick={ components.DownloadCycleSummaryPDF(press) }
+				onclick={ components.DownloadCycleSummaryPDF(p.PressNumber) }
 			>Zusammenfassung (PDF)</button>
 		</div>
 		<div
 			id="cycles-content"
 			class="mt"
-			hx-get={ utils.UrlPress(press).Cycles }
+			hx-get={ utils.UrlPress(p.PressNumber).Cycles }
 			hx-trigger="load, pageLoaded from:body"
 			hx-on:htmx:response-error="alert('Fehler beim Laden des Pressennutzungsverlaufs: ' + event.detail.xhr.responseText)"
 		>

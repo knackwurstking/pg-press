@@ -16,33 +16,30 @@ import (
 )
 
 func GetPage(c echo.Context) *echo.HTTPError {
-	// TODO: ...
-}
-
-// -----------------------------------------------------------------------------
-// Old Press Page Handlers, Can be removed after migration
-// -----------------------------------------------------------------------------
-
-func (h *Handler) GetPressPage(c echo.Context) error {
 	user, merr := shared.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	press, merr := h.getPressNumberFromParam(c)
+	pressNumber, merr := shared.ParseParamInt8(c, "press")
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	// Render page
-	t := templates.Page(press, user)
+	t := Page(PageProps{
+		PressNumber: shared.PressNumber(pressNumber),
+		User:        user,
+	})
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return errors.NewRenderError(err, "Press Page")
+		return errors.NewRenderError(err, "Page")
 	}
-
 	return nil
 }
+
+// -----------------------------------------------------------------------------
+// Old Press Page Handlers, Can be removed after migration
+// -----------------------------------------------------------------------------
 
 func (h *Handler) HTMXGetPressActiveTools(c echo.Context) error {
 	press, merr := h.getPressNumberFromParam(c)
