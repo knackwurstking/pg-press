@@ -18,7 +18,6 @@ type SectionToolsProps struct {
 	NotesCount         int
 }
 
-// TODO: This needs to be triggered on page back
 templ SectionTools(p SectionToolsProps) {
 	<span
 		hx-get={ urlb.UrlTools(0, false).SectionTools }
@@ -26,13 +25,13 @@ templ SectionTools(p SectionToolsProps) {
 		hx-target="#tab-content"
 	></span>
 	@inputFilterTools(p.Tools)
-	<div class="all-tools p" style="margin-top: 3.5rem;">
-		@components.ActionBar() {
-			@actionBarContent()
-		}
-		<div id="lists-container" class="flex flex-col gap p-0">
-			@ToolsList(p)
-		</div>
+	@components.ActionBar(templ.Attributes{
+		"style": "margin-top: 3.5rem;",
+	}) {
+		@actionBarContent()
+	}
+	<div id="tools-container" class="flex flex-col gap">
+		@ToolsList(p)
 	</div>
 }
 

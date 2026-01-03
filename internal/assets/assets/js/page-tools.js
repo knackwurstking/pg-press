@@ -5,17 +5,17 @@
 // ----------------------------------------------------------------------------
 
 document.addEventListener("DOMContentLoaded", () => {
-	let lastActiveTab = parseInt(localStorage.getItem("last-active-tab"));
+    let lastActiveTab = parseInt(localStorage.getItem("last-active-tab"));
 
-	if (isNaN(lastActiveTab)) {
-		lastActiveTab = 1;
-	}
+    if (isNaN(lastActiveTab)) {
+        lastActiveTab = 1;
+    }
 
-	toggleTab({
-		currentTarget: document.querySelector(
-			`.tabs > .tab[data-index="${lastActiveTab}"]`,
-		),
-	});
+    toggleTab({
+        currentTarget: document.querySelector(
+            `.tabs > .tab[data-index="${lastActiveTab}"]`,
+        ),
+    });
 });
 
 // ----------------------------------------------------------------------------
@@ -23,81 +23,81 @@ document.addEventListener("DOMContentLoaded", () => {
 // ----------------------------------------------------------------------------
 
 // Query id constants
-const idListsContainer = "lists-container";
+const idListsContainer = "tools-container";
 const idFilterInput = "tools-filter";
 
 // Query class constants
 const classToolItem = "tool-item";
 
 function initFilterInputFromQuery() {
-	const urlParams = new URLSearchParams(window.location.search);
-	const query = urlParams.get("tools_filter");
-	if (query) document.querySelector(`#${idFilterInput}`).value = query;
+    const urlParams = new URLSearchParams(window.location.search);
+    const query = urlParams.get("tools_filter");
+    if (query) document.querySelector(`#${idFilterInput}`).value = query;
 }
 
 const detailsOpenStates = new Map();
 
 // TODO: Update details summary tools count to match filtered results
 function filterToolsList(event = null, skipHistory = false) {
-	const target = event
-		? event.currentTarget
-		: document.querySelector(`#${idFilterInput}`);
-	if (!target) return;
+    const target = event
+        ? event.currentTarget
+        : document.querySelector(`#${idFilterInput}`);
+    if (!target) return;
 
-	const query = target.value
-		.toLowerCase()
-		.split(" ")
-		.filter((v) => !!v);
-	const targets = document.querySelectorAll(`#${idListsContainer} .${classToolItem}`);
+    const query = target.value
+        .toLowerCase()
+        .split(" ")
+        .filter((v) => !!v);
+    const targets = document.querySelectorAll(`#${idListsContainer} .${classToolItem}`);
 
-	if (!skipHistory) {
-		updateUrlQueryParam(query);
-	}
+    if (!skipHistory) {
+        updateUrlQueryParam(query);
+    }
 
-	// Save details tag open states before filtering
-	if (query.length > 0 && detailsOpenStates.size === 0) {
-		document.querySelectorAll(`#${idListsContainer} details`).forEach((details) => {
-			detailsOpenStates.set(details, details.hasAttribute("open"));
-		});
-	}
+    // Save details tag open states before filtering
+    if (query.length > 0 && detailsOpenStates.size === 0) {
+        document.querySelectorAll(`#${idListsContainer} details`).forEach((details) => {
+            detailsOpenStates.set(details, details.hasAttribute("open"));
+        });
+    }
 
-	if (query.length === 0) {
-		targets.forEach((child) => {
-			child.style.display = "block";
-		});
+    if (query.length === 0) {
+        targets.forEach((child) => {
+            child.style.display = "block";
+        });
 
-		// Restore details tag open states
-		detailsOpenStates.forEach((isOpen, details) => {
-			if (isOpen) {
-				details.setAttribute("open", "true");
-			} else {
-				details.removeAttribute("open");
-			}
-		});
-		detailsOpenStates.clear();
+        // Restore details tag open states
+        detailsOpenStates.forEach((isOpen, details) => {
+            if (isOpen) {
+                details.setAttribute("open", "true");
+            } else {
+                details.removeAttribute("open");
+            }
+        });
+        detailsOpenStates.clear();
 
-		return;
-	}
+        return;
+    }
 
-	console.debug(`Filtering tools list with query: [${query}] [skipHistory=${skipHistory}]`);
+    console.debug(`Filtering tools list with query: [${query}] [skipHistory=${skipHistory}]`);
 
-	matchingDetails = new Set();
-	targets.forEach((child) => {
-		const match = query.every((value) => child.textContent.toLowerCase().includes(value));
-		if (match) {
-			child.style.display = "block";
-			// If this item is inside a details tag, ensure it's open, query details tag from stack
-			child.closest("details")?.setAttribute("open", "true");
-			return;
-		}
-		child.style.display = "none";
-	});
+    matchingDetails = new Set();
+    targets.forEach((child) => {
+        const match = query.every((value) => child.textContent.toLowerCase().includes(value));
+        if (match) {
+            child.style.display = "block";
+            // If this item is inside a details tag, ensure it's open, query details tag from stack
+            child.closest("details")?.setAttribute("open", "true");
+            return;
+        }
+        child.style.display = "none";
+    });
 }
 
 function updateUrlQueryParam(query) {
-	const urlParams = new URLSearchParams(window.location.search);
-	urlParams.set("tool_filter", query.join(" "));
-	window.history.replaceState({}, "", `?${urlParams.toString()}`);
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set("tool_filter", query.join(" "));
+    window.history.replaceState({}, "", `?${urlParams.toString()}`);
 }
 
 // ----------------------------------------------------------------------------
@@ -107,15 +107,15 @@ function updateUrlQueryParam(query) {
 let currentTab = null;
 
 function toggleTab(event) {
-	document
-		.querySelectorAll(".tabs .tab")
-		.forEach((tab) => tab.classList.remove("active"));
+    document
+        .querySelectorAll(".tabs .tab")
+        .forEach((tab) => tab.classList.remove("active"));
 
-	currentTab = event.currentTarget;
-	currentTab.classList.add("active");
-	currentTab.dispatchEvent(new Event("loadTabContent"));
+    currentTab = event.currentTarget;
+    currentTab.classList.add("active");
+    currentTab.dispatchEvent(new Event("loadTabContent"));
 
-	localStorage.setItem("last-active-tab", currentTab.dataset.index);
+    localStorage.setItem("last-active-tab", currentTab.dataset.index);
 }
 
 
