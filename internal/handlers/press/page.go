@@ -5,54 +5,23 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/knackwurstking/pg-press/internal/common"
-	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/press/templates"
 	"github.com/knackwurstking/pg-press/internal/pdf"
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/models"
 	"github.com/knackwurstking/pg-press/services"
-	"github.com/knackwurstking/pg-press/internal/shared"
-
-	ui "github.com/knackwurstking/ui/ui-templ"
 
 	"github.com/labstack/echo/v4"
 )
 
-type Handler struct {
-	registry *common.DB
+func GetPage(c echo.Context) *echo.HTTPError {
+	// TODO: ...
 }
 
-func NewHandler(r *common.DB) *Handler {
-	return &Handler{
-		registry: r,
-	}
-}
-
-func (h *Handler) RegisterRoutes(e *echo.Echo, path string) {
-	ui.RegisterEchoRoutes(e, env.ServerPathPrefix, []*ui.EchoRoute{
-		// Press page
-		ui.NewEchoRoute(http.MethodGet,
-			path+"/:press", h.GetPressPage),
-
-		// HTMX endpoints for press content
-		ui.NewEchoRoute(http.MethodGet,
-			path+"/:press/active-tools", h.HTMXGetPressActiveTools),
-		ui.NewEchoRoute(http.MethodGet,
-			path+"/:press/metal-sheets", h.HTMXGetPressMetalSheets),
-		ui.NewEchoRoute(http.MethodGet,
-			path+"/:press/cycles", h.HTMXGetPressCycles),
-		ui.NewEchoRoute(http.MethodGet,
-			path+"/:press/notes", h.HTMXGetPressNotes),
-		ui.NewEchoRoute(http.MethodGet,
-			path+"/:press/press-regenerations", h.HTMXGetPressRegenerations),
-
-		// PDF Handlers
-		ui.NewEchoRoute(http.MethodGet,
-			path+"/:press/cycle-summary-pdf", h.HTMXGetCycleSummaryPDF),
-	})
-}
+// -----------------------------------------------------------------------------
+// Old Press Page Handlers, Can be removed after migration
+// -----------------------------------------------------------------------------
 
 func (h *Handler) GetPressPage(c echo.Context) error {
 	user, merr := shared.GetUserFromContext(c)
