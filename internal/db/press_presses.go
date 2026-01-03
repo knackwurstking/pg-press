@@ -25,6 +25,22 @@ const (
 		);
 	`
 
+	sqlAddPress string = `
+		INSERT INTO presses (
+			id,
+			slot_up,
+			slot_down,
+			cycles_offset,
+			type
+		) VALUES (
+			:id,
+			:slot_up,
+			:slot_down,
+			:cycles_offset,
+			:type
+		)
+	`
+
 	sqlGetPress string = `
 		SELECT
 			id,
@@ -56,6 +72,24 @@ const (
 // -----------------------------------------------------------------------------
 // Press Functions
 // -----------------------------------------------------------------------------
+
+func AddPress(press *shared.Press) *errors.MasterError {
+	if verr := press.Validate(); verr != nil {
+		return verr.MasterError()
+	}
+
+	_, err := dbPress.Exec(sqlAddPress,
+		sql.Named("id", press.ID),
+		sql.Named("slot_up", press.SlotUp),
+		sql.Named("slot_down", press.SlotDown),
+		sql.Named("cycles_offset", press.CyclesOffset),
+		sql.Named("type", press.Type),
+	)
+	if err != nil {
+		return errors.NewMasterError(err)
+	}
+	return nil
+}
 
 func GetPress(id shared.EntityID) (*shared.Press, *errors.MasterError) {
 	return ScanPress(dbPress.QueryRow(sqlGetPress, sql.Named("id", id)))

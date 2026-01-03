@@ -40,34 +40,46 @@ templ PressContent(press *shared.Press) {
 			press = &shared.Press{}
 		}
 	}}
-	<label for="press_number" class="flex flex-col">
-		<span>Pressen Number</span>
-		<input
-			type="number"
-			name="press_number"
-			step="1"
-			value={ press.ID }
-			required
-		/>
-	</label>
-	<label for="machine_type" class="flex flex-col">
-		Maschine Typ
-		<select id="machine_type" name="machine_type" required>
-			<option
-				vlaue=""
-				disabled
-				selected?={ !slices.Contains(
+	<span class="flex flex-row gap justify-between">
+		<label for="press_number" class="flex flex-col">
+			<span>Pressen Number</span>
+			<input
+				type="number"
+				name="press_number"
+				step="1"
+				value={ press.ID }
+				required
+			/>
+		</label>
+		<label for="machine_type" class="flex flex-col">
+			<span>Maschine Typ</span>
+			<select id="machine_type" name="machine_type" required>
+				<option
+					vlaue=""
+					disabled
+					selected?={ !slices.Contains(
                     []shared.MachineType{"SACMI", "SITI"}, press.Type,
                 ) }
-			>
-				Bitte wählen
-			</option>
-			<option value="SACMI" selected?={ press.Type == "SACMI" }>
-				SACMI
-			</option>
-			<option value="SITI" selected?={ press.Type == "SITI" }>
-				SITI
-			</option>
-		</select>
+				>
+					Bitte wählen
+				</option>
+				<option value="SACMI" selected?={ press.Type == "SACMI" }>
+					SACMI
+				</option>
+				<option value="SITI" selected?={ press.Type == "SITI" }>
+					SITI
+				</option>
+			</select>
+		</label>
+	</span>
+	<label for="cycles_offset" class="flex flex-col">
+		<span>Zyklen Offset</span>
+		<input
+			id="cycles_offset"
+			name="cycles_offset"
+			type="number"
+			step="1"
+			value={ press.CyclesOffset }
+		/>
 	</label>
 }
