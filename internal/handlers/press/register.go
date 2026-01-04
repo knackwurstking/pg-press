@@ -19,7 +19,7 @@ func Register(e *echo.Echo, path string) {
 			// HTMX endpoints for press content
 			ui.NewEchoRoute(http.MethodGet, path+"/:press/active-tools", GetActiveTools),
 			ui.NewEchoRoute(http.MethodGet, path+"/:press/metal-sheets", GetPressMetalSheets),
-			ui.NewEchoRoute(http.MethodGet, path+"/:press/cycles", GetPressCycles),
+			ui.NewEchoRoute(http.MethodGet, path+"/:press/cycles", GetCycles),
 			ui.NewEchoRoute(http.MethodGet, path+"/:press/notes", GetPressNotes),
 			ui.NewEchoRoute(http.MethodGet, path+"/:press/press-regenerations", GetPressRegenerations),
 

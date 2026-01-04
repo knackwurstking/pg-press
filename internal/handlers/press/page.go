@@ -41,45 +41,7 @@ func GetPage(c echo.Context) *echo.HTTPError {
 // Old Press Page Handlers, Can be removed after migration
 // -----------------------------------------------------------------------------
 
-func (h *Handler) GetPressCycles(c echo.Context) *echo.HTTPError {
-	press, merr := h.getPressNumberFromParam(c)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	// Get user for permissions
-	user, merr := utils.GetUserFromContext(c)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	// Get cycles for this press
-	cycles, merr := h.registry.PressCycles.ListPressCyclesByPress(press, -1, 0)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	// Get tools for this press to create toolsMap
-	tools, merr := h.registry.Tools.List()
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	toolsMap := make(map[models.ToolID]*models.Tool)
-	for _, t := range tools {
-		tool := t
-		toolsMap[tool.ID] = tool
-	}
-
-	t := templates.CyclesSection(cycles, toolsMap, user)
-	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.NewRenderError(err, "CyclesSection")
-	}
-
-	return nil
-}
-
-func (h *Handler) HTMXGetPressNotes(c echo.Context) error {
+func (h *Handler) GetPressNotes(c echo.Context) *echo.HTTPError {
 	press, merr := h.getPressNumberFromParam(c)
 	if merr != nil {
 		return merr.Echo()
