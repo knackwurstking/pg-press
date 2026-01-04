@@ -41,38 +41,7 @@ func GetPage(c echo.Context) *echo.HTTPError {
 // Old Press Page Handlers, Can be removed after migration
 // -----------------------------------------------------------------------------
 
-func (h *Handler) HTMXGetPressActiveTools(c echo.Context) error {
-	press, merr := h.getPressNumberFromParam(c)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	// Get ordered tools for this press with validation
-	tools, _, merr := h.getOrderedToolsForPress(press)
-	if merr != nil {
-		return merr.WrapEcho("get tools for press %d", press)
-	}
-
-	// Resolve tools, notes not needed, only the binding tool
-	resolvedTools := make([]*models.ResolvedTool, 0, len(tools))
-	for _, tool := range tools {
-		rt, merr := services.ResolveTool(h.registry, tool)
-		if merr != nil {
-			return merr.WrapEcho("resolve tool %d", tool.ID)
-		}
-		resolvedTools = append(resolvedTools, rt)
-	}
-
-	t := templates.ActiveToolsSection(resolvedTools, press)
-	err := t.Render(c.Request().Context(), c.Response())
-	if err != nil {
-		return errors.NewRenderError(err, "ActiveToolsSection")
-	}
-
-	return nil
-}
-
-func (h *Handler) HTMXGetPressMetalSheets(c echo.Context) error {
+func (h *Handler) GetPressMetalSheets(c echo.Context) *echo.HTTPError {
 	press, merr := h.getPressNumberFromParam(c)
 	if merr != nil {
 		return merr.Echo()
@@ -229,54 +198,4 @@ func (h *Handler) HTMXGetCycleSummaryPDF(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, errors.Wrap(err, "stream"))
 	}
 	return nil
-}
-
-func (h *Handler) getPressNumberFromParam(c echo.Context) (models.PressNumber, *errors.MasterError) {
-	pressNum, merr := utils.ParseParamInt8(c, "press")
-	if merr != nil {
-		return -1, merr
-	}
-
-	press := models.PressNumber(pressNum)
-	if !models.IsValidPressNumber(&press) {
-		return -1, errors.NewMasterError(fmt.Errorf("invalid press number"), http.StatusBadRequest)
-	}
-
-	return press, nil
-}
-
-func (h *Handler) getOrderedToolsForPress(press models.PressNumber) ([]*models.Tool, map[models.ToolID]*models.Tool, *errors.MasterError) {
-	// Get tools from database
-	tools, merr := h.registry.Tools.List()
-	if merr != nil {
-		return nil, nil, merr
-	}
-
-	// Filter tools for this press
-	var pressTools []*models.Tool
-	for _, t := range tools {
-		tool := t
-		if tool.Press != nil && *tool.Press == press {
-			pressTools = append(pressTools, tool)
-		}
-	}
-
-	// Validate that each position is unique (only one tool per position)
-	if !models.ValidateUniquePositions(pressTools) {
-		return nil, nil, errors.NewMasterError(
-			fmt.Errorf("tool duplicates in active tools list"),
-			http.StatusBadRequest,
-		)
-	}
-
-	// Sort tools by position: top, top cassette, bottom
-	sortedTools := models.SortToolsByPosition(pressTools)
-
-	// Create toolsMap for lookup purposes
-	toolsMap := make(map[models.ToolID]*models.Tool)
-	for _, tool := range sortedTools {
-		toolsMap[tool.ID] = tool
-	}
-
-	return sortedTools, toolsMap, nil
 }
