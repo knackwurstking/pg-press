@@ -3,48 +3,43 @@ package press
 import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/components"
+	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/models"
 )
 
-templ MetalSheetsSection(press models.PressNumber, toolsMap map[models.ToolID]*models.Tool, metalSheets []*models.MetalSheet) {
-	{{ expectedMachineType := models.GetMachineTypeForPress(press) }}
-	<div class="flex flex-col gap-sm">
+type MetalSheetsProps struct {
+	Utilization      *shared.PressUtilization
+	UpperMetalSheets []*models.UpperMetalSheet
+	LowerMetalSheets []*models.LowerMetalSheet
+}
+
+templ MetalSheets(p MetalSheetsProps) {
+	<div class="flex flex-col gap">
 		<div class="text-center">
 			<small class="text-muted">
-				Zeigt nur Bleche für { expectedMachineType.DisplayName() }
-				(Presse { fmt.Sprintf("%d", press) })
+				Zeigt nur Bleche für { p.Utilization.Type }
+				(Presse { fmt.Sprintf("%d", p.Utilization.PressNumber) })
 			</small>
 		</div>
-		@metalSheetTablesCollapsible(metalSheets, toolsMap)
+		@metalSheetTables(p)
 	</div>
 }
 
 // Metal sheet table components
-templ metalSheetTablesCollapsible(metalSheets []*models.MetalSheet, toolsMap map[models.ToolID]*models.Tool) {
-	@metalSheetTableTopCollapsible(metalSheets, toolsMap)
-	<br/>
-	@metalSheetTableBottomCollapsible(metalSheets, toolsMap)
+templ metalSheetTables(p MetalSheetsProps) {
+	@metalSheetTableUpper(p.UpperMetalSheets)
+	@metalSheetTableBottom(p.LowerMetalSheets)
 }
 
-templ metalSheetTableTopCollapsible(metalSheets []*models.MetalSheet, toolsMap map[models.ToolID]*models.Tool) {
-	{{
-		topSheets := filterMetalSheetsByPosition(
-			metalSheets,
-			toolsMap,
-			[]models.Position{
-				models.PositionTop,
-				models.PositionTopCassette,
-			},
-		)
-	}}
+templ metalSheetTableUpper(ums []*shared.UpperMetalSheet) {
 	<details
 		class="mb"
-		if len(topSheets) > 0 {
+		if len(ums) > 0 {
 			open
 		}
 	>
 		<summary class="cursor-pointer select-none">
-			<h6 class="inline">Oberteil / Kassette ({ fmt.Sprintf("%d", len(topSheets)) } Einträge)</h6>
+			<h6 class="inline">Oberteil / Kassette ({ fmt.Sprintf("%d", len(ums)) } Einträge)</h6>
 		</summary>
 		<div class="mt">
 			<figure class="w-full overflow-x-scroll">
@@ -56,17 +51,17 @@ templ metalSheetTableTopCollapsible(metalSheets []*models.MetalSheet, toolsMap m
 						</tr>
 					</thead>
 					<tbody>
-						if len(topSheets) == 0 {
+						if len(ums) == 0 {
 							<tr>
 								<td colspan="2" class="text-center">
 									@components.NotFoundSectionText("Keine Bleche für Oberteil gefunden")
 								</td>
 							</tr>
 						} else {
-							for _, sheet := range topSheets {
+							for _, um := range ums {
 								<tr>
-									<td>{ fmt.Sprintf("%.1f", sheet.TileHeight) }</td>
-									<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
+									<td>{ fmt.Sprintf("%.1f", um.TileHeight) }</td>
+									<td>{ fmt.Sprintf("%.1f", um.Value) }</td>
 								</tr>
 							}
 						}
@@ -77,16 +72,15 @@ templ metalSheetTableTopCollapsible(metalSheets []*models.MetalSheet, toolsMap m
 	</details>
 }
 
-templ metalSheetTableBottomCollapsible(metalSheets []*models.MetalSheet, toolsMap map[models.ToolID]*models.Tool) {
-	{{ bottomSheets := filterMetalSheetsByPosition(metalSheets, toolsMap, []models.Position{models.PositionBottom}) }}
+templ metalSheetTableBottom(lms []*shared.LowerMetalSheet) {
 	<details
 		class="mb"
-		if len(bottomSheets) > 0 {
+		if len(lms) > 0 {
 			open
 		}
 	>
 		<summary class="cursor-pointer select-none">
-			<h6 class="inline">Unterteil ({ fmt.Sprintf("%d", len(bottomSheets)) } Einträge)</h6>
+			<h6 class="inline">Unterteil ({ fmt.Sprintf("%d", len(lms)) } Einträge)</h6>
 		</summary>
 		<div class="mt">
 			<figure class="w-full overflow-x-scroll">
@@ -101,14 +95,14 @@ templ metalSheetTableBottomCollapsible(metalSheets []*models.MetalSheet, toolsMa
 						</tr>
 					</thead>
 					<tbody>
-						if len(bottomSheets) == 0 {
+						if len(lms) == 0 {
 							<tr>
 								<td colspan="5" class="text-center">
 									@components.NotFoundSectionText("Keine Bleche für Unterteil gefunden")
 								</td>
 							</tr>
 						} else {
-							for _, sheet := range bottomSheets {
+							for _, sheet := range lms {
 								<tr>
 									<td>{ fmt.Sprintf("%.1f", sheet.TileHeight) }</td>
 									<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
@@ -141,21 +135,4 @@ templ metalSheetTableBottomCollapsible(metalSheets []*models.MetalSheet, toolsMa
 			</figure>
 		</div>
 	</details>
-}
-
-func filterMetalSheetsByPosition(
-	metalSheets []*models.MetalSheet, toolsMap map[models.ToolID]*models.Tool, positions []models.Position,
-) []*models.MetalSheet {
-	var filtered models.MetalSheetList
-	for _, sheet := range metalSheets {
-		if tool, exists := toolsMap[sheet.ToolID]; exists && tool != nil {
-			for _, pos := range positions {
-				if tool.Position == pos {
-					filtered = append(filtered, sheet)
-					break
-				}
-			}
-		}
-	}
-	return filtered.Sort()
 }

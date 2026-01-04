@@ -41,35 +41,7 @@ func GetPage(c echo.Context) *echo.HTTPError {
 // Old Press Page Handlers, Can be removed after migration
 // -----------------------------------------------------------------------------
 
-func (h *Handler) GetPressMetalSheets(c echo.Context) *echo.HTTPError {
-	press, merr := h.getPressNumberFromParam(c)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	// Get ordered tools for this press with validation
-	_, toolsMap, merr := h.getOrderedToolsForPress(press)
-	if merr != nil {
-		return merr.WrapEcho("get tools for press %d", press)
-	}
-
-	// Get metal sheets for tools on this press with automatic machine type filtering
-	// Press 0 and 5 use SACMI machines, all others use SITI machines
-	metalSheets, merr := h.registry.MetalSheets.ListByPress(press, toolsMap)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	t := templates.MetalSheetsSection(press, toolsMap, metalSheets)
-	err := t.Render(c.Request().Context(), c.Response())
-	if err != nil {
-		return errors.NewRenderError(err, "MetalSheetsSection")
-	}
-
-	return nil
-}
-
-func (h *Handler) HTMXGetPressCycles(c echo.Context) error {
+func (h *Handler) GetPressCycles(c echo.Context) *echo.HTTPError {
 	press, merr := h.getPressNumberFromParam(c)
 	if merr != nil {
 		return merr.Echo()
