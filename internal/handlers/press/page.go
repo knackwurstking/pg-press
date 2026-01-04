@@ -41,42 +41,6 @@ func GetPage(c echo.Context) *echo.HTTPError {
 // Old Press Page Handlers, Can be removed after migration
 // -----------------------------------------------------------------------------
 
-func (h *Handler) GetPressNotes(c echo.Context) *echo.HTTPError {
-	press, merr := h.getPressNumberFromParam(c)
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	// Get notes directly linked to this press
-	notes, merr := h.registry.Notes.ListByLinked("press", int64(press))
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	// Get tools for this press for context
-	sortedTools, _, merr := h.getOrderedToolsForPress(press) // Get active tools
-	if merr != nil {
-		return merr.WrapEcho("get tools for press %d", press)
-	}
-
-	// Get notes for tools
-	for _, t := range sortedTools {
-		n, merr := h.registry.Notes.ListByLinked("tool", int64(t.ID))
-		if merr != nil {
-			return merr.WrapEcho("get notes for tool %d", t.ID)
-		}
-		notes = append(notes, n...)
-	}
-
-	t := templates.NotesSection(press, notes, sortedTools)
-	err := t.Render(c.Request().Context(), c.Response())
-	if err != nil {
-		return errors.NewRenderError(err, "NotesSection")
-	}
-
-	return nil
-}
-
 func (h *Handler) HTMXGetPressRegenerations(c echo.Context) error {
 	press, merr := h.getPressNumberFromParam(c)
 	if merr != nil {

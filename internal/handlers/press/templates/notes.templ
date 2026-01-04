@@ -1,34 +1,31 @@
-// TODO: ...
 package templates
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pg-press/components"
-	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/utils"
 	"strconv"
 	"strings"
+
+	"github.com/knackwurstking/pg-press/components"
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/utils"
 )
 
-templ NotesSection(press models.PressNumber, notes []*models.Note, tools []*models.Tool) {
-	{{
-		pressNotes := make([]*models.Note, 0)
-		toolNotes := make([]*models.Note, 0)
-		for _, n := range notes {
-			if strings.HasPrefix(n.Linked, "press_") {
-				pressNotes = append(pressNotes, n)
-			} else if strings.HasPrefix(n.Linked, "tool_") {
-				toolNotes = append(toolNotes, n)
-			}
-		}
-	}}
-	@pressNotesSection(pressNotes, press)
-	if len(toolNotes) > 0 {
-		@toolNotesSection(toolNotes, tools)
+type NotesProps struct {
+	PressNumber shared.PressNumber
+	PressNotes  []*shared.Note
+	ToolNotes   []*shared.Note
+	Tools       map[shared.EntityID]*shared.Tool
+}
+
+templ Notes(p NotesProps) {
+	@pressNotesSection(p.PressNumber, p.PressNotes)
+	if len(p.ToolNotes) > 0 {
+		@toolNotesSection(p.PressNumber, p.PressNotes, p.Tools)
 	}
 }
 
-templ pressNotesSection(notes []*models.Note, press models.PressNumber) {
+templ pressNotesSection(pressNumber shared.PressNumber, notes []*shared.Note) {
 	if len(notes) > 0 {
 		// Press Notes
 		@components.Section(templ.Attributes{
@@ -43,7 +40,7 @@ templ pressNotesSection(notes []*models.Note, press models.PressNumber) {
 		}) {
 			<button
 				class="primary"
-				hx-get={ utils.UrlDialogs().EditNote(0, fmt.Sprintf("press_%d", press)) }
+				hx-get={ utils.UrlDialogs().EditNote(0, fmt.Sprintf("press_%d", pressNumber)) }
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"
@@ -62,7 +59,7 @@ templ pressNotesSection(notes []*models.Note, press models.PressNumber) {
 			<p>Es gibt keine Notizen für Werkzeuge auf dieser Presse.</p>
 			<button
 				class="primary"
-				hx-get={ utils.UrlDialogs().EditNote(0, fmt.Sprintf("press_%d", press)) }
+				hx-get={ utils.UrlDialogs().EditNote(0, fmt.Sprintf("press_%d", pressNumber)) }
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"
@@ -76,48 +73,46 @@ templ pressNotesSection(notes []*models.Note, press models.PressNumber) {
 	}
 }
 
-templ toolNotesSection(notes []*models.Note, tools []*models.Tool) {
+templ toolNotesSection(pressNumber shared.PressNumber, notes []*shared.Note, tools map[shared.EntityID]*shared.Tool) {
 	@components.Section(templ.Attributes{
 		"class": "notes-list flex flex-col gap-lg p",
 	}) {
 		{{
-			topToolNotes := make([]*models.Note, 0)
-			topCassetteToolNotes := make([]*models.Note, 0)
-			bottomToolNotes := make([]*models.Note, 0)
+			// Organize tool notes by position
+			upper := make([]*models.Note, 0)
+			upperCassette := make([]*models.Note, 0)
+			lower := make([]*models.Note, 0)
+
 			for _, n := range notes {
 				sID, _ := strings.CutPrefix(n.Linked, "tool_")
 				id, _ := strconv.ParseInt(sID, 10, 64)
-				for _, t := range tools {
-					if t.ID != models.ToolID(id) {
-						continue
-					}
-
+				if t, ok := tools[shared.EntityID(id)]; ok {
 					switch t.Position {
 					case models.PositionTop:
-						topToolNotes = append(topToolNotes, n)
+						upper = append(upper, n)
 					case models.PositionTopCassette:
-						topCassetteToolNotes = append(topCassetteToolNotes, n)
+						upperCassette = append(upperCassette, n)
 					case models.PositionBottom:
-						bottomToolNotes = append(bottomToolNotes, n)
+						lower = append(lower, n)
 					}
 				}
 			}
 		}}
-		if len(topToolNotes) > 0 {
-			<h4>{ models.PositionTop.GermanString() }</h4>
-			for _, n := range topToolNotes {
+		if len(upper) > 0 {
+			<h4>{ shared.SlotUpper.German() }</h4>
+			for _, n := range upper {
 				@components.NoteCard(n, nil)
 			}
 		}
-		if len(topCassetteToolNotes) > 0 {
-			<h4>{ models.PositionTopCassette.GermanString() }</h4>
-			for _, n := range topCassetteToolNotes {
+		if len(upperCassette) > 0 {
+			<h4>{ shared.SlotUpperCassette.German() }</h4>
+			for _, n := range upperCassette {
 				@components.NoteCard(n, nil)
 			}
 		}
-		if len(bottomToolNotes) > 0 {
-			<h4>{ models.PositionBottom.GermanString() }</h4>
-			for _, n := range bottomToolNotes {
+		if len(lower) > 0 {
+			<h4>{ shared.SlotLower.German() }</h4>
+			for _, n := range lower {
 				@components.NoteCard(n, nil)
 			}
 		}
