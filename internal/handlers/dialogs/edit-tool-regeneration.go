@@ -5,6 +5,7 @@ import (
 
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/handlers/dialogs/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 
@@ -22,7 +23,7 @@ func GetEditToolRegeneration(c echo.Context) *echo.HTTPError {
 		if merr != nil {
 			return merr.Echo()
 		}
-		t := EditToolRegenerationDialog(tr)
+		t := templates.EditToolRegenerationDialog(tr)
 		err := t.Render(c.Request().Context(), c.Response())
 		if err != nil {
 			return errors.NewRenderError(err, "EditToolRegenerationDialog")
@@ -34,7 +35,7 @@ func GetEditToolRegeneration(c echo.Context) *echo.HTTPError {
 	if merr != nil {
 		return merr.Echo()
 	}
-	t := NewToolRegenerationDialog(shared.EntityID(id))
+	t := templates.NewToolRegenerationDialog(shared.EntityID(id))
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "EditToolRegenerationDialog")

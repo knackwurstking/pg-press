@@ -6,8 +6,10 @@ import (
 
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/handlers/dialogs/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+
 	"github.com/labstack/echo/v4"
 )
 
@@ -30,7 +32,7 @@ func GetEditMetalSheet(c echo.Context) *echo.HTTPError {
 				return merr.Echo()
 			}
 
-			t := EditUpperMetalSheetDialog(metalSheet, tool)
+			t := templates.EditUpperMetalSheetDialog(metalSheet, tool)
 			err := t.Render(c.Request().Context(), c.Response())
 			if err != nil {
 				return errors.NewRenderError(err, "EditUpperMetalSheetDialog")
@@ -47,7 +49,7 @@ func GetEditMetalSheet(c echo.Context) *echo.HTTPError {
 				return merr.Echo()
 			}
 
-			t := EditLowerMetalSheetDialog(metalSheet, tool)
+			t := templates.EditLowerMetalSheetDialog(metalSheet, tool)
 			err := t.Render(c.Request().Context(), c.Response())
 			if err != nil {
 				return errors.NewRenderError(err, "EditLowerMetalSheetDialog")
@@ -72,7 +74,7 @@ func GetEditMetalSheet(c echo.Context) *echo.HTTPError {
 
 	switch tool.Position {
 	case shared.SlotUpper:
-		t := NewUpperMetalSheetDialog(tool)
+		t := templates.NewUpperMetalSheetDialog(tool)
 		err := t.Render(c.Request().Context(), c.Response())
 		if err != nil {
 			return errors.NewRenderError(err, "NewUpperMetalSheetDialog")
@@ -80,7 +82,7 @@ func GetEditMetalSheet(c echo.Context) *echo.HTTPError {
 		return nil
 
 	case shared.SlotLower:
-		t := NewLowerMetalSheetDialog(tool)
+		t := templates.NewLowerMetalSheetDialog(tool)
 		err := t.Render(c.Request().Context(), c.Response())
 		if err != nil {
 			return errors.NewRenderError(err, "NewLowerMetalSheetDialog")

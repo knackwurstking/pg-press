@@ -9,6 +9,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/handlers/auth/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/labstack/echo/v4"
@@ -17,8 +18,8 @@ import (
 func GetLoginPage(c echo.Context) *echo.HTTPError {
 	log.Debug("Login page requested from IP: %#v", c.RealIP())
 
-	t := Page(
-		PageProps{
+	t := templates.Page(
+		templates.PageProps{
 			FormData: map[string]string{
 				"api-key":         c.FormValue("api-key"),
 				"invalid-api-key": fmt.Sprintf("%t", shared.ParseQueryBool(c, "invalid")),

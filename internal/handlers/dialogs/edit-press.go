@@ -5,8 +5,10 @@ import (
 
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/handlers/dialogs/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+
 	"github.com/labstack/echo/v4"
 )
 
@@ -22,7 +24,7 @@ func GetEditPress(c echo.Context) *echo.HTTPError {
 			return merr.Echo()
 		}
 
-		t := EditPressDialog(press)
+		t := templates.EditPressDialog(press)
 		err := t.Render(c.Request().Context(), c.Response())
 		if err != nil {
 			return errors.NewRenderError(err, "EditPressDialog")
@@ -30,7 +32,7 @@ func GetEditPress(c echo.Context) *echo.HTTPError {
 		return nil
 	}
 
-	t := NewPressDialog()
+	t := templates.NewPressDialog()
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "NewPressDialog")
