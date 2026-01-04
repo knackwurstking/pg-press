@@ -129,7 +129,7 @@ func ListNotes() ([]*shared.Note, *errors.MasterError) {
 	return notes, nil
 }
 
-func ListNotesForLinked(linked string, id shared.EntityID) ([]*shared.Note, *errors.MasterError) {
+func ListNotesForLinked(linked string, id int) ([]*shared.Note, *errors.MasterError) {
 	rows, err := dbNote.Query(sqlListNotesForLinked)
 	if err != nil {
 		return nil, errors.NewMasterError(err)
