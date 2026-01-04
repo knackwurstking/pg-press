@@ -10,6 +10,10 @@ import (
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
 
+// -----------------------------------------------------------------------------
+// URL Builders
+// -----------------------------------------------------------------------------
+
 // BuildURL constructs a URL with the given path and query parameters
 func BuildURL(path string) templ.SafeURL {
 	return templ.SafeURL(fmt.Sprintf("%s%s", env.ServerPathPrefix, path))
@@ -30,7 +34,9 @@ func BuildURLWithParams(path string, params map[string]string) templ.SafeURL {
 	return BuildURL(path)
 }
 
-// TODO: Remove all of this url builders here
+// -----------------------------------------------------------------------------
+// Auth URLs
+// -----------------------------------------------------------------------------
 
 // UrlLogin constructs login URL with optional API key and invalid flag
 func UrlLogin(apiKey string, invalid *bool) (url struct {
@@ -47,6 +53,10 @@ func UrlLogin(apiKey string, invalid *bool) (url struct {
 	return url
 }
 
+// -----------------------------------------------------------------------------
+// Home URLs
+// -----------------------------------------------------------------------------
+
 // UrlHome constructs home URL
 func UrlHome() (url struct {
 	Page templ.SafeURL
@@ -54,6 +64,10 @@ func UrlHome() (url struct {
 	url.Page = BuildURL("/")
 	return url
 }
+
+// -----------------------------------------------------------------------------
+// Feed URLs
+// -----------------------------------------------------------------------------
 
 // UrlFeed constructs feed URLs
 func UrlFeed() (url struct {
@@ -65,6 +79,10 @@ func UrlFeed() (url struct {
 	return url
 }
 
+// -----------------------------------------------------------------------------
+// Help URLs
+// -----------------------------------------------------------------------------
+
 // UrlHelp constructs help URLs
 func UrlHelp() (url struct {
 	MarkdownPage templ.SafeURL
@@ -72,6 +90,10 @@ func UrlHelp() (url struct {
 	url.MarkdownPage = BuildURL("/help/markdown")
 	return url
 }
+
+// -----------------------------------------------------------------------------
+// Editor URLs
+// -----------------------------------------------------------------------------
 
 // UrlEditor constructs editor URLs
 func UrlEditor(_type shared.EditorType, id string, returnURL templ.SafeURL) (url struct {
@@ -90,6 +112,10 @@ func UrlEditor(_type shared.EditorType, id string, returnURL templ.SafeURL) (url
 	return url
 }
 
+// -----------------------------------------------------------------------------
+// Profile URLs
+// -----------------------------------------------------------------------------
+
 // UrlProfile constructs profile URLs
 func UrlProfile(cookieValue string) (url struct {
 	Page    templ.SafeURL
@@ -101,6 +127,10 @@ func UrlProfile(cookieValue string) (url struct {
 	})
 	return url
 }
+
+// -----------------------------------------------------------------------------
+// Notes URLs
+// -----------------------------------------------------------------------------
 
 // UrlNotes constructs notes URLs
 func UrlNotes(noteID shared.EntityID) (url struct {
@@ -116,6 +146,10 @@ func UrlNotes(noteID shared.EntityID) (url struct {
 	return url
 }
 
+// -----------------------------------------------------------------------------
+// Metal Sheets URLs
+// -----------------------------------------------------------------------------
+
 // UrlMetalSheets constructs metal sheets URLs
 func UrlMetalSheets(metalSheetID shared.EntityID) (url struct {
 	Delete templ.SafeURL
@@ -126,6 +160,10 @@ func UrlMetalSheets(metalSheetID shared.EntityID) (url struct {
 	return url
 }
 
+// -----------------------------------------------------------------------------
+// Umbau URLs
+// -----------------------------------------------------------------------------
+
 // UrlUmbau constructs umbau URLs
 func UrlUmbau(press shared.PressNumber) (url struct {
 	Page templ.SafeURL
@@ -133,6 +171,10 @@ func UrlUmbau(press shared.PressNumber) (url struct {
 	url.Page = BuildURL(fmt.Sprintf("/umbau/%d", press))
 	return url
 }
+
+// -----------------------------------------------------------------------------
+// Trouble Reports URLs
+// -----------------------------------------------------------------------------
 
 // UrlTroubleReports constructs trouble reports URLs
 func UrlTroubleReports(trID shared.EntityID, aID shared.EntityID, modificationTime int64) (url struct {
@@ -166,6 +208,10 @@ func UrlTroubleReports(trID shared.EntityID, aID shared.EntityID, modificationTi
 	return url
 }
 
+// -----------------------------------------------------------------------------
+// Tools URLs
+// -----------------------------------------------------------------------------
+
 // UrlTools constructs tools URLs
 func UrlTools(toolID shared.EntityID, isCassette bool) (url struct {
 	Page                  templ.SafeURL
@@ -189,6 +235,10 @@ func UrlTools(toolID shared.EntityID, isCassette bool) (url struct {
 
 	return url
 }
+
+// -----------------------------------------------------------------------------
+// Tool URLs
+// -----------------------------------------------------------------------------
 
 // UrlTool constructs tool URLs
 func UrlTool(toolID, toolRegenerationID, cycleID shared.EntityID) (url struct {
@@ -237,6 +287,10 @@ func UrlTool(toolID, toolRegenerationID, cycleID shared.EntityID) (url struct {
 	return url
 }
 
+// -----------------------------------------------------------------------------
+// Press URLs
+// -----------------------------------------------------------------------------
+
 // UrlPress constructs press URLs
 func UrlPress(pressNumber shared.PressNumber) (url struct {
 	Page               templ.SafeURL
@@ -252,15 +306,20 @@ func UrlPress(pressNumber shared.PressNumber) (url struct {
 	url.MetalSheets = BuildURL(fmt.Sprintf("/press/%d/metal-sheets", pressNumber))
 	url.Cycles = BuildURL(fmt.Sprintf("/press/%d/cycles", pressNumber))
 	url.Notes = BuildURL(fmt.Sprintf("/press/%d/notes", pressNumber))
-	url.PressRegenerations = BuildURL(fmt.Sprintf("/press/%d/press-regenerations", pressNumber))
+	url.PressRegenerations = BuildURL(fmt.Sprintf("/press/%d/regenerations", pressNumber))
 	url.CycleSummaryPDF = BuildURL(fmt.Sprintf("/press/%d/cycle-summary-pdf", pressNumber))
 
 	return url
 }
 
+// -----------------------------------------------------------------------------
+// Press Regeneration URLs
+// -----------------------------------------------------------------------------
+
 // UrlPressRegeneration constructs press regeneration URLs
 func UrlPressRegeneration(press shared.PressNumber, pressRegenerationID shared.EntityID) (url struct {
 	Page   templ.SafeURL
+	Post   templ.SafeURL
 	Delete templ.SafeURL
 }) {
 	params := map[string]string{
@@ -268,7 +327,32 @@ func UrlPressRegeneration(press shared.PressNumber, pressRegenerationID shared.E
 	}
 
 	url.Page = BuildURL(fmt.Sprintf("/press-regeneration/%d", press))
+	url.Post = url.Page
 	url.Delete = BuildURLWithParams(fmt.Sprintf("/press-regeneration/%d/delete", press), params)
+
+	return url
+}
+
+// -----------------------------------------------------------------------------
+// Dialog URLs
+// -----------------------------------------------------------------------------
+
+func UrlDialogEditToolRegeneration(toolRegenerationID, toolID shared.EntityID) (url struct {
+	Get, Post, Put templ.SafeURL
+}) {
+	url.Get = BuildURLWithParams(
+		"/dialog/edit-tool-regeneration",
+		map[string]string{
+			"tool_id": toolID.String(),
+		},
+	)
+	url.Post = url.Get
+	url.Put = BuildURLWithParams(
+		"/dialog/edit-tool-regeneration",
+		map[string]string{
+			"id": toolRegenerationID.String(),
+		},
+	)
 
 	return url
 }
@@ -297,6 +381,23 @@ func UrlDialogEditCycle(
 
 	return url
 }
+
+func UrlDialogEditPress(pressID shared.PressNumber) (url struct {
+	Get, Post, Put templ.SafeURL
+}) {
+	url.Get = BuildURL("/dialog/edit-press")
+	url.Post = url.Get
+	url.Put = BuildURLWithParams(
+		"/dialog/edit-press", map[string]string{
+			"id": pressID.String(),
+		},
+	)
+	return url
+}
+
+// -----------------------------------------------------------------------------
+// TODO: Remove all of this dialog URL builders here
+// -----------------------------------------------------------------------------
 
 // UrlDialogs constructs dialog URLs
 func UrlDialogs() (url struct {

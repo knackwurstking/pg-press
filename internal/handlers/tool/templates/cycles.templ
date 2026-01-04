@@ -91,11 +91,8 @@ templ regenerations(p CyclesSectionContentProps) {
 	}) {
 		@components.SectionTitle(components.SubTitle, "Regenerationen") {
 			@components.SectionDialogAction(components.SectionDialogActionProps{
-				Icon: "plus-lg",
-				Url: urlb.BuildURLWithParams("/dialog/edit-tool-regeneration",
-					map[string]string{
-						"tool_id": p.Tool.ID.String(),
-					}),
+				Icon:  "plus-lg",
+				Url:   urlb.UrlDialogEditToolRegeneration(0, p.Tool.ID).Get,
 				Title: "Neue Regeneration",
 			})
 		}

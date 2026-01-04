@@ -2,7 +2,6 @@ package shared
 
 import (
 	"fmt"
-	"slices"
 )
 
 const (
@@ -30,5 +29,5 @@ func (p PressNumber) String() string {
 }
 
 func (p PressNumber) IsValid() bool {
-	return slices.Contains(AllPressNumbers, p)
+	return p >= 0
 }

@@ -19,7 +19,7 @@ templ SectionPress(p SectionPressProps) {
 	></span>
 	@components.ActionBar(nil) {
 		<button
-			hx-get={ urlb.BuildURL("/dialog/edit-press") }
+			hx-get={ urlb.UrlDialogEditPress(-1).Get }
 			hx-trigger="click"
 			hx-target="body"
 			hx-swap="beforeend"

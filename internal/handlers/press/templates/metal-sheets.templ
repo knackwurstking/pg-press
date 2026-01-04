@@ -2,15 +2,14 @@ package templates
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pg-press/components"
+	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/pg-press/models"
 )
 
 type MetalSheetsProps struct {
 	Utilization      *shared.PressUtilization
-	UpperMetalSheets []*models.UpperMetalSheet
-	LowerMetalSheets []*models.LowerMetalSheet
+	UpperMetalSheets []*shared.UpperMetalSheet
+	LowerMetalSheets []*shared.LowerMetalSheet
 }
 
 templ MetalSheets(p MetalSheetsProps) {
@@ -54,7 +53,7 @@ templ metalSheetTableUpper(ums []*shared.UpperMetalSheet) {
 						if len(ums) == 0 {
 							<tr>
 								<td colspan="2" class="text-center">
-									@components.NotFoundSectionText("Keine Bleche für Oberteil gefunden")
+									@components.NotFoundText("Keine Bleche für Oberteil gefunden")
 								</td>
 							</tr>
 						} else {
@@ -98,7 +97,7 @@ templ metalSheetTableBottom(lms []*shared.LowerMetalSheet) {
 						if len(lms) == 0 {
 							<tr>
 								<td colspan="5" class="text-center">
-									@components.NotFoundSectionText("Keine Bleche für Unterteil gefunden")
+									@components.NotFoundText("Keine Bleche für Unterteil gefunden")
 								</td>
 							</tr>
 						} else {

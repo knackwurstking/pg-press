@@ -22,7 +22,7 @@ templ Page(props PageProps) {
 	) {
 		<div class="container fluid">
 			<form
-				hx-post={ utils.UrlPressRegeneration(props.Press, 0).Page }
+				hx-post={ utils.UrlPressRegeneration(props.Press, 0).Post }
 				hx-trigger="submit"
 				hx-swap="none"
 				hx-on::response-error="alert(event.detail.xhr.responseText)"

@@ -1,9 +1,9 @@
 package templates
 
 import (
-	"github.com/knackwurstking/pg-press/components"
+	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
 type RegenerationsProps struct {
@@ -13,9 +13,7 @@ type RegenerationsProps struct {
 
 templ Regenerations(p RegenerationsProps) {
 	if len(p.PressRegenerations) == 0 {
-		@components.NotFoundSectionText(
-			"Es sind keine Regenerationen für diese Presse vorhanden.",
-		)
+		@components.NotFoundText("Es sind keine Regenerationen für diese Presse vorhanden.")
 		{{ return }}
 	}
 	<figure>
@@ -31,9 +29,9 @@ templ Regenerations(p RegenerationsProps) {
 					<td>{ r.Stop.FormatDate() }</td>
 					<td>
 						@components.TableActions(components.TableActionsOptions{
-							EditHref:        utils.UrlDialogs().EditPressRegeneration(r.ID),
+							EditHref:        urlb.UrlDialogs().EditPressRegeneration(r.ID),
 							EditAdminOnly:   false,
-							DeleteHref:      utils.UrlPressRegeneration(r.PressNumber, r.ID).Delete,
+							DeleteHref:      urlb.UrlPressRegeneration(r.PressNumber, r.ID).Delete,
 							DeleteAdminOnly: true,
 							User:            p.User,
 						})

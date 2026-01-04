@@ -11,7 +11,7 @@ import (
 templ NewPressDialog() {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPost,
-		Href:             urlb.BuildURL("/dialog/edit-press"),
+		Href:             urlb.UrlDialogEditPress(-1).Post,
 		ID:               "notes-dialog",
 		SubmitButtonText: "Erstellen",
 		FormClasses:      templ.CSSClasses{"container"},
@@ -22,12 +22,8 @@ templ NewPressDialog() {
 
 templ EditPressDialog(press *shared.Press) {
 	@ui.Dialog(ui.DialogOptions{
-		Method: http.MethodPut,
-		Href: urlb.BuildURLWithParams(
-			"/dialog/edit-press", map[string]string{
-				"id": press.ID.String(),
-			},
-		),
+		Method:           http.MethodPut,
+		Href:             urlb.UrlDialogEditPress(press.ID).Put,
 		ID:               "notes-edit-dialog",
 		SubmitButtonText: "Aktualisieren",
 		FormClasses:      templ.CSSClasses{"container"},

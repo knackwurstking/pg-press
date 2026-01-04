@@ -2,9 +2,10 @@ package templates
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pg-press/components"
+
+	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
 type CyclesProps struct {
@@ -38,7 +39,7 @@ templ renderPressCyclesRows(p CyclesProps) {
 	if len(p.Cycles) == 0 {
 		<tr>
 			<td colspan="7" class="text-center">
-				@components.NotFoundSectionText("Kein Pressenverlauf verfügbar")
+				@components.NotFoundText("Kein Pressenverlauf verfügbar")
 			</td>
 		</tr>
 	} else {
@@ -90,9 +91,9 @@ templ renderPressCycleRow(cycle *shared.Cycle, tool *shared.Tool, user *shared.U
 			<span class="button-group flex justify-end items-center">
 				{{ toolChangeMode := true }}
 				@components.TableActions(components.TableActionsOptions{
-					EditHref:        utils.UrlDialogs().EditCycle(cycle.ID, cycle.ToolID, &toolChangeMode),
+					EditHref:        urlb.UrlDialogEditCycle(cycle.ID, cycle.ToolID, toolChangeMode).Get,
 					EditAdminOnly:   true,
-					DeleteHref:      utils.UrlTool(cycle.ToolID, 0, cycle.ID).CycleDelete,
+					DeleteHref:      urlb.UrlTool(cycle.ToolID, 0, cycle.ID).CycleDelete,
 					DeleteAdminOnly: true,
 					User:            user,
 				})

@@ -5,10 +5,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/knackwurstking/pg-press/components"
+	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
 type NotesProps struct {
@@ -40,7 +39,7 @@ templ pressNotes(pressNumber shared.PressNumber, notes []*shared.Note) {
 		}) {
 			<button
 				class="primary"
-				hx-get={ utils.UrlDialogs().EditNote(0, fmt.Sprintf("press_%d", pressNumber)) }
+				hx-get={ urlb.UrlDialogs().EditNote(0, fmt.Sprintf("press_%d", pressNumber)) }
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"
@@ -59,7 +58,7 @@ templ pressNotes(pressNumber shared.PressNumber, notes []*shared.Note) {
 			<p>Es gibt keine Notizen für Werkzeuge auf dieser Presse.</p>
 			<button
 				class="primary"
-				hx-get={ utils.UrlDialogs().EditNote(0, fmt.Sprintf("press_%d", pressNumber)) }
+				hx-get={ urlb.UrlDialogs().EditNote(0, fmt.Sprintf("press_%d", pressNumber)) }
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"
@@ -79,20 +78,20 @@ templ toolNotes(pressNumber shared.PressNumber, notes []*shared.Note, tools map[
 	}) {
 		{{
 			// Organize tool notes by position
-			upper := make([]*models.Note, 0)
-			upperCassette := make([]*models.Note, 0)
-			lower := make([]*models.Note, 0)
+			upper := make([]*shared.Note, 0)
+			upperCassette := make([]*shared.Note, 0)
+			lower := make([]*shared.Note, 0)
 
 			for _, n := range notes {
 				sID, _ := strings.CutPrefix(n.Linked, "tool_")
 				id, _ := strconv.ParseInt(sID, 10, 64)
 				if t, ok := tools[shared.EntityID(id)]; ok {
 					switch t.Position {
-					case models.PositionTop:
+					case shared.SlotUpper:
 						upper = append(upper, n)
-					case models.PositionTopCassette:
+					case shared.SlotUpperCassette:
 						upperCassette = append(upperCassette, n)
-					case models.PositionBottom:
+					case shared.SlotLower:
 						lower = append(lower, n)
 					}
 				}
