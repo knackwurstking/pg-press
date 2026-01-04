@@ -115,7 +115,9 @@ templ ToolsList(p SectionToolsProps) {
 					@components.ToolAnchor(components.ToolAnchorProps{
 						Tool:               t,
 						BindingCassette:    cassette,
+						EnableBadges:       true,
 						IsRegenerating:     isRegenerating,
+						EnableCounts:       true,
 						RegenerationsCount: p.RegenerationsCount,
 						NotesCount:         p.NotesCount,
 					})
@@ -151,7 +153,9 @@ templ ToolsList(p SectionToolsProps) {
 					@components.CassetteAnchor(components.CassetteAnchorProps{
 						Cassette:           c,
 						BindingTool:        boundTool,
+						EnableBadges:       true,
 						IsRegenerating:     isRegenerating,
+						EnableCounts:       true,
 						RegenerationsCount: p.RegenerationsCount,
 						NotesCount:         p.NotesCount,
 					})

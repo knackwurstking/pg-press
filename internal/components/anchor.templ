@@ -16,6 +16,8 @@ type ToolAnchorProps struct {
 	IsRegenerating     bool
 	RegenerationsCount int
 	NotesCount         int
+	EnableBadges       bool
+	EnableCounts       bool
 }
 
 templ ToolAnchor(p ToolAnchorProps) {
@@ -41,18 +43,20 @@ templ ToolAnchor(p ToolAnchorProps) {
 			<span class="text-semibold">
 				{ p.Tool.German() }
 			</span>
-			<div class="flex gap justify-start items-center w-full">
-				@SmallBadge("primary", "text-bold") {
-					{ p.Tool.Position.German() }
-				}
-				@ToolStateBadge(p.Tool, -1, p.IsRegenerating)
-				<span
-					class="total-cycles-container flex justify-end items-center w-full pr text-sm"
-					hx-get={ urlb.UrlTool(p.Tool.ID, 0, 0).TotalCycles }
-					hx-trigger="load"
-					hx-swap="innerHTML"
-				></span>
-			</div>
+			if p.EnableBadges {
+				<div class="flex gap justify-start items-center w-full">
+					@SmallBadge("primary", "text-bold") {
+						{ p.Tool.Position.German() }
+					}
+					@ToolStateBadge(p.Tool, -1, p.IsRegenerating)
+					<span
+						class="total-cycles-container flex justify-end items-center w-full pr text-sm"
+						hx-get={ urlb.UrlTool(p.Tool.ID, 0, 0).TotalCycles }
+						hx-trigger="load"
+						hx-swap="innerHTML"
+					></span>
+				</div>
+			}
 			if p.BindingCassette != nil {
 				<div class="text-sm italic info ghost">
 					<i class="text-xs">
@@ -64,7 +68,9 @@ templ ToolAnchor(p ToolAnchorProps) {
 		<div class="flex flex-col gap justify-between items-center">
 			<i class="bi bi-chevron-right"></i>
 		</div>
-		@ToolAnchorCounts(p.NotesCount, p.RegenerationsCount)
+		if p.EnableCounts {
+			@ToolAnchorCounts(p.NotesCount, p.RegenerationsCount)
+		}
 	</a>
 }
 
@@ -97,9 +103,13 @@ templ ToolAnchorCounts(notesCount, regenerationsCount int) {
 // -----------------------------------------------------------------------------
 
 type CassetteAnchorProps struct {
-	Cassette           *shared.Tool // Required
-	BindingTool        *shared.Tool // Optional
-	IsRegenerating     bool
+	Cassette    *shared.Tool // Required
+	BindingTool *shared.Tool // Optional
+
+	EnableBadges   bool
+	IsRegenerating bool
+
+	EnableCounts       bool
 	RegenerationsCount int
 	NotesCount         int
 }
@@ -122,23 +132,27 @@ templ CassetteAnchor(p CassetteAnchorProps) {
 			<span class="text-semibold">
 				{ p.Cassette.German() }
 			</span>
-			<div class="flex gap justify-start items-center w-full">
-				@SmallBadge("primary", "text-bold") {
-					{ p.Cassette.Position.German() }
-				}
-				@CassetteStateBadge(p.Cassette, p.BindingTool, p.IsRegenerating)
-				<span
-					class="total-cycles-container flex justify-end items-center w-full pr text-sm"
-					hx-get={ urlb.UrlTool(p.Cassette.ID, 0, 0).TotalCycles }
-					hx-trigger="load"
-					hx-swap="innerHTML"
-				></span>
-			</div>
+			if p.EnableBadges {
+				<div class="flex gap justify-start items-center w-full">
+					@SmallBadge("primary", "text-bold") {
+						{ p.Cassette.Position.German() }
+					}
+					@CassetteStateBadge(p.Cassette, p.BindingTool, p.IsRegenerating)
+					<span
+						class="total-cycles-container flex justify-end items-center w-full pr text-sm"
+						hx-get={ urlb.UrlTool(p.Cassette.ID, 0, 0).TotalCycles }
+						hx-trigger="load"
+						hx-swap="innerHTML"
+					></span>
+				</div>
+			}
 		</div>
 		<div class="flex flex-col gap justify-between items-center">
 			<i class="bi bi-chevron-right"></i>
 		</div>
-		@CassetteAnchorCounts(p.NotesCount, p.RegenerationsCount)
+		if p.EnableCounts {
+			@CassetteAnchorCounts(p.NotesCount, p.RegenerationsCount)
+		}
 	</a>
 }
 
