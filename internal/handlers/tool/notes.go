@@ -15,7 +15,7 @@ func GetToolNotes(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 	toolID := shared.EntityID(id)
-	notes, merr := db.ListNotesForLinked("tool", toolID)
+	notes, merr := db.ListNotesForLinked("tool", int(toolID))
 	if merr != nil {
 		return merr.Echo()
 	}

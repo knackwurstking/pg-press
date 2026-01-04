@@ -21,7 +21,7 @@ func Register(e *echo.Echo, path string) {
 			ui.NewEchoRoute(http.MethodGet, path+"/:press/metal-sheets", GetPressMetalSheets),
 			ui.NewEchoRoute(http.MethodGet, path+"/:press/cycles", GetCycles),
 			ui.NewEchoRoute(http.MethodGet, path+"/:press/notes", GetNotes),
-			ui.NewEchoRoute(http.MethodGet, path+"/:press/press-regenerations", GetPressRegenerations),
+			ui.NewEchoRoute(http.MethodGet, path+"/:press/press-regenerations", GetRegenerations),
 
 			ui.NewEchoRoute(http.MethodDelete, path+"/:press", DeletePress),
 

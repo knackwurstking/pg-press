@@ -11,16 +11,11 @@ type PressRegeneration struct {
 	PressNumber PressNumber `json:"press_number"` // PressNumber indicates which press has regenerated
 	Start       UnixMilli   `json:"start"`        // Start timestamp in milliseconds
 	Stop        UnixMilli   `json:"stop"`         // Stop timestamp in milliseconds
-	Cycles      int64       `json:"cycles"`       // Cycles indicates the number cyles done before regeneration
 }
 
 func (pr *PressRegeneration) Validate() *errors.ValidationError {
 	if pr.PressNumber < 0 {
 		return errors.NewValidationError("press_number must be non-negative")
-	}
-
-	if pr.Cycles < 0 {
-		return errors.NewValidationError("cycles must be non-negative")
 	}
 
 	if pr.Start < 0 {
@@ -42,13 +37,12 @@ func (pr *PressRegeneration) Clone() *PressRegeneration {
 		PressNumber: pr.PressNumber,
 		Start:       pr.Start,
 		Stop:        pr.Stop,
-		Cycles:      pr.Cycles,
 	}
 }
 
 func (pr *PressRegeneration) String() string {
 	return fmt.Sprintf(
-		"PressRegeneration{ID:%d, PressNumber:%d, Cycles:%d, Start:%d, Stop:%d}",
-		pr.ID, pr.PressNumber, pr.Cycles, pr.Start, pr.Stop,
+		"PressRegeneration{ID:%d, PressNumber:%d, Start:%d, Stop:%d}",
+		pr.ID, pr.PressNumber, pr.Start, pr.Stop,
 	)
 }

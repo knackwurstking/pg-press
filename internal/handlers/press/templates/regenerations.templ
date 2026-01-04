@@ -1,15 +1,18 @@
-// TODO: ...
 package templates
 
 import (
 	"github.com/knackwurstking/pg-press/components"
-	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/utils"
 )
 
-templ RegenerationsContent(pressRegenerations []*models.PressRegeneration, user *models.User) {
-	if len(pressRegenerations) == 0 {
+type RegenerationsProps struct {
+	PressRegenerations []*shared.PressRegeneration
+	User               *shared.User
+}
+
+templ Regenerations(p RegenerationsProps) {
+	if len(p.PressRegenerations) == 0 {
 		@components.NotFoundSectionText(
 			"Es sind keine Regenerationen für diese Presse vorhanden.",
 		)
@@ -20,21 +23,19 @@ templ RegenerationsContent(pressRegenerations []*models.PressRegeneration, user 
 			<tr>
 				<th>Von</th>
 				<th>Bis</th>
-				<th>Bemerkung</th>
 				<th></th>
 			</tr>
-			for _, r := range pressRegenerations {
+			for _, r := range p.PressRegenerations {
 				<tr>
-					<td>{ r.StartedAt.Format(env.DateFormat) }</td>
-					<td>{ r.CompletedAt.Format(env.DateFormat) }</td>
-					<td>{ r.Reason }</td>
+					<td>{ r.Start.FormatDate() }</td>
+					<td>{ r.Stop.FormatDate() }</td>
 					<td>
 						@components.TableActions(components.TableActionsOptions{
 							EditHref:        utils.UrlDialogs().EditPressRegeneration(r.ID),
 							EditAdminOnly:   false,
 							DeleteHref:      utils.UrlPressRegeneration(r.PressNumber, r.ID).Delete,
 							DeleteAdminOnly: true,
-							User:            user,
+							User:            p.User,
 						})
 					</td>
 				</tr>
