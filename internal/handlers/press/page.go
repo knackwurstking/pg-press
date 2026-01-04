@@ -26,7 +26,7 @@ func GetPage(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	t := Page(PageProps{
+	t := templates.Page(templates.PageProps{
 		PressNumber: shared.PressNumber(pressNumber),
 		User:        user,
 	})

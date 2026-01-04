@@ -5,6 +5,7 @@ import (
 
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/handlers/press/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
 
 	"github.com/labstack/echo/v4"
@@ -48,7 +49,7 @@ func GetPressMetalSheets(c echo.Context) *echo.HTTPError {
 		lms = lms[:i]
 	}
 
-	t := MetalSheets(MetalSheetsProps{
+	t := templates.MetalSheets(templates.MetalSheetsProps{
 		Utilization:      u,
 		UpperMetalSheets: ums,
 		LowerMetalSheets: lms,
