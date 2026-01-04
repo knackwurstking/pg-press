@@ -3,6 +3,7 @@ package notes
 import (
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/handlers/notes/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
 
 	"github.com/labstack/echo/v4"
@@ -27,7 +28,7 @@ func GetPage(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	t := Page(notes, tools)
+	t := templates.Page(notes, tools)
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "Notes Page")

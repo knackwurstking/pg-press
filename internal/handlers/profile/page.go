@@ -3,6 +3,7 @@ package profile
 import (
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/handlers/profile/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
 
 	"github.com/labstack/echo/v4"
@@ -19,7 +20,7 @@ func GetProfilePage(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	t := Page(PageProps{User: user})
+	t := templates.Page(templates.PageProps{User: user})
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "Profile Page")

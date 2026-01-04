@@ -3,7 +3,9 @@ package tool
 import (
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/handlers/tool/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
+
 	"github.com/labstack/echo/v4"
 )
 
@@ -18,7 +20,7 @@ func GetToolNotes(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	t := Notes(toolID, notes)
+	t := templates.Notes(toolID, notes)
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "Notes")

@@ -5,6 +5,7 @@ import (
 
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/handlers/tools/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
 
 	"github.com/labstack/echo/v4"
@@ -83,7 +84,7 @@ func renderToolsSection(c echo.Context) *echo.HTTPError {
 		}
 	}
 
-	t := SectionTools(SectionToolsProps{
+	t := templates.SectionTools(templates.SectionToolsProps{
 		Tools:              tools,
 		Cassettes:          cassettes,
 		User:               user,

@@ -3,7 +3,9 @@ package tools
 import (
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/handlers/tools/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
+
 	"github.com/labstack/echo/v4"
 )
 
@@ -17,7 +19,7 @@ func renderPressSection(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	t := SectionPress(SectionPressProps{
+	t := templates.SectionPress(templates.SectionPressProps{
 		PressUtilizations: pressUtilizations,
 	})
 	err := t.Render(c.Request().Context(), c.Response())

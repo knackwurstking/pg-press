@@ -3,6 +3,7 @@ package tool
 import (
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/handlers/tool/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
 
 	"github.com/labstack/echo/v4"
@@ -14,7 +15,7 @@ func GetCyclesSectionContent(c echo.Context) *echo.HTTPError {
 
 func renderCyclesSection(c echo.Context, tool *shared.Tool) *echo.HTTPError {
 	// Render out-of-band swap for cycles section to trigger reload
-	t := CyclesSection(true, tool.ID, !tool.IsCassette())
+	t := templates.CyclesSection(true, tool.ID, !tool.IsCassette())
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "CyclesSection")
@@ -68,7 +69,7 @@ func renderCyclesSectionContent(c echo.Context) *echo.HTTPError {
 		return merr.WrapEcho("could not get user from context")
 	}
 
-	t := CyclesSectionContent(CyclesSectionContentProps{
+	t := templates.CyclesSectionContent(templates.CyclesSectionContentProps{
 		Tool:                tool,
 		ToolCycles:          toolCycles,
 		ActivePressNumber:   activePressNumber,

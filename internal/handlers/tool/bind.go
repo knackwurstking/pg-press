@@ -7,7 +7,9 @@ import (
 
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/handlers/tool/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
+
 	"github.com/labstack/echo/v4"
 )
 
@@ -70,7 +72,7 @@ func renderBindingSection(c echo.Context, tool *shared.Tool) *echo.HTTPError {
 	bindableCassettes = bindableCassettes[:i]
 
 	// Render the template
-	t := BindingSection(BindingSectionProps{
+	t := templates.BindingSection(templates.BindingSectionProps{
 		Tool:                tool,
 		CassettesForBinding: bindableCassettes,
 		IsAdmin:             user.IsAdmin(),

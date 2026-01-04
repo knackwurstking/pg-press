@@ -5,6 +5,7 @@ import (
 
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/handlers/tool/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
 
 	"github.com/labstack/echo/v4"
@@ -136,7 +137,7 @@ func renderRegenerationEdit(c echo.Context, tool *shared.Tool, editable bool, us
 		return merr.Wrap("getting press number for tool ID %d failed", tool.ID).Echo()
 	}
 
-	t := RegenerationEdit(RegenerationEditProps{
+	t := templates.RegenerationEdit(templates.RegenerationEditProps{
 		Tool:              tool,
 		ActivePressNumber: pressNumber,
 		IsRegenerating:    isRegenerating,

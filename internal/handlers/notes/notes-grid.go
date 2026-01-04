@@ -3,6 +3,7 @@ package notes
 import (
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/handlers/notes/templates"
 
 	"github.com/labstack/echo/v4"
 )
@@ -18,7 +19,7 @@ func GetNotesGrid(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	ng := NotesGrid(notes, tools)
+	ng := templates.NotesGrid(notes, tools)
 	err := ng.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "NotesGrid")

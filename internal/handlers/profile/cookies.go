@@ -5,7 +5,9 @@ import (
 
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/handlers/profile/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
+
 	"github.com/labstack/echo/v4"
 )
 
@@ -48,7 +50,7 @@ func renderCookies(c echo.Context, oob bool) *echo.HTTPError {
 		return int(a.LastLogin - b.LastLogin)
 	})
 
-	t := Cookies(CookiesProps{
+	t := templates.Cookies(templates.CookiesProps{
 		Cookies: cookies,
 		OOB:     oob,
 	})

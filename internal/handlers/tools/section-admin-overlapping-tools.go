@@ -2,6 +2,7 @@ package tools
 
 import (
 	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/handlers/tools/templates"
 	"github.com/labstack/echo/v4"
 )
 
@@ -12,7 +13,7 @@ func AdminOverlappingTools(c echo.Context) *echo.HTTPError {
 	//	return merr.Echo()
 	//}
 
-	t := AdminToolsSectionContent()
+	t := templates.AdminToolsSectionContent()
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "AdminToolsSectionContent")
