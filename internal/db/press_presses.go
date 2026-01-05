@@ -77,6 +77,8 @@ const (
 			type
 		FROM presses;
 	`
+
+	// TODO: delete SQL query
 )
 
 // -----------------------------------------------------------------------------
@@ -211,6 +213,8 @@ func GetPressUtilizations(pressNumbers ...shared.PressNumber) (
 
 	return pu, nil
 }
+
+// TODO: Delete SQL function
 
 // -----------------------------------------------------------------------------
 // Scan Helpers
