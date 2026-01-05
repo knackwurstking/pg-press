@@ -33,15 +33,29 @@ templ Page(p PageProps) {
 }
 
 // Actions section - contains buttons for umbau and regeneration
-//
-// TODO: Add action: Edit press dialog
-// TODO: Add action: Delete this press
 templ sectionActions(p PageProps) {
 	@components.ActionBar(nil) {
 		<a
 			role="button"
+			class="destructive"
+			href={ urlb.UrlPress(p.PressNumber).Delete }
+			disabled?={ !p.User.IsAdmin() }
+		>
+			Entfernen
+		</a>
+		<a
+			role="button"
+			class="secondary"
+			href={ urlb.UrlDialogEditPress(p.PressNumber).Get }
+			disabled?={ !p.User.IsAdmin() }
+		>
+			Bearbeiten
+		</a>
+		<a
+			role="button"
 			class="primary"
 			href={ urlb.UrlUmbau(p.PressNumber).Page }
+			disabled?={ !p.User.IsAdmin() }
 		>
 			Umbau
 		</a>
