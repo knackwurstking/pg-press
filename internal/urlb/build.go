@@ -300,6 +300,7 @@ func UrlPress(pressNumber shared.PressNumber) (url struct {
 	Notes              templ.SafeURL
 	PressRegenerations templ.SafeURL
 	CycleSummaryPDF    templ.SafeURL
+	Delete             templ.SafeURL
 }) {
 	url.Page = BuildURL(fmt.Sprintf("/press/%d", pressNumber))
 	url.ActiveTools = BuildURL(fmt.Sprintf("/press/%d/active-tools", pressNumber))
@@ -308,6 +309,7 @@ func UrlPress(pressNumber shared.PressNumber) (url struct {
 	url.Notes = BuildURL(fmt.Sprintf("/press/%d/notes", pressNumber))
 	url.PressRegenerations = BuildURL(fmt.Sprintf("/press/%d/regenerations", pressNumber))
 	url.CycleSummaryPDF = BuildURL(fmt.Sprintf("/press/%d/cycle-summary-pdf", pressNumber))
+	url.Delete = BuildURL(fmt.Sprintf("/press/%d", pressNumber))
 
 	return url
 }
