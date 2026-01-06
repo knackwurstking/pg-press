@@ -35,14 +35,15 @@ templ Page(p PageProps) {
 // Actions section - contains buttons for umbau and regeneration
 templ sectionActions(p PageProps) {
 	@components.ActionBar(nil) {
-		<a
-			role="button"
+		<button
 			class="destructive"
-			href={ urlb.UrlPress(p.PressNumber).Delete }
+			hx-delete={ urlb.UrlPress(p.PressNumber).Delete }
+			hx-trigger="click"
+			hx-confirm="Möchten Sie diese Presse wirklich entfernen? Diese Aktion kann nicht rückgängig gemacht werden."
 			disabled?={ !p.User.IsAdmin() }
 		>
 			Entfernen
-		</a>
+		</button>
 		<a
 			role="button"
 			class="secondary"
