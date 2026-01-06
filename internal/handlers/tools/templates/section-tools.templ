@@ -20,7 +20,7 @@ type SectionToolsProps struct {
 
 templ SectionTools(p SectionToolsProps) {
 	<span
-		hx-get={ urlb.UrlTools(0, false).SectionTools }
+		hx-get={ urlb.UrlTools(0).SectionTools }
 		hx-trigger="tools-tab from:body"
 		hx-target="#tab-content"
 	></span>

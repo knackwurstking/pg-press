@@ -13,7 +13,7 @@ type SectionPressProps struct {
 
 templ SectionPress(p SectionPressProps) {
 	<span
-		hx-get={ urlb.UrlTools(0, false).SectionPress }
+		hx-get={ urlb.UrlTools(0).SectionPress }
 		hx-trigger="tools-tab from:body"
 		hx-target="#tab-content"
 	></span>

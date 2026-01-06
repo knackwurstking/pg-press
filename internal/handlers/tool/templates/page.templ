@@ -57,7 +57,7 @@ templ actionBarContent(p *PageProps) {
 		} else {
 			<button
 				class="destructive flex gap"
-				hx-patch={ urlb.UrlTools(p.Tool.ID, p.Tool.IsCassette()).MarkDead }
+				hx-patch={ urlb.UrlTools(p.Tool.ID).MarkDead }
 				hx-trigger="click"
 				hx-confirm="Sind Sie sicher, dass Sie dieses Werkzeug löschen möchten?"
 			>

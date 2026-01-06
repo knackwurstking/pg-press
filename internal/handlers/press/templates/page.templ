@@ -36,15 +36,6 @@ templ Page(p PageProps) {
 templ sectionActions(p PageProps) {
 	@components.ActionBar(nil) {
 		<button
-			class="destructive"
-			hx-delete={ urlb.UrlPress(p.PressNumber).Delete }
-			hx-trigger="click"
-			hx-confirm="Möchten Sie diese Presse wirklich entfernen? Diese Aktion kann nicht rückgängig gemacht werden."
-			disabled?={ !p.User.IsAdmin() }
-		>
-			Entfernen
-		</button>
-		<button
 			class="secondary"
 			hx-get={ urlb.UrlDialogEditPress(p.PressNumber).Get }
 			hx-trigger="click"

@@ -213,7 +213,7 @@ func UrlTroubleReports(trID shared.EntityID, aID shared.EntityID, modificationTi
 // -----------------------------------------------------------------------------
 
 // UrlTools constructs tools URLs
-func UrlTools(toolID shared.EntityID, isCassette bool) (url struct {
+func UrlTools(toolID shared.EntityID) (url struct {
 	Page                  templ.SafeURL
 	Delete                templ.SafeURL
 	MarkDead              templ.SafeURL
