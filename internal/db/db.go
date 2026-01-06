@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/logger"
 )
 
 type Scannable interface {
@@ -21,6 +22,8 @@ var (
 	dbPress *sql.DB
 	dbNote  *sql.DB
 	dbUser  *sql.DB
+
+	log = logger.New("db")
 )
 
 func Open(path string, allowCreate bool) error {
@@ -36,7 +39,7 @@ func Open(path string, allowCreate bool) error {
 	wg := &sync.WaitGroup{}
 	chErr := make(chan error, 4)
 	for _, name := range []string{"tool", "press", "note", "user"} {
-		fmt.Fprintf(os.Stderr, "Opening %s database at %s\n", name, path)
+		log.Debug("Opening %s database at %s", name, path)
 
 		wg.Go(func() {
 			path := fmt.Sprintf(
