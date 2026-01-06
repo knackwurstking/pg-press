@@ -34,7 +34,7 @@ func GetNotes(c echo.Context) *echo.HTTPError {
 	toolsMap[u.SlotLower.ID] = u.SlotLower
 
 	var toolNotes []*shared.Note
-	for id, _ := range toolsMap {
+	for id := range toolsMap {
 		notes, merr := db.ListNotesForLinked("tool", int(id))
 		if merr != nil {
 			return merr.Echo()
