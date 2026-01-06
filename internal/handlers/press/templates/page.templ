@@ -53,19 +53,19 @@ templ sectionActions(p PageProps) {
 		</a>
 		<a
 			role="button"
-			class="primary"
-			href={ urlb.UrlUmbau(p.PressNumber).Page }
-			disabled?={ !p.User.IsAdmin() }
-		>
-			Umbau
-		</a>
-		<a
-			role="button"
 			class="secondary"
 			href={ urlb.UrlPressRegeneration(p.PressNumber, 0).Page }
 			disabled?={ !p.User.IsAdmin() }
 		>
 			Regeneration
+		</a>
+		<a
+			role="button"
+			class="primary"
+			href={ urlb.UrlUmbau(p.PressNumber).Page }
+			disabled?={ !p.User.IsAdmin() }
+		>
+			Umbau
 		</a>
 	}
 }
