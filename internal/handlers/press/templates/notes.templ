@@ -1,13 +1,11 @@
 package templates
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
 type NotesProps struct {
@@ -25,49 +23,12 @@ templ Notes(p NotesProps) {
 }
 
 templ pressNotes(pressNumber shared.PressNumber, notes []*shared.Note) {
-	if len(notes) > 0 {
-		// Press Notes
-		@components.Section(templ.Attributes{
-			"class": "notes-list flex flex-col gap-lg p",
-		}) {
-			for _, note := range notes {
-				@components.NoteCard(note, nil)
-			}
-		}
-		@components.Section(templ.Attributes{
-			"class": "flex justify-center mt",
-		}) {
-			<button
-				class="primary"
-				hx-get={ urlb.UrlDialogs().EditNote(0, fmt.Sprintf("press_%d", pressNumber)) }
-				hx-trigger="click"
-				hx-target="body"
-				hx-swap="beforeend"
-				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-				title="Neue Notiz für diese Presse hinzufügen"
-			>
-				<i class="bi bi-plus-lg"></i>
-				Notiz hinzufügen
-			</button>
-		}
-	} else {
-		@components.Section(templ.Attributes{
-			"class": "empty-state",
-		}) {
-			<h4>Keine Notizen</h4>
-			<p>Es gibt keine Notizen für Werkzeuge auf dieser Presse.</p>
-			<button
-				class="primary"
-				hx-get={ urlb.UrlDialogs().EditNote(0, fmt.Sprintf("press_%d", pressNumber)) }
-				hx-trigger="click"
-				hx-target="body"
-				hx-swap="beforeend"
-				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-				title="Neue Notiz für diese Presse hinzufügen"
-			>
-				<i class="bi bi-plus-lg"></i>
-				Erste Notiz hinzufügen
-			</button>
+	// Press Notes
+	@components.Section(templ.Attributes{
+		"class": "notes-list flex flex-col gap-lg p",
+	}) {
+		for _, note := range notes {
+			@components.NoteCard(note, nil)
 		}
 	}
 }

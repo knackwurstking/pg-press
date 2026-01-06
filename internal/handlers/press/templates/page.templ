@@ -76,9 +76,13 @@ templ sectionNotes(p PageProps) {
 		"id":    "notes-section",
 		"class": "mt",
 	}) {
-		<div class="flex justify-between items-center mb">
-			<h5>Notizen</h5>
-		</div>
+		@components.SectionTitle(components.SubTitle, "Notizen") {
+			@components.SectionDialogAction(components.SectionDialogActionProps{
+				Url:   urlb.UrlDialogs().EditNote(0, fmt.Sprintf("press_%d", p.PressNumber)),
+				Icon:  "plus-lg",
+				Title: "Neue Notiz für diese Presse hinzufügen",
+			})
+		}
 		<div
 			id="notes-content"
 			hx-get={ urlb.UrlPress(p.PressNumber).Notes }
