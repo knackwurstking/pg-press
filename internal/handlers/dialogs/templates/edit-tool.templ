@@ -24,28 +24,16 @@ templ NewToolDialog() {
 
 templ EditToolDialog(tool *shared.Tool) {
 	@ui.Dialog(ui.DialogOptions{
-		Method:            "PUT",
-		Href:              urlb.UrlDialogs().EditTool(tool.ID),
-		ID:                "tool-edit-dialog",
-		SubmitButtonText:  "Aktualisieren",
-		AdditionalActions: editToolActions(tool),
+		Method:           "PUT",
+		Href:             urlb.UrlDialogs().EditTool(tool.ID),
+		ID:               "tool-edit-dialog",
+		SubmitButtonText: "Aktualisieren",
 	}) {
 		@toolPosition(tool.Position)
 		@toolFormat(tool.Width, tool.Height)
 		@toolType(tool.Type)
 		@toolCode(tool.Code)
 	}
-}
-
-templ editToolActions(tool *shared.Tool) {
-	<button
-		class="destructive"
-		hx-delete={ urlb.UrlTools(tool.ID).Delete }
-		hx-trigger="click"
-		hx-confirm="Möchten Sie dieses Werkzeug wirklich entfernen? Diese Aktion kann nicht rückgängig gemacht werden."
-	>
-		Entfernen
-	</button>
 }
 
 templ toolPosition(inputPosition shared.Slot) {
