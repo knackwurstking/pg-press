@@ -16,9 +16,11 @@ func GetEditPress(c echo.Context) *echo.HTTPError {
 	id, merr := shared.ParseQueryInt64(c, "id")
 	if merr != nil && !merr.IsNotFoundError() {
 		return merr.Echo()
+	} else if merr != nil && merr.IsNotFoundError() {
+		id = -1
 	}
 
-	if id > 0 {
+	if id > -1 {
 		press, merr := db.GetPress(shared.EntityID(id))
 		if merr != nil {
 			return merr.Echo()
