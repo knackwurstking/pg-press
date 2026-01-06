@@ -44,14 +44,16 @@ templ sectionActions(p PageProps) {
 		>
 			Entfernen
 		</button>
-		<a
-			role="button"
+		<button
 			class="secondary"
-			href={ urlb.UrlDialogEditPress(p.PressNumber).Get }
+			hx-get={ urlb.UrlDialogEditPress(p.PressNumber).Get }
+			hx-trigger="click"
+			hx-target="body"
+			hx-swap="beforeend"
 			disabled?={ !p.User.IsAdmin() }
 		>
 			Bearbeiten
-		</a>
+		</button>
 		<a
 			role="button"
 			class="secondary"
