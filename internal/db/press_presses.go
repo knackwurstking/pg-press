@@ -78,7 +78,10 @@ const (
 		FROM presses;
 	`
 
-	// TODO: delete SQL query
+	sqlDeletePress string = `
+		DELETE FROM presses
+		WHERE id = :id
+	`
 )
 
 // -----------------------------------------------------------------------------
@@ -214,7 +217,13 @@ func GetPressUtilizations(pressNumbers ...shared.PressNumber) (
 	return pu, nil
 }
 
-// TODO: Delete SQL function
+func DeletePress(id shared.EntityID) *errors.MasterError {
+	_, err := dbPress.Exec(sqlDeletePress, sql.Named("id", id))
+	if err != nil {
+		return errors.NewMasterError(err)
+	}
+	return nil
+}
 
 // -----------------------------------------------------------------------------
 // Scan Helpers
