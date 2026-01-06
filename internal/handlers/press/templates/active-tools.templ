@@ -9,9 +9,7 @@ import (
 templ ActiveToolsSection(pu *shared.PressUtilization) {
 	<div class="flex flex-col gap">
 		if pu.SlotUpper == nil || pu.SlotUpperCassette == nil || pu.SlotLower == nil {
-			<div class="text-center text-muted">
-				Keine aktiven Werkzeuge für diese Presse
-			</div>
+			@components.NotFoundText("Keine aktiven Werkzeuge für diese Presse")
 		} else {
 			if pu.SlotUpper != nil {
 				@components.ToolAnchor(components.ToolAnchorProps{
