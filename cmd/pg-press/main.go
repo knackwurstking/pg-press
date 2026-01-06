@@ -10,7 +10,6 @@ import (
 )
 
 const (
-	appName = "pg-press"
 	version = "v0.0.1"
 
 	exitCodeGeneric     = 1
@@ -19,12 +18,15 @@ const (
 )
 
 var (
+	appName    string
 	configPath string
 	log        *ui.Logger
 )
 
 func init() {
 	log = logger.New("main")
+
+	appName = filepath.Base(os.Args[0])
 
 	p, err := os.UserConfigDir()
 	if err != nil {
