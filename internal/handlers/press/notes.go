@@ -29,9 +29,15 @@ func GetNotes(c echo.Context) *echo.HTTPError {
 	u := pu[pressNumber]
 
 	toolsMap := make(map[shared.EntityID]*shared.Tool)
-	toolsMap[u.SlotUpper.ID] = u.SlotUpper
-	toolsMap[u.SlotUpperCassette.ID] = u.SlotUpperCassette
-	toolsMap[u.SlotLower.ID] = u.SlotLower
+	if u.SlotUpper != nil {
+		toolsMap[u.SlotUpper.ID] = u.SlotUpper
+	}
+	if u.SlotUpperCassette != nil {
+		toolsMap[u.SlotUpperCassette.ID] = u.SlotUpperCassette
+	}
+	if u.SlotLower != nil {
+		toolsMap[u.SlotLower.ID] = u.SlotLower
+	}
 
 	var toolNotes []*shared.Note
 	for id := range toolsMap {

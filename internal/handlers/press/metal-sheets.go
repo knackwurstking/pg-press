@@ -30,23 +30,28 @@ func GetPressMetalSheets(c echo.Context) *echo.HTTPError {
 	}
 
 	var ums []*shared.UpperMetalSheet
-	var lms []*shared.LowerMetalSheet
-	var merr *errors.MasterError
-	if ums, merr = db.ListUpperMetalSheetsByTool(u.SlotUpper.ID); merr != nil {
-		return merr.Echo()
+	if u.SlotUpper != nil {
+		var merr *errors.MasterError
+		if ums, merr = db.ListUpperMetalSheetsByTool(u.SlotUpper.ID); merr != nil {
+			return merr.Echo()
+		}
 	}
 
-	if lms, merr = db.ListLowerMetalSheetsByTool(u.SlotLower.ID); merr != nil {
-		return merr.Echo()
-	} else {
-		i := 0
-		for _, lm := range lms {
-			if lm.Identifier == u.Type {
-				lms[i] = lm
-				i++
+	var lms []*shared.LowerMetalSheet
+	if u.SlotLower != nil {
+		var merr *errors.MasterError
+		if lms, merr = db.ListLowerMetalSheetsByTool(u.SlotLower.ID); merr != nil {
+			return merr.Echo()
+		} else {
+			i := 0
+			for _, lm := range lms {
+				if lm.Identifier == u.Type {
+					lms[i] = lm
+					i++
+				}
 			}
+			lms = lms[:i]
 		}
-		lms = lms[:i]
 	}
 
 	t := templates.MetalSheets(templates.MetalSheetsProps{
