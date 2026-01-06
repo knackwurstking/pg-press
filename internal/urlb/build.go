@@ -387,7 +387,7 @@ func UrlDialogEditCycle(
 func UrlDialogEditPress(pressID shared.PressNumber) (url struct {
 	Get, Post, Put templ.SafeURL
 }) {
-	if pressID > 0 {
+	if pressID > -1 {
 		url.Get = BuildURLWithParams("/dialog/edit-press", map[string]string{
 			"id": pressID.String(),
 		})
