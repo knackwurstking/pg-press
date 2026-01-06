@@ -217,7 +217,7 @@ func GetPressUtilizations(pressNumbers ...shared.PressNumber) (
 	return pu, nil
 }
 
-func DeletePress(id shared.EntityID) *errors.MasterError {
+func DeletePress(id shared.PressNumber) *errors.MasterError {
 	_, err := dbPress.Exec(sqlDeletePress, sql.Named("id", id))
 	if err != nil {
 		return errors.NewMasterError(err)
