@@ -162,14 +162,15 @@ templ sectionCycles(p PageProps) {
 		<div class="flex justify-between items-center mb">
 			<h5>Pressennutzungsverlauf</h5>
 		</div>
-		<div class="mx w-full flex justify-end align-center">
-			<!-- Request a summary in PDF form from the server -->
-			<button
-				role="button"
-				class="info"
-				onclick={ components.DownloadCycleSummaryPDF(p.PressNumber) }
-			>Zusammenfassung (PDF)</button>
-		</div>
+		// TODO: PDF Stuff disabled for now
+		//<div class="mx w-full flex justify-end align-center">
+		//	<!-- Request a summary in PDF form from the server -->
+		//	<button
+		//		role="button"
+		//		class="info"
+		//		onclick={ components.DownloadCycleSummaryPDF(p.PressNumber) }
+		//	>Zusammenfassung (PDF)</button>
+		//</div>
 		<div
 			id="cycles-content"
 			class="mt"
