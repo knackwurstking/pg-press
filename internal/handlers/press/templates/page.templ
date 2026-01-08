@@ -99,7 +99,7 @@ templ sectionActiveTools(p PageProps) {
 		<div
 			id="active-tools-content"
 			hx-get={ urlb.UrlPress(p.PressNumber).ActiveTools }
-			hx-trigger="load, pageLoaded from:body"
+			hx-trigger="load, reload-active-tools from:body"
 			hx-on:htmx:response-error="alert('Fehler beim Laden der Werkzeuge: ' + event.detail.xhr.responseText)"
 		>
 			@components.Spinner()

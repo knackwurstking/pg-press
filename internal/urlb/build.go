@@ -314,6 +314,13 @@ func UrlPress(pressNumber shared.PressNumber) (url struct {
 	return url
 }
 
+func UrlPressReplaceTool(pn shared.PressNumber, p shared.Slot) templ.SafeURL {
+	return BuildURLWithParams(fmt.Sprintf("/press/%d/replace-tool", pn), map[string]string{
+		"tool_id":  fmt.Sprintf("%d", pn),
+		"position": fmt.Sprintf("%d", p),
+	})
+}
+
 // -----------------------------------------------------------------------------
 // Press Regeneration URLs
 // -----------------------------------------------------------------------------

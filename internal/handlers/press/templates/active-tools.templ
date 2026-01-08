@@ -3,33 +3,66 @@ package templates
 import (
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
 // Active tools section component
 templ ActiveToolsSection(pu *shared.PressUtilization, toolsForSelection map[shared.Slot][]*shared.Tool) {
 	<div class="flex flex-col gap">
-		if pu.SlotUpper == nil || pu.SlotLower == nil {
-			@components.NotFoundText("Keine aktiven Werkzeuge für diese Presse")
-		} else {
+		// Upper Tool Selection
+		{{
+			currentToolID := shared.EntityID(0)
 			if pu.SlotUpper != nil {
-				@components.ToolAnchor(components.ToolAnchorProps{
-					Tool:            pu.SlotUpper,
-					BindingCassette: pu.SlotUpperCassette,
-				})
-			} else {
-				@toolSelection(toolsForSelection[shared.SlotUpper])
+				currentToolID = pu.SlotUpper.ID
 			}
+		}}
+		@toolSelection(pu.PressNumber, shared.SlotUpper, currentToolID, toolsForSelection[shared.SlotUpper])
+		if pu.SlotUpper != nil {
+			@components.ToolAnchor(components.ToolAnchorProps{
+				Tool:            pu.SlotUpper,
+				BindingCassette: pu.SlotUpperCassette,
+			})
+		}
+		// Lower Tool Selection
+		{{
+			currentToolID = shared.EntityID(0)
 			if pu.SlotLower != nil {
-				@components.ToolAnchor(components.ToolAnchorProps{
-					Tool: pu.SlotLower,
-				})
-			} else {
-				@toolSelection(toolsForSelection[shared.SlotLower])
+				currentToolID = pu.SlotLower.ID
 			}
+		}}
+		@toolSelection(pu.PressNumber, shared.SlotLower, currentToolID, toolsForSelection[shared.SlotLower])
+		if pu.SlotLower != nil {
+			@components.ToolAnchor(components.ToolAnchorProps{
+				Tool: pu.SlotLower,
+			})
 		}
 	</div>
 }
 
-templ toolSelection(tools []*shared.Tool) {
-	// TODO: Select upper or lower tool for press slot
+templ toolSelection(pn shared.PressNumber, position shared.Slot, currentToolID shared.EntityID, tools []*shared.Tool) {
+	<form
+		hx-post={ urlb.UrlPressReplaceTool(pn, position) }
+		hx-trigger="change"
+	>
+		<select
+			class="select"
+			name="tool_id"
+		>
+			<option value="" disabled>
+				Wählen Sie 
+				switch position {
+					case shared.SlotUpper:
+						ein Oberteil
+					case shared.SlotLower:
+						ein Unterteil
+				}
+			</option>
+			<option value="0" selected?={ currentToolID <= 0 }>Kein Tool</option>
+			for _, tool := range tools {
+				<option value={ tool.ID } selected?={ currentToolID == tool.ID }>
+					{ tool.German() }
+				</option>
+			}
+		</select>
+	</form>
 }

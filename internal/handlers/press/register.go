@@ -24,8 +24,8 @@ func Register(e *echo.Echo, path string) {
 			ui.NewEchoRoute(http.MethodGet, path+"/:press/cycles", GetCycles),
 			ui.NewEchoRoute(http.MethodGet, path+"/:press/notes", GetNotes),
 			ui.NewEchoRoute(http.MethodGet, path+"/:press/regenerations", GetRegenerations),
-
 			ui.NewEchoRoute(http.MethodDelete, path+"/:press", DeletePress),
+			ui.NewEchoRoute(http.MethodPost, path+"/:press/replace-tool", ReplaceTool),
 
 			// PDF Handlers
 			//ui.NewEchoRoute(http.MethodGet, path+"/:press/cycle-summary-pdf", GetCycleSummaryPDF),
