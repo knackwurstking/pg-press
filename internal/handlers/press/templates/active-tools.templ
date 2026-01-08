@@ -6,7 +6,7 @@ import (
 )
 
 // Active tools section component
-templ ActiveToolsSection(pu *shared.PressUtilization) {
+templ ActiveToolsSection(pu *shared.PressUtilization, toolsForSelection map[shared.Slot][]*shared.Tool) {
 	<div class="flex flex-col gap">
 		if pu.SlotUpper == nil || pu.SlotLower == nil {
 			@components.NotFoundText("Keine aktiven Werkzeuge für diese Presse")
@@ -17,15 +17,19 @@ templ ActiveToolsSection(pu *shared.PressUtilization) {
 					BindingCassette: pu.SlotUpperCassette,
 				})
 			} else {
-				// TODO: Input element to assign a tool to upper slot
+				@toolSelection(toolsForSelection[shared.SlotUpper])
 			}
 			if pu.SlotLower != nil {
 				@components.ToolAnchor(components.ToolAnchorProps{
 					Tool: pu.SlotLower,
 				})
 			} else {
-				// TODO: Input element to assign a tool to lower slot
+				@toolSelection(toolsForSelection[shared.SlotLower])
 			}
 		}
 	</div>
+}
+
+templ toolSelection(tools []*shared.Tool) {
+	// TODO: Select upper or lower tool for press slot
 }

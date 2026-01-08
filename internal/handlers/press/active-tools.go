@@ -15,12 +15,26 @@ func GetActiveTools(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	tools, merr := db.GetPressUtilizations([]shared.PressNumber{shared.PressNumber(pressNumber)}...)
+	pu, merr := db.GetPressUtilizations([]shared.PressNumber{shared.PressNumber(pressNumber)}...)
 	if merr != nil {
 		return merr.WrapEcho("get press utilizations for press %d", pressNumber)
 	}
 
-	t := templates.ActiveToolsSection(tools[shared.PressNumber(pressNumber)])
+	toolsForSelection := make(map[shared.Slot][]*shared.Tool)
+	toolsForSelection[shared.SlotUpper] = []*shared.Tool{}
+	toolsForSelection[shared.SlotLower] = []*shared.Tool{}
+	tools, merr := db.ListTools()
+	if merr != nil {
+		return merr.WrapEcho("list tools for active tools selection")
+	}
+	for _, tool := range tools {
+		switch tool.Position {
+		case shared.SlotUpper, shared.SlotLower:
+			toolsForSelection[tool.Position] = append(toolsForSelection[tool.Position], tool)
+		}
+	}
+
+	t := templates.ActiveToolsSection(pu[shared.PressNumber(pressNumber)], toolsForSelection)
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "ActiveToolsSection")
