@@ -8,10 +8,12 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// AuthorizationError represents an authorization-related error
 type AuthorizationError struct {
 	Message string
 }
 
+// NewAuthorizationError creates a new authorization error
 func NewAuthorizationError(format string, v ...any) *AuthorizationError {
 	return &AuthorizationError{
 		Message: fmt.Sprintf(format, v...),
@@ -22,14 +24,17 @@ func (a *AuthorizationError) Error() string {
 	return a.Message
 }
 
-func (a *AuthorizationError) MasterError() *MasterError {
-	return NewMasterError(a).SetCode(http.StatusUnauthorized)
+// HTTPError converts AuthorizationError to HTTPError with unauthorized status
+func (a *AuthorizationError) HTTPError() *HTTPError {
+	return NewHTTPError(a).SetCode(http.StatusUnauthorized)
 }
 
+// NotFoundError represents a resource not found error
 type NotFoundError struct {
 	Message string
 }
 
+// NewNotFoundError creates a new not found error
 func NewNotFoundError(format string, v ...any) *NotFoundError {
 	return &NotFoundError{
 		Message: fmt.Sprintf(format, v...),
@@ -40,14 +45,17 @@ func (n *NotFoundError) Error() string {
 	return n.Message
 }
 
-func (n *NotFoundError) MasterError() *MasterError {
-	return NewMasterError(n).SetCode(http.StatusNotFound)
+// HTTPError converts NotFoundError to HTTPError with not found status
+func (n *NotFoundError) HTTPError() *HTTPError {
+	return NewHTTPError(n).SetCode(http.StatusNotFound)
 }
 
+// ValidationError represents a validation error
 type ValidationError struct {
 	Message string
 }
 
+// NewValidationError creates a new validation error
 func NewValidationError(format string, v ...any) *ValidationError {
 	return &ValidationError{
 		Message: fmt.Sprintf(format, v...),
@@ -58,15 +66,18 @@ func (ve *ValidationError) Error() string {
 	return ve.Message
 }
 
-func (ve *ValidationError) MasterError() *MasterError {
-	return NewMasterError(ve).SetCode(http.StatusBadRequest)
+// HTTPError converts ValidationError to HTTPError with bad request status
+func (ve *ValidationError) HTTPError() *HTTPError {
+	return NewHTTPError(ve).SetCode(http.StatusBadRequest)
 }
 
+// ExistsError represents an error when a resource already exists
 type ExistsError struct {
 	Name  string
 	Value any
 }
 
+// NewExistsError creates a new exists error
 func NewExistsError(name string, v any) *ExistsError {
 	return &ExistsError{
 		Name:  name,
@@ -82,21 +93,24 @@ func (ee *ExistsError) Error() string {
 	return fmt.Sprintf("%s already exists", ee.Name)
 }
 
-func (ee *ExistsError) MasterError() *MasterError {
-	return NewMasterError(ee).SetCode(http.StatusConflict)
+// HTTPError converts ExistsError to HTTPError with conflict status
+func (ee *ExistsError) HTTPError() *HTTPError {
+	return NewHTTPError(ee).SetCode(http.StatusConflict)
 }
 
-type MasterError struct {
+// HTTPError is a wrapper that provides HTTP status codes for errors
+type HTTPError struct {
 	err  error // Err is required
 	code int   // Code is optional
 }
 
-func NewMasterError(err error) *MasterError {
+// NewHTTPError creates a new HTTPError from an error
+func NewHTTPError(err error) *HTTPError {
 	if err == nil {
-		panic("cannot create MasterError with nil error")
+		panic("cannot create HTTPError with nil error")
 	}
 
-	if e, ok := err.(*MasterError); ok {
+	if e, ok := err.(*HTTPError); ok {
 		return e
 	}
 
@@ -110,13 +124,14 @@ func NewMasterError(err error) *MasterError {
 		code = http.StatusConflict
 	}
 
-	return &MasterError{
+	return &HTTPError{
 		err:  err,
 		code: code,
 	}
 }
 
-func (e *MasterError) Error() string {
+// Error returns the underlying error's message
+func (e *HTTPError) Error() string {
 	if e == nil {
 		panic("error is nil?")
 	}
@@ -124,49 +139,57 @@ func (e *MasterError) Error() string {
 	return e.err.Error()
 }
 
-func (e *MasterError) Err() error {
+// Err returns the underlying error
+func (e *HTTPError) Err() error {
 	return e.err
 }
 
 // Code returns the associated HTTP status code
-func (e *MasterError) Code() int {
+func (e *HTTPError) Code() int {
 	return e.code
 }
 
-func (e *MasterError) SetCode(code int) *MasterError {
+// SetCode sets the HTTP status code for this error
+func (e *HTTPError) SetCode(code int) *HTTPError {
 	e.code = code
 	return e
 }
 
-func (e *MasterError) Wrap(format string, a ...any) *MasterError {
+// Wrap wraps the error with additional context
+func (e *HTTPError) Wrap(format string, a ...any) *HTTPError {
 	msg := fmt.Sprintf(format, a...)
 	if msg == "" {
 		return e
 	}
 	wrapped := fmt.Errorf("%s: %v", msg, e.err)
-	return &MasterError{err: wrapped, code: e.code}
+	return &HTTPError{err: wrapped, code: e.code}
 }
 
-func (e *MasterError) Echo() *echo.HTTPError {
+// Echo converts this error to an echo HTTP error
+func (e *HTTPError) Echo() *echo.HTTPError {
 	return echo.NewHTTPError(e.code, e.err.Error())
 }
 
-func (e *MasterError) WrapEcho(format string, a ...any) *echo.HTTPError {
+// WrapEcho wraps the error and converts it to an echo HTTP error
+func (e *HTTPError) WrapEcho(format string, a ...any) *echo.HTTPError {
 	msg := fmt.Sprintf(format, a...)
 	return echo.NewHTTPError(e.code, msg+": "+e.err.Error())
 }
 
-func (e *MasterError) IsValidationError() bool {
+// IsValidationError checks if the error is a validation error
+func (e *HTTPError) IsValidationError() bool {
 	_, ok := e.err.(*ValidationError)
 	return ok || e.code == http.StatusBadRequest
 }
 
-func (e *MasterError) IsExistsError() bool {
+// IsExistsError checks if the error is an exists error
+func (e *HTTPError) IsExistsError() bool {
 	_, ok := e.err.(*ExistsError)
 	return ok || e.code == http.StatusConflict
 }
 
-func (e *MasterError) IsNotFoundError() bool {
+// IsNotFoundError checks if the error is a not found error
+func (e *HTTPError) IsNotFoundError() bool {
 	_, ok := e.err.(*NotFoundError)
 	return ok || e.code == http.StatusNotFound
 }
