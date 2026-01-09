@@ -40,7 +40,7 @@ const (
 
 	sqlUpdateUpperMetalSheet string = `
 		UPDATE metal_sheets
-		SET 
+		SET
 			tool_id 	= :tool_id,
 			tile_height = :tile_height,
 			value 		= :value
@@ -72,7 +72,7 @@ const (
 
 	sqlUpdateLowerMetalSheet string = `
 		UPDATE metal_sheets
-		SET 
+		SET
 			tool_id 		= :tool_id,
 			tile_height 	= :tile_height,
 			value 			= :value,
@@ -102,6 +102,7 @@ const (
 // Upper Metal Sheets
 // -----------------------------------------------------------------------------
 
+// AddUpperMetalSheet adds a new upper metal sheet to the database
 func AddUpperMetalSheet(ums *shared.UpperMetalSheet) *errors.MasterError {
 	if verr := ums.Validate(); verr != nil {
 		return verr.MasterError().Wrap("invalid upper metal sheet")
@@ -118,6 +119,7 @@ func AddUpperMetalSheet(ums *shared.UpperMetalSheet) *errors.MasterError {
 	return nil
 }
 
+// UpdateUpperMetalSheet updates an existing upper metal sheet in the database
 func UpdateUpperMetalSheet(ums *shared.UpperMetalSheet) *errors.MasterError {
 	if verr := ums.Validate(); verr != nil {
 		return verr.MasterError().Wrap("invalid upper metal sheet")
@@ -135,6 +137,7 @@ func UpdateUpperMetalSheet(ums *shared.UpperMetalSheet) *errors.MasterError {
 	return nil
 }
 
+// GetUpperMetalSheet retrieves an upper metal sheet by its ID
 func GetUpperMetalSheet(metalSheetID shared.EntityID) (*shared.UpperMetalSheet, *errors.MasterError) {
 	r := dbTool.QueryRow(sqlGetUpperMetalSheet, sql.Named("id", metalSheetID))
 	ums, merr := ScanUpperMetalSheet(r)
@@ -144,6 +147,7 @@ func GetUpperMetalSheet(metalSheetID shared.EntityID) (*shared.UpperMetalSheet, 
 	return ums, nil
 }
 
+// ListUpperMetalSheetsByTool retrieves all upper metal sheets for a given tool
 func ListUpperMetalSheetsByTool(toolID shared.EntityID) ([]*shared.UpperMetalSheet, *errors.MasterError) {
 	rows, err := dbTool.Query(sqlListUpperMetalSheetsByTool, sql.Named("tool_id", toolID))
 	if err != nil {
@@ -162,10 +166,20 @@ func ListUpperMetalSheetsByTool(toolID shared.EntityID) ([]*shared.UpperMetalShe
 	return metalSheets, nil
 }
 
+// DeleteUpperMetalSheet removes an upper metal sheet from the database
+func DeleteUpperMetalSheet(id shared.EntityID) *errors.MasterError {
+	_, err := dbTool.Exec("DELETE FROM metal_sheets WHERE id = ? AND type = 'upper'", id)
+	if err != nil {
+		return errors.NewMasterError(err)
+	}
+	return nil
+}
+
 // -----------------------------------------------------------------------------
 // Lower Metal Sheets
 // -----------------------------------------------------------------------------
 
+// AddLowerMetalSheet adds a new lower metal sheet to the database
 func AddLowerMetalSheet(lms *shared.LowerMetalSheet) *errors.MasterError {
 	if verr := lms.Validate(); verr != nil {
 		return verr.MasterError().Wrap("invalid lower metal sheet")
@@ -186,6 +200,7 @@ func AddLowerMetalSheet(lms *shared.LowerMetalSheet) *errors.MasterError {
 	return nil
 }
 
+// UpdateLowerMetalSheet updates an existing lower metal sheet in the database
 func UpdateLowerMetalSheet(lms *shared.LowerMetalSheet) *errors.MasterError {
 	if verr := lms.Validate(); verr != nil {
 		return verr.MasterError().Wrap("invalid lower metal sheet")
@@ -207,6 +222,7 @@ func UpdateLowerMetalSheet(lms *shared.LowerMetalSheet) *errors.MasterError {
 	return nil
 }
 
+// GetLowerMetalSheet retrieves a lower metal sheet by its ID
 func GetLowerMetalSheet(metalSheetID shared.EntityID) (*shared.LowerMetalSheet, *errors.MasterError) {
 	r := dbTool.QueryRow(sqlGetLowerMetalSheet, sql.Named("id", metalSheetID))
 	lms, merr := ScanLowerMetalSheet(r)
@@ -216,6 +232,7 @@ func GetLowerMetalSheet(metalSheetID shared.EntityID) (*shared.LowerMetalSheet, 
 	return lms, nil
 }
 
+// ListLowerMetalSheetsByTool retrieves all lower metal sheets for a given tool
 func ListLowerMetalSheetsByTool(toolID shared.EntityID) ([]*shared.LowerMetalSheet, *errors.MasterError) {
 	rows, err := dbTool.Query(sqlListLowerMetalSheetsByTool, sql.Named("tool_id", toolID))
 	if err != nil {
@@ -234,10 +251,20 @@ func ListLowerMetalSheetsByTool(toolID shared.EntityID) ([]*shared.LowerMetalShe
 	return metalSheets, nil
 }
 
+// DeleteLowerMetalSheet removes a lower metal sheet from the database
+func DeleteLowerMetalSheet(id shared.EntityID) *errors.MasterError {
+	_, err := dbTool.Exec("DELETE FROM metal_sheets WHERE id = ? AND type = 'lower'", id)
+	if err != nil {
+		return errors.NewMasterError(err)
+	}
+	return nil
+}
+
 // -----------------------------------------------------------------------------
 // Scan Helpers
 // -----------------------------------------------------------------------------
 
+// ScanUpperMetalSheet scans a database row into an UpperMetalSheet struct
 func ScanUpperMetalSheet(row Scannable) (*shared.UpperMetalSheet, *errors.MasterError) {
 	var ums shared.UpperMetalSheet
 	err := row.Scan(
@@ -252,6 +279,7 @@ func ScanUpperMetalSheet(row Scannable) (*shared.UpperMetalSheet, *errors.Master
 	return &ums, nil
 }
 
+// ScanLowerMetalSheet scans a database row into a LowerMetalSheet struct
 func ScanLowerMetalSheet(row Scannable) (*shared.LowerMetalSheet, *errors.MasterError) {
 	var lms shared.LowerMetalSheet
 	err := row.Scan(

@@ -42,7 +42,7 @@ const (
 	sqlGetNote string = `
 		SELECT id, level, content, created_at, linked
 		FROM notes
-		WHERE id = ?;
+		WHERE id = :id;
 	`
 
 	sqlListNotes string = `
@@ -64,9 +64,10 @@ const (
 )
 
 // -----------------------------------------------------------------------------
-// Table Helpers: "notes"
+// Note Functions
 // -----------------------------------------------------------------------------
 
+// AddNote adds a new note to the database
 func AddNote(note *shared.Note) *errors.MasterError {
 	if verr := note.Validate(); verr != nil {
 		return verr.MasterError().Wrap("invalid note data")
@@ -84,6 +85,7 @@ func AddNote(note *shared.Note) *errors.MasterError {
 	return nil
 }
 
+// UpdateNote updates an existing note in the database
 func UpdateNote(note *shared.Note) *errors.MasterError {
 	if verr := note.Validate(); verr != nil {
 		return verr.MasterError().Wrap("invalid note data")
@@ -102,15 +104,12 @@ func UpdateNote(note *shared.Note) *errors.MasterError {
 	return nil
 }
 
+// GetNote retrieves a note by its ID
 func GetNote(id shared.EntityID) (*shared.Note, *errors.MasterError) {
-	row := dbNote.QueryRow(sqlGetNote, id)
-	note, merr := ScanNote(row)
-	if merr != nil {
-		return nil, merr
-	}
-	return note, nil
+	return ScanNote(dbNote.QueryRow(sqlGetNote, sql.Named("id", id)))
 }
 
+// ListNotes retrieves all notes from the database
 func ListNotes() ([]*shared.Note, *errors.MasterError) {
 	rows, err := dbNote.Query(sqlListNotes)
 	if err != nil {
@@ -129,6 +128,7 @@ func ListNotes() ([]*shared.Note, *errors.MasterError) {
 	return notes, nil
 }
 
+// ListNotesForLinked retrieves notes linked to a specific entity
 func ListNotesForLinked(linked string, id int) ([]*shared.Note, *errors.MasterError) {
 	rows, err := dbNote.Query(sqlListNotesForLinked)
 	if err != nil {
@@ -158,6 +158,7 @@ func ListNotesForLinked(linked string, id int) ([]*shared.Note, *errors.MasterEr
 	return notes[:n], nil
 }
 
+// DeleteNote removes a note from the database
 func DeleteNote(id shared.EntityID) *errors.MasterError {
 	_, err := dbNote.Exec(sqlDeleteNote, sql.Named("id", id))
 	if err != nil {
@@ -170,6 +171,7 @@ func DeleteNote(id shared.EntityID) *errors.MasterError {
 // Scan Helpers
 // -----------------------------------------------------------------------------
 
+// ScanNote scans a database row into a Note struct
 func ScanNote(row Scannable) (*shared.Note, *errors.MasterError) {
 	n := &shared.Note{}
 	err := row.Scan(

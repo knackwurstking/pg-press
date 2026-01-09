@@ -33,8 +33,8 @@ const (
 		UPDATE cycles
 		SET
 			tool_id = :tool_id,
-			press_number = :press_number
-			cycles = :cycles
+			press_number = :press_number,
+			cycles = :cycles,
 			stop = :stop
 		WHERE id = :id
 	`
@@ -74,9 +74,10 @@ const (
 )
 
 // -----------------------------------------------------------------------------
-// Table Helpers: "cycles"
+// Cycle Functions
 // -----------------------------------------------------------------------------
 
+// AddCycle adds a new cycle entry to the database
 func AddCycle(cycle *shared.Cycle) *errors.MasterError {
 	if verr := cycle.Validate(); verr != nil {
 		return verr.MasterError()
@@ -95,6 +96,7 @@ func AddCycle(cycle *shared.Cycle) *errors.MasterError {
 	return nil
 }
 
+// UpdateCycle updates an existing cycle entry in the database
 func UpdateCycle(cycle *shared.Cycle) *errors.MasterError {
 	if verr := cycle.Validate(); verr != nil {
 		return verr.MasterError()
@@ -113,6 +115,7 @@ func UpdateCycle(cycle *shared.Cycle) *errors.MasterError {
 	return nil
 }
 
+// DeleteCycle removes a cycle entry from the database
 func DeleteCycle(id shared.EntityID) *errors.MasterError {
 	_, err := dbPress.Exec(sqlDeleteCycle, sql.Named("id", int64(id)))
 	if err != nil {
@@ -121,6 +124,7 @@ func DeleteCycle(id shared.EntityID) *errors.MasterError {
 	return nil
 }
 
+// GetCycle retrieves a cycle entry by its ID
 func GetCycle(id shared.EntityID) (*shared.Cycle, *errors.MasterError) {
 	return ScanCycle(dbPress.QueryRow(sqlGetCycle, sql.Named("id", id)))
 }
@@ -143,6 +147,7 @@ func GetTotalToolCycles(id shared.EntityID) (int64, *errors.MasterError) {
 	return totalCycles, nil
 }
 
+// ListToolCycles retrieves all cycle entries for a specific tool
 func ListToolCycles(toolID shared.EntityID) ([]*shared.Cycle, *errors.MasterError) {
 	rows, err := dbPress.Query(sqlListToolCycles, sql.Named("tool_id", int64(toolID)))
 	if err != nil {
@@ -170,6 +175,7 @@ func ListToolCycles(toolID shared.EntityID) ([]*shared.Cycle, *errors.MasterErro
 	return cycles, nil
 }
 
+// ListCyclesByPressNumber retrieves all cycle entries for a specific press number
 func ListCyclesByPressNumber(pressNumber shared.PressNumber) ([]*shared.Cycle, *errors.MasterError) {
 	rows, err := dbPress.Query(sqlListCyclesByPressNumber, sql.Named("press_number", int64(pressNumber)))
 	if err != nil {
@@ -223,6 +229,7 @@ func CycleInject(cycle *shared.Cycle) *errors.MasterError {
 // Scan Helpers
 // -----------------------------------------------------------------------------
 
+// ScanCycle scans a database row into a Cycle struct
 func ScanCycle(row Scannable) (cycle *shared.Cycle, merr *errors.MasterError) {
 	cycle = &shared.Cycle{}
 	err := row.Scan(

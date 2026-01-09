@@ -39,9 +39,10 @@ const (
 )
 
 // -----------------------------------------------------------------------------
-// Table Helpers: "press_regenerations"
+// Press Regeneration Functions
 // -----------------------------------------------------------------------------
 
+// ListPressRegenerationsByPress retrieves all press regenerations for a specific press number
 func ListPressRegenerationsByPress(pressNumber shared.PressNumber) ([]*shared.PressRegeneration, *errors.MasterError) {
 	if !pressNumber.IsValid() {
 		return nil, errors.NewValidationError("invalid press_number").MasterError()
@@ -73,6 +74,7 @@ func ListPressRegenerationsByPress(pressNumber shared.PressNumber) ([]*shared.Pr
 // Scan Helpers
 // -----------------------------------------------------------------------------
 
+// ScanPressRegeneration scans a database row into a PressRegeneration struct
 func ScanPressRegeneration(row Scannable) (pr *shared.PressRegeneration, merr *errors.MasterError) {
 	pr = &shared.PressRegeneration{}
 	err := row.Scan(

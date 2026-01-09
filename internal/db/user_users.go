@@ -59,17 +59,20 @@ const (
 )
 
 // -----------------------------------------------------------------------------
-// Table Helpers: "users"
+// User Functions
 // -----------------------------------------------------------------------------
 
+// GetUser retrieves a user by its ID
 func GetUser(id shared.TelegramID) (*shared.User, *errors.MasterError) {
 	return ScanUser(dbUser.QueryRow(sqlGetUser, sql.Named("id", id)))
 }
 
+// GetUserByApiKey retrieves a user by its API key
 func GetUserByApiKey(apiKey string) (user *shared.User, merr *errors.MasterError) {
 	return ScanUser(dbUser.QueryRow(sqlGetUserByApiKey, sql.Named("api_key", apiKey)))
 }
 
+// AddUser adds a new user to the database
 func AddUser(user *shared.User) *errors.MasterError {
 	if verr := user.Validate(); verr != nil {
 		return verr.MasterError().Wrap("invalid user data")
@@ -86,6 +89,7 @@ func AddUser(user *shared.User) *errors.MasterError {
 	return nil
 }
 
+// UpdateUser updates an existing user in the database
 func UpdateUser(user *shared.User) *errors.MasterError {
 	if verr := user.Validate(); verr != nil {
 		return verr.MasterError().Wrap("invalid user data")
@@ -102,6 +106,7 @@ func UpdateUser(user *shared.User) *errors.MasterError {
 	return nil
 }
 
+// ListUsers retrieves all users from the database
 func ListUsers() (users []*shared.User, merr *errors.MasterError) {
 	rows, err := dbUser.Query(sqlListUsers)
 	if err != nil {
@@ -120,6 +125,7 @@ func ListUsers() (users []*shared.User, merr *errors.MasterError) {
 	return users, nil
 }
 
+// DeleteUser removes a user from the database
 func DeleteUser(id shared.TelegramID) *errors.MasterError {
 	_, err := dbUser.Exec(sqlDeleteUser, sql.Named("id", id))
 	if err != nil {
@@ -129,9 +135,10 @@ func DeleteUser(id shared.TelegramID) *errors.MasterError {
 }
 
 // -----------------------------------------------------------------------------
-// Scanners
+// Scan Helpers
 // -----------------------------------------------------------------------------
 
+// ScanUser scans a database row into a User struct
 func ScanUser(row Scannable) (*shared.User, *errors.MasterError) {
 	var u shared.User
 	err := row.Scan(

@@ -42,7 +42,7 @@ const (
 	`
 
 	sqlUpdatePress string = `
-		UPDATE presses 
+		UPDATE presses
 		SET
 			slot_up = :slot_up,
 			slot_down = :slot_down,
@@ -88,6 +88,7 @@ const (
 // Press Functions
 // -----------------------------------------------------------------------------
 
+// AddPress adds a new press to the database
 func AddPress(press *shared.Press) *errors.MasterError {
 	if verr := press.Validate(); verr != nil {
 		return verr.MasterError()
@@ -106,6 +107,7 @@ func AddPress(press *shared.Press) *errors.MasterError {
 	return nil
 }
 
+// UpdatePress updates an existing press in the database
 func UpdatePress(press *shared.Press) *errors.MasterError {
 	if verr := press.Validate(); verr != nil {
 		return verr.MasterError()
@@ -124,10 +126,12 @@ func UpdatePress(press *shared.Press) *errors.MasterError {
 	return nil
 }
 
+// GetPress retrieves a press by its ID
 func GetPress(id shared.EntityID) (*shared.Press, *errors.MasterError) {
 	return ScanPress(dbPress.QueryRow(sqlGetPress, sql.Named("id", id)))
 }
 
+// GetPressNumberForTool retrieves the press number that has the given tool in either slot
 func GetPressNumberForTool(toolID shared.EntityID) (shared.PressNumber, *errors.MasterError) {
 	var pressNumber shared.PressNumber = -1
 
@@ -139,6 +143,7 @@ func GetPressNumberForTool(toolID shared.EntityID) (shared.PressNumber, *errors.
 	return pressNumber, nil
 }
 
+// GetPressUtilizations retrieves all press utilizations with tool information
 func GetPressUtilizations(pressNumbers ...shared.PressNumber) (
 	pu map[shared.PressNumber]*shared.PressUtilization, merr *errors.MasterError,
 ) {
@@ -217,6 +222,7 @@ func GetPressUtilizations(pressNumbers ...shared.PressNumber) (
 	return pu, nil
 }
 
+// DeletePress removes a press from the database
 func DeletePress(id shared.PressNumber) *errors.MasterError {
 	_, err := dbPress.Exec(sqlDeletePress, sql.Named("id", id))
 	if err != nil {
@@ -229,6 +235,7 @@ func DeletePress(id shared.PressNumber) *errors.MasterError {
 // Scan Helpers
 // -----------------------------------------------------------------------------
 
+// ScanPress scans a database row into a Press struct
 func ScanPress(row Scannable) (press *shared.Press, merr *errors.MasterError) {
 	press = &shared.Press{}
 	err := row.Scan(

@@ -79,9 +79,10 @@ const (
 )
 
 // -----------------------------------------------------------------------------
-// Table Helpers: "cookies"
+// Cookie Functions
 // -----------------------------------------------------------------------------
 
+// ListCookies retrieves all cookies from the database
 func ListCookies() (cookies []*shared.Cookie, merr *errors.MasterError) {
 	rows, err := dbUser.Query(sqlListCookies)
 	if err != nil {
@@ -100,6 +101,7 @@ func ListCookies() (cookies []*shared.Cookie, merr *errors.MasterError) {
 	return cookies, nil
 }
 
+// ListCookiesByUserID retrieves all cookies for a specific user ID
 func ListCookiesByUserID(userID shared.TelegramID) (cookies []*shared.Cookie, merr *errors.MasterError) {
 	rows, err := dbUser.Query(sqlListCookiesByUserID, sql.Named("user_id", userID))
 	if err != nil {
@@ -118,6 +120,7 @@ func ListCookiesByUserID(userID shared.TelegramID) (cookies []*shared.Cookie, me
 	return cookies, nil
 }
 
+// ListCookiesByApiKey retrieves all cookies for a specific user by API key
 func ListCookiesByApiKey(apiKey string) (cookies []*shared.Cookie, merr *errors.MasterError) {
 	// Get user id from the users table
 	user, merr := GetUserByApiKey(apiKey)
@@ -142,10 +145,12 @@ func ListCookiesByApiKey(apiKey string) (cookies []*shared.Cookie, merr *errors.
 	return cookies, nil
 }
 
+// GetCookie retrieves a cookie by its value
 func GetCookie(value string) (*shared.Cookie, *errors.MasterError) {
 	return ScanCookie(dbUser.QueryRow(sqlGetCookie, sql.Named("value", value)))
 }
 
+// AddCookie adds a new cookie to the database
 func AddCookie(cookie *shared.Cookie) *errors.MasterError {
 	if verr := cookie.Validate(); verr != nil {
 		return verr.MasterError().Wrap("invalid cookie data")
@@ -181,6 +186,7 @@ func UpdateCookie(cookie *shared.Cookie) *errors.MasterError {
 	return nil
 }
 
+// DeleteCookie removes a cookie from the database by value
 func DeleteCookie(value string) *errors.MasterError {
 	_, err := dbUser.Exec(sqlDeleteCookie, sql.Named("value", value))
 	if err != nil {
@@ -189,6 +195,7 @@ func DeleteCookie(value string) *errors.MasterError {
 	return nil
 }
 
+// DeleteCookiesByUserID removes all cookies for a specific user
 func DeleteCookiesByUserID(userID shared.TelegramID) *errors.MasterError {
 	_, err := dbUser.Exec(sqlDeleteCookiesByUserID, sql.Named("user_id", userID))
 	if err != nil {
@@ -198,9 +205,10 @@ func DeleteCookiesByUserID(userID shared.TelegramID) *errors.MasterError {
 }
 
 // -----------------------------------------------------------------------------
-// Scanners
+// Scan Helpers
 // -----------------------------------------------------------------------------
 
+// ScanCookie scans a database row into a Cookie struct
 func ScanCookie(row Scannable) (*shared.Cookie, *errors.MasterError) {
 	var c shared.Cookie
 	err := row.Scan(
