@@ -113,7 +113,7 @@ func Regeneration(c echo.Context) *echo.HTTPError {
 
 func renderRegenerationEdit(c echo.Context, tool *shared.Tool, editable bool, user *shared.User) *echo.HTTPError {
 	if user == nil {
-		var merr *errors.MasterError
+		var merr *errors.HTTPError
 		user, merr = shared.GetUserFromContext(c)
 		if merr != nil {
 			return merr.Wrap("getting user from context failed").Echo()

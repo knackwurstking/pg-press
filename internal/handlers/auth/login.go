@@ -59,9 +59,9 @@ func PostLoginPage(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func processApiKeyLogin(apiKey string, ctx echo.Context) *errors.MasterError {
+func processApiKeyLogin(apiKey string, ctx echo.Context) *errors.HTTPError {
 	if len(apiKey) < shared.MinAPIKeyLength {
-		return errors.NewValidationError("API key too short").MasterError().Wrap("invalid api key")
+		return errors.NewValidationError("API key too short").HTTPError().Wrap("invalid api key")
 	}
 
 	user, merr := db.GetUserByApiKey(apiKey)
@@ -81,7 +81,7 @@ func processApiKeyLogin(apiKey string, ctx echo.Context) *errors.MasterError {
 	return nil
 }
 
-func createSession(ctx echo.Context, userID shared.TelegramID) *errors.MasterError {
+func createSession(ctx echo.Context, userID shared.TelegramID) *errors.HTTPError {
 	cookie := &shared.Cookie{
 		UserAgent: ctx.Request().UserAgent(),
 		Value:     uuid.New().String(),

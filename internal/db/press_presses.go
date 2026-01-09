@@ -89,7 +89,7 @@ const (
 // -----------------------------------------------------------------------------
 
 // AddPress adds a new press to the database
-func AddPress(press *shared.Press) *errors.MasterError {
+func AddPress(press *shared.Press) *errors.HTTPError {
 	if verr := press.Validate(); verr != nil {
 		return verr.MasterError()
 	}
@@ -108,7 +108,7 @@ func AddPress(press *shared.Press) *errors.MasterError {
 }
 
 // UpdatePress updates an existing press in the database
-func UpdatePress(press *shared.Press) *errors.MasterError {
+func UpdatePress(press *shared.Press) *errors.HTTPError {
 	if verr := press.Validate(); verr != nil {
 		return verr.MasterError()
 	}
@@ -127,12 +127,12 @@ func UpdatePress(press *shared.Press) *errors.MasterError {
 }
 
 // GetPress retrieves a press by its ID
-func GetPress(id shared.EntityID) (*shared.Press, *errors.MasterError) {
+func GetPress(id shared.EntityID) (*shared.Press, *errors.HTTPError) {
 	return ScanPress(dbPress.QueryRow(sqlGetPress, sql.Named("id", id)))
 }
 
 // GetPressNumberForTool retrieves the press number that has the given tool in either slot
-func GetPressNumberForTool(toolID shared.EntityID) (shared.PressNumber, *errors.MasterError) {
+func GetPressNumberForTool(toolID shared.EntityID) (shared.PressNumber, *errors.HTTPError) {
 	var pressNumber shared.PressNumber = -1
 
 	err := dbPress.QueryRow(sqlGetPressNumberForTool, sql.Named("tool_id", toolID)).Scan(&pressNumber)

@@ -134,18 +134,18 @@ func PutCycle(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func parseCycleForm(c echo.Context) (*shared.Cycle, *errors.MasterError) {
+func parseCycleForm(c echo.Context) (*shared.Cycle, *errors.HTTPError) {
 	cycle := &shared.Cycle{}
 
 	// Tool
 	originalToolID, err := strconv.ParseInt(c.FormValue("original_tool_id"), 10, 64)
 	if err != nil {
-		return cycle, errors.NewMasterError(err).Wrap("original_tool_id")
+		return cycle, errors.NewHTTPError(err).Wrap("original_tool_id")
 	}
 	if c.FormValue("tool_id") != "" {
 		newToolID, err := strconv.ParseInt(c.FormValue("tool_id"), 10, 64)
 		if err != nil {
-			return cycle, errors.NewMasterError(err).Wrap("tool_id")
+			return cycle, errors.NewHTTPError(err).Wrap("tool_id")
 		}
 		cycle.ToolID = shared.EntityID(newToolID)
 	} else {
@@ -155,7 +155,7 @@ func parseCycleForm(c echo.Context) (*shared.Cycle, *errors.MasterError) {
 	// Press Number
 	pressNumber, err := strconv.ParseInt(c.FormValue("press_number"), 10, 8)
 	if err != nil {
-		return cycle, errors.NewMasterError(err).Wrap("press_number")
+		return cycle, errors.NewHTTPError(err).Wrap("press_number")
 	}
 	cycle.PressNumber = shared.PressNumber(pressNumber)
 
