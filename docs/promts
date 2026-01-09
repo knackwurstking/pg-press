@@ -1,0 +1,49 @@
+Check the "NewHTTPError" function if there i something missing, this function 
+should check the error given and set a fitting HTTP status code
+
+--------------------------------------------------------------------------------
+
+Check the "db" package if it could be improved to make it more clear which 
+function modifies which database
+databases:
+	dbTool  *sql.DB
+	dbPress *sql.DB
+	dbNote  *sql.DB
+	dbUser  *sql.DB
+
+--------------------------------------------------------------------------------
+
+Refactor the "shared" package...
+
+--------------------------------------------------------------------------------
+
+The ParseQuery... and ParseParam... functions from the "shared" package could 
+be moved to a separate package i think, or maybe just move them to the "urlb" 
+package?
+
+--------------------------------------------------------------------------------
+
+Improve and simplify all the error returns (messages) and logs
+
+--------------------------------------------------------------------------------
+
+Change the "urlb" package Url* functions and simplify it, each function should 
+just return a templ.SafeURL type, create an rename functions if needed, 
+after that the project files using this functions needs to be fixed
+
+--------------------------------------------------------------------------------
+
+Rewrite the hidden "handlers/.umbau/" echo handlers and templates, see the 
+other handlers for reference
+Handlers done:
+	- auth/
+	- dialogs/
+	- home/
+	- notes/
+	- press/
+	- profile/
+	- tool/
+	- tools/
+This page will be reached by the "handlers/press" page.
+The "urlb" package should be used for url building, add any missing stuff
+
