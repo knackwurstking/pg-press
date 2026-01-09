@@ -26,7 +26,7 @@ func (a *AuthorizationError) Error() string {
 
 // HTTPError converts AuthorizationError to HTTPError with unauthorized status
 func (a *AuthorizationError) HTTPError() *HTTPError {
-	return NewHTTPError(a).SetCode(http.StatusUnauthorized)
+	return NewHTTPError(a)
 }
 
 // NotFoundError represents a resource not found error
@@ -47,7 +47,7 @@ func (n *NotFoundError) Error() string {
 
 // HTTPError converts NotFoundError to HTTPError with not found status
 func (n *NotFoundError) HTTPError() *HTTPError {
-	return NewHTTPError(n).SetCode(http.StatusNotFound)
+	return NewHTTPError(n)
 }
 
 // ValidationError represents a validation error
@@ -68,7 +68,7 @@ func (ve *ValidationError) Error() string {
 
 // HTTPError converts ValidationError to HTTPError with bad request status
 func (ve *ValidationError) HTTPError() *HTTPError {
-	return NewHTTPError(ve).SetCode(http.StatusBadRequest)
+	return NewHTTPError(ve)
 }
 
 // ExistsError represents an error when a resource already exists
@@ -95,7 +95,7 @@ func (ee *ExistsError) Error() string {
 
 // HTTPError converts ExistsError to HTTPError with conflict status
 func (ee *ExistsError) HTTPError() *HTTPError {
-	return NewHTTPError(ee).SetCode(http.StatusConflict)
+	return NewHTTPError(ee)
 }
 
 // HTTPError is a wrapper that provides HTTP status codes for errors
@@ -122,6 +122,18 @@ func NewHTTPError(err error) *HTTPError {
 		code = http.StatusServiceUnavailable
 	case sql.ErrTxDone:
 		code = http.StatusConflict
+	default:
+		// Check for custom error types and set appropriate HTTP status codes
+		switch err.(type) {
+		case *ValidationError:
+			code = http.StatusBadRequest
+		case *NotFoundError:
+			code = http.StatusNotFound
+		case *ExistsError:
+			code = http.StatusConflict
+		case *AuthorizationError:
+			code = http.StatusUnauthorized
+		}
 	}
 
 	return &HTTPError{
