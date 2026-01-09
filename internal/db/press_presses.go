@@ -91,7 +91,7 @@ const (
 // AddPress adds a new press to the database
 func AddPress(press *shared.Press) *errors.HTTPError {
 	if verr := press.Validate(); verr != nil {
-		return verr.MasterError()
+		return verr.HTTPError()
 	}
 
 	_, err := dbPress.Exec(sqlAddPress,
@@ -102,7 +102,7 @@ func AddPress(press *shared.Press) *errors.HTTPError {
 		sql.Named("type", press.Type),
 	)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewHTTPError(err)
 	}
 	return nil
 }
@@ -110,7 +110,7 @@ func AddPress(press *shared.Press) *errors.HTTPError {
 // UpdatePress updates an existing press in the database
 func UpdatePress(press *shared.Press) *errors.HTTPError {
 	if verr := press.Validate(); verr != nil {
-		return verr.MasterError()
+		return verr.HTTPError()
 	}
 
 	_, err := dbPress.Exec(sqlUpdatePress,
@@ -121,7 +121,7 @@ func UpdatePress(press *shared.Press) *errors.HTTPError {
 		sql.Named("type", press.Type),
 	)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewHTTPError(err)
 	}
 	return nil
 }
@@ -137,7 +137,7 @@ func GetPressNumberForTool(toolID shared.EntityID) (shared.PressNumber, *errors.
 
 	err := dbPress.QueryRow(sqlGetPressNumberForTool, sql.Named("tool_id", toolID)).Scan(&pressNumber)
 	if err != nil && err != sql.ErrNoRows {
-		return pressNumber, errors.NewMasterError(err)
+		return pressNumber, errors.NewHTTPError(err)
 	}
 
 	return pressNumber, nil
@@ -145,13 +145,13 @@ func GetPressNumberForTool(toolID shared.EntityID) (shared.PressNumber, *errors.
 
 // GetPressUtilizations retrieves all press utilizations with tool information
 func GetPressUtilizations(pressNumbers ...shared.PressNumber) (
-	pu map[shared.PressNumber]*shared.PressUtilization, merr *errors.MasterError,
+	pu map[shared.PressNumber]*shared.PressUtilization, merr *errors.HTTPError,
 ) {
 	pu = make(map[shared.PressNumber]*shared.PressUtilization)
 
 	r, err := dbPress.Query(sqlGetPressUtilizations)
 	if err != nil {
-		return nil, errors.NewMasterError(fmt.Errorf("error querying press utilizations: %v", err))
+		return nil, errors.NewHTTPError(fmt.Errorf("error querying press utilizations: %v", err))
 	}
 	defer r.Close()
 
@@ -169,7 +169,7 @@ func GetPressUtilizations(pressNumbers ...shared.PressNumber) (
 			&pressType,
 		)
 		if err != nil {
-			return pu, errors.NewMasterError(err)
+			return pu, errors.NewHTTPError(err)
 		}
 
 		pu[pressNumber] = &shared.PressUtilization{
@@ -216,17 +216,17 @@ func GetPressUtilizations(pressNumbers ...shared.PressNumber) (
 	}
 
 	if err = r.Err(); err != nil {
-		return nil, errors.NewMasterError(fmt.Errorf("error iterating over press utilizations: %v", err))
+		return nil, errors.NewHTTPError(fmt.Errorf("error iterating over press utilizations: %v", err))
 	}
 
 	return pu, nil
 }
 
 // DeletePress removes a press from the database
-func DeletePress(id shared.PressNumber) *errors.MasterError {
+func DeletePress(id shared.PressNumber) *errors.HTTPError {
 	_, err := dbPress.Exec(sqlDeletePress, sql.Named("id", id))
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewHTTPError(err)
 	}
 	return nil
 }
@@ -236,7 +236,7 @@ func DeletePress(id shared.PressNumber) *errors.MasterError {
 // -----------------------------------------------------------------------------
 
 // ScanPress scans a database row into a Press struct
-func ScanPress(row Scannable) (press *shared.Press, merr *errors.MasterError) {
+func ScanPress(row Scannable) (press *shared.Press, merr *errors.HTTPError) {
 	press = &shared.Press{}
 	err := row.Scan(
 		&press.ID,
@@ -246,7 +246,7 @@ func ScanPress(row Scannable) (press *shared.Press, merr *errors.MasterError) {
 		&press.Type,
 	)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewHTTPError(err)
 	}
 	return press, nil
 }

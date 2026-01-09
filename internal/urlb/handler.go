@@ -14,10 +14,10 @@ import (
 var log = logger.New("urlb")
 
 // RedirectTo performs an HTTP redirect to the specified path
-func RedirectTo(c echo.Context, path templ.SafeURL) *errors.MasterError {
+func RedirectTo(c echo.Context, path templ.SafeURL) *errors.HTTPError {
 	err := c.Redirect(http.StatusSeeOther, string(path))
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewHTTPError(err)
 	}
 	return nil
 }

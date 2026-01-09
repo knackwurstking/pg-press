@@ -162,14 +162,14 @@ func parseCycleForm(c echo.Context) (*shared.Cycle, *errors.HTTPError) {
 	// Total Cycles
 	totalCycles, err := strconv.ParseInt(c.FormValue("press_cycles"), 10, 64)
 	if err != nil {
-		return cycle, errors.NewMasterError(err).Wrap("press_cycles")
+		return cycle, errors.NewHTTPError(err).Wrap("press_cycles")
 	}
 	cycle.PressCycles = totalCycles
 
 	// Stop
 	stop, err := time.Parse("2006-01-02", c.FormValue("stop"))
 	if err != nil {
-		return cycle, errors.NewMasterError(err).Wrap("stop")
+		return cycle, errors.NewHTTPError(err).Wrap("stop")
 	}
 	cycle.Stop = shared.NewUnixMilli(stop)
 

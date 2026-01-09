@@ -29,7 +29,7 @@ func GetProfilePage(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func handleUserNameChange(c echo.Context, user *shared.User) *errors.MasterError {
+func handleUserNameChange(c echo.Context, user *shared.User) *errors.HTTPError {
 	userName := c.FormValue("user-name")
 	if userName == "" || userName == user.Name {
 		return nil
@@ -39,7 +39,7 @@ func handleUserNameChange(c echo.Context, user *shared.User) *errors.MasterError
 		return errors.NewValidationError(
 			"username must be between %d and %d characters",
 			shared.UserNameMinLength, shared.UserNameMaxLength,
-		).MasterError()
+		).HTTPError()
 	}
 
 	user.Name = userName

@@ -93,21 +93,21 @@ type EditPressFormData struct {
 	CyclesOffset int64
 }
 
-func GetEditPressFormData(c echo.Context) (*EditPressFormData, *errors.MasterError) {
+func GetEditPressFormData(c echo.Context) (*EditPressFormData, *errors.HTTPError) {
 	vPressNumber := c.FormValue("press_number")
 	if vPressNumber == "" {
-		return nil, errors.NewValidationError("press number is required").MasterError()
+		return nil, errors.NewValidationError("press number is required").HTTPError()
 	}
 	pressNumber, err := strconv.Atoi(vPressNumber)
 	if err != nil {
-		return nil, errors.NewValidationError("invalid press number %s: %v", vPressNumber, err).MasterError()
+		return nil, errors.NewValidationError("invalid press number %s: %v", vPressNumber, err).HTTPError()
 	}
 
 	cyclesOffset, err := strconv.ParseInt(c.FormValue("cycles_offset"), 10, 64)
 	if err != nil {
 		return nil, errors.NewValidationError(
 			"invalid cycles offset %s: %v", c.FormValue("cycles_offset"), err,
-		).MasterError()
+		).HTTPError()
 	}
 
 	return &EditPressFormData{

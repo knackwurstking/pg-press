@@ -78,9 +78,9 @@ const (
 // -----------------------------------------------------------------------------
 
 // AddCycle adds a new cycle entry to the database
-func AddCycle(cycle *shared.Cycle) *errors.MasterError {
+func AddCycle(cycle *shared.Cycle) *errors.HTTPError {
 	if verr := cycle.Validate(); verr != nil {
-		return verr.MasterError()
+		return verr.HTTPError()
 	}
 
 	_, err := dbPress.Exec(sqlAddCycle,
@@ -90,16 +90,16 @@ func AddCycle(cycle *shared.Cycle) *errors.MasterError {
 		sql.Named("stop", cycle.Stop),
 	)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewHTTPError(err)
 	}
 
 	return nil
 }
 
 // UpdateCycle updates an existing cycle entry in the database
-func UpdateCycle(cycle *shared.Cycle) *errors.MasterError {
+func UpdateCycle(cycle *shared.Cycle) *errors.HTTPError {
 	if verr := cycle.Validate(); verr != nil {
-		return verr.MasterError()
+		return verr.HTTPError()
 	}
 
 	_, err := dbPress.Exec(sqlUpdateCycle,
@@ -110,27 +110,27 @@ func UpdateCycle(cycle *shared.Cycle) *errors.MasterError {
 		sql.Named("stop", cycle.Stop),
 	)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewHTTPError(err)
 	}
 	return nil
 }
 
 // DeleteCycle removes a cycle entry from the database
-func DeleteCycle(id shared.EntityID) *errors.MasterError {
+func DeleteCycle(id shared.EntityID) *errors.HTTPError {
 	_, err := dbPress.Exec(sqlDeleteCycle, sql.Named("id", int64(id)))
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewHTTPError(err)
 	}
 	return nil
 }
 
 // GetCycle retrieves a cycle entry by its ID
-func GetCycle(id shared.EntityID) (*shared.Cycle, *errors.MasterError) {
+func GetCycle(id shared.EntityID) (*shared.Cycle, *errors.HTTPError) {
 	return ScanCycle(dbPress.QueryRow(sqlGetCycle, sql.Named("id", id)))
 }
 
 // TotalToolCycles since last tool regeneration
-func GetTotalToolCycles(id shared.EntityID) (int64, *errors.MasterError) {
+func GetTotalToolCycles(id shared.EntityID) (int64, *errors.HTTPError) {
 	cycles, merr := ListToolCycles(id)
 	if merr != nil {
 		return 0, merr.Wrap("failed to list tool cycles for tool ID %d", id)
@@ -148,10 +148,10 @@ func GetTotalToolCycles(id shared.EntityID) (int64, *errors.MasterError) {
 }
 
 // ListToolCycles retrieves all cycle entries for a specific tool
-func ListToolCycles(toolID shared.EntityID) ([]*shared.Cycle, *errors.MasterError) {
+func ListToolCycles(toolID shared.EntityID) ([]*shared.Cycle, *errors.HTTPError) {
 	rows, err := dbPress.Query(sqlListToolCycles, sql.Named("tool_id", int64(toolID)))
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewHTTPError(err)
 	}
 
 	var cycles []*shared.Cycle
@@ -165,7 +165,7 @@ func ListToolCycles(toolID shared.EntityID) ([]*shared.Cycle, *errors.MasterErro
 	}
 	rows.Close()
 
-	var merr *errors.MasterError
+	var merr *errors.HTTPError
 	for _, c := range cycles {
 		if merr = CycleInject(c); merr != nil {
 			return nil, merr.Wrap("failed to inject into cycle with ID %d", c.ID)
@@ -176,10 +176,10 @@ func ListToolCycles(toolID shared.EntityID) ([]*shared.Cycle, *errors.MasterErro
 }
 
 // ListCyclesByPressNumber retrieves all cycle entries for a specific press number
-func ListCyclesByPressNumber(pressNumber shared.PressNumber) ([]*shared.Cycle, *errors.MasterError) {
+func ListCyclesByPressNumber(pressNumber shared.PressNumber) ([]*shared.Cycle, *errors.HTTPError) {
 	rows, err := dbPress.Query(sqlListCyclesByPressNumber, sql.Named("press_number", int64(pressNumber)))
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewHTTPError(err)
 	}
 	defer rows.Close()
 
@@ -192,7 +192,7 @@ func ListCyclesByPressNumber(pressNumber shared.PressNumber) ([]*shared.Cycle, *
 		cycles = append(cycles, cycle)
 	}
 
-	var merr *errors.MasterError
+	var merr *errors.HTTPError
 	for _, c := range cycles {
 		if merr = CycleInject(c); merr != nil {
 			return nil, merr.Wrap("failed to inject into cycle with ID %d", c.ID)
@@ -203,7 +203,7 @@ func ListCyclesByPressNumber(pressNumber shared.PressNumber) ([]*shared.Cycle, *
 }
 
 // CycleInject injects "start" and `PartialCycles` into cycle
-func CycleInject(cycle *shared.Cycle) *errors.MasterError {
+func CycleInject(cycle *shared.Cycle) *errors.HTTPError {
 	var lastCycles int64 = 0
 	var lastStop int64 = 0
 	err := dbPress.QueryRow(sqlGetPrevCycle, cycle.PressNumber, cycle.Stop).Scan(&lastCycles, &lastStop)
@@ -212,7 +212,7 @@ func CycleInject(cycle *shared.Cycle) *errors.MasterError {
 			// No previous cycles found, return full cycles
 			cycle.PartialCycles = cycle.PressCycles
 		} else {
-			return errors.NewMasterError(err)
+			return errors.NewHTTPError(err)
 		}
 	} else {
 		cycle.PartialCycles = cycle.PressCycles - lastCycles
@@ -230,7 +230,7 @@ func CycleInject(cycle *shared.Cycle) *errors.MasterError {
 // -----------------------------------------------------------------------------
 
 // ScanCycle scans a database row into a Cycle struct
-func ScanCycle(row Scannable) (cycle *shared.Cycle, merr *errors.MasterError) {
+func ScanCycle(row Scannable) (cycle *shared.Cycle, merr *errors.HTTPError) {
 	cycle = &shared.Cycle{}
 	err := row.Scan(
 		&cycle.ID,
@@ -240,7 +240,7 @@ func ScanCycle(row Scannable) (cycle *shared.Cycle, merr *errors.MasterError) {
 		&cycle.Stop,
 	)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewHTTPError(err)
 	}
 	return cycle, nil
 }

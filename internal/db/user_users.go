@@ -63,19 +63,19 @@ const (
 // -----------------------------------------------------------------------------
 
 // GetUser retrieves a user by its ID
-func GetUser(id shared.TelegramID) (*shared.User, *errors.MasterError) {
+func GetUser(id shared.TelegramID) (*shared.User, *errors.HTTPError) {
 	return ScanUser(dbUser.QueryRow(sqlGetUser, sql.Named("id", id)))
 }
 
 // GetUserByApiKey retrieves a user by its API key
-func GetUserByApiKey(apiKey string) (user *shared.User, merr *errors.MasterError) {
+func GetUserByApiKey(apiKey string) (user *shared.User, merr *errors.HTTPError) {
 	return ScanUser(dbUser.QueryRow(sqlGetUserByApiKey, sql.Named("api_key", apiKey)))
 }
 
 // AddUser adds a new user to the database
-func AddUser(user *shared.User) *errors.MasterError {
+func AddUser(user *shared.User) *errors.HTTPError {
 	if verr := user.Validate(); verr != nil {
-		return verr.MasterError().Wrap("invalid user data")
+		return verr.HTTPError().Wrap("invalid user data")
 	}
 
 	_, err := dbUser.Exec(sqlAddUser,
@@ -84,15 +84,15 @@ func AddUser(user *shared.User) *errors.MasterError {
 		sql.Named("api_key", user.ApiKey),
 	)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewHTTPError(err)
 	}
 	return nil
 }
 
 // UpdateUser updates an existing user in the database
-func UpdateUser(user *shared.User) *errors.MasterError {
+func UpdateUser(user *shared.User) *errors.HTTPError {
 	if verr := user.Validate(); verr != nil {
-		return verr.MasterError().Wrap("invalid user data")
+		return verr.HTTPError().Wrap("invalid user data")
 	}
 
 	_, err := dbUser.Exec(sqlUpdateUser,
@@ -101,16 +101,16 @@ func UpdateUser(user *shared.User) *errors.MasterError {
 		sql.Named("api_key", user.ApiKey),
 	)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewHTTPError(err)
 	}
 	return nil
 }
 
 // ListUsers retrieves all users from the database
-func ListUsers() (users []*shared.User, merr *errors.MasterError) {
+func ListUsers() (users []*shared.User, merr *errors.HTTPError) {
 	rows, err := dbUser.Query(sqlListUsers)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewHTTPError(err)
 	}
 	defer rows.Close()
 
@@ -126,10 +126,10 @@ func ListUsers() (users []*shared.User, merr *errors.MasterError) {
 }
 
 // DeleteUser removes a user from the database
-func DeleteUser(id shared.TelegramID) *errors.MasterError {
+func DeleteUser(id shared.TelegramID) *errors.HTTPError {
 	_, err := dbUser.Exec(sqlDeleteUser, sql.Named("id", id))
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewHTTPError(err)
 	}
 	return nil
 }
@@ -139,7 +139,7 @@ func DeleteUser(id shared.TelegramID) *errors.MasterError {
 // -----------------------------------------------------------------------------
 
 // ScanUser scans a database row into a User struct
-func ScanUser(row Scannable) (*shared.User, *errors.MasterError) {
+func ScanUser(row Scannable) (*shared.User, *errors.HTTPError) {
 	var u shared.User
 	err := row.Scan(
 		&u.ID,
@@ -147,7 +147,7 @@ func ScanUser(row Scannable) (*shared.User, *errors.MasterError) {
 		&u.ApiKey,
 	)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewHTTPError(err)
 	}
 	return &u, nil
 }

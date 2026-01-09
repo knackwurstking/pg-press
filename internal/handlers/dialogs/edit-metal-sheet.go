@@ -57,7 +57,7 @@ func GetEditMetalSheet(c echo.Context) *echo.HTTPError {
 			return nil
 
 		default:
-			return errors.NewValidationError("invalid slot position").MasterError().Echo()
+			return errors.NewValidationError("invalid slot position").HTTPError().Echo()
 		}
 	}
 
@@ -90,7 +90,7 @@ func GetEditMetalSheet(c echo.Context) *echo.HTTPError {
 		return nil
 
 	default:
-		return errors.NewValidationError("invalid slot position").MasterError().Echo()
+		return errors.NewValidationError("invalid slot position").HTTPError().Echo()
 	}
 }
 
@@ -130,7 +130,7 @@ func PostMetalSheet(c echo.Context) *echo.HTTPError {
 		}
 
 	default:
-		return errors.NewValidationError("invalid tool position").MasterError().Echo()
+		return errors.NewValidationError("invalid tool position").HTTPError().Echo()
 	}
 
 	urlb.SetHXTrigger(c, "reload-metal-sheets")
@@ -178,7 +178,7 @@ func PutMetalSheet(c echo.Context) *echo.HTTPError {
 		}
 
 	default:
-		return errors.NewValidationError("invalid slot position").MasterError().Echo()
+		return errors.NewValidationError("invalid slot position").HTTPError().Echo()
 	}
 
 	urlb.SetHXTrigger(c, "reload-metal-sheets")
@@ -186,7 +186,7 @@ func PutMetalSheet(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func parseUpperMetalSheetForm(c echo.Context, ums *shared.UpperMetalSheet) (*shared.UpperMetalSheet, *errors.MasterError) {
+func parseUpperMetalSheetForm(c echo.Context, ums *shared.UpperMetalSheet) (*shared.UpperMetalSheet, *errors.HTTPError) {
 	if ums == nil {
 		ums = &shared.UpperMetalSheet{}
 	}
@@ -199,18 +199,18 @@ func parseUpperMetalSheetForm(c echo.Context, ums *shared.UpperMetalSheet) (*sha
 
 	ums.TileHeight, err = strconv.ParseFloat(tileHeightStr, 64)
 	if err != nil {
-		return nil, errors.NewValidationError("invalid tile height: %v", err).MasterError()
+		return nil, errors.NewValidationError("invalid tile height: %v", err).HTTPError()
 	}
 
 	ums.Value, err = strconv.ParseFloat(valueStr, 64)
 	if err != nil {
-		return nil, errors.NewValidationError("invalid value: %v", err).MasterError()
+		return nil, errors.NewValidationError("invalid value: %v", err).HTTPError()
 	}
 
 	return ums, nil
 }
 
-func parseLowerMetalSheetForm(c echo.Context, lms *shared.LowerMetalSheet) (*shared.LowerMetalSheet, *errors.MasterError) {
+func parseLowerMetalSheetForm(c echo.Context, lms *shared.LowerMetalSheet) (*shared.LowerMetalSheet, *errors.HTTPError) {
 	if lms == nil {
 		lms = &shared.LowerMetalSheet{}
 	}
@@ -227,34 +227,34 @@ func parseLowerMetalSheetForm(c echo.Context, lms *shared.LowerMetalSheet) (*sha
 
 	lms.TileHeight, err = strconv.ParseFloat(tileHeightStr, 64)
 	if err != nil {
-		return nil, errors.NewValidationError("invalid tile height: %v", err).MasterError()
+		return nil, errors.NewValidationError("invalid tile height: %v", err).HTTPError()
 	}
 
 	lms.Value, err = strconv.ParseFloat(valueStr, 64)
 	if err != nil {
-		return nil, errors.NewValidationError("invalid value: %v", err).MasterError()
+		return nil, errors.NewValidationError("invalid value: %v", err).HTTPError()
 	}
 
 	lms.MarkeHeight, err = strconv.Atoi(markeHeightStr)
 	if err != nil {
-		return nil, errors.NewValidationError("invalid marke height: %v", err).MasterError()
+		return nil, errors.NewValidationError("invalid marke height: %v", err).HTTPError()
 	}
 
 	lms.STF, err = strconv.ParseFloat(stfStr, 64)
 	if err != nil {
-		return nil, errors.NewValidationError("invalid STF value: %v", err).MasterError()
+		return nil, errors.NewValidationError("invalid STF value: %v", err).HTTPError()
 	}
 
 	lms.STFMax, err = strconv.ParseFloat(stfMaxStr, 64)
 	if err != nil {
-		return nil, errors.NewValidationError("invalid STF max value: %v", err).MasterError()
+		return nil, errors.NewValidationError("invalid STF max value: %v", err).HTTPError()
 	}
 
 	switch v := shared.MachineType(identifierStr); v {
 	case shared.MachineTypeSACMI, shared.MachineTypeSITI:
 		lms.Identifier = v
 	default:
-		return nil, errors.NewValidationError("identifier must be either 'SACMI' or 'SITI'").MasterError()
+		return nil, errors.NewValidationError("identifier must be either 'SACMI' or 'SITI'").HTTPError()
 	}
 
 	return lms, nil

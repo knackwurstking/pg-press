@@ -22,7 +22,7 @@ func GetEditNote(c echo.Context) *echo.HTTPError {
 	if id, _ := shared.ParseQueryInt64(c, "id"); id > 0 {
 		noteID := shared.EntityID(id)
 
-		var merr *errors.MasterError
+		var merr *errors.HTTPError
 		note, merr = db.GetNote(noteID)
 		if merr != nil {
 			return merr.Echo()
@@ -94,28 +94,28 @@ func PutNote(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func parseNoteForm(c echo.Context) (*shared.Note, *errors.MasterError) {
+func parseNoteForm(c echo.Context) (*shared.Note, *errors.HTTPError) {
 	// Parse level (required)
 	levelStr := c.FormValue("level")
 	if levelStr == "" {
-		return nil, errors.NewValidationError("level is required").MasterError()
+		return nil, errors.NewValidationError("level is required").HTTPError()
 	}
 
 	levelInt, err := strconv.Atoi(levelStr)
 	if err != nil {
-		return nil, errors.NewValidationError("level must be an integer").MasterError()
+		return nil, errors.NewValidationError("level must be an integer").HTTPError()
 	}
 
 	// Validate level is within valid range (0=INFO, 1=ATTENTION, 2=BROKEN)
 	level := shared.NoteLevel(levelInt)
 	if !level.IsValid() {
-		return nil, errors.NewValidationError("level is invalid").MasterError()
+		return nil, errors.NewValidationError("level is invalid").HTTPError()
 	}
 
 	// Parse content (required)
 	content := strings.TrimSpace(c.FormValue("content"))
 	if content == "" {
-		return nil, errors.NewValidationError("content is required").MasterError()
+		return nil, errors.NewValidationError("content is required").HTTPError()
 	}
 
 	return &shared.Note{

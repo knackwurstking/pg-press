@@ -83,10 +83,10 @@ const (
 // -----------------------------------------------------------------------------
 
 // ListCookies retrieves all cookies from the database
-func ListCookies() (cookies []*shared.Cookie, merr *errors.MasterError) {
+func ListCookies() (cookies []*shared.Cookie, merr *errors.HTTPError) {
 	rows, err := dbUser.Query(sqlListCookies)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewHTTPError(err)
 	}
 	defer rows.Close()
 
@@ -102,10 +102,10 @@ func ListCookies() (cookies []*shared.Cookie, merr *errors.MasterError) {
 }
 
 // ListCookiesByUserID retrieves all cookies for a specific user ID
-func ListCookiesByUserID(userID shared.TelegramID) (cookies []*shared.Cookie, merr *errors.MasterError) {
+func ListCookiesByUserID(userID shared.TelegramID) (cookies []*shared.Cookie, merr *errors.HTTPError) {
 	rows, err := dbUser.Query(sqlListCookiesByUserID, sql.Named("user_id", userID))
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewHTTPError(err)
 	}
 	defer rows.Close()
 
@@ -121,7 +121,7 @@ func ListCookiesByUserID(userID shared.TelegramID) (cookies []*shared.Cookie, me
 }
 
 // ListCookiesByApiKey retrieves all cookies for a specific user by API key
-func ListCookiesByApiKey(apiKey string) (cookies []*shared.Cookie, merr *errors.MasterError) {
+func ListCookiesByApiKey(apiKey string) (cookies []*shared.Cookie, merr *errors.HTTPError) {
 	// Get user id from the users table
 	user, merr := GetUserByApiKey(apiKey)
 	if merr != nil {
@@ -130,7 +130,7 @@ func ListCookiesByApiKey(apiKey string) (cookies []*shared.Cookie, merr *errors.
 
 	rows, err := dbUser.Query(sqlListCookiesByApiKey, sql.Named("user_id", user.ID))
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewHTTPError(err)
 	}
 	defer rows.Close()
 
@@ -146,14 +146,14 @@ func ListCookiesByApiKey(apiKey string) (cookies []*shared.Cookie, merr *errors.
 }
 
 // GetCookie retrieves a cookie by its value
-func GetCookie(value string) (*shared.Cookie, *errors.MasterError) {
+func GetCookie(value string) (*shared.Cookie, *errors.HTTPError) {
 	return ScanCookie(dbUser.QueryRow(sqlGetCookie, sql.Named("value", value)))
 }
 
 // AddCookie adds a new cookie to the database
-func AddCookie(cookie *shared.Cookie) *errors.MasterError {
+func AddCookie(cookie *shared.Cookie) *errors.HTTPError {
 	if verr := cookie.Validate(); verr != nil {
-		return verr.MasterError().Wrap("invalid cookie data")
+		return verr.HTTPError().Wrap("invalid cookie data")
 	}
 
 	_, err := dbUser.Exec(sqlAddCookie,
@@ -163,15 +163,15 @@ func AddCookie(cookie *shared.Cookie) *errors.MasterError {
 		sql.Named("last_login", cookie.LastLogin),
 	)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewHTTPError(err)
 	}
 	return nil
 }
 
 // UpdateCookie updates the given cookie in the database, it just replaces all fields including the value.
-func UpdateCookie(cookie *shared.Cookie) *errors.MasterError {
+func UpdateCookie(cookie *shared.Cookie) *errors.HTTPError {
 	if verr := cookie.Validate(); verr != nil {
-		return verr.MasterError().Wrap("invalid cookie data")
+		return verr.HTTPError().Wrap("invalid cookie data")
 	}
 
 	_, err := dbUser.Exec(sqlUpdateCookie,
@@ -181,25 +181,25 @@ func UpdateCookie(cookie *shared.Cookie) *errors.MasterError {
 		sql.Named("value", cookie.Value),
 	)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewHTTPError(err)
 	}
 	return nil
 }
 
 // DeleteCookie removes a cookie from the database by value
-func DeleteCookie(value string) *errors.MasterError {
+func DeleteCookie(value string) *errors.HTTPError {
 	_, err := dbUser.Exec(sqlDeleteCookie, sql.Named("value", value))
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewHTTPError(err)
 	}
 	return nil
 }
 
 // DeleteCookiesByUserID removes all cookies for a specific user
-func DeleteCookiesByUserID(userID shared.TelegramID) *errors.MasterError {
+func DeleteCookiesByUserID(userID shared.TelegramID) *errors.HTTPError {
 	_, err := dbUser.Exec(sqlDeleteCookiesByUserID, sql.Named("user_id", userID))
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewHTTPError(err)
 	}
 	return nil
 }
@@ -209,7 +209,7 @@ func DeleteCookiesByUserID(userID shared.TelegramID) *errors.MasterError {
 // -----------------------------------------------------------------------------
 
 // ScanCookie scans a database row into a Cookie struct
-func ScanCookie(row Scannable) (*shared.Cookie, *errors.MasterError) {
+func ScanCookie(row Scannable) (*shared.Cookie, *errors.HTTPError) {
 	var c shared.Cookie
 	err := row.Scan(
 		&c.UserAgent,
@@ -218,7 +218,7 @@ func ScanCookie(row Scannable) (*shared.Cookie, *errors.MasterError) {
 		&c.LastLogin,
 	)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewHTTPError(err)
 	}
 	return &c, nil
 }

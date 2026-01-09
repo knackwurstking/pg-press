@@ -68,9 +68,9 @@ const (
 // -----------------------------------------------------------------------------
 
 // AddNote adds a new note to the database
-func AddNote(note *shared.Note) *errors.MasterError {
+func AddNote(note *shared.Note) *errors.HTTPError {
 	if verr := note.Validate(); verr != nil {
-		return verr.MasterError().Wrap("invalid note data")
+		return verr.HTTPError().Wrap("invalid note data")
 	}
 
 	_, err := dbNote.Exec(sqlAddNote,
@@ -80,15 +80,15 @@ func AddNote(note *shared.Note) *errors.MasterError {
 		sql.Named("linked", note.Linked),
 	)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewHTTPError(err)
 	}
 	return nil
 }
 
 // UpdateNote updates an existing note in the database
-func UpdateNote(note *shared.Note) *errors.MasterError {
+func UpdateNote(note *shared.Note) *errors.HTTPError {
 	if verr := note.Validate(); verr != nil {
-		return verr.MasterError().Wrap("invalid note data")
+		return verr.HTTPError().Wrap("invalid note data")
 	}
 
 	_, err := dbNote.Exec(sqlUpdateNote,
@@ -99,21 +99,21 @@ func UpdateNote(note *shared.Note) *errors.MasterError {
 		sql.Named("linked", note.Linked),
 	)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewHTTPError(err)
 	}
 	return nil
 }
 
 // GetNote retrieves a note by its ID
-func GetNote(id shared.EntityID) (*shared.Note, *errors.MasterError) {
+func GetNote(id shared.EntityID) (*shared.Note, *errors.HTTPError) {
 	return ScanNote(dbNote.QueryRow(sqlGetNote, sql.Named("id", id)))
 }
 
 // ListNotes retrieves all notes from the database
-func ListNotes() ([]*shared.Note, *errors.MasterError) {
+func ListNotes() ([]*shared.Note, *errors.HTTPError) {
 	rows, err := dbNote.Query(sqlListNotes)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewHTTPError(err)
 	}
 	defer rows.Close()
 
@@ -129,10 +129,10 @@ func ListNotes() ([]*shared.Note, *errors.MasterError) {
 }
 
 // ListNotesForLinked retrieves notes linked to a specific entity
-func ListNotesForLinked(linked string, id int) ([]*shared.Note, *errors.MasterError) {
+func ListNotesForLinked(linked string, id int) ([]*shared.Note, *errors.HTTPError) {
 	rows, err := dbNote.Query(sqlListNotesForLinked)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewHTTPError(err)
 	}
 	defer rows.Close()
 
@@ -159,10 +159,10 @@ func ListNotesForLinked(linked string, id int) ([]*shared.Note, *errors.MasterEr
 }
 
 // DeleteNote removes a note from the database
-func DeleteNote(id shared.EntityID) *errors.MasterError {
+func DeleteNote(id shared.EntityID) *errors.HTTPError {
 	_, err := dbNote.Exec(sqlDeleteNote, sql.Named("id", id))
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewHTTPError(err)
 	}
 	return nil
 }
@@ -172,7 +172,7 @@ func DeleteNote(id shared.EntityID) *errors.MasterError {
 // -----------------------------------------------------------------------------
 
 // ScanNote scans a database row into a Note struct
-func ScanNote(row Scannable) (*shared.Note, *errors.MasterError) {
+func ScanNote(row Scannable) (*shared.Note, *errors.HTTPError) {
 	n := &shared.Note{}
 	err := row.Scan(
 		&n.ID,
@@ -182,7 +182,7 @@ func ScanNote(row Scannable) (*shared.Note, *errors.MasterError) {
 		&n.Linked,
 	)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewHTTPError(err)
 	}
 
 	return n, nil

@@ -25,15 +25,15 @@ func MaskString(s string) string {
 // User Retrieval from Context
 // -----------------------------------------------------------------------------
 
-func GetUserFromContext(c echo.Context) (*User, *errors.MasterError) {
+func GetUserFromContext(c echo.Context) (*User, *errors.HTTPError) {
 	u := c.Get("user")
 	if u == nil {
-		return nil, errors.NewAuthorizationError("no user in context").MasterError()
+		return nil, errors.NewAuthorizationError("no user in context").HTTPError()
 	}
 
 	user, ok := u.(*User)
 	if !ok || user.Validate() != nil {
-		return nil, errors.NewAuthorizationError("invalid user in context").MasterError()
+		return nil, errors.NewAuthorizationError("invalid user in context").HTTPError()
 	}
 
 	return user, nil
@@ -44,10 +44,10 @@ func GetUserFromContext(c echo.Context) (*User, *errors.MasterError) {
 // -----------------------------------------------------------------------------
 
 // ParseQueryString parses a string query parameter from the request
-func ParseQueryString(c echo.Context, paramName string) (string, *errors.MasterError) {
+func ParseQueryString(c echo.Context, paramName string) (string, *errors.HTTPError) {
 	s := c.QueryParam(paramName)
 	if s == "" {
-		return s, errors.NewNotFoundError("missing %s", paramName).MasterError()
+		return s, errors.NewNotFoundError("missing %s", paramName).HTTPError()
 	}
 
 	return s, nil
@@ -69,29 +69,29 @@ func ParseQueryBool(c echo.Context, paramName string) bool {
 }
 
 // ParseQueryInt64 parses an int64 query parameter from the request
-func ParseQueryInt64(c echo.Context, paramName string) (int64, *errors.MasterError) {
+func ParseQueryInt64(c echo.Context, paramName string) (int64, *errors.HTTPError) {
 	idStr := c.QueryParam(paramName)
 	if idStr == "" {
-		return 0, errors.NewNotFoundError("missing %s", paramName).MasterError()
+		return 0, errors.NewNotFoundError("missing %s", paramName).HTTPError()
 	}
 
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		return 0, errors.NewValidationError("invalid %s query parameter: must be a number", paramName).MasterError()
+		return 0, errors.NewValidationError("invalid %s query parameter: must be a number", paramName).HTTPError()
 	}
 
 	return id, nil
 }
 
-func ParseQueryInt(c echo.Context, paramName string) (int, *errors.MasterError) {
+func ParseQueryInt(c echo.Context, paramName string) (int, *errors.HTTPError) {
 	idStr := c.QueryParam(paramName)
 	if idStr == "" {
-		return 0, errors.NewNotFoundError("missing %s", paramName).MasterError()
+		return 0, errors.NewNotFoundError("missing %s", paramName).HTTPError()
 	}
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		return 0, errors.NewValidationError("invalid %s query parameter: must be a number", paramName).MasterError()
+		return 0, errors.NewValidationError("invalid %s query parameter: must be a number", paramName).HTTPError()
 	}
 
 	return id, nil
@@ -102,29 +102,29 @@ func ParseQueryInt(c echo.Context, paramName string) (int, *errors.MasterError) 
 // -----------------------------------------------------------------------------
 
 // ParseParamInt64 parses an int64 parameter from the request
-func ParseParamInt64(c echo.Context, paramName string) (int64, *errors.MasterError) {
+func ParseParamInt64(c echo.Context, paramName string) (int64, *errors.HTTPError) {
 	idStr := c.Param(paramName)
 	if idStr == "" {
-		return 0, errors.NewNotFoundError("missing %s", paramName).MasterError()
+		return 0, errors.NewNotFoundError("missing %s", paramName).HTTPError()
 	}
 
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		return 0, errors.NewValidationError("invalid %s: must be a number", paramName).MasterError()
+		return 0, errors.NewValidationError("invalid %s: must be a number", paramName).HTTPError()
 	}
 	return id, nil
 }
 
 // ParseParamInt8 parses an int8 parameter from the request
-func ParseParamInt8(c echo.Context, paramName string) (int8, *errors.MasterError) {
+func ParseParamInt8(c echo.Context, paramName string) (int8, *errors.HTTPError) {
 	idStr := c.Param(paramName)
 	if idStr == "" {
-		return 0, errors.NewNotFoundError("missing %s", paramName).MasterError()
+		return 0, errors.NewNotFoundError("missing %s", paramName).HTTPError()
 	}
 
 	id, err := strconv.ParseInt(idStr, 10, 8)
 	if err != nil {
-		return 0, errors.NewValidationError("invalid %s: must be a number", paramName).MasterError()
+		return 0, errors.NewValidationError("invalid %s: must be a number", paramName).HTTPError()
 	}
 	return int8(id), nil
 }

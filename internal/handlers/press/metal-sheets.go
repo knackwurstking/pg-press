@@ -31,7 +31,7 @@ func GetPressMetalSheets(c echo.Context) *echo.HTTPError {
 
 	var ums []*shared.UpperMetalSheet
 	if u.SlotUpper != nil {
-		var merr *errors.MasterError
+		var merr *errors.HTTPError
 		if ums, merr = db.ListUpperMetalSheetsByTool(u.SlotUpper.ID); merr != nil {
 			return merr.Echo()
 		}
@@ -39,7 +39,7 @@ func GetPressMetalSheets(c echo.Context) *echo.HTTPError {
 
 	var lms []*shared.LowerMetalSheet
 	if u.SlotLower != nil {
-		var merr *errors.MasterError
+		var merr *errors.HTTPError
 		if lms, merr = db.ListLowerMetalSheetsByTool(u.SlotLower.ID); merr != nil {
 			return merr.Echo()
 		} else {

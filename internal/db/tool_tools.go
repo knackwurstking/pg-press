@@ -101,9 +101,9 @@ const (
 // -----------------------------------------------------------------------------
 
 // AddTool adds a new tool to the database
-func AddTool(tool *shared.Tool) *errors.MasterError {
+func AddTool(tool *shared.Tool) *errors.HTTPError {
 	if verr := tool.Validate(); verr != nil {
-		return verr.MasterError().Wrap("invalid tool data")
+		return verr.HTTPError().Wrap("invalid tool data")
 	}
 
 	_, err := dbTool.Exec(sqlAddTool,
@@ -119,16 +119,16 @@ func AddTool(tool *shared.Tool) *errors.MasterError {
 		sql.Named("max_thickness", tool.MaxThickness),
 	)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewHTTPError(err)
 	}
 
 	return nil
 }
 
 // UpdateTool updates an existing tool in the database
-func UpdateTool(tool *shared.Tool) *errors.MasterError {
+func UpdateTool(tool *shared.Tool) *errors.HTTPError {
 	if verr := tool.Validate(); verr != nil {
-		return verr.MasterError().Wrap("invalid tool data")
+		return verr.HTTPError().Wrap("invalid tool data")
 	}
 
 	_, err := dbTool.Exec(sqlUpdateTool,
@@ -145,13 +145,13 @@ func UpdateTool(tool *shared.Tool) *errors.MasterError {
 		sql.Named("max_thickness", tool.MaxThickness),
 	)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewHTTPError(err)
 	}
 	return nil
 }
 
 // GetTool retrieves a tool by its ID
-func GetTool(id shared.EntityID) (*shared.Tool, *errors.MasterError) {
+func GetTool(id shared.EntityID) (*shared.Tool, *errors.HTTPError) {
 	tool, merr := ScanTool(dbTool.QueryRow(sqlGetTool, id))
 	if merr != nil {
 		return tool, merr
@@ -166,10 +166,10 @@ func GetTool(id shared.EntityID) (*shared.Tool, *errors.MasterError) {
 }
 
 // ListTools retrieves all tools from the database
-func ListTools() (tools []*shared.Tool, merr *errors.MasterError) {
+func ListTools() (tools []*shared.Tool, merr *errors.HTTPError) {
 	r, err := dbTool.Query(sqlListTools)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewHTTPError(err)
 	}
 
 	for r.Next() {
@@ -193,13 +193,13 @@ func ListTools() (tools []*shared.Tool, merr *errors.MasterError) {
 }
 
 // ListBindableCassettes retrieves cassettes that can be bound to a given tool
-func ListBindableCassettes(id shared.EntityID) (cassettes []*shared.Tool, merr *errors.MasterError) {
+func ListBindableCassettes(id shared.EntityID) (cassettes []*shared.Tool, merr *errors.HTTPError) {
 	tool, merr := GetTool(id)
 	if merr != nil {
 		return nil, merr
 	}
 	if tool.IsCassette() {
-		return nil, errors.NewValidationError("cannot bind cassette to itself").MasterError()
+		return nil, errors.NewValidationError("cannot bind cassette to itself").HTTPError()
 	}
 
 	tools, merr := ListTools()
@@ -216,47 +216,47 @@ func ListBindableCassettes(id shared.EntityID) (cassettes []*shared.Tool, merr *
 }
 
 // DeleteTool removes a tool from the database
-func DeleteTool(id shared.EntityID) *errors.MasterError {
+func DeleteTool(id shared.EntityID) *errors.HTTPError {
 	_, err := dbTool.Exec(sqlDeleteTool, sql.Named("id", id))
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewHTTPError(err)
 	}
 	return nil
 }
 
 // MarkToolAsDead marks a tool as dead (destroyed)
-func MarkToolAsDead(id shared.EntityID) *errors.MasterError {
+func MarkToolAsDead(id shared.EntityID) *errors.HTTPError {
 	_, err := dbTool.Exec(sqlMarkToolAsDead, sql.Named("id", id))
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewHTTPError(err)
 	}
 	return nil
 }
 
 // ReviveTool revives a dead tool
-func ReviveTool(id shared.EntityID) *errors.MasterError {
+func ReviveTool(id shared.EntityID) *errors.HTTPError {
 	_, err := dbTool.Exec(sqlReviveTool, sql.Named("id", id))
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewHTTPError(err)
 	}
 	return nil
 }
 
 // BindTool binds a cassette to a tool
-func BindTool(sourceID, targetID shared.EntityID) *errors.MasterError {
+func BindTool(sourceID, targetID shared.EntityID) *errors.HTTPError {
 	res, err := dbTool.Exec(sqlBindTool,
 		sql.Named("source_id", sourceID),
 		sql.Named("target_id", targetID),
 	)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewHTTPError(err)
 	}
 	rowsAffected, err := res.RowsAffected()
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewHTTPError(err)
 	}
 	if rowsAffected == 0 {
-		return errors.NewMasterError(
+		return errors.NewHTTPError(
 			fmt.Errorf("tool %d is already bound to a cassette", sourceID),
 		)
 	}
@@ -264,18 +264,18 @@ func BindTool(sourceID, targetID shared.EntityID) *errors.MasterError {
 }
 
 // UnbindTool unbinds a cassette from a tool
-func UnbindTool(sourceID shared.EntityID) *errors.MasterError {
+func UnbindTool(sourceID shared.EntityID) *errors.HTTPError {
 	_, err := dbTool.Exec(sqlUnbindTool,
 		sql.Named("id", sourceID),
 	)
 	if err != nil {
-		return errors.NewMasterError(err)
+		return errors.NewHTTPError(err)
 	}
 	return nil
 }
 
 // InjectCyclesIntoTool injects cycle count info into a tool
-func InjectCyclesIntoTool(tool *shared.Tool) *errors.MasterError {
+func InjectCyclesIntoTool(tool *shared.Tool) *errors.HTTPError {
 	cycles, merr := GetTotalToolCycles(tool.ID)
 	if merr != nil {
 		return merr.Wrap("could not get total cycles for tool ID %d", tool.ID)
@@ -289,7 +289,7 @@ func InjectCyclesIntoTool(tool *shared.Tool) *errors.MasterError {
 // -----------------------------------------------------------------------------
 
 // ScanTool scans a database row into a Tool struct
-func ScanTool(row Scannable) (*shared.Tool, *errors.MasterError) {
+func ScanTool(row Scannable) (*shared.Tool, *errors.HTTPError) {
 	var t shared.Tool
 	err := row.Scan(
 		&t.ID,
@@ -305,7 +305,7 @@ func ScanTool(row Scannable) (*shared.Tool, *errors.MasterError) {
 		&t.MaxThickness,
 	)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewHTTPError(err)
 	}
 	return &t, nil
 }

@@ -115,7 +115,7 @@ func keyAuthValidator(auth string, ctx echo.Context) (bool, error) {
 		)
 
 		// Try to get user directly from the API key
-		var merr *errors.MasterError
+		var merr *errors.HTTPError
 		user, merr = db.GetUserByApiKey(auth)
 		if merr != nil {
 			return false, merr

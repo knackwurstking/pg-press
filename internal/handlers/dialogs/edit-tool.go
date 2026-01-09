@@ -17,7 +17,7 @@ func GetToolDialog(c echo.Context) *echo.HTTPError {
 	var tool *shared.Tool
 	id, _ := shared.ParseQueryInt64(c, "id")
 	if id > 0 {
-		var merr *errors.MasterError
+		var merr *errors.HTTPError
 		tool, merr = db.GetTool(shared.EntityID(id))
 		if merr != nil {
 			return merr.Echo()
@@ -47,7 +47,7 @@ func GetToolDialog(c echo.Context) *echo.HTTPError {
 func PostTool(c echo.Context) *echo.HTTPError {
 	tool, verr := parseToolForm(c, nil)
 	if verr != nil {
-		return verr.MasterError().Echo()
+		return verr.HTTPError().Echo()
 	}
 
 	log.Debug("Creating new tool: %#v", tool.String())
@@ -75,7 +75,7 @@ func PutTool(c echo.Context) *echo.HTTPError {
 
 	tool, verr := parseToolForm(c, tool)
 	if verr != nil {
-		return verr.MasterError().Echo()
+		return verr.HTTPError().Echo()
 	}
 
 	log.Debug("Updating tool: %#v", tool.String())

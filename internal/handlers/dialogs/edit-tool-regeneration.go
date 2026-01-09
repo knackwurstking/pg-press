@@ -99,22 +99,22 @@ type EditToolRegenerationFormData struct {
 	Stop  shared.UnixMilli
 }
 
-func GetEditToolRegenerationFormData(c echo.Context) (data EditToolRegenerationFormData, merr *errors.MasterError) {
+func GetEditToolRegenerationFormData(c echo.Context) (data EditToolRegenerationFormData, merr *errors.HTTPError) {
 	// Parse start and stop dates from HTML input fields (type "date")
 	vStart := c.FormValue("start")
 	vStop := c.FormValue("stop")
 
 	if vStart == "" || vStop == "" {
-		return data, errors.NewValidationError("missing start or stop").MasterError()
+		return data, errors.NewValidationError("missing start or stop").HTTPError()
 	}
 
 	startInt, err := strconv.ParseInt(vStart, 10, 64)
 	if err != nil {
-		return data, errors.NewValidationError("invalid start date").MasterError()
+		return data, errors.NewValidationError("invalid start date").HTTPError()
 	}
 	stopInt, err := strconv.ParseInt(vStop, 10, 64)
 	if err != nil {
-		return data, errors.NewValidationError("invalid stop date").MasterError()
+		return data, errors.NewValidationError("invalid stop date").HTTPError()
 	}
 
 	data.Start = shared.UnixMilli(startInt)

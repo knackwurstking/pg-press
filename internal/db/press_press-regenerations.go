@@ -43,15 +43,15 @@ const (
 // -----------------------------------------------------------------------------
 
 // ListPressRegenerationsByPress retrieves all press regenerations for a specific press number
-func ListPressRegenerationsByPress(pressNumber shared.PressNumber) ([]*shared.PressRegeneration, *errors.MasterError) {
+func ListPressRegenerationsByPress(pressNumber shared.PressNumber) ([]*shared.PressRegeneration, *errors.HTTPError) {
 	if !pressNumber.IsValid() {
-		return nil, errors.NewValidationError("invalid press_number").MasterError()
+		return nil, errors.NewValidationError("invalid press_number").HTTPError()
 	}
 
 	r, err := dbPress.Query(sqlListPressRegenerationsByPress,
 		sql.Named("press_number", pressNumber))
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewHTTPError(err)
 	}
 	defer r.Close()
 
@@ -64,7 +64,7 @@ func ListPressRegenerationsByPress(pressNumber shared.PressNumber) ([]*shared.Pr
 		regenerations = append(regenerations, pr)
 	}
 	if err = r.Err(); err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewHTTPError(err)
 	}
 
 	return regenerations, nil
@@ -75,7 +75,7 @@ func ListPressRegenerationsByPress(pressNumber shared.PressNumber) ([]*shared.Pr
 // -----------------------------------------------------------------------------
 
 // ScanPressRegeneration scans a database row into a PressRegeneration struct
-func ScanPressRegeneration(row Scannable) (pr *shared.PressRegeneration, merr *errors.MasterError) {
+func ScanPressRegeneration(row Scannable) (pr *shared.PressRegeneration, merr *errors.HTTPError) {
 	pr = &shared.PressRegeneration{}
 	err := row.Scan(
 		&pr.ID,
@@ -84,7 +84,7 @@ func ScanPressRegeneration(row Scannable) (pr *shared.PressRegeneration, merr *e
 		&pr.Stop,
 	)
 	if err != nil {
-		return nil, errors.NewMasterError(err)
+		return nil, errors.NewHTTPError(err)
 	}
 	return pr, nil
 }
