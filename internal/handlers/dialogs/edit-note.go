@@ -19,7 +19,7 @@ func GetEditNote(c echo.Context) *echo.HTTPError {
 
 	// Check if we're editing an existing note
 	var note *shared.Note
-	if id, _ := shared.ParseQueryInt64(c, "id"); id > 0 {
+	if id, _ := urlb.ParseQueryInt64(c, "id"); id > 0 {
 		noteID := shared.EntityID(id)
 
 		var merr *errors.HTTPError
@@ -29,7 +29,7 @@ func GetEditNote(c echo.Context) *echo.HTTPError {
 		}
 	}
 
-	user, _ := shared.GetUserFromContext(c)
+	user, _ := urlb.GetUserFromContext(c)
 
 	if note != nil {
 		log.Debug("Rendering edit note dialog [note=%v, linked=%v, user_name=%s]", note, linked, c.Get("user-name"))
@@ -74,7 +74,7 @@ func PutNote(c echo.Context) *echo.HTTPError {
 		return merr.WrapEcho("failed to get note form data")
 	}
 
-	id, merr := shared.ParseQueryInt64(c, "id")
+	id, merr := urlb.ParseQueryInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}

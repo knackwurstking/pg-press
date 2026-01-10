@@ -7,6 +7,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/tools/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 
 	"github.com/labstack/echo/v4"
 )
@@ -70,7 +71,7 @@ func renderToolsSection(c echo.Context) *echo.HTTPError {
 		errCh <- nil
 	})
 
-	user, merr := shared.GetUserFromContext(c)
+	user, merr := urlb.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}

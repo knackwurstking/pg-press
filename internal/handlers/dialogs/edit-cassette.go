@@ -16,7 +16,7 @@ import (
 
 func GetCassetteDialog(c echo.Context) *echo.HTTPError {
 	var tool *shared.Tool
-	id, _ := shared.ParseQueryInt64(c, "id")
+	id, _ := urlb.ParseQueryInt64(c, "id")
 	if id > 0 {
 		var merr *errors.HTTPError
 		tool, merr = db.GetTool(shared.EntityID(id))
@@ -66,7 +66,7 @@ func PostCassette(c echo.Context) *echo.HTTPError {
 
 // PutCassette handles updating an existing cassette
 func PutCassette(c echo.Context) *echo.HTTPError {
-	id, merr := shared.ParseQueryInt64(c, "id")
+	id, merr := urlb.ParseQueryInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}

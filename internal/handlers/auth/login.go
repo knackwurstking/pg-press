@@ -22,7 +22,7 @@ func GetLoginPage(c echo.Context) *echo.HTTPError {
 		templates.PageProps{
 			FormData: map[string]string{
 				"api-key":         c.FormValue("api-key"),
-				"invalid-api-key": fmt.Sprintf("%t", shared.ParseQueryBool(c, "invalid")),
+				"invalid-api-key": fmt.Sprintf("%t", urlb.ParseQueryBool(c, "invalid")),
 			},
 		},
 	)

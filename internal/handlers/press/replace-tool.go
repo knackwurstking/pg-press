@@ -12,14 +12,14 @@ import (
 
 func ReplaceTool(c echo.Context) *echo.HTTPError {
 	var position shared.Slot
-	if p, merr := shared.ParseQueryInt(c, "position"); merr != nil {
+	if p, merr := urlb.ParseQueryInt(c, "position"); merr != nil {
 		return merr.Echo()
 	} else {
 		position = shared.Slot(p)
 	}
 
 	var toolID shared.EntityID
-	if id, merr := shared.ParseQueryInt64(c, "tool_id"); merr != nil {
+	if id, merr := urlb.ParseQueryInt64(c, "tool_id"); merr != nil {
 		return merr.Echo()
 	} else {
 		toolID = shared.EntityID(id)

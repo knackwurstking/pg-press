@@ -15,9 +15,9 @@ import (
 
 func GetEditMetalSheet(c echo.Context) *echo.HTTPError {
 	// Check if we're editing an existing metal sheet (has ID) or creating new one
-	idQuery, _ := shared.ParseQueryInt64(c, "id")
+	idQuery, _ := urlb.ParseQueryInt64(c, "id")
 	if metalSheetID := shared.EntityID(idQuery); metalSheetID > 0 {
-		positionQuery, merr := shared.ParseQueryInt(c, "position")
+		positionQuery, merr := urlb.ParseQueryInt(c, "position")
 		if merr != nil {
 			return merr.Echo()
 		}
@@ -62,7 +62,7 @@ func GetEditMetalSheet(c echo.Context) *echo.HTTPError {
 	}
 
 	// Creating new metal sheet, get tool_id from query
-	toolIDQuery, merr := shared.ParseQueryInt64(c, "tool_id")
+	toolIDQuery, merr := urlb.ParseQueryInt64(c, "tool_id")
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -96,7 +96,7 @@ func GetEditMetalSheet(c echo.Context) *echo.HTTPError {
 
 func PostMetalSheet(c echo.Context) *echo.HTTPError {
 	// Extract tool ID from query parameters
-	id, merr := shared.ParseQueryInt64(c, "tool_id")
+	id, merr := urlb.ParseQueryInt64(c, "tool_id")
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -140,11 +140,11 @@ func PostMetalSheet(c echo.Context) *echo.HTTPError {
 
 func PutMetalSheet(c echo.Context) *echo.HTTPError {
 	// Extract metal sheet ID from query parameters
-	id, merr := shared.ParseQueryInt64(c, "id")
+	id, merr := urlb.ParseQueryInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
-	position, merr := shared.ParseQueryInt(c, "position")
+	position, merr := urlb.ParseQueryInt(c, "position")
 	if merr != nil {
 		return merr.Echo()
 	}

@@ -7,6 +7,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/profile/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 
 	"github.com/labstack/echo/v4"
 )
@@ -16,7 +17,7 @@ func HTMXGetCookies(c echo.Context) *echo.HTTPError {
 }
 
 func HTMXDeleteCookies(c echo.Context) *echo.HTTPError {
-	value, merr := shared.ParseQueryString(c, "value")
+	value, merr := urlb.ParseQueryString(c, "value")
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -35,7 +36,7 @@ func HTMXDeleteCookies(c echo.Context) *echo.HTTPError {
 }
 
 func renderCookies(c echo.Context, oob bool) *echo.HTTPError {
-	user, merr := shared.GetUserFromContext(c)
+	user, merr := urlb.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}

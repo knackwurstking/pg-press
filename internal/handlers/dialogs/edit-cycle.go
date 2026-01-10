@@ -17,11 +17,11 @@ import (
 
 func GetEditCycle(c echo.Context) *echo.HTTPError {
 	// Check if we're in tool change mode
-	toolChangeMode := shared.ParseQueryBool(c, "tool_change_mode")
+	toolChangeMode := urlb.ParseQueryBool(c, "tool_change_mode")
 
 	// Edit Cycle Dialog
 	if c.QueryParam("id") != "" {
-		cycleIDQuery, merr := shared.ParseQueryInt64(c, "id")
+		cycleIDQuery, merr := urlb.ParseQueryInt64(c, "id")
 		if merr != nil {
 			return merr.Echo()
 		}
@@ -75,7 +75,7 @@ func GetEditCycle(c echo.Context) *echo.HTTPError {
 		return echo.NewHTTPError(http.StatusBadRequest, "missing tool or cycle ID")
 	}
 
-	id, merr := shared.ParseQueryInt64(c, "tool_id")
+	id, merr := urlb.ParseQueryInt64(c, "tool_id")
 	if merr != nil {
 		return merr.Echo()
 	}

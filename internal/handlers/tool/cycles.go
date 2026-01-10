@@ -5,6 +5,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/tool/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 
 	"github.com/labstack/echo/v4"
 )
@@ -25,7 +26,7 @@ func renderCyclesSection(c echo.Context, tool *shared.Tool) *echo.HTTPError {
 
 func renderCyclesSectionContent(c echo.Context) *echo.HTTPError {
 	// Get tool from URL param "id"
-	id, merr := shared.ParseParamInt64(c, "id")
+	id, merr := urlb.ParseParamInt64(c, "id")
 	if merr != nil {
 		return merr.WrapEcho("could not parse tool ID from URL parameter")
 	}
@@ -64,7 +65,7 @@ func renderCyclesSectionContent(c echo.Context) *echo.HTTPError {
 	}
 
 	// Get user from context
-	user, merr := shared.GetUserFromContext(c)
+	user, merr := urlb.GetUserFromContext(c)
 	if merr != nil {
 		return merr.WrapEcho("could not get user from context")
 	}

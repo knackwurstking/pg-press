@@ -13,7 +13,7 @@ import (
 )
 
 func GetEditToolRegeneration(c echo.Context) *echo.HTTPError {
-	id, merr := shared.ParseQueryInt64(c, "id")
+	id, merr := urlb.ParseQueryInt64(c, "id")
 	if merr != nil && !merr.IsNotFoundError() {
 		return merr.Echo()
 	}
@@ -31,7 +31,7 @@ func GetEditToolRegeneration(c echo.Context) *echo.HTTPError {
 		return nil
 	}
 
-	id, merr = shared.ParseQueryInt64(c, "tool_id")
+	id, merr = urlb.ParseQueryInt64(c, "tool_id")
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -44,7 +44,7 @@ func GetEditToolRegeneration(c echo.Context) *echo.HTTPError {
 }
 
 func PostToolRegeneration(c echo.Context) *echo.HTTPError {
-	id, merr := shared.ParseQueryInt64(c, "tool_id")
+	id, merr := urlb.ParseQueryInt64(c, "tool_id")
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -69,7 +69,7 @@ func PostToolRegeneration(c echo.Context) *echo.HTTPError {
 }
 
 func PutToolRegeneration(c echo.Context) *echo.HTTPError {
-	id, merr := shared.ParseQueryInt64(c, "id")
+	id, merr := urlb.ParseQueryInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}

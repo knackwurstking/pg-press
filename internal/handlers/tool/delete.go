@@ -8,7 +8,7 @@ import (
 )
 
 func DeleteToolCycle(c echo.Context) *echo.HTTPError {
-	id, merr := shared.ParseQueryInt64(c, "id")
+	id, merr := urlb.ParseQueryInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}

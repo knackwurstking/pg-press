@@ -15,7 +15,7 @@ import (
 
 func GetToolDialog(c echo.Context) *echo.HTTPError {
 	var tool *shared.Tool
-	id, _ := shared.ParseQueryInt64(c, "id")
+	id, _ := urlb.ParseQueryInt64(c, "id")
 	if id > 0 {
 		var merr *errors.HTTPError
 		tool, merr = db.GetTool(shared.EntityID(id))
@@ -64,7 +64,7 @@ func PostTool(c echo.Context) *echo.HTTPError {
 
 // PutTool handles updating an existing tool
 func PutTool(c echo.Context) *echo.HTTPError {
-	id, merr := shared.ParseQueryInt64(c, "id")
+	id, merr := urlb.ParseQueryInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}

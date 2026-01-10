@@ -7,13 +7,14 @@ import (
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/press/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 
 	"github.com/labstack/echo/v4"
 )
 
 func GetPressMetalSheets(c echo.Context) *echo.HTTPError {
 	var pn shared.PressNumber
-	if p, merr := shared.ParseParamInt8(c, "press"); merr != nil {
+	if p, merr := urlb.ParseParamInt8(c, "press"); merr != nil {
 		return merr.Echo()
 	} else {
 		pn = shared.PressNumber(p)

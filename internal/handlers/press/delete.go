@@ -9,7 +9,7 @@ import (
 
 func DeletePress(c echo.Context) *echo.HTTPError {
 	var pressNumber shared.PressNumber
-	if pn, merr := shared.ParseParamInt8(c, "press"); merr != nil {
+	if pn, merr := urlb.ParseParamInt8(c, "press"); merr != nil {
 		return merr.Echo()
 	} else {
 		pressNumber = shared.PressNumber(pn)
