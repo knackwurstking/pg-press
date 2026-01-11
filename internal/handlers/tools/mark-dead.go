@@ -4,12 +4,13 @@ import (
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/pg-press/internal/utils"
 	"github.com/labstack/echo/v4"
 )
 
 // MarkAsDead marks a tool as dead
 func MarkAsDead(c echo.Context) *echo.HTTPError {
-	id, merr := urlb.ParseQueryInt64(c, "id")
+	id, merr := utils.GetQueryInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -19,7 +20,7 @@ func MarkAsDead(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	urlb.SetHXRedirect(c, urlb.UrlTool(toolID, 0, 0).Page)
+	utils.SetHXRedirect(c, urlb.Tool(toolID))
 
 	return nil
 }

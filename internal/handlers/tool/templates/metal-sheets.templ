@@ -23,7 +23,7 @@ templ UppperMetalSheets(metalSheets []*shared.UpperMetalSheet, tool *shared.Tool
 	}}
 	@components.SectionTitle(components.MainTitle, "Bleche") {
 		@components.SectionDialogAction(components.SectionDialogActionProps{
-			Url:   urlb.UrlDialogs().EditMetalSheet(0, tool.ID, shared.SlotUnknown),
+			Url:   urlb.DialogEditMetalSheet(0, tool.ID, shared.SlotUnknown),
 			Icon:  "plus-lg",
 			Title: "Neues Blech hinzufügen",
 		})
@@ -47,7 +47,7 @@ templ LowerMetalSheets(metalSheets []*shared.LowerMetalSheet, tool *shared.Tool,
 	}}
 	@components.SectionTitle(components.MainTitle, "Bleche") {
 		@components.SectionDialogAction(components.SectionDialogActionProps{
-			Url:   urlb.UrlDialogs().EditMetalSheet(0, tool.ID, shared.SlotUnknown),
+			Url:   urlb.DialogEditMetalSheet(0, tool.ID, shared.SlotUnknown),
 			Icon:  "plus-lg",
 			Title: "Neues Blech hinzufügen",
 		})
@@ -78,9 +78,9 @@ templ metalSheetTableForUpperSlot(position shared.Slot, metalSheets []*shared.Up
 						<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
 						<td class="button-group flex justify-end items-center">
 							@components.TableActions(components.TableActionsOptions{
-								EditHref:        urlb.UrlDialogs().EditMetalSheet(sheet.ID, 0, position),
+								EditHref:        urlb.DialogEditMetalSheet(sheet.ID, 0, position),
 								EditAdminOnly:   false,
-								DeleteHref:      urlb.UrlMetalSheets(sheet.ID).Delete,
+								DeleteHref:      urlb.MetalSheetDelete(sheet.ID),
 								DeleteAdminOnly: true,
 								User:            user,
 							})
@@ -123,9 +123,9 @@ templ metalSheetTableForLowerSlot(position shared.Slot, metalSheets []*shared.Lo
 						</td>
 						<td class="button-group flex justify-end items-center">
 							@components.TableActions(components.TableActionsOptions{
-								EditHref:        urlb.UrlDialogs().EditMetalSheet(sheet.ID, 0, position),
+								EditHref:        urlb.DialogEditMetalSheet(sheet.ID, 0, position),
 								EditAdminOnly:   false,
-								DeleteHref:      urlb.UrlMetalSheets(sheet.ID).Delete,
+								DeleteHref:      urlb.MetalSheetDelete(sheet.ID),
 								DeleteAdminOnly: true,
 								User:            user,
 							})

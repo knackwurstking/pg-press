@@ -5,13 +5,13 @@ import (
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/tool/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/pg-press/internal/utils"
 
 	"github.com/labstack/echo/v4"
 )
 
 func GetToolTotalCycles(c echo.Context) *echo.HTTPError {
-	id, merr := urlb.ParseParamInt64(c, "id")
+	id, merr := utils.GetParamInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -20,7 +20,7 @@ func GetToolTotalCycles(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	t := templates.TotalCycles(totalCycles, urlb.ParseQueryBool(c, "input"))
+	t := templates.TotalCycles(totalCycles, utils.GetQueryBool(c, "input"))
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "TotalCycles")

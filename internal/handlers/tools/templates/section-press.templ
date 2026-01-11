@@ -13,13 +13,13 @@ type SectionPressProps struct {
 
 templ SectionPress(p SectionPressProps) {
 	<span
-		hx-get={ urlb.UrlTools(0).SectionPress }
+		hx-get={ urlb.ToolsSectionPress() }
 		hx-trigger="tools-tab from:body"
 		hx-target="#tab-content"
 	></span>
 	@components.ActionBar(nil) {
 		<button
-			hx-get={ urlb.UrlDialogEditPress(-1).Get }
+			hx-get={ urlb.DialogEditPressGet(-1) }
 			hx-trigger="click"
 			hx-target="body"
 			hx-swap="beforeend"
@@ -58,7 +58,7 @@ templ listPressItem(p listPressItemProps) {
 	<li title={ title }>
 		<a
 			role="button"
-			href={ urlb.UrlPress(p.PressNumber).Page }
+			href={ urlb.Press(p.PressNumber) }
 			class="outline contrast flex justify-between items-center"
 		>
 			<span class="flex flex-col gap-lg w-full">

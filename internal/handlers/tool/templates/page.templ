@@ -27,7 +27,7 @@ templ Page(p *PageProps) {
 			}
 			@components.Section(templ.Attributes{
 				"id":                    "notes-section",
-				"hx-get":                string(urlb.UrlTool(p.Tool.ID, 0, 0).Notes),
+				"hx-get":                string(urlb.ToolNotes(p.Tool.ID)),
 				"hx-trigger":            "load, reload-notes from:body",
 				"hx-swap":               "innerHTML",
 				"hx-on::response-error": "alert(event.detail.xhr.responseText)",
@@ -37,7 +37,7 @@ templ Page(p *PageProps) {
 			if !p.Tool.IsCassette() {
 				@components.Section(templ.Attributes{
 					"id":                    "metal-sheets-section",
-					"hx-get":                string(urlb.UrlTool(p.Tool.ID, 0, 0).MetalSheets),
+					"hx-get":                string(urlb.ToolMetalSheets(p.Tool.ID)),
 					"hx-trigger":            "load, reload-metal-sheets from:body",
 					"hx-swap":               "innerHTML",
 					"hx-on::response-error": "alert(event.detail.xhr.responseText)",
@@ -45,7 +45,7 @@ templ Page(p *PageProps) {
 					@components.Spinner()
 				}
 			}
-			@CyclesSection(false, p.Tool.ID, !p.Tool.IsCassette())
+			@CyclesSection(false, p.Tool.ID)
 		</main>
 	}
 }
@@ -57,7 +57,7 @@ templ actionBarContent(p *PageProps) {
 		} else {
 			<button
 				class="destructive flex gap"
-				hx-patch={ urlb.UrlTools(p.Tool.ID).MarkDead }
+				hx-patch={ urlb.ToolsMarkDead(p.Tool.ID) }
 				hx-trigger="click"
 				hx-confirm="Sind Sie sicher, dass Sie dieses Werkzeug löschen möchten?"
 			>
@@ -69,9 +69,9 @@ templ actionBarContent(p *PageProps) {
 	<button
 		class="primary flex gap"
 		if p.Tool.IsCassette() {
-			hx-get={ urlb.UrlDialogs().EditCassette(p.Tool.ID) }
+			hx-get={ urlb.DialogEditCassette(p.Tool.ID) }
 		} else {
-			hx-get={ urlb.UrlDialogs().EditTool(p.Tool.ID) }
+			hx-get={ urlb.DialogEditTool(p.Tool.ID) }
 		}
 		hx-trigger="click"
 		hx-target="body"

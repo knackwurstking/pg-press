@@ -20,7 +20,7 @@ type SectionToolsProps struct {
 
 templ SectionTools(p SectionToolsProps) {
 	<span
-		hx-get={ urlb.UrlTools(0).SectionTools }
+		hx-get={ urlb.ToolsSectionTools() }
 		hx-trigger="tools-tab from:body"
 		hx-target="#tab-content"
 	></span>
@@ -60,7 +60,7 @@ templ inputFilterTools(tools []*shared.Tool) {
 
 templ actionBarContent() {
 	<button
-		hx-get={ urlb.UrlDialogs().EditCassette(0) }
+		hx-get={ urlb.DialogEditCassette(0) }
 		hx-trigger="click"
 		hx-swap="beforeend"
 		class="flex gap secondary small"
@@ -69,7 +69,7 @@ templ actionBarContent() {
 		<span>Kassette</span>
 	</button>
 	<button
-		hx-get={ urlb.UrlDialogs().EditTool(0) }
+		hx-get={ urlb.DialogEditTool(0) }
 		hx-trigger="click"
 		hx-swap="beforeend"
 		class="flex gap primary small"

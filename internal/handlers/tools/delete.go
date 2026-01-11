@@ -3,13 +3,13 @@ package tools
 import (
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/pg-press/internal/utils"
 	"github.com/labstack/echo/v4"
 )
 
 // Delete deletes a tool
 func Delete(c echo.Context) *echo.HTTPError {
-	id, merr := urlb.ParseQueryInt64(c, "id")
+	id, merr := utils.GetQueryInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -19,7 +19,7 @@ func Delete(c echo.Context) *echo.HTTPError {
 	}
 	log.Debug("Deleted tool with ID: %d", id)
 
-	urlb.SetHXTrigger(c, "tools-tab")
+	utils.SetHXTrigger(c, "tools-tab")
 
 	return nil
 }

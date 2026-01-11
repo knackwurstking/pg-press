@@ -10,7 +10,7 @@ import (
 templ Notes(toolID shared.EntityID, notes []*shared.Note) {
 	@components.SectionTitle(components.SubTitle, "Notizen") {
 		@components.SectionDialogAction(components.SectionDialogActionProps{
-			Url:   urlb.UrlDialogs().EditNote(0, fmt.Sprintf("tool_%d", toolID)),
+			Url:   urlb.DialogEditNote(0, fmt.Sprintf("tool_%d", toolID)),
 			Icon:  "plus-lg",
 			Title: "Neue Notiz hinzufügen",
 		})
