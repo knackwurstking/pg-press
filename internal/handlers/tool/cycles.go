@@ -28,25 +28,25 @@ func renderCyclesSectionContent(c echo.Context) *echo.HTTPError {
 	// Get tool from URL param "id"
 	id, merr := urlb.ParseParamInt64(c, "id")
 	if merr != nil {
-		return merr.WrapEcho("could not parse tool ID from URL parameter")
+		return merr.Echo()
 	}
 	toolID := shared.EntityID(id)
 
 	tool, merr := db.GetTool(toolID)
 	if merr != nil {
-		return merr.WrapEcho("could not get tool by ID")
+		return merr.Echo()
 	}
 
 	// Get cycles for this specific tool
 	toolCycles, merr := db.ListToolCycles(toolID)
 	if merr != nil {
-		return merr.WrapEcho("could not list cycles for tool")
+		return merr.Echo()
 	}
 
 	// Get active press number for this tool, -1 if none
 	activePressNumber, merr := db.GetPressNumberForTool(toolID)
 	if merr != nil && !merr.IsNotFoundError() {
-		return merr.WrapEcho("could not get active press number for tool")
+		return merr.Echo()
 	}
 
 	// Get bindable cassettes for this tool, if it is a tool and not a cassette
@@ -54,20 +54,20 @@ func renderCyclesSectionContent(c echo.Context) *echo.HTTPError {
 	if !tool.IsCassette() {
 		cassettesForBinding, merr = db.ListBindableCassettes(toolID)
 		if merr != nil {
-			return merr.WrapEcho("could not list available cassettes for binding")
+			return merr.Echo()
 		}
 	}
 
 	// Get regenerations for this tool
 	regenerations, merr := db.ListToolRegenerationsByTool(toolID)
 	if merr != nil {
-		return merr.WrapEcho("could not get regenerations for tool")
+		return merr.Echo()
 	}
 
 	// Get user from context
 	user, merr := urlb.GetUserFromContext(c)
 	if merr != nil {
-		return merr.WrapEcho("could not get user from context")
+		return merr.Echo()
 	}
 
 	t := templates.CyclesSectionContent(templates.CyclesSectionContentProps{

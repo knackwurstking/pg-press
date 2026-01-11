@@ -16,7 +16,7 @@ import (
 )
 
 func GetLoginPage(c echo.Context) *echo.HTTPError {
-	log.Debug("Login page requested from IP: %#v", c.RealIP())
+	log.Debug("Login page requested from IP: %s", c.RealIP())
 
 	t := templates.Page(
 		templates.PageProps{
@@ -41,7 +41,7 @@ func PostLoginPage(c echo.Context) *echo.HTTPError {
 
 	err := processApiKeyLogin(apiKey, c)
 	if err != nil {
-		fmt.Println("Processing api key failed:", err)
+		log.Warn("Login failed: %v", err)
 	}
 	if apiKey == "" || err != nil {
 		invalid := true
@@ -61,7 +61,7 @@ func PostLoginPage(c echo.Context) *echo.HTTPError {
 
 func processApiKeyLogin(apiKey string, ctx echo.Context) *errors.HTTPError {
 	if len(apiKey) < shared.MinAPIKeyLength {
-		return errors.NewValidationError("API key too short").HTTPError().Wrap("invalid api key")
+		return errors.NewValidationError("invalid API key: too short").HTTPError()
 	}
 
 	user, merr := db.GetUserByApiKey(apiKey)
@@ -75,7 +75,7 @@ func processApiKeyLogin(apiKey string, ctx echo.Context) *errors.HTTPError {
 	}
 
 	if user.IsAdmin() {
-		log.Info("Administrator login successful: %#v, from ID: %#v", user.Name, ctx.RealIP())
+		log.Info("Administrator %s logged in from IP %s", user.Name, ctx.RealIP())
 	}
 
 	return nil

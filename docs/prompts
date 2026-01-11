@@ -1,6 +1,3 @@
-Improve and simplify all the error returns (messages) and logs
-
---------------------------------------------------------------------------------
 
 Change the "urlb" package Url* functions and simplify it, each function should 
 just return a templ.SafeURL type, create an rename functions if needed, 

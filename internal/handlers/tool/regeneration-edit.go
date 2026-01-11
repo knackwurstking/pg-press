@@ -60,7 +60,7 @@ func Regeneration(c echo.Context) *echo.HTTPError {
 	}
 	tool, merr := db.GetTool(shared.EntityID(id))
 	if merr != nil {
-		return merr.WrapEcho("getting tool by ID %d failed", id)
+		return merr.Echo()
 	}
 
 	statusStr := c.FormValue("status")
@@ -75,19 +75,19 @@ func Regeneration(c echo.Context) *echo.HTTPError {
 	case "regenerating":
 		merr = db.StopToolRegeneration(tool.ID)
 		if merr != nil {
-			return merr.WrapEcho("stopping regeneration for tool ID %d failed", tool.ID)
+			return merr.Echo()
 		}
 
 	case "active":
 		merr = db.StartToolRegeneration(tool.ID)
 		if merr != nil {
-			return merr.WrapEcho("starting regeneration for tool ID %d failed", tool.ID)
+			return merr.Echo()
 		}
 
 	case "abort":
 		merr := db.AbortToolRegeneration(tool.ID)
 		if merr != nil {
-			return merr.WrapEcho("aborting regeneration for tool ID %d failed", tool.ID)
+			return merr.Echo()
 		}
 
 	default:
@@ -100,7 +100,7 @@ func Regeneration(c echo.Context) *echo.HTTPError {
 	// Get updated tool and render status display
 	tool, merr = db.GetTool(tool.ID)
 	if merr != nil {
-		return merr.WrapEcho("getting tool by ID %d failed", tool.ID)
+		return merr.Echo()
 	}
 
 	// Render the updated status component

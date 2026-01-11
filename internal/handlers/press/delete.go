@@ -16,7 +16,7 @@ func DeletePress(c echo.Context) *echo.HTTPError {
 	}
 
 	if merr := db.DeletePress(pressNumber); merr != nil {
-		return merr.WrapEcho("delete press %d", pressNumber)
+		return merr.Echo()
 	}
 
 	urlb.SetHXRedirect(c, urlb.UrlPress(pressNumber).Page)

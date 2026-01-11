@@ -30,6 +30,6 @@ func Wrap(err error, format string, a ...any) error {
 func NewRenderError(err error, name string) *echo.HTTPError {
 	return echo.NewHTTPError(
 		http.StatusInternalServerError,
-		fmt.Sprintf("render %s: %#v", name, err.Error()),
+		fmt.Sprintf("render %s: %s", name, err.Error()),
 	)
 }

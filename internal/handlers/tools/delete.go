@@ -17,7 +17,7 @@ func Delete(c echo.Context) *echo.HTTPError {
 	if merr != nil {
 		return merr.Echo()
 	}
-	log.Debug("Deleted cassette with ID: %v", id)
+	log.Debug("Deleted tool with ID: %d", id)
 
 	urlb.SetHXTrigger(c, "tools-tab")
 

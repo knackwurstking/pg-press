@@ -53,14 +53,14 @@ func GetEditNote(c echo.Context) *echo.HTTPError {
 func PostNote(c echo.Context) *echo.HTTPError {
 	note, merr := parseNoteForm(c)
 	if merr != nil {
-		return merr.WrapEcho("failed to get note form data")
+		return merr.Echo()
 	}
 
 	log.Debug("Creating new note [note=%v, user_name=%s]", note, c.Get("user-name"))
 
 	merr = db.AddNote(note)
 	if merr != nil {
-		return merr.WrapEcho("failed to create note")
+		return merr.Echo()
 	}
 
 	urlb.SetHXTrigger(c, "reload-notes")

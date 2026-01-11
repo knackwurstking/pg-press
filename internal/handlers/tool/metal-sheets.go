@@ -25,7 +25,7 @@ func GetToolMetalSheets(c echo.Context) *echo.HTTPError {
 	}
 	tool, merr := db.GetTool(shared.EntityID(id))
 	if merr != nil {
-		return merr.WrapEcho("could not get tool by ID")
+		return merr.WrapEcho("tool not found")
 	}
 
 	var t templ.Component

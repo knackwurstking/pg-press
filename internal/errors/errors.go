@@ -185,7 +185,7 @@ func (e *HTTPError) Echo() *echo.HTTPError {
 // WrapEcho wraps the error and converts it to an echo HTTP error
 func (e *HTTPError) WrapEcho(format string, a ...any) *echo.HTTPError {
 	msg := fmt.Sprintf(format, a...)
-	return echo.NewHTTPError(e.code, msg+": "+e.err.Error())
+	return echo.NewHTTPError(e.code, fmt.Sprintf("%s: %s", msg, e.err.Error()))
 }
 
 // IsValidationError checks if the error is a validation error
