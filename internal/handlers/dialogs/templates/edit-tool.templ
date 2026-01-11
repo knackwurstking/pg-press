@@ -10,7 +10,7 @@ import (
 templ NewToolDialog() {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           "POST",
-		Href:             urlb.UrlDialogs().EditTool(0),
+		Href:             urlb.DialogEditTool(0),
 		ID:               "tool-dialog",
 		SubmitButtonText: "Erstellen",
 	}) {
@@ -25,7 +25,7 @@ templ NewToolDialog() {
 templ EditToolDialog(tool *shared.Tool) {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           "PUT",
-		Href:             urlb.UrlDialogs().EditTool(tool.ID),
+		Href:             urlb.DialogEditTool(tool.ID),
 		ID:               "tool-edit-dialog",
 		SubmitButtonText: "Aktualisieren",
 	}) {

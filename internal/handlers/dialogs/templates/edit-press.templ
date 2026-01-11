@@ -11,7 +11,7 @@ import (
 templ NewPressDialog() {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPost,
-		Href:             urlb.UrlDialogEditPress(-1).Post,
+		Href:             urlb.DialogEditPressPost(-1),
 		ID:               "notes-dialog",
 		SubmitButtonText: "Erstellen",
 		FormClasses:      templ.CSSClasses{"container"},
@@ -23,7 +23,7 @@ templ NewPressDialog() {
 templ EditPressDialog(press *shared.Press) {
 	@ui.Dialog(ui.DialogOptions{
 		Method:            http.MethodPut,
-		Href:              urlb.UrlDialogEditPress(press.ID).Put,
+		Href:              urlb.DialogEditPressPut(press.ID),
 		ID:                "notes-edit-dialog",
 		SubmitButtonText:  "Aktualisieren",
 		FormClasses:       templ.CSSClasses{"container"},
@@ -36,7 +36,7 @@ templ EditPressDialog(press *shared.Press) {
 templ editPressActions(press *shared.Press) {
 	<button
 		class="destructive"
-		hx-delete={ urlb.UrlPress(press.ID).Delete }
+		hx-delete={ urlb.PressDelete(press.ID) }
 		hx-trigger="click"
 		hx-confirm="Möchten Sie diese Presse wirklich entfernen? Diese Aktion kann nicht rückgängig gemacht werden."
 	>

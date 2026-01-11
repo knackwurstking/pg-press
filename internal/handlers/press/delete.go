@@ -4,12 +4,13 @@ import (
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/pg-press/internal/utils"
 	"github.com/labstack/echo/v4"
 )
 
 func DeletePress(c echo.Context) *echo.HTTPError {
 	var pressNumber shared.PressNumber
-	if pn, merr := urlb.ParseParamInt8(c, "press"); merr != nil {
+	if pn, merr := utils.GetParamInt8(c, "press"); merr != nil {
 		return merr.Echo()
 	} else {
 		pressNumber = shared.PressNumber(pn)
@@ -19,7 +20,7 @@ func DeletePress(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	urlb.SetHXRedirect(c, urlb.UrlPress(pressNumber).Page)
+	utils.SetHXRedirect(c, urlb.Press(pressNumber))
 
 	return nil
 }

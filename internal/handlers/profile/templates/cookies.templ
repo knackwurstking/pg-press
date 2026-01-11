@@ -59,7 +59,7 @@ templ cookieRow(cookie *shared.Cookie) {
 		<td class="left user-agent-cell">{ cookie.UserAgent }</td>
 		<td class="right select-none">
 			<a
-				hx-delete={ urlb.UrlProfile(cookie.Value).Cookies }
+				hx-delete={ urlb.ProfileCookies(cookie.Value) }
 				hx-trigger="click"
 				hx-confirm="Sind Sie sicher, dass Sie dieses Cookie löschen möchten?"
 				role="button"

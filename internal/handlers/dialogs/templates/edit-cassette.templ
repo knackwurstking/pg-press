@@ -10,7 +10,7 @@ import (
 templ NewCassetteDialog() {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           "POST",
-		Href:             urlb.UrlDialogs().EditCassette(0),
+		Href:             urlb.DialogEditCassette(0),
 		ID:               "cassette-dialog",
 		SubmitButtonText: "Erstellen",
 	}) {
@@ -25,7 +25,7 @@ templ NewCassetteDialog() {
 templ EditCassetteDialog(cassette *shared.Tool) {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           "PUT",
-		Href:             urlb.UrlDialogs().EditCassette(cassette.ID),
+		Href:             urlb.DialogEditCassette(cassette.ID),
 		ID:               "cassette-edit-dialog",
 		SubmitButtonText: "Aktualisieren",
 	}) {

@@ -11,7 +11,7 @@ import (
 templ NewToolRegenerationDialog(toolID shared.EntityID) {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPost,
-		Href:             urlb.UrlDialogEditToolRegeneration(0, toolID).Post,
+		Href:             urlb.DialogEditToolRegenerationPost(toolID),
 		ID:               "tool-regeneration-dialog",
 		SubmitButtonText: "Erstellen",
 	}) {
@@ -22,7 +22,7 @@ templ NewToolRegenerationDialog(toolID shared.EntityID) {
 templ EditToolRegenerationDialog(tr *shared.ToolRegeneration) {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPut,
-		Href:             urlb.UrlDialogEditToolRegeneration(tr.ID, 0).Put,
+		Href:             urlb.DialogEditToolRegenerationPut(tr.ID),
 		ID:               "tool-regeneration-dialog",
 		SubmitButtonText: "Bearbeiten",
 	}) {

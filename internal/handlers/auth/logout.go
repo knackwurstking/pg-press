@@ -3,6 +3,7 @@ package auth
 import (
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/pg-press/internal/utils"
 	"github.com/labstack/echo/v4"
 )
 
@@ -16,7 +17,7 @@ func GetLogout(c echo.Context) *echo.HTTPError {
 		}
 	}
 
-	if merr := urlb.RedirectTo(c, urlb.UrlLogin("", nil).Page); merr != nil {
+	if merr := utils.RedirectTo(c, urlb.Login("", nil)); merr != nil {
 		return merr.Echo()
 	}
 	return nil

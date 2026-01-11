@@ -3,13 +3,13 @@ package notes
 import (
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/pg-press/internal/utils"
 
 	"github.com/labstack/echo/v4"
 )
 
 func DeleteNote(c echo.Context) *echo.HTTPError {
-	id, merr := urlb.ParseQueryInt64(c, "id")
+	id, merr := utils.GetQueryInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -23,7 +23,7 @@ func DeleteNote(c echo.Context) *echo.HTTPError {
 	}
 
 	// Trigger reload of notes sections
-	urlb.SetHXTrigger(c, "reload-notes")
+	utils.SetHXTrigger(c, "reload-notes")
 
 	return nil
 }

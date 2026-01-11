@@ -12,7 +12,7 @@ import (
 templ NewNoteDialog(linked string, user *shared.User) {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPost,
-		Href:             urlb.UrlDialogs().EditNote(0, linked),
+		Href:             urlb.DialogEditNote(0, linked),
 		ID:               "notes-dialog",
 		SubmitButtonText: "Erstellen",
 	}) {
@@ -25,7 +25,7 @@ templ NewNoteDialog(linked string, user *shared.User) {
 templ EditNoteDialog(note *shared.Note, linked string, user *shared.User) {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPut,
-		Href:             urlb.UrlDialogs().EditNote(note.ID, linked),
+		Href:             urlb.DialogEditNote(note.ID, linked),
 		ID:               "notes-edit-dialog",
 		SubmitButtonText: "Aktualisieren",
 	}) {

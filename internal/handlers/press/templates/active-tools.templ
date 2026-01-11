@@ -41,7 +41,7 @@ templ ActiveToolsSection(pu *shared.PressUtilization, toolsForSelection map[shar
 
 templ toolSelection(pn shared.PressNumber, position shared.Slot, currentToolID shared.EntityID, tools []*shared.Tool) {
 	<form
-		hx-post={ urlb.UrlPressReplaceTool(pn, position) }
+		hx-post={ urlb.PressReplaceTool(pn, position) }
 		hx-trigger="change"
 	>
 		<select

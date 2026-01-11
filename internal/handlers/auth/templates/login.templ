@@ -27,7 +27,7 @@ templ Page(p PageProps) {
 templ apiKeyDialog(apiKey, invalidApiKey string) {
 	<dialog id="login-dialog" class="clean" oncancel="event.preventDefault();">
 		<form
-			action={ urlb.UrlLogin("", nil).Page }
+			action={ urlb.Login("", nil) }
 			method="post"
 		>
 			<label class="flex flex-col">

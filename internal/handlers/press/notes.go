@@ -5,14 +5,14 @@ import (
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/press/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/pg-press/internal/utils"
 
 	"github.com/labstack/echo/v4"
 )
 
 func GetNotes(c echo.Context) *echo.HTTPError {
 	var pressNumber shared.PressNumber
-	if press, merr := urlb.ParseParamInt8(c, "press"); merr != nil {
+	if press, merr := utils.GetParamInt8(c, "press"); merr != nil {
 		return merr.Echo()
 	} else {
 		pressNumber = shared.PressNumber(press)

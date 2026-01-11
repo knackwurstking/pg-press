@@ -5,7 +5,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/tool/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/pg-press/internal/utils"
 
 	"github.com/labstack/echo/v4"
 )
@@ -16,7 +16,7 @@ func GetCyclesSectionContent(c echo.Context) *echo.HTTPError {
 
 func renderCyclesSection(c echo.Context, tool *shared.Tool) *echo.HTTPError {
 	// Render out-of-band swap for cycles section to trigger reload
-	t := templates.CyclesSection(true, tool.ID, !tool.IsCassette())
+	t := templates.CyclesSection(true, tool.ID)
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "CyclesSection")
@@ -26,7 +26,7 @@ func renderCyclesSection(c echo.Context, tool *shared.Tool) *echo.HTTPError {
 
 func renderCyclesSectionContent(c echo.Context) *echo.HTTPError {
 	// Get tool from URL param "id"
-	id, merr := urlb.ParseParamInt64(c, "id")
+	id, merr := utils.GetParamInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -65,7 +65,7 @@ func renderCyclesSectionContent(c echo.Context) *echo.HTTPError {
 	}
 
 	// Get user from context
-	user, merr := urlb.GetUserFromContext(c)
+	user, merr := utils.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}

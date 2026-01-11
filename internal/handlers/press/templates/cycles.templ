@@ -91,9 +91,9 @@ templ renderPressCycleRow(cycle *shared.Cycle, tool *shared.Tool, user *shared.U
 			<span class="button-group flex justify-end items-center">
 				{{ toolChangeMode := true }}
 				@components.TableActions(components.TableActionsOptions{
-					EditHref:        urlb.UrlDialogEditCycle(cycle.ID, cycle.ToolID, toolChangeMode).Get,
+					EditHref:        urlb.DialogEditCycleGet(cycle.ID, cycle.ToolID, toolChangeMode),
 					EditAdminOnly:   true,
-					DeleteHref:      urlb.UrlTool(cycle.ToolID, 0, cycle.ID).CycleDelete,
+					DeleteHref:      urlb.ToolCycleDelete(cycle.ID),
 					DeleteAdminOnly: true,
 					User:            user,
 				})

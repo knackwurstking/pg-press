@@ -12,6 +12,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/handlers/auth/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/pg-press/internal/utils"
 	"github.com/labstack/echo/v4"
 )
 
@@ -22,7 +23,7 @@ func GetLoginPage(c echo.Context) *echo.HTTPError {
 		templates.PageProps{
 			FormData: map[string]string{
 				"api-key":         c.FormValue("api-key"),
-				"invalid-api-key": fmt.Sprintf("%t", urlb.ParseQueryBool(c, "invalid")),
+				"invalid-api-key": fmt.Sprintf("%t", utils.GetQueryBool(c, "invalid")),
 			},
 		},
 	)
@@ -45,13 +46,13 @@ func PostLoginPage(c echo.Context) *echo.HTTPError {
 	}
 	if apiKey == "" || err != nil {
 		invalid := true
-		merr := urlb.RedirectTo(c, urlb.UrlLogin(apiKey, &invalid).Page)
+		merr := utils.RedirectTo(c, urlb.Login(apiKey, &invalid))
 		if merr != nil {
 			return merr.Echo()
 		}
 	}
 
-	merr := urlb.RedirectTo(c, urlb.UrlProfile("").Page)
+	merr := utils.RedirectTo(c, urlb.Profile())
 	if merr != nil {
 		return merr.Echo()
 	}

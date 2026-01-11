@@ -9,13 +9,14 @@ import (
 	"github.com/knackwurstking/pg-press/internal/handlers/dialogs/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/pg-press/internal/utils"
 
 	"github.com/labstack/echo/v4"
 )
 
 func GetToolDialog(c echo.Context) *echo.HTTPError {
 	var tool *shared.Tool
-	id, _ := urlb.ParseQueryInt64(c, "id")
+	id, _ := utils.GetQueryInt64(c, "id")
 	if id > 0 {
 		var merr *errors.HTTPError
 		tool, merr = db.GetTool(shared.EntityID(id))
@@ -57,14 +58,14 @@ func PostTool(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	urlb.SetHXTrigger(c, "tools-tab")
+	utils.SetHXTrigger(c, "tools-tab")
 
 	return nil
 }
 
 // PutTool handles updating an existing tool
 func PutTool(c echo.Context) *echo.HTTPError {
-	id, merr := urlb.ParseQueryInt64(c, "id")
+	id, merr := utils.GetQueryInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -86,7 +87,7 @@ func PutTool(c echo.Context) *echo.HTTPError {
 	}
 
 	// Set HX headers
-	urlb.SetHXRedirect(c, urlb.UrlTool(tool.ID, 0, 0).Page)
+	utils.SetHXRedirect(c, urlb.Tool(tool.ID))
 
 	return nil
 }

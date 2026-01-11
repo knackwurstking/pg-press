@@ -81,7 +81,7 @@ script DownloadPDF(url templ.SafeURL, defaultFilename, loadingContent, resetCont
 
 func DownloadCycleSummaryPDF(press shared.PressNumber) templ.ComponentScript {
 	return DownloadPDF(
-		urlb.UrlPress(press).CycleSummaryPDF,
+		urlb.PressCycleSummaryPDF(press),
 		"cycle_summary.pdf",
 		"Lädt...",
 		"Zusammenfassung (PDF)",
@@ -90,7 +90,7 @@ func DownloadCycleSummaryPDF(press shared.PressNumber) templ.ComponentScript {
 
 func DownloadTroubleReportPDF(troubleReportID shared.EntityID) templ.ComponentScript {
 	return DownloadPDF(
-		urlb.UrlTroubleReports(troubleReportID, 0, 0).SharePDF,
+		urlb.TroubleReportsSharePDF(troubleReportID),
 		"trouble_report.pdf",
 		`<i class="bi bi-hourglass-split"></i>`,
 		`<i class="bi bi-share"></i>`,

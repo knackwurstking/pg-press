@@ -13,6 +13,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/logger"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/pg-press/internal/utils"
 	ui "github.com/knackwurstking/ui/ui-templ"
 
 	"github.com/labstack/echo/v4"
@@ -87,7 +88,7 @@ func middlewareKeyAuth() echo.MiddlewareFunc {
 				"KeyAuth error: %v [method=%s, path=%s, real_ip=%s]",
 				err, c.Request().Method, c.Request().URL.Path, c.RealIP(),
 			)
-			merr := urlb.RedirectTo(c, urlb.UrlLogin("", nil).Page)
+			merr := utils.RedirectTo(c, urlb.Login("", nil))
 			if merr != nil {
 				return merr.Err()
 			}

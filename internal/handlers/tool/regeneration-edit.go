@@ -7,13 +7,13 @@ import (
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/tool/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/pg-press/internal/utils"
 
 	"github.com/labstack/echo/v4"
 )
 
 func RegenerationEditable(c echo.Context) *echo.HTTPError {
-	id, merr := urlb.ParseParamInt64(c, "id")
+	id, merr := utils.GetParamInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -31,7 +31,7 @@ func RegenerationEditable(c echo.Context) *echo.HTTPError {
 }
 
 func RegenerationNonEditable(c echo.Context) *echo.HTTPError {
-	id, merr := urlb.ParseParamInt64(c, "id")
+	id, merr := utils.GetParamInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -49,12 +49,12 @@ func RegenerationNonEditable(c echo.Context) *echo.HTTPError {
 }
 
 func Regeneration(c echo.Context) *echo.HTTPError {
-	user, merr := urlb.GetUserFromContext(c)
+	user, merr := utils.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	id, merr := urlb.ParseParamInt64(c, "id")
+	id, merr := utils.GetParamInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -115,7 +115,7 @@ func Regeneration(c echo.Context) *echo.HTTPError {
 func renderRegenerationEdit(c echo.Context, tool *shared.Tool, editable bool, user *shared.User) *echo.HTTPError {
 	if user == nil {
 		var merr *errors.HTTPError
-		user, merr = urlb.GetUserFromContext(c)
+		user, merr = utils.GetUserFromContext(c)
 		if merr != nil {
 			return merr.Wrap("getting user from context failed").Echo()
 		}

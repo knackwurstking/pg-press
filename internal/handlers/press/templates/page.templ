@@ -38,7 +38,7 @@ templ sectionActions(p PageProps) {
 		if p.User.IsAdmin() {
 			<button
 				class="secondary"
-				hx-get={ urlb.UrlDialogEditPress(p.PressNumber).Get }
+				hx-get={ urlb.DialogEditPressGet(p.PressNumber) }
 				hx-trigger="click"
 				hx-target="body"
 				hx-swap="beforeend"
@@ -48,14 +48,14 @@ templ sectionActions(p PageProps) {
 			<a
 				role="button"
 				class="secondary"
-				href={ urlb.UrlPressRegeneration(p.PressNumber, 0).Page }
+				href={ urlb.PressRegeneration(p.PressNumber, 0) }
 			>
 				Regeneration
 			</a>
 			<a
 				role="button"
 				class="primary"
-				href={ urlb.UrlUmbau(p.PressNumber).Page }
+				href={ urlb.Umbau(p.PressNumber) }
 			>
 				Umbau
 			</a>
@@ -71,14 +71,14 @@ templ sectionNotes(p PageProps) {
 	}) {
 		@components.SectionTitle(components.SubTitle, "Notizen") {
 			@components.SectionDialogAction(components.SectionDialogActionProps{
-				Url:   urlb.UrlDialogs().EditNote(0, fmt.Sprintf("press_%d", p.PressNumber)),
+				Url:   urlb.DialogEditNote(0, fmt.Sprintf("press_%d", p.PressNumber)),
 				Icon:  "plus-lg",
 				Title: "Neue Notiz für diese Presse hinzufügen",
 			})
 		}
 		<div
 			id="notes-content"
-			hx-get={ urlb.UrlPress(p.PressNumber).Notes }
+			hx-get={ urlb.PressNotes(p.PressNumber) }
 			hx-trigger="load, pageLoaded from:body"
 			hx-on:htmx:response-error="alert('Fehler beim Laden der Notizen: ' + event.detail.xhr.responseText)"
 		>
@@ -98,7 +98,7 @@ templ sectionActiveTools(p PageProps) {
 		</div>
 		<div
 			id="active-tools-content"
-			hx-get={ urlb.UrlPress(p.PressNumber).ActiveTools }
+			hx-get={ urlb.PressActiveTools(p.PressNumber) }
 			hx-trigger="load, reload-active-tools from:body"
 			hx-on:htmx:response-error="alert('Fehler beim Laden der Werkzeuge: ' + event.detail.xhr.responseText)"
 		>
@@ -117,7 +117,7 @@ templ sectionMetalSheets(p PageProps) {
 		</div>
 		<div
 			id="metal-sheets-content"
-			hx-get={ urlb.UrlPress(p.PressNumber).MetalSheets }
+			hx-get={ urlb.PressMetalSheets(p.PressNumber) }
 			hx-trigger="load, pageLoaded from:body"
 			hx-on:htmx:response-error="alert('Fehler beim Laden der Blech Listen: ' + event.detail.xhr.responseText)"
 		>
@@ -135,7 +135,7 @@ templ sectionRegenerations(p PageProps) {
 		</div>
 		<div
 			id="press-regenerations-section-content"
-			hx-get={ urlb.UrlPress(p.PressNumber).PressRegenerations }
+			hx-get={ urlb.PressRegenerations(p.PressNumber) }
 			hx-trigger="load, pageLoaded from:body"
 			hx-on::response-error="alert('Fehler beim laden: ' + event.detail.xhr.responseText)"
 		>
@@ -167,7 +167,7 @@ templ sectionCycles(p PageProps) {
 		<div
 			id="cycles-content"
 			class="mt"
-			hx-get={ urlb.UrlPress(p.PressNumber).Cycles }
+			hx-get={ urlb.PressCycles(p.PressNumber) }
 			hx-trigger="load, pageLoaded from:body"
 			hx-on:htmx:response-error="alert('Fehler beim Laden des Pressennutzungsverlaufs: ' + event.detail.xhr.responseText)"
 		>

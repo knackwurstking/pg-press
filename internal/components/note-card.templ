@@ -39,7 +39,7 @@ templ NoteCard(note *shared.Note, tools []*shared.Tool) {
 			<span class="flex gap">
 				<button
 					class="icon secondary small"
-					hx-get={ urlb.UrlDialogs().EditNote(note.ID, note.Linked) }
+					hx-get={ urlb.DialogEditNote(note.ID, note.Linked) }
 					hx-trigger="click"
 					hx-target="body"
 					hx-swap="beforeend"
@@ -49,7 +49,7 @@ templ NoteCard(note *shared.Note, tools []*shared.Tool) {
 				</button>
 				<button
 					class="icon small destructive"
-					hx-delete={ urlb.UrlNotes(note.ID).Delete }
+					hx-delete={ urlb.NotesDelete(note.ID) }
 					hx-trigger="click"
 					hx-confirm="Sind Sie sicher, dass Sie diese Notiz löschen möchten?"
 					title="Notiz löschen"
@@ -71,7 +71,7 @@ templ NoteCard(note *shared.Note, tools []*shared.Tool) {
 							for _, t := range tools {
 								if t.ID == shared.EntityID(linked.ID) {
 									<a
-										href={ urlb.UrlTool(t.ID, 0, 0).Page }
+										href={ urlb.Tool(t.ID) }
 										class="tool-link"
 									>
 										{ fmt.Sprintf(
@@ -86,7 +86,7 @@ templ NoteCard(note *shared.Note, tools []*shared.Tool) {
 							}
 						case "press":
 							<a
-								href={ urlb.UrlPress(shared.PressNumber(linked.ID)).Page }
+								href={ urlb.Press(shared.PressNumber(linked.ID)) }
 								class="press-link"
 							>
 								{ fmt.Sprintf("Presse %d", linked.ID) }

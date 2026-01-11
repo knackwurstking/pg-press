@@ -6,20 +6,20 @@ import (
 
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/pg-press/internal/utils"
 	"github.com/labstack/echo/v4"
 )
 
 func ReplaceTool(c echo.Context) *echo.HTTPError {
 	var position shared.Slot
-	if p, merr := urlb.ParseQueryInt(c, "position"); merr != nil {
+	if p, merr := utils.GetQueryInt(c, "position"); merr != nil {
 		return merr.Echo()
 	} else {
 		position = shared.Slot(p)
 	}
 
 	var toolID shared.EntityID
-	if id, merr := urlb.ParseQueryInt64(c, "tool_id"); merr != nil {
+	if id, merr := utils.GetQueryInt64(c, "tool_id"); merr != nil {
 		return merr.Echo()
 	} else {
 		toolID = shared.EntityID(id)
@@ -56,7 +56,7 @@ func ReplaceTool(c echo.Context) *echo.HTTPError {
 		}
 	}
 
-	urlb.SetHXTrigger(c, "reload-active-tools")
+	utils.SetHXTrigger(c, "reload-active-tools")
 
 	return nil
 }

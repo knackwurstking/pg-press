@@ -24,7 +24,7 @@ templ BindingSection(props BindingSectionProps) {
 			<select
 				id="tool-binding-select"
 				class="max-w-full"
-				hx-patch={ urlb.UrlTool(props.Tool.ID, 0, 0).Bind }
+				hx-patch={ urlb.ToolBind(props.Tool.ID) }
 				hx-vals="js:{target_id: event.target.value}"
 				hx-trigger="change"
 				hx-target="#binding-section"
@@ -54,7 +54,7 @@ templ BindingSection(props BindingSectionProps) {
 			</select>
 			<button
 				class="small ghost destructive"
-				hx-patch={ urlb.UrlTool(props.Tool.ID, 0, 0).UnBind }
+				hx-patch={ urlb.ToolUnbind(props.Tool.ID) }
 				hx-trigger="click"
 				hx-target="#binding-section"
 				hx-swap="outerHTML"

@@ -8,16 +8,16 @@ import (
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/dialogs/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/pg-press/internal/utils"
 
 	"github.com/labstack/echo/v4"
 )
 
 func GetEditMetalSheet(c echo.Context) *echo.HTTPError {
 	// Check if we're editing an existing metal sheet (has ID) or creating new one
-	idQuery, _ := urlb.ParseQueryInt64(c, "id")
+	idQuery, _ := utils.GetQueryInt64(c, "id")
 	if metalSheetID := shared.EntityID(idQuery); metalSheetID > 0 {
-		positionQuery, merr := urlb.ParseQueryInt(c, "position")
+		positionQuery, merr := utils.GetQueryInt(c, "position")
 		if merr != nil {
 			return merr.Echo()
 		}
@@ -62,7 +62,7 @@ func GetEditMetalSheet(c echo.Context) *echo.HTTPError {
 	}
 
 	// Creating new metal sheet, get tool_id from query
-	toolIDQuery, merr := urlb.ParseQueryInt64(c, "tool_id")
+	toolIDQuery, merr := utils.GetQueryInt64(c, "tool_id")
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -96,7 +96,7 @@ func GetEditMetalSheet(c echo.Context) *echo.HTTPError {
 
 func PostMetalSheet(c echo.Context) *echo.HTTPError {
 	// Extract tool ID from query parameters
-	id, merr := urlb.ParseQueryInt64(c, "tool_id")
+	id, merr := utils.GetQueryInt64(c, "tool_id")
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -133,18 +133,18 @@ func PostMetalSheet(c echo.Context) *echo.HTTPError {
 		return errors.NewValidationError("invalid tool position").HTTPError().Echo()
 	}
 
-	urlb.SetHXTrigger(c, "reload-metal-sheets")
+	utils.SetHXTrigger(c, "reload-metal-sheets")
 
 	return nil
 }
 
 func PutMetalSheet(c echo.Context) *echo.HTTPError {
 	// Extract metal sheet ID from query parameters
-	id, merr := urlb.ParseQueryInt64(c, "id")
+	id, merr := utils.GetQueryInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
-	position, merr := urlb.ParseQueryInt(c, "position")
+	position, merr := utils.GetQueryInt(c, "position")
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -181,7 +181,7 @@ func PutMetalSheet(c echo.Context) *echo.HTTPError {
 		return errors.NewValidationError("invalid slot position").HTTPError().Echo()
 	}
 
-	urlb.SetHXTrigger(c, "reload-metal-sheets")
+	utils.SetHXTrigger(c, "reload-metal-sheets")
 
 	return nil
 }

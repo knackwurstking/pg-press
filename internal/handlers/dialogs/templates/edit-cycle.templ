@@ -18,7 +18,7 @@ templ NewCycleDialog(
 ) {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPost,
-		Href:             urlb.UrlDialogEditCycle(0, tool.ID, false).Post,
+		Href:             urlb.DialogEditCyclePost(),
 		ID:               "cycle-dialog",
 		SubmitButtonText: "Erstellen",
 	}) {
@@ -54,7 +54,7 @@ templ EditCycleDialog(
 	{{ toolChangeMode := len(availableTools) > 0 }}
 	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPut,
-		Href:             urlb.UrlDialogEditCycle(cycle.ID, 0, toolChangeMode).Put,
+		Href:             urlb.DialogEditCyclePut(),
 		ID:               "cycle-edit-dialog",
 		SubmitButtonText: "Aktualisieren",
 	}) {

@@ -22,19 +22,19 @@ templ homePageContent() {
 	<main class="container fluid">
 		<nav class="flex flex-col gap-lg justify-center">
 			@homeNavigationItem(
-				urlb.UrlTroubleReports(0, 0, 0).Page,
+				urlb.TroubleReports(),
 				"exclamation-triangle",
 				"Problemberichte",
 				"Verwalten Sie Problemberichte und Lösungen",
 			)
 			@homeNavigationItem(
-				urlb.UrlTools(0).Page,
+				urlb.Tools(),
 				"tools",
 				"Werkzeuglisten",
 				"Verwalten Sie Blechlisten, Notizen, Probleme und Zyklen",
 			)
 			@homeNavigationItem(
-				urlb.UrlNotes(0).Page,
+				urlb.Notes(),
 				"journal-text",
 				"Notizen Verwaltung",
 				"Verwalten Sie Notizen für Werkzeuge und Pressen",

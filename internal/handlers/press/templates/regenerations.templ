@@ -29,9 +29,9 @@ templ Regenerations(p RegenerationsProps) {
 					<td>{ r.Stop.FormatDate() }</td>
 					<td>
 						@components.TableActions(components.TableActionsOptions{
-							EditHref:        urlb.UrlDialogs().EditPressRegeneration(r.ID),
+							EditHref:        urlb.DialogEditPressRegeneration(r.ID),
 							EditAdminOnly:   false,
-							DeleteHref:      urlb.UrlPressRegeneration(r.PressNumber, r.ID).Delete,
+							DeleteHref:      urlb.PressRegenerationDelete(r.PressNumber, r.ID),
 							DeleteAdminOnly: true,
 							User:            p.User,
 						})

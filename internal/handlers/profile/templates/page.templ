@@ -61,7 +61,7 @@ templ sectionCookies() {
 	<div class="border" style="overflow: hidden; background: var(--ui-color-50);">
 		<span
 			id="cookies"
-			hx-get={ urlb.UrlProfile("").Cookies }
+			hx-get={ urlb.ProfileCookies("") }
 			hx-trigger="load"
 			hx-swap="outerHTML"
 		></span>
@@ -74,7 +74,7 @@ templ editUserDialog(user *shared.User) {
 		class="profile-dialog border clean"
 		oncancel="event.preventDefault()"
 	>
-		<form action={ urlb.UrlProfile("").Page }>
+		<form action={ urlb.Profile() }>
 			<label class="flex flex-col">
 				<strong>Benutzername ändern</strong>
 				<input
@@ -88,7 +88,7 @@ templ editUserDialog(user *shared.User) {
 			<footer class="flex gap justify-end mt-lg">
 				<a
 					role="button"
-					href={ urlb.UrlProfile("").Page }
+					href={ urlb.Profile() }
 					class="secondary flex gap"
 				>
 					<i class="bi bi-x-circle"></i>

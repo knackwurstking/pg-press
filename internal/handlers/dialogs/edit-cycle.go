@@ -10,18 +10,18 @@ import (
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/dialogs/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/pg-press/internal/utils"
 
 	"github.com/labstack/echo/v4"
 )
 
 func GetEditCycle(c echo.Context) *echo.HTTPError {
 	// Check if we're in tool change mode
-	toolChangeMode := urlb.ParseQueryBool(c, "tool_change_mode")
+	toolChangeMode := utils.GetQueryBool(c, "tool_change_mode")
 
 	// Edit Cycle Dialog
 	if c.QueryParam("id") != "" {
-		cycleIDQuery, merr := urlb.ParseQueryInt64(c, "id")
+		cycleIDQuery, merr := utils.GetQueryInt64(c, "id")
 		if merr != nil {
 			return merr.Echo()
 		}
@@ -75,7 +75,7 @@ func GetEditCycle(c echo.Context) *echo.HTTPError {
 		return echo.NewHTTPError(http.StatusBadRequest, "missing tool or cycle ID")
 	}
 
-	id, merr := urlb.ParseQueryInt64(c, "tool_id")
+	id, merr := utils.GetQueryInt64(c, "tool_id")
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -111,7 +111,7 @@ func PostCycle(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	urlb.SetHXTrigger(c, "reload-cycles")
+	utils.SetHXTrigger(c, "reload-cycles")
 
 	return nil
 }
@@ -129,7 +129,7 @@ func PutCycle(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	urlb.SetHXTrigger(c, "reload-cycles")
+	utils.SetHXTrigger(c, "reload-cycles")
 
 	return nil
 }

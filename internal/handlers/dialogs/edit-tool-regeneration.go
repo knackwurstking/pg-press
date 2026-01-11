@@ -7,13 +7,13 @@ import (
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/dialogs/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/pg-press/internal/utils"
 
 	"github.com/labstack/echo/v4"
 )
 
 func GetEditToolRegeneration(c echo.Context) *echo.HTTPError {
-	id, merr := urlb.ParseQueryInt64(c, "id")
+	id, merr := utils.GetQueryInt64(c, "id")
 	if merr != nil && !merr.IsNotFoundError() {
 		return merr.Echo()
 	}
@@ -31,7 +31,7 @@ func GetEditToolRegeneration(c echo.Context) *echo.HTTPError {
 		return nil
 	}
 
-	id, merr = urlb.ParseQueryInt64(c, "tool_id")
+	id, merr = utils.GetQueryInt64(c, "tool_id")
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -44,7 +44,7 @@ func GetEditToolRegeneration(c echo.Context) *echo.HTTPError {
 }
 
 func PostToolRegeneration(c echo.Context) *echo.HTTPError {
-	id, merr := urlb.ParseQueryInt64(c, "tool_id")
+	id, merr := utils.GetQueryInt64(c, "tool_id")
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -63,13 +63,13 @@ func PostToolRegeneration(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	urlb.SetHXTrigger(c, "reload-tool-regenerations")
+	utils.SetHXTrigger(c, "reload-tool-regenerations")
 
 	return nil
 }
 
 func PutToolRegeneration(c echo.Context) *echo.HTTPError {
-	id, merr := urlb.ParseQueryInt64(c, "id")
+	id, merr := utils.GetQueryInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -89,7 +89,7 @@ func PutToolRegeneration(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	urlb.SetHXTrigger(c, "reload-tool-regenerations")
+	utils.SetHXTrigger(c, "reload-tool-regenerations")
 
 	return nil
 }
