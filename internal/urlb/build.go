@@ -153,8 +153,8 @@ func UrlMetalSheetDelete(metalSheetID shared.EntityID) templ.SafeURL {
 // Umbau URLs
 // -----------------------------------------------------------------------------
 
-// UrlUmbau constructs umbau URLs
-func UrlUmbau(press shared.PressNumber) templ.SafeURL {
+// UmbauPage constructs umbau URL
+func UmbauPage(press shared.PressNumber) templ.SafeURL {
 	return BuildURL(fmt.Sprintf("/umbau/%d", press))
 }
 
@@ -162,16 +162,20 @@ func UrlUmbau(press shared.PressNumber) templ.SafeURL {
 // Trouble Reports URLs
 // -----------------------------------------------------------------------------
 
-// UrlTroubleReports constructs trouble reports URLs
-func UrlTroubleReports(trID shared.EntityID, aID shared.EntityID, modificationTime int64) (url struct {
-	Page               templ.SafeURL
-	SharePDF           templ.SafeURL
-	Attachment         templ.SafeURL
-	Modifications      templ.SafeURL
-	Data               templ.SafeURL
-	AttachmentsPreview templ.SafeURL
-	Rollback           templ.SafeURL
-}) {
+// TroubleReportsPage constructs trouble reports page URL
+func TroubleReportsPage() templ.SafeURL {
+	return BuildURL("/trouble-reports")
+}
+
+// TroubleReportsSharePDF constructs trouble reports share PDF URL
+func TroubleReportsSharePDF(trID shared.EntityID) templ.SafeURL {
+	return BuildURLWithParams("/trouble-reports/share-pdf", map[string]string{
+		"id": fmt.Sprintf("%d", trID),
+	})
+}
+
+// TroubleReportsAttachment constructs trouble reports attachment URL
+func TroubleReportsAttachment(trID, aID shared.EntityID, modificationTime int64) templ.SafeURL {
 	params := map[string]string{}
 	if trID != 0 {
 		params["id"] = fmt.Sprintf("%d", trID)
@@ -182,125 +186,193 @@ func UrlTroubleReports(trID shared.EntityID, aID shared.EntityID, modificationTi
 	if modificationTime != 0 {
 		params["modification_time"] = fmt.Sprintf("%d", modificationTime)
 	}
+	return BuildURLWithParams("/trouble-reports/attachment", params)
+}
 
-	url.Page = BuildURL("/trouble-reports")
-	url.SharePDF = BuildURLWithParams("/trouble-reports/share-pdf", params)
-	url.Attachment = BuildURLWithParams("/trouble-reports/attachment", params)
-	url.Modifications = BuildURLWithParams(fmt.Sprintf("/trouble-reports/modifications/%d", trID), params)
-	url.Data = BuildURLWithParams("/trouble-reports/data", params)
-	url.AttachmentsPreview = BuildURLWithParams("/trouble-reports/attachments-preview", params)
-	url.Rollback = BuildURLWithParams("/trouble-reports/rollback", params)
+// TroubleReportsModifications constructs trouble reports modifications URL
+func TroubleReportsModifications(trID shared.EntityID) templ.SafeURL {
+	return BuildURLWithParams(fmt.Sprintf("/trouble-reports/modifications/%d", trID), map[string]string{
+		"id": fmt.Sprintf("%d", trID),
+	})
+}
 
-	return url
+// TroubleReportsData constructs trouble reports data URL
+func TroubleReportsData(trID shared.EntityID) templ.SafeURL {
+	return BuildURLWithParams("/trouble-reports/data", map[string]string{
+		"id": fmt.Sprintf("%d", trID),
+	})
+}
+
+// TroubleReportsAttachmentsPreview constructs trouble reports attachments preview URL
+func TroubleReportsAttachmentsPreview(trID shared.EntityID) templ.SafeURL {
+	return BuildURLWithParams("/trouble-reports/attachments-preview", map[string]string{
+		"id": fmt.Sprintf("%d", trID),
+	})
+}
+
+// TroubleReportsRollback constructs trouble reports rollback URL
+func TroubleReportsRollback(trID shared.EntityID) templ.SafeURL {
+	return BuildURLWithParams("/trouble-reports/rollback", map[string]string{
+		"id": fmt.Sprintf("%d", trID),
+	})
 }
 
 // -----------------------------------------------------------------------------
 // Tools URLs
 // -----------------------------------------------------------------------------
 
-// UrlTools constructs tools URLs
-func UrlTools(toolID shared.EntityID) (url struct {
-	Page                  templ.SafeURL
-	Delete                templ.SafeURL
-	MarkDead              templ.SafeURL
-	SectionPress          templ.SafeURL
-	SectionTools          templ.SafeURL
-	AdminOverlappingTools templ.SafeURL
-}) {
-	params := map[string]string{}
-	if toolID != 0 {
-		params["id"] = fmt.Sprintf("%d", toolID)
-	}
+// ToolsPage constructs tools page URL
+func ToolsPage() templ.SafeURL {
+	return BuildURL("/tools")
+}
 
-	url.Page = BuildURL("/tools")
-	url.Delete = BuildURLWithParams("/tools/delete", params)
-	url.MarkDead = BuildURLWithParams("/tools/mark-dead", params)
-	url.SectionPress = BuildURL("/tools/section/press")
-	url.SectionTools = BuildURL("/tools/section/tools")
-	url.AdminOverlappingTools = BuildURL("/tools/admin/overlapping-tools")
+// ToolsDelete constructs tools delete URL
+func ToolsDelete(toolID shared.EntityID) templ.SafeURL {
+	return BuildURLWithParams("/tools/delete", map[string]string{
+		"id": fmt.Sprintf("%d", toolID),
+	})
+}
 
-	return url
+// ToolsMarkDead constructs tools mark dead URL
+func ToolsMarkDead(toolID shared.EntityID) templ.SafeURL {
+	return BuildURLWithParams("/tools/mark-dead", map[string]string{
+		"id": fmt.Sprintf("%d", toolID),
+	})
+}
+
+// ToolsSectionPress constructs tools section press URL
+func ToolsSectionPress() templ.SafeURL {
+	return BuildURL("/tools/section/press")
+}
+
+// ToolsSectionTools constructs tools section tools URL
+func ToolsSectionTools() templ.SafeURL {
+	return BuildURL("/tools/section/tools")
+}
+
+// ToolsAdminOverlapping constructs admin overlapping tools URL
+func ToolsAdminOverlapping() templ.SafeURL {
+	return BuildURL("/tools/admin/overlapping-tools")
 }
 
 // -----------------------------------------------------------------------------
 // Tool URLs
 // -----------------------------------------------------------------------------
 
-// UrlTool constructs tool URLs
-func UrlTool(toolID, toolRegenerationID, cycleID shared.EntityID) (url struct {
-	Page                templ.SafeURL
-	DeleteRegeneration  templ.SafeURL
-	RegenerationEdit    templ.SafeURL
-	RegenerationDisplay templ.SafeURL
-	Regeneration        templ.SafeURL
-	Notes               templ.SafeURL
-	MetalSheets         templ.SafeURL
-	Cycles              templ.SafeURL
-	TotalCycles         templ.SafeURL
-	CycleDelete         templ.SafeURL
-	Bind                templ.SafeURL
-	UnBind              templ.SafeURL
-}) {
-	url.Page = BuildURL(fmt.Sprintf("/tool/%d", toolID))
+// ToolPage constructs tool page URL
+func ToolPage(toolID shared.EntityID) templ.SafeURL {
+	return BuildURL(fmt.Sprintf("/tool/%d", toolID))
+}
 
-	{
-		params := map[string]string{}
-		if toolRegenerationID != 0 {
-			params["id"] = fmt.Sprintf("%d", toolRegenerationID)
-		}
-		url.DeleteRegeneration = BuildURLWithParams(fmt.Sprintf("/tool/%d/delete-regeneration", toolID), params)
+// ToolDeleteRegeneration constructs tool delete regeneration URL
+func ToolDeleteRegeneration(toolID, toolRegenerationID shared.EntityID) templ.SafeURL {
+	params := map[string]string{}
+	if toolRegenerationID != 0 {
+		params["id"] = fmt.Sprintf("%d", toolRegenerationID)
 	}
+	return BuildURLWithParams(fmt.Sprintf("/tool/%d/delete-regeneration", toolID), params)
+}
 
-	url.RegenerationEdit = BuildURL(fmt.Sprintf("/tool/%d/regeneration-edit", toolID))
-	url.RegenerationDisplay = BuildURL(fmt.Sprintf("/tool/%d/regeneration-display", toolID))
-	url.Regeneration = BuildURL(fmt.Sprintf("/tool/%d/regeneration", toolID))
-	url.Notes = BuildURL(fmt.Sprintf("/tool/%d/notes", toolID))
-	url.MetalSheets = BuildURL(fmt.Sprintf("/tool/%d/metal-sheets", toolID))
-	url.Cycles = BuildURL(fmt.Sprintf("/tool/%d/cycles", toolID))
-	url.TotalCycles = BuildURL(fmt.Sprintf("/tool/%d/total-cycles", toolID))
+// ToolRegenerationEdit constructs tool regeneration edit URL
+func ToolRegenerationEdit(toolID shared.EntityID) templ.SafeURL {
+	return BuildURL(fmt.Sprintf("/tool/%d/regeneration-edit", toolID))
+}
 
-	{
-		params := map[string]string{}
-		if cycleID != 0 {
-			params["id"] = fmt.Sprintf("%d", cycleID)
-		}
-		url.CycleDelete = BuildURLWithParams("/tool/cycle/delete", params)
+// ToolRegenerationDisplay constructs tool regeneration display URL
+func ToolRegenerationDisplay(toolID shared.EntityID) templ.SafeURL {
+	return BuildURL(fmt.Sprintf("/tool/%d/regeneration-display", toolID))
+}
+
+// ToolRegeneration constructs tool regeneration URL
+func ToolRegeneration(toolID shared.EntityID) templ.SafeURL {
+	return BuildURL(fmt.Sprintf("/tool/%d/regeneration", toolID))
+}
+
+// ToolNotes constructs tool notes URL
+func ToolNotes(toolID shared.EntityID) templ.SafeURL {
+	return BuildURL(fmt.Sprintf("/tool/%d/notes", toolID))
+}
+
+// ToolMetalSheets constructs tool metal sheets URL
+func ToolMetalSheets(toolID shared.EntityID) templ.SafeURL {
+	return BuildURL(fmt.Sprintf("/tool/%d/metal-sheets", toolID))
+}
+
+// ToolCycles constructs tool cycles URL
+func ToolCycles(toolID shared.EntityID) templ.SafeURL {
+	return BuildURL(fmt.Sprintf("/tool/%d/cycles", toolID))
+}
+
+// ToolTotalCycles constructs tool total cycles URL
+func ToolTotalCycles(toolID shared.EntityID) templ.SafeURL {
+	return BuildURL(fmt.Sprintf("/tool/%d/total-cycles", toolID))
+}
+
+// ToolCycleDelete constructs tool cycle delete URL
+func ToolCycleDelete(cycleID shared.EntityID) templ.SafeURL {
+	params := map[string]string{}
+	if cycleID != 0 {
+		params["id"] = fmt.Sprintf("%d", cycleID)
 	}
+	return BuildURLWithParams("/tool/cycle/delete", params)
+}
 
-	url.Bind = BuildURL(fmt.Sprintf("/tool/%d/bind", toolID))
-	url.UnBind = BuildURL(fmt.Sprintf("/tool/%d/unbind", toolID))
+// ToolBind constructs tool bind URL
+func ToolBind(toolID shared.EntityID) templ.SafeURL {
+	return BuildURL(fmt.Sprintf("/tool/%d/bind", toolID))
+}
 
-	return url
+// ToolUnbind constructs tool unbind URL
+func ToolUnbind(toolID shared.EntityID) templ.SafeURL {
+	return BuildURL(fmt.Sprintf("/tool/%d/unbind", toolID))
 }
 
 // -----------------------------------------------------------------------------
 // Press URLs
 // -----------------------------------------------------------------------------
 
-// UrlPress constructs press URLs
-func UrlPress(pressNumber shared.PressNumber) (url struct {
-	Page               templ.SafeURL
-	ActiveTools        templ.SafeURL
-	MetalSheets        templ.SafeURL
-	Cycles             templ.SafeURL
-	Notes              templ.SafeURL
-	PressRegenerations templ.SafeURL
-	CycleSummaryPDF    templ.SafeURL
-	Delete             templ.SafeURL
-}) {
-	url.Page = BuildURL(fmt.Sprintf("/press/%d", pressNumber))
-	url.ActiveTools = BuildURL(fmt.Sprintf("/press/%d/active-tools", pressNumber))
-	url.MetalSheets = BuildURL(fmt.Sprintf("/press/%d/metal-sheets", pressNumber))
-	url.Cycles = BuildURL(fmt.Sprintf("/press/%d/cycles", pressNumber))
-	url.Notes = BuildURL(fmt.Sprintf("/press/%d/notes", pressNumber))
-	url.PressRegenerations = BuildURL(fmt.Sprintf("/press/%d/regenerations", pressNumber))
-	url.CycleSummaryPDF = BuildURL(fmt.Sprintf("/press/%d/cycle-summary-pdf", pressNumber))
-	url.Delete = BuildURL(fmt.Sprintf("/press/%d", pressNumber))
-
-	return url
+// PressPage constructs press page URL
+func PressPage(pressNumber shared.PressNumber) templ.SafeURL {
+	return BuildURL(fmt.Sprintf("/press/%d", pressNumber))
 }
 
-func UrlPressReplaceTool(pn shared.PressNumber, p shared.Slot) templ.SafeURL {
+// PressActiveTools constructs press active tools URL
+func PressActiveTools(pressNumber shared.PressNumber) templ.SafeURL {
+	return BuildURL(fmt.Sprintf("/press/%d/active-tools", pressNumber))
+}
+
+// PressMetalSheets constructs press metal sheets URL
+func PressMetalSheets(pressNumber shared.PressNumber) templ.SafeURL {
+	return BuildURL(fmt.Sprintf("/press/%d/metal-sheets", pressNumber))
+}
+
+// PressCycles constructs press cycles URL
+func PressCycles(pressNumber shared.PressNumber) templ.SafeURL {
+	return BuildURL(fmt.Sprintf("/press/%d/cycles", pressNumber))
+}
+
+// PressNotes constructs press notes URL
+func PressNotes(pressNumber shared.PressNumber) templ.SafeURL {
+	return BuildURL(fmt.Sprintf("/press/%d/notes", pressNumber))
+}
+
+// PressRegenerations constructs press regenerations URL
+func PressRegenerations(pressNumber shared.PressNumber) templ.SafeURL {
+	return BuildURL(fmt.Sprintf("/press/%d/regenerations", pressNumber))
+}
+
+// PressCycleSummaryPDF constructs press cycle summary PDF URL
+func PressCycleSummaryPDF(pressNumber shared.PressNumber) templ.SafeURL {
+	return BuildURL(fmt.Sprintf("/press/%d/cycle-summary-pdf", pressNumber))
+}
+
+// PressDelete constructs press delete URL
+func PressDelete(pressNumber shared.PressNumber) templ.SafeURL {
+	return BuildURL(fmt.Sprintf("/press/%d", pressNumber))
+}
+
+// PressReplaceTool constructs press replace tool URL
+func PressReplaceTool(pn shared.PressNumber, p shared.Slot) templ.SafeURL {
 	return BuildURLWithParams(fmt.Sprintf("/press/%d/replace-tool", pn), map[string]string{
 		"tool_id":  fmt.Sprintf("%d", pn),
 		"position": fmt.Sprintf("%d", p),
@@ -311,54 +383,50 @@ func UrlPressReplaceTool(pn shared.PressNumber, p shared.Slot) templ.SafeURL {
 // Press Regeneration URLs
 // -----------------------------------------------------------------------------
 
-// UrlPressRegeneration constructs press regeneration URLs
-func UrlPressRegeneration(press shared.PressNumber, pressRegenerationID shared.EntityID) (url struct {
-	Page   templ.SafeURL
-	Post   templ.SafeURL
-	Delete templ.SafeURL
-}) {
+// PressRegenerationPage constructs press regeneration page URL
+func PressRegenerationPage(press shared.PressNumber, pressRegenerationID shared.EntityID) templ.SafeURL {
+	return BuildURL(fmt.Sprintf("/press-regeneration/%d", press))
+}
+
+// PressRegenerationDelete constructs press regeneration delete URL
+func PressRegenerationDelete(press shared.PressNumber, pressRegenerationID shared.EntityID) templ.SafeURL {
 	params := map[string]string{
 		"id": fmt.Sprintf("%d", pressRegenerationID),
 	}
-
-	url.Page = BuildURL(fmt.Sprintf("/press-regeneration/%d", press))
-	url.Post = url.Page
-	url.Delete = BuildURLWithParams(fmt.Sprintf("/press-regeneration/%d/delete", press), params)
-
-	return url
+	return BuildURLWithParams(fmt.Sprintf("/press-regeneration/%d/delete", press), params)
 }
 
 // -----------------------------------------------------------------------------
 // Dialog URLs
 // -----------------------------------------------------------------------------
 
-func UrlDialogEditToolRegeneration(toolRegenerationID, toolID shared.EntityID) (url struct {
-	Get, Post, Put templ.SafeURL
-}) {
-	url.Get = BuildURLWithParams(
+// DialogEditToolRegenerationGet constructs edit tool regeneration dialog GET URL
+func DialogEditToolRegenerationGet(toolID shared.EntityID) templ.SafeURL {
+	return BuildURLWithParams(
 		"/dialog/edit-tool-regeneration",
 		map[string]string{
 			"tool_id": toolID.String(),
 		},
 	)
-	url.Post = url.Get
-	url.Put = BuildURLWithParams(
+}
+
+// DialogEditToolRegenerationPost constructs edit tool regeneration dialog POST URL
+func DialogEditToolRegenerationPost(toolID shared.EntityID) templ.SafeURL {
+	return DialogEditToolRegenerationGet(toolID)
+}
+
+// DialogEditToolRegenerationPut constructs edit tool regeneration dialog PUT URL
+func DialogEditToolRegenerationPut(toolRegenerationID shared.EntityID) templ.SafeURL {
+	return BuildURLWithParams(
 		"/dialog/edit-tool-regeneration",
 		map[string]string{
 			"id": toolRegenerationID.String(),
 		},
 	)
-
-	return url
 }
 
-func UrlDialogEditCycle(
-	cycleID shared.EntityID, toolID shared.EntityID, toolChangeMode bool,
-) (url struct {
-	Get  templ.SafeURL
-	Post templ.SafeURL
-	Put  templ.SafeURL
-}) {
+// DialogEditCycleGet constructs edit cycle dialog GET URL
+func DialogEditCycleGet(cycleID shared.EntityID, toolID shared.EntityID, toolChangeMode bool) templ.SafeURL {
 	params := map[string]string{}
 	if cycleID != 0 {
 		params["id"] = fmt.Sprintf("%d", cycleID)
@@ -369,33 +437,41 @@ func UrlDialogEditCycle(
 	if toolChangeMode {
 		params["tool_change_mode"] = "true"
 	}
-
-	url.Get = BuildURLWithParams("/dialog/edit-cycle", params)
-	url.Post = BuildURL("/dialog/edit-cycle")
-	url.Put = BuildURL("/dialog/edit-cycle")
-
-	return url
+	return BuildURLWithParams("/dialog/edit-cycle", params)
 }
 
-func UrlDialogEditPress(pressID shared.PressNumber) (url struct {
-	Get, Post, Put templ.SafeURL
-}) {
+// DialogEditCyclePost constructs edit cycle dialog POST URL
+func DialogEditCyclePost() templ.SafeURL {
+	return BuildURL("/dialog/edit-cycle")
+}
+
+// DialogEditCyclePut constructs edit cycle dialog PUT URL
+func DialogEditCyclePut() templ.SafeURL {
+	return BuildURL("/dialog/edit-cycle")
+}
+
+// DialogEditPressGet constructs edit press dialog GET URL
+func DialogEditPressGet(pressID shared.PressNumber) templ.SafeURL {
 	if pressID > -1 {
-		url.Get = BuildURLWithParams("/dialog/edit-press", map[string]string{
+		return BuildURLWithParams("/dialog/edit-press", map[string]string{
 			"id": pressID.String(),
 		})
-	} else {
-		url.Get = BuildURL("/dialog/edit-press")
 	}
+	return BuildURL("/dialog/edit-press")
+}
 
-	url.Post = url.Get
-	url.Put = BuildURLWithParams(
+// DialogEditPressPost constructs edit press dialog POST URL
+func DialogEditPressPost(pressID shared.PressNumber) templ.SafeURL {
+	return DialogEditPressGet(pressID)
+}
+
+// DialogEditPressPut constructs edit press dialog PUT URL
+func DialogEditPressPut(pressID shared.PressNumber) templ.SafeURL {
+	return BuildURLWithParams(
 		"/dialog/edit-press", map[string]string{
 			"id": pressID.String(),
 		},
 	)
-
-	return url
 }
 
 // -----------------------------------------------------------------------------
