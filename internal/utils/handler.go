@@ -1,4 +1,4 @@
-package routerutils
+package utils
 
 import (
 	"encoding/json"
