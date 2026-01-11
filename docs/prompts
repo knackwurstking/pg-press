@@ -1,10 +1,3 @@
-
-Change the "urlb" package Url* functions and simplify it, each function should 
-just return a templ.SafeURL type, create an rename functions if needed, 
-after that the project files using this functions needs to be fixed
-
---------------------------------------------------------------------------------
-
 Rewrite the hidden "handlers/.umbau/" echo handlers and templates, see the 
 other handlers for reference
 Handlers done:
