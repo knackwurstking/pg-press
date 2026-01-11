@@ -7,8 +7,8 @@ import (
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
 
-// ToolsPage constructs tools page URL
-func ToolsPage() templ.SafeURL {
+// Tools constructs tools page URL
+func Tools() templ.SafeURL {
 	return BuildURL("/tools")
 }
 

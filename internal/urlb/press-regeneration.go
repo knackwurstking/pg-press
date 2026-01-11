@@ -7,8 +7,8 @@ import (
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
 
-// PressRegenerationPage constructs press regeneration page URL
-func PressRegenerationPage(press shared.PressNumber, pressRegenerationID shared.EntityID) templ.SafeURL {
+// PressRegeneration constructs press regeneration page URL
+func PressRegeneration(press shared.PressNumber, pressRegenerationID shared.EntityID) templ.SafeURL {
 	return BuildURL(fmt.Sprintf("/press-regeneration/%d", press))
 }
 

@@ -7,8 +7,8 @@ import (
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
 
-// TroubleReportsPage constructs trouble reports page URL
-func TroubleReportsPage() templ.SafeURL {
+// TroubleReports constructs trouble reports page URL
+func TroubleReports() templ.SafeURL {
 	return BuildURL("/trouble-reports")
 }
 

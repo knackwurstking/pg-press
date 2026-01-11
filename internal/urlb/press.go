@@ -7,8 +7,8 @@ import (
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
 
-// PressPage constructs press page URL
-func PressPage(pressNumber shared.PressNumber) templ.SafeURL {
+// Press constructs press page URL
+func Press(pressNumber shared.PressNumber) templ.SafeURL {
 	return BuildURL(fmt.Sprintf("/press/%d", pressNumber))
 }
 

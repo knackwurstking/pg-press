@@ -7,8 +7,8 @@ import (
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
 
-// ToolPage constructs tool page URL
-func ToolPage(toolID shared.EntityID) templ.SafeURL {
+// Tool constructs tool page URL
+func Tool(toolID shared.EntityID) templ.SafeURL {
 	return BuildURL(fmt.Sprintf("/tool/%d", toolID))
 }
 
