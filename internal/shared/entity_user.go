@@ -24,16 +24,16 @@ type User struct {
 
 func (e *User) Validate() *errors.ValidationError {
 	if e.Name == "" {
-		return errors.NewValidationError("name cannot be empty")
+		return errors.NewValidationError("display name is required")
 	}
 	if len(e.Name) < UserNameMinLength || len(e.Name) > UserNameMaxLength {
 		return errors.NewValidationError(
-			"name length must be between %d and %d characters",
+			"display name must be between %d and %d characters",
 			UserNameMinLength, UserNameMaxLength,
 		)
 	}
 	if !ValidateAPIKey(e.ApiKey) {
-		return errors.NewValidationError("api_key is not valid")
+		return errors.NewValidationError("API key must be at least %d characters long", MinAPIKeyLength)
 	}
 	return nil
 }

@@ -100,35 +100,38 @@ func (t *Tool) Validate() *errors.ValidationError {
 	switch t.Position {
 	case SlotUpper, SlotLower, SlotUpperCassette:
 	default:
-		return errors.NewValidationError("invalid position: %d", t.Position)
+		return errors.NewValidationError("tool position must be either 1 (upper), 2 (lower), or 3 (upper cassette)")
 	}
 
 	// Width and Height must be positive, zero is allowed for reason of special (placeholder) tools
 	if t.Width < 0 {
-		return errors.NewValidationError("width must be positive: %d", t.Width)
+		return errors.NewValidationError("tool width must be a positive number, got %d", t.Width)
 	}
 	if t.Height < 0 {
-		return errors.NewValidationError("height must be positive: %d", t.Height)
+		return errors.NewValidationError("tool height must be a positive number, got %d", t.Height)
 	}
 
 	// Type and Code must be set
 	if t.Type == "" {
-		return errors.NewValidationError("type is required")
+		return errors.NewValidationError("tool type is required")
 	}
 	if !t.IsCassette() && t.Code == "" {
-		return errors.NewValidationError("code is required for all tools not being cassettes")
+		return errors.NewValidationError("tool code is required for all tools except cassettes")
 	}
 
 	// For cassettes, MinThickness must be less than MaxThickness
 	if t.IsCassette() {
 		if t.MinThickness <= 0 {
-			return errors.NewValidationError("min thickness must be positive: %.1f", t.MinThickness)
+			return errors.NewValidationError("cassette minimum thickness must be positive, got %.1f", t.MinThickness)
 		}
 		if t.MaxThickness <= 0 {
-			return errors.NewValidationError("max thickness must be positive: %.1f", t.MaxThickness)
+			return errors.NewValidationError("cassette maximum thickness must be positive, got %.1f", t.MaxThickness)
 		}
 		if t.MinThickness >= t.MaxThickness {
-			return errors.NewValidationError("min thickness %.1f must be less than max thickness %.1f", t.MinThickness, t.MaxThickness)
+			return errors.NewValidationError(
+				"cassette minimum thickness %.1f must be less than maximum thickness %.1f",
+				t.MinThickness, t.MaxThickness,
+		)
 		}
 	}
 

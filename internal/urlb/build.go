@@ -39,9 +39,7 @@ func BuildURLWithParams(path string, params map[string]string) templ.SafeURL {
 // -----------------------------------------------------------------------------
 
 // UrlLogin constructs login URL with optional API key and invalid flag
-func UrlLogin(apiKey string, invalid *bool) (url struct {
-	Page templ.SafeURL
-}) {
+func UrlLogin(apiKey string, invalid *bool) templ.SafeURL {
 	params := map[string]string{}
 	if apiKey != "" {
 		params["api-key"] = apiKey
@@ -49,8 +47,7 @@ func UrlLogin(apiKey string, invalid *bool) (url struct {
 	if invalid != nil {
 		params["invalid"] = fmt.Sprintf("%t", *invalid)
 	}
-	url.Page = BuildURLWithParams("/login", params)
-	return url
+	return BuildURLWithParams("/login", params)
 }
 
 // -----------------------------------------------------------------------------
@@ -58,106 +55,98 @@ func UrlLogin(apiKey string, invalid *bool) (url struct {
 // -----------------------------------------------------------------------------
 
 // UrlHome constructs home URL
-func UrlHome() (url struct {
-	Page templ.SafeURL
-}) {
-	url.Page = BuildURL("/")
-	return url
+func UrlHome() templ.SafeURL {
+	return BuildURL("/")
 }
 
 // -----------------------------------------------------------------------------
 // Feed URLs
 // -----------------------------------------------------------------------------
 
-// UrlFeed constructs feed URLs
-func UrlFeed() (url struct {
-	Page templ.SafeURL
-	List templ.SafeURL
-}) {
-	url.Page = BuildURL("/feed")
-	url.List = BuildURL("/feed/list")
-	return url
+// UrlFeed constructs feed page URL
+func UrlFeed() templ.SafeURL {
+	return BuildURL("/feed")
+}
+
+// UrlFeedList constructs feed list URL
+func UrlFeedList() templ.SafeURL {
+	return BuildURL("/feed/list")
 }
 
 // -----------------------------------------------------------------------------
 // Help URLs
 // -----------------------------------------------------------------------------
 
-// UrlHelp constructs help URLs
-func UrlHelp() (url struct {
-	MarkdownPage templ.SafeURL
-}) {
-	url.MarkdownPage = BuildURL("/help/markdown")
-	return url
+// UrlHelpMarkdown constructs help markdown URL
+func UrlHelpMarkdown() templ.SafeURL {
+	return BuildURL("/help/markdown")
 }
 
 // -----------------------------------------------------------------------------
 // Editor URLs
 // -----------------------------------------------------------------------------
 
-// UrlEditor constructs editor URLs
-func UrlEditor(_type shared.EditorType, id string, returnURL templ.SafeURL) (url struct {
-	Page templ.SafeURL
-	Save templ.SafeURL
-}) {
+// UrlEditor constructs editor page URL
+func UrlEditor(_type shared.EditorType, id string, returnURL templ.SafeURL) templ.SafeURL {
 	a, _ := strings.CutPrefix(string(returnURL), env.ServerPathPrefix)
-	url.Page = BuildURLWithParams("/editor", map[string]string{
+	return BuildURLWithParams("/editor", map[string]string{
 		"type":       string(_type),
 		"id":         id,
 		"return_url": string(a),
 	})
+}
 
-	url.Save = BuildURL("/editor/save")
-
-	return url
+// UrlEditorSave constructs editor save URL
+func EditorSave() templ.SafeURL {
+	return BuildURL("/editor/save")
 }
 
 // -----------------------------------------------------------------------------
 // Profile URLs
 // -----------------------------------------------------------------------------
 
-// UrlProfile constructs profile URLs
-func UrlProfile(cookieValue string) (url struct {
-	Page    templ.SafeURL
-	Cookies templ.SafeURL
-}) {
-	url.Page = BuildURL("/profile")
-	url.Cookies = BuildURLWithParams("/profile/cookies", map[string]string{
+// UrlProfile constructs profile page URL
+func UrlProfile() templ.SafeURL {
+	return BuildURL("/profile")
+}
+
+// UrlProfileCookies constructs profile cookies URL
+func UrlProfileCookies(cookieValue string) templ.SafeURL {
+	return BuildURLWithParams("/profile/cookies", map[string]string{
 		"value": cookieValue,
 	})
-	return url
 }
 
 // -----------------------------------------------------------------------------
 // Notes URLs
 // -----------------------------------------------------------------------------
 
-// UrlNotes constructs notes URLs
-func UrlNotes(noteID shared.EntityID) (url struct {
-	Page   templ.SafeURL
-	Delete templ.SafeURL
-	Grid   templ.SafeURL
-}) {
-	url.Page = BuildURL("/notes")
-	url.Delete = BuildURLWithParams("/notes/delete", map[string]string{
+// UrlNotes constructs notes page URL
+func UrlNotes() templ.SafeURL {
+	return BuildURL("/notes")
+}
+
+// UrlNotesDelete constructs notes delete URL
+func UrlNotesDelete(noteID shared.EntityID) templ.SafeURL {
+	return BuildURLWithParams("/notes/delete", map[string]string{
 		"id": fmt.Sprintf("%d", noteID),
 	})
-	url.Grid = BuildURL("/notes/grid")
-	return url
+}
+
+// UrlNotesGrid constructs notes grid URL
+func UrlNotesGrid() templ.SafeURL {
+	return BuildURL("/notes/grid")
 }
 
 // -----------------------------------------------------------------------------
 // Metal Sheets URLs
 // -----------------------------------------------------------------------------
 
-// UrlMetalSheets constructs metal sheets URLs
-func UrlMetalSheets(metalSheetID shared.EntityID) (url struct {
-	Delete templ.SafeURL
-}) {
-	url.Delete = BuildURLWithParams("/metal-sheets/delete", map[string]string{
+// UrlMetalSheetDelete constructs metal sheet delete URL
+func UrlMetalSheetDelete(metalSheetID shared.EntityID) templ.SafeURL {
+	return BuildURLWithParams("/metal-sheets/delete", map[string]string{
 		"id": fmt.Sprintf("%d", metalSheetID),
 	})
-	return url
 }
 
 // -----------------------------------------------------------------------------
@@ -165,11 +154,8 @@ func UrlMetalSheets(metalSheetID shared.EntityID) (url struct {
 // -----------------------------------------------------------------------------
 
 // UrlUmbau constructs umbau URLs
-func UrlUmbau(press shared.PressNumber) (url struct {
-	Page templ.SafeURL
-}) {
-	url.Page = BuildURL(fmt.Sprintf("/umbau/%d", press))
-	return url
+func UrlUmbau(press shared.PressNumber) templ.SafeURL {
+	return BuildURL(fmt.Sprintf("/umbau/%d", press))
 }
 
 // -----------------------------------------------------------------------------

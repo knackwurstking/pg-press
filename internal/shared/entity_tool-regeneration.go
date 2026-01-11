@@ -16,14 +16,14 @@ type ToolRegeneration struct {
 
 func (tr *ToolRegeneration) Validate() *errors.ValidationError {
 	if tr.ToolID < 0 {
-		return errors.NewValidationError("tool_id must be non-negative")
+		return errors.NewValidationError("tool ID must be a positive number")
 	}
 
 	if tr.Start < 0 {
-		return errors.NewValidationError("start must be non-negative")
+		return errors.NewValidationError("start timestamp must be a positive number")
 	}
 	if tr.Stop > 0 && tr.Stop < tr.Start {
-		return errors.NewValidationError("stop must be greater than or equal to start")
+		return errors.NewValidationError("stop date must be after or equal to start date")
 	}
 	return nil
 }

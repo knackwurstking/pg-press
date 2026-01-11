@@ -16,12 +16,12 @@ import (
 func GetUserFromContext(c echo.Context) (*shared.User, *errors.HTTPError) {
 	u := c.Get("user")
 	if u == nil {
-		return nil, errors.NewAuthorizationError("no user in context").HTTPError()
+		return nil, errors.NewAuthorizationError("you must be logged in to access this resource").HTTPError()
 	}
 
 	user, ok := u.(*shared.User)
 	if !ok || user.Validate() != nil {
-		return nil, errors.NewAuthorizationError("invalid user in context").HTTPError()
+		return nil, errors.NewAuthorizationError("invalid user session. Please log in again").HTTPError()
 	}
 
 	return user, nil
@@ -35,7 +35,7 @@ func GetUserFromContext(c echo.Context) (*shared.User, *errors.HTTPError) {
 func ParseQueryString(c echo.Context, paramName string) (string, *errors.HTTPError) {
 	s := c.QueryParam(paramName)
 	if s == "" {
-		return s, errors.NewNotFoundError("missing %s", paramName).HTTPError()
+		return s, errors.NewValidationError("query parameter '%s' is required", paramName).HTTPError()
 	}
 
 	return s, nil
@@ -60,12 +60,12 @@ func ParseQueryBool(c echo.Context, paramName string) bool {
 func ParseQueryInt64(c echo.Context, paramName string) (int64, *errors.HTTPError) {
 	idStr := c.QueryParam(paramName)
 	if idStr == "" {
-		return 0, errors.NewNotFoundError("missing %s", paramName).HTTPError()
+		return 0, errors.NewValidationError("query parameter '%s' is required", paramName).HTTPError()
 	}
 
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		return 0, errors.NewValidationError("invalid %s query parameter: must be a number", paramName).HTTPError()
+		return 0, errors.NewValidationError("invalid '%s' value '%s': must be a valid integer", paramName, idStr).HTTPError()
 	}
 
 	return id, nil
@@ -74,12 +74,12 @@ func ParseQueryInt64(c echo.Context, paramName string) (int64, *errors.HTTPError
 func ParseQueryInt(c echo.Context, paramName string) (int, *errors.HTTPError) {
 	idStr := c.QueryParam(paramName)
 	if idStr == "" {
-		return 0, errors.NewNotFoundError("missing %s", paramName).HTTPError()
+		return 0, errors.NewValidationError("query parameter '%s' is required", paramName).HTTPError()
 	}
 
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		return 0, errors.NewValidationError("invalid %s query parameter: must be a number", paramName).HTTPError()
+		return 0, errors.NewValidationError("invalid '%s' value '%s': must be a valid integer", paramName, idStr).HTTPError()
 	}
 
 	return id, nil

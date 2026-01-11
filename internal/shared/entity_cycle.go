@@ -18,25 +18,25 @@ type Cycle struct {
 
 func (c *Cycle) Validate() *errors.ValidationError {
 	if c.PressNumber < 0 {
-		return errors.NewValidationError("press_number must be non-negative")
+		return errors.NewValidationError("press number must be 0 or greater")
 	}
 
 	if c.PressCycles < 0 {
-		return errors.NewValidationError("cycles must be non-negative")
+		return errors.NewValidationError("number of cycles must be 0 or greater")
 	}
 
 	if c.Start < 0 {
-		return errors.NewValidationError("start must be non-negative")
+		return errors.NewValidationError("start timestamp must be a positive number")
 	}
 	if c.Stop < 0 {
-		return errors.NewValidationError("stop must be non-negative")
+		return errors.NewValidationError("stop timestamp must be a positive number")
 	}
 	if c.Stop < c.Start {
-		return errors.NewValidationError("stop must be greater than or equal to start")
+		return errors.NewValidationError("stop date must be after or equal to start date")
 	}
 
 	if c.ToolID <= 0 {
-		return errors.NewValidationError("tool_id must be positive")
+		return errors.NewValidationError("tool ID must be specified")
 	}
 
 	return nil

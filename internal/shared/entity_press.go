@@ -22,7 +22,7 @@ type Press struct {
 
 func (p *Press) Validate() *errors.ValidationError {
 	if !slices.Contains([]MachineType{MachineTypeSACMI, MachineTypeSITI}, p.Type) {
-		return errors.NewValidationError("invalid press type: %s", p.Type)
+		return errors.NewValidationError("press type must be either 'SACMI' or 'SITI'")
 	}
 
 	return nil

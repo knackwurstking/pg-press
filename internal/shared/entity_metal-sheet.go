@@ -33,16 +33,16 @@ type UpperMetalSheet struct {
 // Validate checks if the lower metal sheet has valid data
 func (u *LowerMetalSheet) Validate() *errors.ValidationError {
 	if u.MarkeHeight <= 0 {
-		return errors.NewValidationError("marke height must be positive")
+		return errors.NewValidationError("marke height must be a positive number, got %d", u.MarkeHeight)
 	}
 	if u.STF <= 0 {
-		return errors.NewValidationError("STF value must be positive")
+		return errors.NewValidationError("STF value must be a positive number, got %.2f", u.STF)
 	}
 	if u.STFMax <= 0 {
-		return errors.NewValidationError("STF max value must be positive")
+		return errors.NewValidationError("STF max value must be a positive number, got %.2f", u.STFMax)
 	}
 	if u.Identifier != MachineTypeSACMI && u.Identifier != MachineTypeSITI {
-		return errors.NewValidationError("identifier must be either 'SACMI' or 'SITI'")
+		return errors.NewValidationError("identifier must be either 'SACMI' or 'SITI', got '%s'", u.Identifier)
 	}
 
 	return nil

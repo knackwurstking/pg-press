@@ -15,17 +15,17 @@ type PressRegeneration struct {
 
 func (pr *PressRegeneration) Validate() *errors.ValidationError {
 	if pr.PressNumber < 0 {
-		return errors.NewValidationError("press_number must be non-negative")
+		return errors.NewValidationError("press number must be 0 or greater")
 	}
 
 	if pr.Start < 0 {
-		return errors.NewValidationError("start must be non-negative")
+		return errors.NewValidationError("start timestamp must be a positive number")
 	}
 	if pr.Stop < 0 {
-		return errors.NewValidationError("stop must be non-negative")
+		return errors.NewValidationError("stop timestamp must be a positive number")
 	}
 	if pr.Stop < pr.Start {
-		return errors.NewValidationError("stop must be greater than or equal to start")
+		return errors.NewValidationError("stop date must be after or equal to start date")
 	}
 
 	return nil
