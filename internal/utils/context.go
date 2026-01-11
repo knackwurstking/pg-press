@@ -1,4 +1,4 @@
-package urlb
+package routerutils
 
 import (
 	"strconv"
@@ -28,11 +28,10 @@ func GetUserFromContext(c echo.Context) (*shared.User, *errors.HTTPError) {
 }
 
 // -----------------------------------------------------------------------------
-// Query Parameter Parsing
+// Query Parameter
 // -----------------------------------------------------------------------------
 
-// ParseQueryString parses a string query parameter from the request
-func ParseQueryString(c echo.Context, paramName string) (string, *errors.HTTPError) {
+func GetQueryString(c echo.Context, paramName string) (string, *errors.HTTPError) {
 	s := c.QueryParam(paramName)
 	if s == "" {
 		return s, errors.NewValidationError("query parameter '%s' is required", paramName).HTTPError()
@@ -41,8 +40,7 @@ func ParseQueryString(c echo.Context, paramName string) (string, *errors.HTTPErr
 	return s, nil
 }
 
-// ParseQueryBool parses a boolean query parameter from the request
-func ParseQueryBool(c echo.Context, paramName string) bool {
+func GetQueryBool(c echo.Context, paramName string) bool {
 	value := c.QueryParam(paramName)
 	if value == "" {
 		return false
@@ -56,8 +54,7 @@ func ParseQueryBool(c echo.Context, paramName string) bool {
 	return boolValue
 }
 
-// ParseQueryInt64 parses an int64 query parameter from the request
-func ParseQueryInt64(c echo.Context, paramName string) (int64, *errors.HTTPError) {
+func GetQueryInt64(c echo.Context, paramName string) (int64, *errors.HTTPError) {
 	idStr := c.QueryParam(paramName)
 	if idStr == "" {
 		return 0, errors.NewValidationError("query parameter '%s' is required", paramName).HTTPError()
@@ -71,7 +68,7 @@ func ParseQueryInt64(c echo.Context, paramName string) (int64, *errors.HTTPError
 	return id, nil
 }
 
-func ParseQueryInt(c echo.Context, paramName string) (int, *errors.HTTPError) {
+func GetQueryInt(c echo.Context, paramName string) (int, *errors.HTTPError) {
 	idStr := c.QueryParam(paramName)
 	if idStr == "" {
 		return 0, errors.NewValidationError("query parameter '%s' is required", paramName).HTTPError()
@@ -86,11 +83,10 @@ func ParseQueryInt(c echo.Context, paramName string) (int, *errors.HTTPError) {
 }
 
 // -----------------------------------------------------------------------------
-// Path Parameter Parsing
+// Path Parameter
 // -----------------------------------------------------------------------------
 
-// ParseParamInt64 parses an int64 parameter from the request
-func ParseParamInt64(c echo.Context, paramName string) (int64, *errors.HTTPError) {
+func GetParamInt64(c echo.Context, paramName string) (int64, *errors.HTTPError) {
 	idStr := c.Param(paramName)
 	if idStr == "" {
 		return 0, errors.NewNotFoundError("missing %s", paramName).HTTPError()
@@ -103,8 +99,7 @@ func ParseParamInt64(c echo.Context, paramName string) (int64, *errors.HTTPError
 	return id, nil
 }
 
-// ParseParamInt8 parses an int8 parameter from the request
-func ParseParamInt8(c echo.Context, paramName string) (int8, *errors.HTTPError) {
+func GetParamInt8(c echo.Context, paramName string) (int8, *errors.HTTPError) {
 	idStr := c.Param(paramName)
 	if idStr == "" {
 		return 0, errors.NewNotFoundError("missing %s", paramName).HTTPError()
