@@ -4,14 +4,14 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pg-press/components"
-	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
 type PageProps struct {
-	PressNumber models.PressNumber
-	User        *models.User
-	Tools       []*models.Tool
+	PressNumber shared.PressNumber
+	User        *shared.User
+	Tools       []*shared.Tool
 }
 
 func (pp *PageProps) GetOptions(position models.Position) []OptionData {
