@@ -13,15 +13,15 @@ import (
 )
 
 func GetEditPress(c echo.Context) *echo.HTTPError {
-	id, merr := utils.GetQueryInt64(c, "id")
+	pn, merr := utils.GetQueryInt8(c, "id")
 	if merr != nil && !merr.IsNotFoundError() {
 		return merr.Echo()
 	} else if merr != nil && merr.IsNotFoundError() {
-		id = -1
+		pn = -1
 	}
 
-	if id > -1 {
-		press, merr := db.GetPress(shared.EntityID(id))
+	if pn > -1 {
+		press, merr := db.GetPress(shared.PressNumber(pn))
 		if merr != nil {
 			return merr.Echo()
 		}

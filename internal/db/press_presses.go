@@ -69,13 +69,15 @@ const (
 		LIMIT 1;
 	`
 
-	sqlGetPressUtilizations string = `
+	sqlGetPressUtilization string = `
 		SELECT
 			id,
 			slot_up,
 			slot_down,
+			cycles_offset,
 			type
-		FROM presses;
+		FROM presses
+		WHERE id = :press_number;
 	`
 
 	sqlDeletePress string = `
@@ -127,7 +129,7 @@ func UpdatePress(press *shared.Press) *errors.HTTPError {
 }
 
 // GetPress retrieves a press by its ID
-func GetPress(id shared.EntityID) (*shared.Press, *errors.HTTPError) {
+func GetPress(id shared.PressNumber) (*shared.Press, *errors.HTTPError) {
 	return ScanPress(dbPress.QueryRow(sqlGetPress, sql.Named("id", id)))
 }
 
@@ -143,80 +145,63 @@ func GetPressNumberForTool(toolID shared.EntityID) (shared.PressNumber, *errors.
 	return pressNumber, nil
 }
 
+func GetPressUtilization(pressNumber shared.PressNumber) (*shared.PressUtilization, *errors.HTTPError) {
+	var (
+		slotUpper shared.EntityID
+		slotLower shared.EntityID
+	)
+	pu := &shared.PressUtilization{}
+	err := dbPress.QueryRow(sqlGetPressUtilization, sql.Named("press_number", pressNumber)).Scan(
+		&pu.PressNumber,
+		&slotUpper,
+		&slotLower,
+		&pu.CyclesOffset,
+		&pu.Type,
+	)
+	if err != nil {
+		return pu, errors.NewHTTPError(fmt.Errorf("error query press utilization for press %d failed: %v", pressNumber, err))
+	}
+
+	if slotUpper > 0 {
+		tool, merr := GetTool(slotUpper)
+		if merr != nil {
+			return nil, merr
+		}
+		pu.SlotUpper = tool
+
+		if tool.Cassette > 0 {
+			cassette, merr := GetTool(tool.Cassette)
+			if merr != nil {
+				return nil, merr.Wrap(
+					"error getting upper cassette tool (%d) for tool ID %d",
+					tool.Cassette, tool.ID,
+				)
+			}
+			pu.SlotUpperCassette = cassette
+		}
+	}
+	if slotLower > 0 {
+		tool, merr := GetTool(slotLower)
+		if merr != nil {
+			return nil, merr
+		}
+		pu.SlotLower = tool
+	}
+
+	return pu, nil
+}
+
 // GetPressUtilizations retrieves all press utilizations with tool information
 func GetPressUtilizations(pressNumbers ...shared.PressNumber) (
 	pu map[shared.PressNumber]*shared.PressUtilization, merr *errors.HTTPError,
 ) {
 	pu = make(map[shared.PressNumber]*shared.PressUtilization)
-
-	r, err := dbPress.Query(sqlGetPressUtilizations)
-	if err != nil {
-		return nil, errors.NewHTTPError(fmt.Errorf("error querying press utilizations: %v", err))
-	}
-	defer r.Close()
-
-	for r.Next() {
-		var (
-			pressNumber shared.PressNumber
-			slotUp      shared.EntityID
-			slotDown    shared.EntityID
-			pressType   shared.MachineType
-		)
-		err := r.Scan(
-			&pressNumber,
-			&slotUp,
-			&slotDown,
-			&pressType,
-		)
-		if err != nil {
-			return pu, errors.NewHTTPError(err)
+	for _, pn := range pressNumbers {
+		u, merr := GetPressUtilization(pn)
+		if merr != nil {
+			return pu, merr.Wrap("%d", pn)
 		}
-
-		pu[pressNumber] = &shared.PressUtilization{
-			PressNumber: pressNumber,
-			Type:        pressType,
-		}
-		if slotUp > 0 {
-			pu[pressNumber].SlotUpper = &shared.Tool{ID: slotUp}
-		}
-		if slotDown > 0 {
-			pu[pressNumber].SlotLower = &shared.Tool{ID: slotDown}
-		}
-	}
-
-	for _, v := range pu {
-		if v.SlotUpper != nil {
-			tool, merr := GetTool(v.SlotUpper.ID)
-			if merr != nil {
-				return nil, merr
-			}
-			v.SlotUpper = tool
-
-			if tool.Cassette > 0 {
-				cassette, merr := GetTool(tool.Cassette)
-				if merr != nil {
-					return nil, merr.Wrap(
-						"error getting upper cassette tool (%d) for tool ID %d",
-						tool.Cassette, tool.ID,
-					)
-				}
-				v.SlotUpperCassette = cassette
-			}
-		}
-
-		if v.SlotLower != nil {
-			tool, merr := GetTool(v.SlotLower.ID)
-			if merr != nil {
-				return nil, merr
-			}
-			v.SlotLower = tool
-
-			// NOTE: Only to upper tool can contain a cassette for now
-		}
-	}
-
-	if err = r.Err(); err != nil {
-		return nil, errors.NewHTTPError(fmt.Errorf("error iterating over press utilizations: %v", err))
+		pu[pn] = u
 	}
 
 	return pu, nil

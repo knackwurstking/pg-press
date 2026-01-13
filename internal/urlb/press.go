@@ -50,7 +50,6 @@ func PressDelete(pressNumber shared.PressNumber) templ.SafeURL {
 // PressReplaceTool constructs press replace tool URL
 func PressReplaceTool(pn shared.PressNumber, p shared.Slot) templ.SafeURL {
 	return BuildURLWithParams(fmt.Sprintf("/press/%d/replace-tool", pn), map[string]string{
-		"tool_id":  fmt.Sprintf("%d", pn),
 		"position": fmt.Sprintf("%d", p),
 	})
 }

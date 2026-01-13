@@ -68,6 +68,19 @@ func GetQueryInt64(c echo.Context, paramName string) (int64, *errors.HTTPError) 
 	return id, nil
 }
 
+func GetQueryInt8(c echo.Context, paramName string) (int8, *errors.HTTPError) {
+	idStr := c.QueryParam(paramName)
+	if idStr == "" {
+		return 0, errors.NewNotFoundError("missing query parameter '%s'", paramName).HTTPError()
+	}
+
+	id, err := strconv.ParseInt(idStr, 10, 8)
+	if err != nil {
+		return 0, errors.NewValidationError("invalid %s: must be a number", paramName).HTTPError()
+	}
+	return int8(id), nil
+}
+
 func GetQueryInt(c echo.Context, paramName string) (int, *errors.HTTPError) {
 	idStr := c.QueryParam(paramName)
 	if idStr == "" {
