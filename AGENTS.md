@@ -15,7 +15,7 @@
 
 - Shared components are stored in "internal/components"
 - Page-specific templates are stored in "internal/handlers/{handler_name}/templates/"
-- The Echo routes are defined in "internal/handlers/{handler_name}/{handler_name}.go"
+- In handlers, each route should be inside a separate file
 
 ## Git Commit Message Conventions
 
