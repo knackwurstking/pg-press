@@ -82,7 +82,9 @@ templ toolSelection(position shared.Slot, current *shared.Tool, tools []*shared.
 			>
 				<option value="" selected>{ position.German() } wählen</option>
 				for _, t := range tools {
-					<option value={ o.ToolID } data-format={ o.Format }>{ o.Label }</option>
+					<option value={ t.ID } data-format={ fmt.Sprintf("%dx%d", t.Width, t.Height) }>
+						{ t.German() }
+					</option>
 				}
 			</select>
 		</label>
@@ -108,7 +110,7 @@ script onToolChange(event templ.JSExpression) {
 	var format = "";
 	var selectedOption = target.children[target.selectedIndex];
 	if (selectedOption) {
-		format = selectedOption.getAttribute("data-format");
+		format = selectedOption.dataset.format;
 	}
 
 	// Get all the options, besides the first one for each select element (#top, #bottom)
@@ -119,10 +121,7 @@ script onToolChange(event templ.JSExpression) {
 
 	// Disable all options that are not compatible with the selected format
 	var optionsLoopHandler = function(option) {
-		option.disabled = false; // Just resetting
-
-		// Check format (data-format)
-		if (!!format && !option.textContent.includes(format)) option.disabled = true;
+		option.disabled = !!format && !option.textContent.includes(format)
 	};
 
 	// Loop through all options
