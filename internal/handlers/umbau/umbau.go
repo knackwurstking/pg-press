@@ -25,16 +25,33 @@ func GetUmbauPage(c echo.Context) *echo.HTTPError {
 	if eerr != nil {
 		return eerr
 	}
+	u, merr := db.GetPressUtilization(pressNumber)
+	if merr != nil {
+		return merr.Echo()
+	}
 
 	tools, merr := db.ListTools()
 	if merr != nil {
 		return merr.Echo()
 	}
+	upperTools := make([]*shared.Tool, 0)
+	lowerTools := make([]*shared.Tool, 0)
+	for _, t := range tools {
+		switch t.Position {
+		case shared.SlotUpper:
+			upperTools = append(upperTools, t)
+		case shared.SlotLower:
+			lowerTools = append(lowerTools, t)
+		}
+	}
 
 	t := templates.Page(&templates.PageProps{
-		PressNumber: pressNumber,
-		User:        user,
-		Tools:       tools,
+		PressNumber:      pressNumber,
+		User:             user,
+		CurrentUpperTool: u.SlotUpper,
+		CurrentLowerTool: u.SlotLower,
+		UpperTools:       upperTools,
+		LowerTools:       lowerTools,
 	})
 	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.NewRenderError(err, "Umbau Page")

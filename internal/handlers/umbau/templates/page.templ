@@ -9,46 +9,12 @@ import (
 )
 
 type PageProps struct {
-	PressNumber shared.PressNumber
-	User        *shared.User
-	Tools       []*shared.Tool
-}
-
-func (pp *PageProps) GetOptions(Slot shared.Slot) []OptionData {
-	var options []OptionData
-
-	for _, tool := range pp.Tools {
-		if tool.Position == Slot {
-			options = append(options, OptionData{
-				ToolID: tool.ID,
-				Label:  tool.String(),
-				Format: tool.Format.String(),
-			})
-		}
-	}
-
-	return options
-}
-
-func (pp *PageProps) GetSlotsMap() map[shared.Slot]*shared.Tool {
-	slots := map[shared.Slot]*shared.Tool{
-		shared.SlotUpper: nil,
-		shared.SlotLower: nil,
-	}
-
-	for _, t := range pp.Tools {
-		if t.Press != nil && *t.Press == pp.PressNumber {
-			slots[t.Slot] = t
-		}
-	}
-
-	return slots
-}
-
-type OptionData struct {
-	ToolID shared.EntityID
-	Label  string
-	Format string
+	User             *shared.User
+	PressNumber      shared.PressNumber
+	CurrentUpperTool *shared.Tool
+	CurrentLowerTool *shared.Tool
+	UpperTools       []*shared.Tool
+	LowerTools       []*shared.Tool
 }
 
 templ Page(props *PageProps) {
@@ -59,7 +25,6 @@ templ Page(props *PageProps) {
 			NavContent:  components.StandardNavContent(),
 		},
 	) {
-		{{ slots := props.GetSlotsMap() }}
 		<main class="container fluid">
 			<h2>Werkzeugumbau an Presse { fmt.Sprintf("%d", props.PressNumber) }</h2>
 			<form
@@ -68,41 +33,8 @@ templ Page(props *PageProps) {
 				hx-on:htmx:after-request="if(event.detail.successful) history.back()"
 			>
 				@cyclesSection()
-				<hr/>
-				for _, Slot := range []shared.Slot{shared.SlotUpper, shared.SlotLower} {
-					{{ currentTool := slots[Slot] }}
-					@components.Section(nil) {
-						<h3>{ shared.SlotLower.GermanString() }</h3>
-						if currentTool != nil {
-							<p>Aktuelles Werkzeug: { currentTool.String() }</p>
-						} else {
-							<p>Aktuelles Werkzeug: -</p>
-						}
-						<span class="flex flex-col">
-							{{
-								var id string
-								switch Slot {
-								case shared.SlotUpper:
-									id = "top"
-								case shared.SlotLower:
-									id = "bottom"
-								}
-							}}
-							<label for={ id }>Neues Werkzeug:</label>
-							<select
-								id={ id }
-								name={ id }
-								onchange={ onToolChange(templ.JSExpression("event")) }
-							>
-								<option value="" selected>{ Slot.GermanString() } wählen</option>
-								for _, o := range props.GetOptions(Slot) {
-									<option value={ o.ToolID } data-format={ o.Format }>{ o.Label }</option>
-								}
-							</select>
-						</span>
-					}
-				}
-				<hr/>
+				@toolSelection(shared.SlotUpper, props.CurrentUpperTool, props.UpperTools)
+				@toolSelection(shared.SlotLower, props.CurrentLowerTool, props.LowerTools)
 				@formActions(props.User)
 			</form>
 		</main>
@@ -121,6 +53,39 @@ templ cyclesSection() {
 				required
 			/>
 		</span>
+	}
+}
+
+templ toolSelection(position shared.Slot, current *shared.Tool, tools []*shared.Tool) {
+	@components.Section(nil) {
+		@components.SectionTitle(components.SubTitle, fmt.Sprintf("%s", position.German()))
+		if current != nil {
+			<p>Aktuelles Werkzeug: { current.German() }</p>
+		} else {
+			<p>Aktuelles Werkzeug: -</p>
+		}
+		{{
+			var id string
+			switch position {
+			case shared.SlotUpper:
+				id = "top"
+			case shared.SlotLower:
+				id = "bottom"
+			}
+		}}
+		<label for={ id } class="flex flex-col">
+			<span>Neues Werkzeug:</span>
+			<select
+				id={ id }
+				name={ id }
+				onchange={ onToolChange(templ.JSExpression("event")) }
+			>
+				<option value="" selected>{ position.German() } wählen</option>
+				for _, t := range tools {
+					<option value={ o.ToolID } data-format={ o.Format }>{ o.Label }</option>
+				}
+			</select>
+		</label>
 	}
 }
 
