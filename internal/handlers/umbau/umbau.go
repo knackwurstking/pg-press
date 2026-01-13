@@ -94,12 +94,14 @@ func PostUmbauPage(c echo.Context) *echo.HTTPError {
 	}
 	// Set cycles for old tools
 	for _, t := range tools {
-		merr = db.AddCycle(&shared.Cycle{
-			ToolID:      t.ID,
-			PressNumber: pressNumber,
-			PressCycles: data.totalCycles,
-			Stop:        shared.NewUnixMilli(time.Now()),
-		})
+		merr = db.AddCycle(
+			shared.NewCycle(
+				t.ID,
+				pressNumber,
+				data.totalCycles,
+				shared.NewUnixMilli(time.Now()),
+			),
+		)
 		if merr != nil {
 			return merr.WrapEcho("add cycle")
 		}

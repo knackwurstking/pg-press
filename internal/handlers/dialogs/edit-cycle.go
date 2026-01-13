@@ -135,43 +135,42 @@ func PutCycle(c echo.Context) *echo.HTTPError {
 }
 
 func parseCycleForm(c echo.Context) (*shared.Cycle, *errors.HTTPError) {
-	cycle := &shared.Cycle{}
-
-	// Tool
-	originalToolID, err := strconv.ParseInt(c.FormValue("original_tool_id"), 10, 64)
+	// Tool ID
+	var toolID shared.EntityID
+	vOriginalToolID, err := strconv.ParseInt(c.FormValue("original_tool_id"), 10, 64)
 	if err != nil {
-		return cycle, errors.NewHTTPError(err).Wrap("original_tool_id")
+		return nil, errors.NewHTTPError(err).Wrap("original_tool_id")
 	}
 	if c.FormValue("tool_id") != "" {
-		newToolID, err := strconv.ParseInt(c.FormValue("tool_id"), 10, 64)
-		if err != nil {
-			return cycle, errors.NewHTTPError(err).Wrap("tool_id")
+		if newToolID, err := strconv.ParseInt(c.FormValue("tool_id"), 10, 64); err != nil {
+			return nil, errors.NewHTTPError(err).Wrap("tool_id")
+		} else {
+			toolID = shared.EntityID(newToolID)
 		}
-		cycle.ToolID = shared.EntityID(newToolID)
 	} else {
-		cycle.ToolID = shared.EntityID(originalToolID)
+		toolID = shared.EntityID(vOriginalToolID)
 	}
 
 	// Press Number
-	pressNumber, err := strconv.ParseInt(c.FormValue("press_number"), 10, 8)
+	vPressNumber, err := strconv.ParseInt(c.FormValue("press_number"), 10, 8)
 	if err != nil {
-		return cycle, errors.NewHTTPError(err).Wrap("press_number")
+		return nil, errors.NewHTTPError(err).Wrap("press_number")
 	}
-	cycle.PressNumber = shared.PressNumber(pressNumber)
+	pressNumber := shared.PressNumber(vPressNumber)
 
-	// Total Cycles
-	totalCycles, err := strconv.ParseInt(c.FormValue("press_cycles"), 10, 64)
+	// Press Cycles
+	vPressCycles, err := strconv.ParseInt(c.FormValue("press_cycles"), 10, 64)
 	if err != nil {
-		return cycle, errors.NewHTTPError(err).Wrap("press_cycles")
+		return nil, errors.NewHTTPError(err).Wrap("press_cycles")
 	}
-	cycle.PressCycles = totalCycles
+	pressCycles := vPressCycles
 
 	// Stop
-	stop, err := time.Parse("2006-01-02", c.FormValue("stop"))
+	vStop, err := time.Parse("2006-01-02", c.FormValue("stop"))
 	if err != nil {
-		return cycle, errors.NewHTTPError(err).Wrap("stop")
+		return nil, errors.NewHTTPError(err).Wrap("stop")
 	}
-	cycle.Stop = shared.NewUnixMilli(stop)
+	stop := shared.NewUnixMilli(vStop)
 
-	return cycle, nil
+	return shared.NewCycle(toolID, pressNumber, pressCycles, stop), nil
 }

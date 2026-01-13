@@ -16,6 +16,15 @@ type Cycle struct {
 	Stop          UnixMilli   `json:"stop"`           // Stop timestamp in milliseconds, should be the date were the press cycles got read
 }
 
+func NewCycle(toolID EntityID, pn PressNumber, pressCycles int64, stop UnixMilli) *Cycle {
+	return &Cycle{
+		ToolID:      toolID,
+		PressNumber: pn,
+		PressCycles: pressCycles,
+		Stop:        stop,
+	}
+}
+
 func (c *Cycle) Validate() *errors.ValidationError {
 	if c.PressNumber < 0 {
 		return errors.NewValidationError("press number must be 0 or greater")
