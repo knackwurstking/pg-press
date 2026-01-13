@@ -12,7 +12,6 @@ import (
 
 func Register(e *echo.Echo, path string) {
 	ui.RegisterEchoRoutes(e, env.ServerPathPrefix, []*ui.EchoRoute{
-		// HTMX routes for metal sheets deletion
 		ui.NewEchoRoute(http.MethodDelete, path+"/delete", DeleteMetalSheet),
 	})
 }
