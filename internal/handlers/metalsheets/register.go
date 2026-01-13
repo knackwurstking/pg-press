@@ -1,0 +1,18 @@
+package metalsheets
+
+import (
+	"net/http"
+
+	"github.com/knackwurstking/pg-press/internal/env"
+
+	ui "github.com/knackwurstking/ui/ui-templ"
+
+	"github.com/labstack/echo/v4"
+)
+
+func Register(e *echo.Echo, path string) {
+	ui.RegisterEchoRoutes(e, env.ServerPathPrefix, []*ui.EchoRoute{
+		// HTMX routes for metal sheets deletion
+		ui.NewEchoRoute(http.MethodDelete, path+"/delete", DeleteMetalSheet),
+	})
+}
