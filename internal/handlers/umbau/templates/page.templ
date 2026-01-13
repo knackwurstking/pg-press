@@ -3,7 +3,7 @@ package templates
 import (
 	"fmt"
 
-	"github.com/knackwurstking/pg-press/components"
+	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 )
@@ -14,11 +14,11 @@ type PageProps struct {
 	Tools       []*shared.Tool
 }
 
-func (pp *PageProps) GetOptions(position models.Position) []OptionData {
+func (pp *PageProps) GetOptions(Slot shared.Slot) []OptionData {
 	var options []OptionData
 
 	for _, tool := range pp.Tools {
-		if tool.Position == position {
+		if tool.Position == Slot {
 			options = append(options, OptionData{
 				ToolID: tool.ID,
 				Label:  tool.String(),
@@ -30,15 +30,15 @@ func (pp *PageProps) GetOptions(position models.Position) []OptionData {
 	return options
 }
 
-func (pp *PageProps) GetSlotsMap() map[models.Position]*models.Tool {
-	slots := map[models.Position]*models.Tool{
-		models.PositionTop:    nil,
-		models.PositionBottom: nil,
+func (pp *PageProps) GetSlotsMap() map[shared.Slot]*shared.Tool {
+	slots := map[shared.Slot]*shared.Tool{
+		shared.SlotUpper: nil,
+		shared.SlotLower: nil,
 	}
 
 	for _, t := range pp.Tools {
 		if t.Press != nil && *t.Press == pp.PressNumber {
-			slots[t.Position] = t
+			slots[t.Slot] = t
 		}
 	}
 
@@ -46,14 +46,14 @@ func (pp *PageProps) GetSlotsMap() map[models.Position]*models.Tool {
 }
 
 type OptionData struct {
-	ToolID models.ToolID
+	ToolID shared.EntityID
 	Label  string
 	Format string
 }
 
 templ Page(props *PageProps) {
 	@components.Layout(
-		components.LayoutOptions{
+		components.LayoutProps{
 			PageTitle:   fmt.Sprintf("PG Presse | Umbau Presse %d", props.PressNumber),
 			AppBarTitle: fmt.Sprintf("Umbau Presse %d", props.PressNumber),
 			NavContent:  components.StandardNavContent(),
@@ -63,16 +63,16 @@ templ Page(props *PageProps) {
 		<main class="container fluid">
 			<h2>Werkzeugumbau an Presse { fmt.Sprintf("%d", props.PressNumber) }</h2>
 			<form
-				hx-post={ utils.UrlUmbau(props.PressNumber).Page }
+				hx-post={ urlb.Umbau(props.PressNumber) }
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 				hx-on:htmx:after-request="if(event.detail.successful) history.back()"
 			>
 				@cyclesSection()
 				<hr/>
-				for _, position := range []models.Position{models.PositionTop, models.PositionBottom} {
-					{{ currentTool := slots[position] }}
+				for _, Slot := range []shared.Slot{shared.SlotUpper, shared.SlotLower} {
+					{{ currentTool := slots[Slot] }}
 					@components.Section(nil) {
-						<h3>{ models.PositionBottom.GermanString() }</h3>
+						<h3>{ shared.SlotLower.GermanString() }</h3>
 						if currentTool != nil {
 							<p>Aktuelles Werkzeug: { currentTool.String() }</p>
 						} else {
@@ -81,10 +81,10 @@ templ Page(props *PageProps) {
 						<span class="flex flex-col">
 							{{
 								var id string
-								switch position {
-								case models.PositionTop:
+								switch Slot {
+								case shared.SlotUpper:
 									id = "top"
-								case models.PositionBottom:
+								case shared.SlotLower:
 									id = "bottom"
 								}
 							}}
@@ -94,8 +94,8 @@ templ Page(props *PageProps) {
 								name={ id }
 								onchange={ onToolChange(templ.JSExpression("event")) }
 							>
-								<option value="" selected>{ position.GermanString() } wählen</option>
-								for _, o := range props.GetOptions(position) {
+								<option value="" selected>{ Slot.GermanString() } wählen</option>
+								for _, o := range props.GetOptions(Slot) {
 									<option value={ o.ToolID } data-format={ o.Format }>{ o.Label }</option>
 								}
 							</select>
@@ -124,7 +124,7 @@ templ cyclesSection() {
 	}
 }
 
-templ formActions(user *models.User) {
+templ formActions(user *shared.User) {
 	<footer class="flex justify-end items-center">
 		<button
 			type="submit"
