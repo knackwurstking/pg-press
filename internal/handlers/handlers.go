@@ -10,6 +10,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/handlers/profile"
 	"github.com/knackwurstking/pg-press/internal/handlers/tool"
 	"github.com/knackwurstking/pg-press/internal/handlers/tools"
+	"github.com/knackwurstking/pg-press/internal/handlers/troublereports"
 	"github.com/knackwurstking/pg-press/internal/handlers/umbau"
 
 	"github.com/labstack/echo/v4"
@@ -30,6 +31,7 @@ func RegisterAll(e *echo.Echo) {
 		{handler: press.Register, subPath: "/press"},
 		{handler: umbau.Register, subPath: "/umbau"},
 		{handler: metalsheets.Register, subPath: "/metal-sheets"},
+		{handler: troublereports.Register, subPath: "/trouble-reports"},
 	}
 	for _, reg := range registers {
 		reg.handler(e, reg.subPath)
@@ -38,6 +40,5 @@ func RegisterAll(e *echo.Echo) {
 	// TODO: These handlers need to be re-implemented, just like the other ones above
 	//help.NewHandler(r).RegisterRoutes(e, "/help")
 	//editor.NewHandler(r).RegisterRoutes(e, "/editor")
-	//troublereports.NewHandler(r).RegisterRoutes(e, "/trouble-reports")
 	//pressregenerations.NewHandler(r).RegisterRoutes(e, "/press-regeneration")
 }
