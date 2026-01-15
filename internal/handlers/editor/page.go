@@ -52,7 +52,7 @@ func getQueryEditorType(c echo.Context) (shared.EditorType, *echo.HTTPError) {
 
 func getQueryID(c echo.Context) (shared.EntityID, *echo.HTTPError) {
 	id, merr := utils.GetQueryInt64(c, "id")
-	if merr != nil {
+	if merr != nil && !merr.IsNotFoundError() {
 		return 0, merr.WrapEcho("editor id")
 	}
 	return shared.EntityID(id), nil
