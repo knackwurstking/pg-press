@@ -8,17 +8,21 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/knackwurstking/pg-press/internal/common"
-	"github.com/knackwurstking/pg-press/internal/env"
-	"github.com/knackwurstking/pg-press/internal/errors"
-	"github.com/knackwurstking/pg-press/internal/handlers/editor/templates"
-	"github.com/knackwurstking/pg-press/internal/shared"
-
 	ui "github.com/knackwurstking/ui/ui-templ"
 
 	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 )
+
+func Register(e *echo.Echo, path string) {
+	ui.RegisterEchoRoutes(
+		e,
+		env.ServerPathPrefix,
+		[]*ui.EchoRoute{
+			ui.NewEchoRoute(http.MethodGet, path, GetPage),
+		},
+	)
+}
 
 type Handler struct {
 	registry *common.DB
