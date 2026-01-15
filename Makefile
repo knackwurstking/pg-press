@@ -28,8 +28,7 @@ init: generate
 	go mod tidy -v
 	git submodule init
 	git submodule update --recursive
-	make templui-init
-	make templui-add
+	make templui
 
 define TEMPLUI
 {
@@ -44,7 +43,7 @@ endef
 export TEMPLUI
 templui:
 	echo "$$TEMPLUI" > .templui.json
-	templui add "*"
+	yes | templui add "*"
 
 test:
 	go test -v ./...

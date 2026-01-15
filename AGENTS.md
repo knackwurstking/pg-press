@@ -105,7 +105,7 @@ VERBOSE=true
 # Authentication
 ADMINS=admin@example.com
 
-SERVER_PATH_IMAGES=/var/www/pg-press/images
+SERVER_PATH_IMAGES=${HOME}/.pg-press/images
 ```
 
 ## Database Schema

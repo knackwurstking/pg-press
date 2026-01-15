@@ -18,8 +18,13 @@ var (
 )
 
 func init() {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		panic(err)
+	}
+
 	if ServerPathImages == "" {
-		ServerPathImages = fmt.Sprintf("/var/www/%s/images", Name)
+		ServerPathImages = fmt.Sprintf("%s/.%s/images", home, Name)
 	}
 
 	if _, err := os.Stat(ServerPathImages); os.IsNotExist(err) {

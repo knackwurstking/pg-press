@@ -3,6 +3,7 @@ module github.com/knackwurstking/pg-press
 go 1.25.3
 
 require (
+	github.com/Oudwins/tailwind-merge-go v0.2.1
 	github.com/SuperPaintman/nice v0.0.0-20211001214957-a29cd3367b17
 	github.com/a-h/templ v0.3.960
 	github.com/google/uuid v1.6.0
