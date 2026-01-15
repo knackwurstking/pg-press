@@ -36,20 +36,10 @@ templ ListReports(user *shared.User, troubleReports []*shared.TroubleReportWithA
 				}
 			</details>
 			<div class="actions flex gap justify-end items-center">
-				// GoTo: Modifications
-				<a
-					role="button"
-					class="ghost secondary icon"
-					href={ urlb.TroubleReportsModifications(tr.ID) }
-				>
-					<i class="bi bi-clock-history"></i>
-				</a>
 				// Edit Report
 				<a
 					href={ urlb.Editor(
-						"troublereport",
-						fmt.Sprintf("%d", tr.ID),
-						urlb.TroubleReports(),
+						"troublereport", fmt.Sprintf("%d", tr.ID), urlb.TroubleReports(),
 					) }
 					class="ghost icon"
 					role="button"
