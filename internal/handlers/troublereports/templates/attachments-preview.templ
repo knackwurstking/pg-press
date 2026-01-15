@@ -4,16 +4,11 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pg-press/internal/components"
-	"github.com/knackwurstking/pg-press/internal/env"
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
-const (
-	AttachmentPathTroubleReports AttachmentPath = "trouble-reports"
-)
-
-type AttachmentPath string
-
-templ AttachmentsPreview(path AttachmentPath, attachments []*shared.Attachment) {
+templ AttachmentsPreview(attachments []*shared.Image) {
 	if len(attachments) > 0 {
 		<div class="attachments-preview-container">
 			<div class="attachments-preview-label flex gap items-center select-none">
@@ -22,28 +17,28 @@ templ AttachmentsPreview(path AttachmentPath, attachments []*shared.Attachment) 
 			</div>
 			<div class="attachments-preview-scroll flex gap">
 				for _, attachment := range attachments {
-					@attachmentPreviewItem(attachment, path)
+					@attachmentPreviewItem(attachment)
 				}
 			</div>
 		</div>
 	}
 }
 
-templ attachmentPreviewItem(attachment *shared.Attachment, path AttachmentPath) {
+templ attachmentPreviewItem(attachment *shared.Image) {
 	<div
 		class="attachment-preview-item flex flex-col gap items-center select-none ghost"
 		onclick={ components.OpenImageViewer(
-			utils.UrlTroubleReports(0, attachment.GetID(), 0).Attachment,
+			urlb.TroubleReportsAttachment(0, attachment.Name),
 		) }
 		tabindex="0"
 		role="button"
-		aria-label={ fmt.Sprintf("Bild %s anzeigen", attachment.ID) }
+		aria-label={ fmt.Sprintf("Bild \"%s\" anzeigen", attachment.Name) }
 	>
 		<div class="attachment-preview-image">
 			<img
 				loading="lazy"
-				src={ fmt.Sprintf("%s/%s/attachment?attachment_id=%s", env.ServerPathPrefix, path, attachment.ID) }
-				alt={ fmt.Sprintf("Anhang %s", attachment.ID) }
+				src={ attachment.ServerPath() }
+				alt={ fmt.Sprintf("Anhang \"%s\"", attachment.Name) }
 				class="preview-thumbnail select-none"
 			/>
 		</div>

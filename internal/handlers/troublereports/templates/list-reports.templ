@@ -8,7 +8,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
-templ ListReports(user *shared.User, troubleReports []*shared.TroubleReportWithAttachments) {
+templ ListReports(user *shared.User, troubleReports []*shared.TroubleReport) {
 	for _, tr := range troubleReports {
 		<span class="trouble-report">
 			<details
@@ -18,7 +18,7 @@ templ ListReports(user *shared.User, troubleReports []*shared.TroubleReportWithA
 				<summary>{ tr.Title }</summary>
 				@components.MarkdownContent(tr.Content, tr.UseMarkdown)
 				<!-- Attachments Preview Container -->
-				if len(tr.LoadedAttachments) > 0 {
+				if len(tr.LinkedAttachments) > 0 {
 					<br/>
 					<div
 						class="attachments-preview-placeholder"
@@ -30,7 +30,7 @@ templ ListReports(user *shared.User, troubleReports []*shared.TroubleReportWithA
 					>
 						<div class="attachments-preview-label">
 							<i class="bi bi-paperclip"></i>
-							Anhänge ({ len(tr.LoadedAttachments) }) - Klicken Sie hier, um zu laden...
+							Anhänge ({ len(tr.LinkedAttachments) }) - Klicken Sie hier, um zu laden...
 						</div>
 					</div>
 				}
