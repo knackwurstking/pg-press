@@ -5,6 +5,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/editor/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/utils"
 	"github.com/labstack/echo/v4"
 )
 
@@ -42,13 +43,25 @@ func Page(c echo.Context) *echo.HTTPError {
 }
 
 func getQueryEditorType(c echo.Context) (shared.EditorType, *echo.HTTPError) {
-	// TODO: ...
+	t, merr := utils.GetQueryString(c, "type")
+	if merr != nil {
+		return "", merr.WrapEcho("editor type")
+	}
+	return shared.EditorType(t), nil
 }
 
 func getQueryID(c echo.Context) (shared.EntityID, *echo.HTTPError) {
-	// TODO: ...
+	id, merr := utils.GetQueryInt64(c, "id")
+	if merr != nil {
+		return 0, merr.WrapEcho("editor id")
+	}
+	return shared.EntityID(id), nil
 }
 
 func getQueryReturnURL(c echo.Context) (templ.SafeURL, *echo.HTTPError) {
-	// TODO: ...
+	u, merr := utils.GetQueryString(c, "return_url")
+	if merr != nil {
+		return "", merr.WrapEcho("editor return_url")
+	}
+	return templ.SafeURL(u), nil
 }

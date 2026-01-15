@@ -2,7 +2,6 @@ package templates
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -328,7 +327,7 @@ templ pageAdditionalHead() {
 
 templ hiddenFields(options *PageProps) {
 	<input type="hidden" name="type" value={ options.Type }/>
-	<input type="hidden" name="id" value={ strconv.FormatInt(options.ID, 10) }/>
+	<input type="hidden" name="id" value={ options.ID }/>
 	<input type="hidden" name="return_url" value={ string(options.ReturnURL) }/>
 	<input type="hidden" name="existing_attachments_removal" id="existing-attachments-removal" value=""/>
 }
