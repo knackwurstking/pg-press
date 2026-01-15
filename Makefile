@@ -28,6 +28,23 @@ init: generate
 	go mod tidy -v
 	git submodule init
 	git submodule update --recursive
+	make templui-init
+	make templui-add
+
+define TEMPLUI
+{
+	"componentsDir": "internal/components",
+	"utilsDir": "internal/utils",
+	"moduleName": "github.com/knackwurstking/pg-press",
+	"jsDir": "internal/assets/js",
+	"jsPublicPath": "$(SERVER_PATH_PREFIX)/assets/js"
+}
+endef
+
+export TEMPLUI
+templui:
+	echo "$$TEMPLUI" > .templui.json
+	templui add "*"
 
 test:
 	go test -v ./...
@@ -97,7 +114,6 @@ define LAUNCHCTL_PLIST
 endef
 
 export LAUNCHCTL_PLIST
-
 macos-install:
 	@echo "Installing $(BINARY_NAME) for macOS..."
 	mkdir -p $(INSTALL_PATH)
