@@ -25,16 +25,25 @@ func Page(c echo.Context) *echo.HTTPError {
 		return eerr
 	}
 
-	attachments := make([]string, 0) // TODO: Get existing attachments if editing already exists
+	// TODO: Get existing trouble reports, if exists...
+	var (
+		attachments []string
+		title       string
+		content     string
+		useMarkdown bool
+	)
+	if id > 0 {
+		// ...
+	}
 
 	t := templates.Page(&templates.PageProps{
 		Type:        editorType,
 		ID:          id,
 		ReturnURL:   returnURL,
-		Title:       "", // TODO: Get title if editing already exists
-		Content:     "", // TODO: Get content if editing already exists
+		Title:       title,
+		Content:     content,
 		Attachments: attachments,
-		UseMarkdown: false, // TODO: Get use_markdown from existing data
+		UseMarkdown: useMarkdown,
 	})
 	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.NewRenderError(err, "editor page")
