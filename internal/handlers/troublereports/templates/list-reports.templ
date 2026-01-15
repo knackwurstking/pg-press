@@ -57,7 +57,7 @@ templ ListReports(user *shared.User, troubleReports []*shared.TroubleReport) {
 				</button>
 				// Admin only: Delete Report
 				<button
-					hx-delete={ urlb.TroubleReportsData(tr.ID) }
+					hx-delete={ urlb.TroubleReportsDelete(tr.ID) }
 					hx-trigger="click"
 					hx-target="#data"
 					hx-confirm="Sind Sie sicher, dass Sie diesen Fehlerbericht löschen möchten?"

@@ -1,19 +1,28 @@
 package troublereports
 
 import (
-	"net/http"
+	"github.com/knackwurstking/pg-press/internal/db"
+	"github.com/knackwurstking/pg-press/internal/errors"
+	"github.com/knackwurstking/pg-press/internal/handlers/troublereports/templates"
+	"github.com/knackwurstking/pg-press/internal/utils"
 
 	"github.com/labstack/echo/v4"
 )
 
-// TODO: Render trouble reports data
-
 func GetData(c echo.Context) *echo.HTTPError {
-	// This would normally return HTMX data, but for now return not implemented
-	return echo.NewHTTPError(http.StatusNotImplemented, "HTMX data not implemented")
-}
+	user, merr := utils.GetUserFromContext(c)
+	if merr != nil {
+		return merr.Echo()
+	}
 
-func DeleteTroubleReport(c echo.Context) *echo.HTTPError {
-	// This would normally delete a trouble report, but for now return not implemented
-	return echo.NewHTTPError(http.StatusNotImplemented, "Delete functionality not implemented")
+	troubleReports, merr := db.ListTroubleReports()
+	if merr != nil {
+		return merr.Echo()
+	}
+
+	t := templates.ListReports(user, troubleReports)
+	if err := t.Render(c.Request().Context(), c.Response().Writer); err != nil {
+		return errors.NewRenderError(err, "ListReports")
+	}
+	return nil
 }

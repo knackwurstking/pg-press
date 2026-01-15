@@ -32,8 +32,13 @@ func TroubleReportsAttachment(trID shared.EntityID, attachmentName string) templ
 }
 
 // TroubleReportsData constructs trouble reports data URL
-func TroubleReportsData(trID shared.EntityID) templ.SafeURL {
-	return BuildURLWithParams("/trouble-reports/data", map[string]string{
+func TroubleReportsData() templ.SafeURL {
+	return BuildURL("/trouble-reports/data")
+}
+
+// TroubleReportsDelete constructs trouble reports data URL
+func TroubleReportsDelete(trID shared.EntityID) templ.SafeURL {
+	return BuildURLWithParams("/trouble-reports/delete", map[string]string{
 		"id": fmt.Sprintf("%d", trID),
 	})
 }

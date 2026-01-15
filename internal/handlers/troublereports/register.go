@@ -17,7 +17,7 @@ func Register(e *echo.Echo, path string) {
 		[]*ui.EchoRoute{
 			ui.NewEchoRoute(http.MethodGet, path, GetPage),
 			ui.NewEchoRoute(http.MethodGet, path+"/data", GetData),
-			ui.NewEchoRoute(http.MethodDelete, path+"/data", DeleteTroubleReport),
+			ui.NewEchoRoute(http.MethodDelete, path+"/delete", DeleteTroubleReport),
 
 			ui.NewEchoRoute(http.MethodGet, path+"/share-pdf", GetSharePDF),
 			ui.NewEchoRoute(http.MethodGet, path+"/attachment", GetAttachment),
