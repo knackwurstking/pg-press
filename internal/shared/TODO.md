@@ -2,7 +2,7 @@
 
 ## General
 
-- [ ] Add new model "attachment", or find another method to handler attachments
+- [ ] Add new model "attachment", or find another method to handle attachments
 
 ## New* Functions
 - [x] NewCycle
