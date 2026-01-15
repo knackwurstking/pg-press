@@ -16,14 +16,11 @@ func Register(e *echo.Echo, path string) {
 		env.ServerPathPrefix,
 		[]*ui.EchoRoute{
 			ui.NewEchoRoute(http.MethodGet, path, GetPage),
-
-			ui.NewEchoRoute(http.MethodGet, path+"/share-pdf", GetSharePDF),
-
-			ui.NewEchoRoute(http.MethodGet, path+"/attachment", GetAttachment),
-
 			ui.NewEchoRoute(http.MethodGet, path+"/data", GetData),
 			ui.NewEchoRoute(http.MethodDelete, path+"/data", DeleteTroubleReport),
 
+			ui.NewEchoRoute(http.MethodGet, path+"/share-pdf", GetSharePDF),
+			ui.NewEchoRoute(http.MethodGet, path+"/attachment", GetAttachment),
 			ui.NewEchoRoute(http.MethodGet, path+"/attachments-preview", GetAttachmentsPreview),
 		},
 	)

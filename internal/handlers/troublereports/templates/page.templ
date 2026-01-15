@@ -46,7 +46,7 @@ templ Page() {
 			@components.Section(templ.Attributes{
 				"id":                        "data",
 				"hx-get":                    string(urlb.TroubleReportsData(0)),
-				"hx-trigger":                "load, pageLoaded from:body",
+				"hx-trigger":                "load, reload-trouble-reports from:body",
 				"hx-on:htmx:response-error": "alert(event.detail.xhr.responseText)",
 			})
 		</main>

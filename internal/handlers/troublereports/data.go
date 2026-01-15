@@ -6,6 +6,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// TODO: Render trouble reports data
+
 func GetData(c echo.Context) *echo.HTTPError {
 	// This would normally return HTMX data, but for now return not implemented
 	return echo.NewHTTPError(http.StatusNotImplemented, "HTMX data not implemented")
