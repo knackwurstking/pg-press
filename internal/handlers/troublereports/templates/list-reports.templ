@@ -38,9 +38,7 @@ templ ListReports(user *shared.User, troubleReports []*shared.TroubleReport) {
 			<div class="actions flex gap justify-end items-center">
 				// Edit Report
 				<a
-					href={ urlb.Editor(
-						"troublereport", fmt.Sprintf("%d", tr.ID), urlb.TroubleReports(),
-					) }
+					href={ urlb.Editor("troublereport", tr.ID, urlb.TroubleReports()) }
 					class="ghost icon"
 					role="button"
 				>
