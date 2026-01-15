@@ -51,8 +51,8 @@ templ Page(props *PageProps) {
 					@markdownTools()
 					@contentTextarea(props.Content)
 					@markdownPreview()
-					@attachmentsSeparator()
 					if supportsAttachments(props.Type) {
+						@attachmentsSeparator()
 						@attachmentsSection(props.Attachments)
 					}
 					@formActions(props)
