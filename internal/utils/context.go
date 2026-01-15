@@ -34,7 +34,7 @@ func GetUserFromContext(c echo.Context) (*shared.User, *errors.HTTPError) {
 func GetQueryString(c echo.Context, paramName string) (string, *errors.HTTPError) {
 	s := c.QueryParam(paramName)
 	if s == "" {
-		return s, errors.NewValidationError("query parameter '%s' is required", paramName).HTTPError()
+		return s, errors.NewNotFoundError("query parameter '%s' is required", paramName).HTTPError()
 	}
 
 	return s, nil
@@ -57,7 +57,7 @@ func GetQueryBool(c echo.Context, paramName string) bool {
 func GetQueryInt64(c echo.Context, paramName string) (int64, *errors.HTTPError) {
 	idStr := c.QueryParam(paramName)
 	if idStr == "" {
-		return 0, errors.NewValidationError("query parameter '%s' is required", paramName).HTTPError()
+		return 0, errors.NewNotFoundError("query parameter '%s' is required", paramName).HTTPError()
 	}
 
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -71,12 +71,12 @@ func GetQueryInt64(c echo.Context, paramName string) (int64, *errors.HTTPError) 
 func GetQueryInt8(c echo.Context, paramName string) (int8, *errors.HTTPError) {
 	idStr := c.QueryParam(paramName)
 	if idStr == "" {
-		return 0, errors.NewNotFoundError("missing query parameter '%s'", paramName).HTTPError()
+		return 0, errors.NewNotFoundError("query parameter '%s' is required", paramName).HTTPError()
 	}
 
-	id, err := strconv.ParseInt(idStr, 10, 8)
+	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		return 0, errors.NewValidationError("invalid %s: must be a number", paramName).HTTPError()
+		return 0, errors.NewValidationError("invalid '%s' value '%s': must be a valid integer", paramName, idStr).HTTPError()
 	}
 	return int8(id), nil
 }
@@ -84,7 +84,7 @@ func GetQueryInt8(c echo.Context, paramName string) (int8, *errors.HTTPError) {
 func GetQueryInt(c echo.Context, paramName string) (int, *errors.HTTPError) {
 	idStr := c.QueryParam(paramName)
 	if idStr == "" {
-		return 0, errors.NewValidationError("query parameter '%s' is required", paramName).HTTPError()
+		return 0, errors.NewNotFoundError("query parameter '%s' is required", paramName).HTTPError()
 	}
 
 	id, err := strconv.Atoi(idStr)
@@ -102,12 +102,12 @@ func GetQueryInt(c echo.Context, paramName string) (int, *errors.HTTPError) {
 func GetParamInt64(c echo.Context, paramName string) (int64, *errors.HTTPError) {
 	idStr := c.Param(paramName)
 	if idStr == "" {
-		return 0, errors.NewNotFoundError("missing %s", paramName).HTTPError()
+		return 0, errors.NewNotFoundError("path parameter '%s' is required", paramName).HTTPError()
 	}
 
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		return 0, errors.NewValidationError("invalid %s: must be a number", paramName).HTTPError()
+		return 0, errors.NewValidationError("invalid '%s' value '%s': must be a valid integer", paramName, idStr).HTTPError()
 	}
 	return id, nil
 }
@@ -115,12 +115,12 @@ func GetParamInt64(c echo.Context, paramName string) (int64, *errors.HTTPError) 
 func GetParamInt8(c echo.Context, paramName string) (int8, *errors.HTTPError) {
 	idStr := c.Param(paramName)
 	if idStr == "" {
-		return 0, errors.NewNotFoundError("missing %s", paramName).HTTPError()
+		return 0, errors.NewNotFoundError("path parameter '%s' is required", paramName).HTTPError()
 	}
 
-	id, err := strconv.ParseInt(idStr, 10, 8)
+	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		return 0, errors.NewValidationError("invalid %s: must be a number", paramName).HTTPError()
+		return 0, errors.NewValidationError("invalid '%s' value '%s': must be a valid integer", paramName, idStr).HTTPError()
 	}
 	return int8(id), nil
 }
