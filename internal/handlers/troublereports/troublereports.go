@@ -28,27 +28,17 @@ func GetAttachment(c echo.Context) *echo.HTTPError {
 	return echo.NewHTTPError(http.StatusNotImplemented, "Attachment serving not implemented")
 }
 
-func GetModificationsForID(c echo.Context) *echo.HTTPError {
-	// This would normally show modifications, but for now return not implemented
-	return echo.NewHTTPError(http.StatusNotImplemented, "Modifications page not implemented")
-}
-
-func HTMXGetData(c echo.Context) *echo.HTTPError {
+func GetData(c echo.Context) *echo.HTTPError {
 	// This would normally return HTMX data, but for now return not implemented
 	return echo.NewHTTPError(http.StatusNotImplemented, "HTMX data not implemented")
 }
 
-func HTMXDeleteTroubleReport(c echo.Context) *echo.HTTPError {
+func DeleteTroubleReport(c echo.Context) *echo.HTTPError {
 	// This would normally delete a trouble report, but for now return not implemented
 	return echo.NewHTTPError(http.StatusNotImplemented, "Delete functionality not implemented")
 }
 
-func HTMXGetAttachmentsPreview(c echo.Context) *echo.HTTPError {
+func GetAttachmentsPreview(c echo.Context) *echo.HTTPError {
 	// This would normally preview attachments, but for now return not implemented
 	return echo.NewHTTPError(http.StatusNotImplemented, "Attachments preview not implemented")
-}
-
-func HTMXPostRollback(c echo.Context) *echo.HTTPError {
-	// This would normally rollback a trouble report, but for now return not implemented
-	return echo.NewHTTPError(http.StatusNotImplemented, "Rollback functionality not implemented")
 }

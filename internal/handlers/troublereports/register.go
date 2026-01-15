@@ -15,17 +15,16 @@ func Register(e *echo.Echo, path string) {
 		e,
 		env.ServerPathPrefix,
 		[]*ui.EchoRoute{
-			// Pages
 			ui.NewEchoRoute(http.MethodGet, path, GetPage),
-			ui.NewEchoRoute(http.MethodGet, path+"/share-pdf", GetSharePDF),
-			ui.NewEchoRoute(http.MethodGet, path+"/attachment", GetAttachment),
-			ui.NewEchoRoute(http.MethodGet, path+"/modifications/:id", GetModificationsForID),
 
-			// HTMX
-			ui.NewEchoRoute(http.MethodGet, path+"/data", HTMXGetData),
-			ui.NewEchoRoute(http.MethodDelete, path+"/data", HTMXDeleteTroubleReport),
-			ui.NewEchoRoute(http.MethodGet, path+"/attachments-preview", HTMXGetAttachmentsPreview),
-			ui.NewEchoRoute(http.MethodPost, path+"/rollback", HTMXPostRollback),
+			ui.NewEchoRoute(http.MethodGet, path+"/share-pdf", GetSharePDF),
+
+			ui.NewEchoRoute(http.MethodGet, path+"/attachment", GetAttachment),
+
+			ui.NewEchoRoute(http.MethodGet, path+"/data", GetData),
+			ui.NewEchoRoute(http.MethodDelete, path+"/data", DeleteTroubleReport),
+
+			ui.NewEchoRoute(http.MethodGet, path+"/attachments-preview", GetAttachmentsPreview),
 		},
 	)
 }

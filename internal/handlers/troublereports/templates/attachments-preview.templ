@@ -2,19 +2,18 @@ package templates
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pg-press/components"
-	"github.com/knackwurstking/pg-press/env"
-	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/utils"
+
+	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/env"
 )
 
 const (
-	AttachmentPathTroubleReports = "trouble-reports"
+	AttachmentPathTroubleReports AttachmentPath = "trouble-reports"
 )
 
 type AttachmentPath string
 
-templ AttachmentsPreview(path AttachmentPath, attachments []*models.Attachment) {
+templ AttachmentsPreview(path AttachmentPath, attachments []*shared.Attachment) {
 	if len(attachments) > 0 {
 		<div class="attachments-preview-container">
 			<div class="attachments-preview-label flex gap items-center select-none">
@@ -30,7 +29,7 @@ templ AttachmentsPreview(path AttachmentPath, attachments []*models.Attachment) 
 	}
 }
 
-templ attachmentPreviewItem(attachment *models.Attachment, path AttachmentPath) {
+templ attachmentPreviewItem(attachment *shared.Attachment, path AttachmentPath) {
 	<div
 		class="attachment-preview-item flex flex-col gap items-center select-none ghost"
 		onclick={ components.OpenImageViewer(

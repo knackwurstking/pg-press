@@ -2,12 +2,13 @@ package templates
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pg-press/components"
-	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/utils"
+
+	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
-templ ListReports(user *models.User, troubleReports []*models.TroubleReportWithAttachments) {
+templ ListReports(user *shared.User, troubleReports []*shared.TroubleReportWithAttachments) {
 	for _, tr := range troubleReports {
 		<span class="trouble-report">
 			<details
@@ -22,7 +23,7 @@ templ ListReports(user *models.User, troubleReports []*models.TroubleReportWithA
 					<div
 						class="attachments-preview-placeholder"
 						data-trouble-report-id={ fmt.Sprintf("%d", tr.ID) }
-						hx-get={ utils.UrlTroubleReports(tr.ID, 0, 0).AttachmentsPreview }
+						hx-get={ urlb.TroubleReportsAttachmentsPreview(tr.ID) }
 						hx-trigger="click"
 						hx-swap="outerHTML"
 						hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
@@ -39,17 +40,17 @@ templ ListReports(user *models.User, troubleReports []*models.TroubleReportWithA
 				<a
 					role="button"
 					class="ghost secondary icon"
-					href={ utils.UrlTroubleReports(tr.ID, 0, 0).Modifications }
+					href={ urlb.TroubleReportsModifications(tr.ID) }
 				>
 					<i class="bi bi-clock-history"></i>
 				</a>
 				// Edit Report
 				<a
-					href={ utils.UrlEditor(
-						"troublereport", 
-						fmt.Sprintf("%d", tr.ID), 
-						utils.UrlTroubleReports(0, 0, 0).Page,
-					).Page }
+					href={ urlb.Editor(
+						"troublereport",
+						fmt.Sprintf("%d", tr.ID),
+						urlb.TroubleReports(),
+					) }
 					class="ghost icon"
 					role="button"
 				>
@@ -66,7 +67,7 @@ templ ListReports(user *models.User, troubleReports []*models.TroubleReportWithA
 				</button>
 				// Admin only: Delete Report
 				<button
-					hx-delete={ utils.UrlTroubleReports(tr.ID, 0, 0).Data }
+					hx-delete={ urlb.TroubleReportsData(tr.ID) }
 					hx-trigger="click"
 					hx-target="#data"
 					hx-confirm="Sind Sie sicher, dass Sie diesen Fehlerbericht löschen möchten?"
