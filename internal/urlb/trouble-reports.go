@@ -20,11 +20,8 @@ func TroubleReportsSharePDF(trID shared.EntityID) templ.SafeURL {
 }
 
 // TroubleReportsAttachment constructs trouble reports attachment URL
-func TroubleReportsAttachment(trID shared.EntityID, attachmentName string) templ.SafeURL {
+func TroubleReportsAttachment(attachmentName string) templ.SafeURL {
 	params := map[string]string{}
-	if trID != 0 {
-		params["id"] = fmt.Sprintf("%d", trID)
-	}
 	if attachmentName != "" {
 		params["attachment"] = attachmentName
 	}

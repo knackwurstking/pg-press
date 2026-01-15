@@ -15,8 +15,8 @@ type PageProps struct {
 	ReturnURL   templ.SafeURL
 	Title       string
 	Content     string
+	Attachments []string
 	UseMarkdown bool
-	Attachments []*shared.Attachment
 }
 
 templ Page(props *PageProps) {
@@ -32,7 +32,7 @@ templ Page(props *PageProps) {
 			editorTitle = fmt.Sprintf("Neues %s erstellen", typeName)
 		}
 	}}
-	@components.Layout(components.LayoutOptions{
+	@components.Layout(components.LayoutProps{
 		PageTitle:      pageTitle,
 		AppBarTitle:    editorTitle,
 		AdditionalHead: pageAdditionalHead(),
@@ -43,7 +43,7 @@ templ Page(props *PageProps) {
 				<form
 					class="editor-form flex flex-col gap px"
 					method="POST"
-					action={ urlb.UrlEditor(props.Type, fmt.Sprintf("%d", props.ID), props.ReturnURL).Save }
+					action={ urlb.EditorSave() }
 					enctype="multipart/form-data"
 				>
 					@hiddenFields(props)
@@ -302,16 +302,16 @@ templ pageAdditionalHead() {
 			}
 		}
 
-		function deleteAttachment(attachmentId) {
+		function deleteAttachment(attachment) {
 			if (!confirm("Sind Sie sicher, dass Sie diesen Anhang löschen möchten?")) {
 				return;
 			}
 
-			var attachmentItem = document.querySelector('#existing-attachments [data-id="' + attachmentId + '"]');
+			var attachmentItem = document.querySelector('#existing-attachments [data-attachment-path="' + attachment + '"]');
 
 			if (attachmentItem) {
 				attachmentItem.remove();
-				existingAttachmentsRemoval.push(attachmentId);
+				existingAttachmentsRemoval.push(attachment);
 				updateExistingAttachmentsRemoval();
 
 				var existingAttachments = document.getElementById('existing-attachments');
@@ -365,7 +365,7 @@ templ markdownToggle(useMarkdown bool) {
 				<div class="ml-auto flex justify-end items-center gap-xs">
 					<a
 						role="button"
-						href={ urlb.UrlHelp().MarkdownPage }
+						href={ urlb.HelpMarkdown() }
 						target="_blank"
 						class="small primary ghost"
 						style="text-wrap: nowrap;"
@@ -446,7 +446,7 @@ templ attachmentsSeparator() {
 	</div>
 }
 
-templ attachmentsSection(attachments []*shared.Attachment) {
+templ attachmentsSection(attachments []string) {
 	<div class="border-2 p-lg muted mt transition-all" style="border-radius: var(--ui-radius);">
 		@attachmentsSectionHeader()
 		if len(attachments) > 0 {
@@ -469,7 +469,7 @@ templ attachmentsSectionHeader() {
 	</div>
 }
 
-templ existingAttachments(attachments []*shared.Attachment) {
+templ existingAttachments(attachments []string) {
 	<details class="border mb" style="border-radius: var(--ui-radius);">
 		<summary class="p cursor-pointer text-medium flex gap items-center">
 			<i class="bi bi-images"></i>
@@ -483,22 +483,22 @@ templ existingAttachments(attachments []*shared.Attachment) {
 	</details>
 }
 
-templ existingAttachmentItem(attachment *shared.Attachment, index int) {
+templ existingAttachmentItem(attachment string, index int) {
 	<div
 		class="p border flex gap justify-between items-center"
-		data-id={ fmt.Sprintf("%d", attachment.GetID()) }
+		data-attachment-path={ attachment }
 		style="border-radius: var(--ui-radius);"
 	>
 		<div class="flex gap items-center">
 			<span class="text-medium">Anhang { index }</span>
-			<span class="muted text-sm">({ attachment.GetMimeType() })</span>
+			<span class="muted text-sm">({ attachment })</span>
 		</div>
 		<div class="flex gap-sm">
 			<button
 				type="button"
 				class="secondary small"
 				onclick={ components.OpenImageViewer(
-					urlb.UrlTroubleReports(0, attachment.GetID(), 0).Attachment,
+					urlb.TroubleReportsAttachment(attachment),
 				) }
 			>
 				<i class="bi bi-eye"></i>
@@ -507,7 +507,7 @@ templ existingAttachmentItem(attachment *shared.Attachment, index int) {
 			<button
 				type="button"
 				class="destructive small"
-				onclick={ deleteAttachment(attachment.GetID()) }
+				onclick={ deleteAttachment(attachment) }
 			>
 				<i class="bi bi-trash"></i>
 				Löschen
@@ -589,7 +589,7 @@ templ formActions(options *PageProps) {
 
 func getTypeName(editorType shared.EditorType) string {
 	switch editorType {
-	case shared.TypeTroubleReport:
+	case shared.EditorTypeTroubleReport:
 		return "Problembericht"
 	default:
 		return "Dokument"
@@ -597,9 +597,9 @@ func getTypeName(editorType shared.EditorType) string {
 }
 
 func supportsAttachments(editorType shared.EditorType) bool {
-	return editorType == shared.TypeTroubleReport
+	return editorType == shared.EditorTypeTroubleReport
 }
 
-script deleteAttachment(attachmentId shared.EntityID) {
-	deleteAttachment(attachmentId);
+script deleteAttachment(attachment string) {
+	deleteAttachment(attachment);
 }

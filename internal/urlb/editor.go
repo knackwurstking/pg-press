@@ -1,6 +1,7 @@
 package urlb
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/a-h/templ"
@@ -8,11 +9,11 @@ import (
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
 
-func Editor(_type shared.EditorType, id string, returnURL templ.SafeURL) templ.SafeURL {
+func Editor(_type shared.EditorType, id shared.EntityID, returnURL templ.SafeURL) templ.SafeURL {
 	a, _ := strings.CutPrefix(string(returnURL), env.ServerPathPrefix)
 	return BuildURLWithParams("/editor", map[string]string{
 		"type":       string(_type),
-		"id":         id,
+		"id":         fmt.Sprintf("%d", id),
 		"return_url": string(a),
 	})
 }
