@@ -77,7 +77,7 @@ func middlewareConfiguration(e *echo.Echo) {
 func setupRouter(e *echo.Echo, prefix string) {
 	// Static File Server
 	e.StaticFS(prefix+"/", assets.GetAssets())
-	// TODO: Server static directory for serving attachments
+	e.Static(prefix+"/images", env.ServerPathImages)
 	handlers.RegisterAll(e)
 }
 
