@@ -14,10 +14,10 @@ import (
 
 func GetEditPress(c echo.Context) *echo.HTTPError {
 	pn, merr := utils.GetQueryInt8(c, "id")
-	if merr != nil && !merr.IsNotFoundError() {
-		return merr.Echo()
-	} else if merr != nil && merr.IsNotFoundError() {
+	if merr != nil && merr.IsNotFoundError() {
 		pn = -1
+	} else if merr != nil {
+		return merr.Echo()
 	}
 
 	if pn > -1 {
