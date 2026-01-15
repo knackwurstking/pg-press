@@ -30,5 +30,5 @@ func (i *Image) IsImage() bool {
 }
 
 func (i *Image) ServerPath() string {
-	return fmt.Sprintf("%s/images/%s", env.ServerPathPrefix, i.Name)
+	return fmt.Sprintf("%s/%s", env.ServerPathImages, i.Name)
 }
