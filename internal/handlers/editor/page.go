@@ -2,6 +2,7 @@ package editor
 
 import (
 	"github.com/a-h/templ"
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/editor/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -25,7 +26,7 @@ func Page(c echo.Context) *echo.HTTPError {
 		return eerr
 	}
 
-	// TODO: Get existing trouble reports, if exists...
+	// Get existing trouble reports, if exists
 	var (
 		attachments []string
 		title       string
@@ -33,7 +34,14 @@ func Page(c echo.Context) *echo.HTTPError {
 		useMarkdown bool
 	)
 	if id > 0 {
-		// ...
+		tr, merr := db.GetTroubleReport(id)
+		if merr != nil {
+			return merr.Echo()
+		}
+		attachments = tr.LinkedAttachments
+		title = tr.Title
+		content = tr.Content
+		useMarkdown = tr.UseMarkdown
 	}
 
 	t := templates.Page(&templates.PageProps{
