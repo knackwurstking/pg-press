@@ -1,13 +1,22 @@
 package troublereports
 
 import (
-	"net/http"
-
+	"github.com/knackwurstking/pg-press/internal/db"
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/utils"
 	"github.com/labstack/echo/v4"
 )
 
-// TODO: Delete trouble reports, take from query parameter "id"
 func DeleteTroubleReport(c echo.Context) *echo.HTTPError {
-	// This would normally delete a trouble report, but for now return not implemented
-	return echo.NewHTTPError(http.StatusNotImplemented, "Delete functionality not implemented")
+	id, merr := utils.GetQueryInt64(c, "id")
+	if merr != nil {
+		return merr.Echo()
+	}
+	trID := shared.EntityID(id)
+
+	if merr = db.DeleteTroubleReport(trID); merr != nil {
+		return merr.Echo()
+	}
+
+	return nil
 }

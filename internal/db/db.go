@@ -18,10 +18,11 @@ type Scannable interface {
 }
 
 var (
-	dbTool  *sql.DB
-	dbPress *sql.DB
-	dbNote  *sql.DB
-	dbUser  *sql.DB
+	dbTool    *sql.DB
+	dbPress   *sql.DB
+	dbNote    *sql.DB
+	dbUser    *sql.DB
+	dbReports *sql.DB
 
 	log = logger.New("db")
 )
@@ -37,8 +38,9 @@ func Open(path string, allowCreate bool) error {
 	}
 
 	wg := &sync.WaitGroup{}
-	chErr := make(chan error, 4)
-	for _, name := range []string{"tool", "press", "note", "user"} {
+	names := []string{"tool", "press", "note", "user", "reports"}
+	chErr := make(chan error, len(names))
+	for _, name := range names {
 		log.Debug("Opening %s database at %s", name, path)
 
 		wg.Go(func() {
@@ -103,6 +105,13 @@ func Open(path string, allowCreate bool) error {
 				}
 				if err := createTable(db, sqlCreateUsersTable); err != nil {
 					chErr <- errors.Wrap(err, "failed to create users table")
+					return
+				}
+
+			case "reports":
+				dbReports = db
+				if err := createTable(db, sqlCreateTroubleReportsTable); err != nil {
+					chErr <- errors.Wrap(err, "failed to create trouble_reports table")
 					return
 				}
 			}
