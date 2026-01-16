@@ -18,5 +18,7 @@ func DeleteTroubleReport(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
+	utils.SetHXTrigger(c, "reload-trouble-reports")
+
 	return nil
 }
