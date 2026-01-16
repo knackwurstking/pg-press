@@ -2,6 +2,7 @@ package urlb
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/a-h/templ"
@@ -14,7 +15,7 @@ func Editor(_type shared.EditorType, id shared.EntityID, returnURL templ.SafeURL
 	return BuildURLWithParams("/editor", map[string]string{
 		"type":       string(_type),
 		"id":         fmt.Sprintf("%d", id),
-		"return_url": string(a),
+		"return_url": filepath.Join(env.ServerPathPrefix, a),
 	})
 }
 
