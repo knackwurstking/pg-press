@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/a-h/templ"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/knackwurstking/pg-press/internal/utils"
 	"github.com/labstack/echo/v4"
 )
@@ -17,12 +18,6 @@ func Save(c echo.Context) *echo.HTTPError {
 	)
 
 	log.Info("Save editor content with type %s and ID %s", editorType, idParam)
-
-	// Get user from context
-	user, merr := utils.GetUserFromContext(c)
-	if merr != nil {
-		return merr.Echo()
-	}
 
 	// Parse form data
 	var (
@@ -47,17 +42,21 @@ func Save(c echo.Context) *echo.HTTPError {
 		}
 	}
 
-	// TODO: Handle linked attachments, uploads will be handled inside a separate handler
-	// Just set the linked attachments list here
+	switch editorType {
+	case "troublereport":
+		// TODO: Handle linked attachments, uploads will be handled inside a
+		//       separate handler, Just set the linked attachments list here.
+		//       The page needs to be changed for this new attachment system.
 
-	// TODO: Save content based on type, Check editor type and store to the database
+		// TODO: Save content based on type, Check editor type and store to the
+		//       database
+	}
 
 	// Redirect back to return URL or appropriate page
 	returnURL := c.FormValue("return_url")
 	if returnURL != "" {
 		url := templ.SafeURL(returnURL)
-		merr = utils.RedirectTo(c, url)
-		if merr != nil {
+		if merr := utils.RedirectTo(c, url); merr != nil {
 			return merr.WrapEcho("redirect to %#v", url)
 		}
 		return nil
@@ -66,16 +65,15 @@ func Save(c echo.Context) *echo.HTTPError {
 	// Default redirects based on type
 	switch editorType {
 	case "troublereport":
-		url := utils.UrlTroubleReports(0, 0, 0).Page
-		merr = utils.RedirectTo(c, url)
-		if merr != nil {
+		url := urlb.TroubleReports()
+		if merr := utils.RedirectTo(c, url); merr != nil {
 			return merr.WrapEcho("redirect to %#v", url)
 		}
 		return nil
+
 	default:
-		url := utils.UrlHome().Page
-		merr = utils.RedirectTo(c, url)
-		if merr != nil {
+		url := urlb.Home()
+		if merr := utils.RedirectTo(c, url); merr != nil {
 			return merr.WrapEcho("redirect to %#v", url)
 		}
 		return nil
