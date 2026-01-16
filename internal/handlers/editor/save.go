@@ -5,9 +5,12 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/a-h/templ"
+	"github.com/google/uuid"
 	"github.com/knackwurstking/pg-press/internal/db"
+	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/knackwurstking/pg-press/internal/utils"
@@ -56,6 +59,33 @@ func Save(c echo.Context) *echo.HTTPError {
 			return echo.NewHTTPError(http.StatusBadRequest, "invalid ID parameter")
 		}
 	}
+
+	// Without Attachments:
+	//
+	// existingAttachmentsToRemove=[]string(nil)
+	// attachments=[]string(nil)
+	// v=url.Values{
+	// 	"attachments":[]string{""},
+	// 	"content":[]string{"k"},
+	// 	"existing_attachments_removal":[]string{""},
+	// 	"id":[]string{"0"},
+	// 	"return_url":[]string{"/pg-press/trouble-reports"},
+	// 	"title":[]string{"l"},
+	// 	"type":[]string{"troublereport"},
+	// }
+	//
+	// With Attachments:
+	//
+	// existingAttachmentsToRemove=[]string(nil)
+	// attachments=[]string(nil)
+	// v=url.Values{
+	// 	"content":[]string{"fsf"},
+	// 	"existing_attachments_removal":[]string{""},
+	// 	"id":[]string{"0"},
+	// 	"return_url":[]string{"/pg-press/trouble-reports"},
+	// 	"title":[]string{"fewf"},
+	// 	"type":[]string{"troublereport"},
+	// }
 
 	v, _ := c.FormParams()
 	log.Debug("Form values: existingAttachmentsToRemove=%#v", existingAttachmentsToRemove)
@@ -143,70 +173,56 @@ func Save(c echo.Context) *echo.HTTPError {
 func processAttachments(c echo.Context) ([]string, error) {
 	var attachments []string
 
-	// Check if this is a multipart form
-	if c.Request().MultipartForm == nil {
-		err := c.Request().ParseMultipartForm(10 * 1024 * 1024) // 10MB max
-		if err != nil {
-			return nil, fmt.Errorf("parse multipart form: %w", err)
+	// Handle new file uploads
+	form, err := c.MultipartForm()
+	if err != nil {
+		// No multipart form is okay, just return empty attachments
+		return attachments, nil
+	}
+
+	files := form.File["attachments"]
+	for _, fileHeader := range files {
+		if fileHeader.Size == 0 {
+			continue
 		}
+
+		// Validate file size (max 10MB)
+		if fileHeader.Size > 10*1024*1024 {
+			return nil, errors.NewValidationError(
+				"file %s is too large (max 10MB)", fileHeader.Filename,
+			).HTTPError()
+		}
+
+		// Validate file type (images only)
+		if !strings.HasPrefix(fileHeader.Header.Get("Content-Type"), "image/") {
+			return nil, errors.NewValidationError(
+				"file %s is not an image", fileHeader.Filename,
+			).HTTPError()
+		}
+
+		file, err := fileHeader.Open()
+		if err != nil {
+			return nil, errors.NewValidationError("open file: %v", err).HTTPError()
+		}
+		defer file.Close()
+
+		// Read file data
+		data := make([]byte, fileHeader.Size)
+		_, err = file.Read(data)
+		if err != nil {
+			return nil, errors.NewValidationError("read file: %v", err).HTTPError()
+		}
+
+		// TODO: Get the mime type from the filename `fileHeader.Filename`
+		var mimeType string
+
+		// Generate a unique filename for this and add to attachments
+		fileName := fmt.Sprintf("%s%d%s",
+			time.Now().Format("20060102150405"),
+			uuid.New().ID(),
+			getFileExtension(mimeType))
+		attachments = append(attachments, fileName)
 	}
-
-	// Get uploaded files
-	files := c.FormValue("attachments")
-	if files == "" {
-		return attachments, nil
-	}
-
-	fileHeaders, err := c.FormFile("attachments")
-	if err != nil && err != http.ErrMissingFile {
-		return nil, fmt.Errorf("get file headers: %w", err)
-	}
-
-	if err == http.ErrMissingFile {
-		return attachments, nil
-	}
-
-	log.Debug("processAttachments: attachments=%#v, files=%#v, fileHeaders=%#v", attachments, files, fileHeaders)
-
-	// Process each file
-	//for _, fileHeader := range fileHeaders {
-	//	if fileHeader.Size == 0 {
-	//		continue
-	//	}
-
-	//	// Validate file size (max 10MB)
-	//	if fileHeader.Size > 10*1024*1024 {
-	//		return nil, fmt.Errorf("file %s is too large (max 10MB)", fileHeader.Filename)
-	//	}
-
-	//	// Validate file type (images only)
-	//	contentType := fileHeader.Header.Get("Content-Type")
-	//	if !strings.HasPrefix(contentType, "image/") {
-	//		return nil, fmt.Errorf("file %s is not an image", fileHeader.Filename)
-	//	}
-
-	//	// Process the file
-	//	file, err := fileHeader.Open()
-	//	if err != nil {
-	//		return nil, fmt.Errorf("open file %s: %w", fileHeader.Filename, err)
-	//	}
-	//	defer file.Close()
-
-	//	// Read file data
-	//	data := make([]byte, fileHeader.Size)
-	//	_, err = file.Read(data)
-	//	if err != nil {
-	//		return nil, fmt.Errorf("read file %s: %w", fileHeader.Filename, err)
-	//	}
-
-	//	// Create attachment
-	//	attachment := &shared.Attachment{
-	//		MimeType: contentType,
-	//		Data:     data,
-	//	}
-
-	//	attachments = append(attachments, attachment)
-	//}
 
 	return attachments, nil
 }
