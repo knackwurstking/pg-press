@@ -4,10 +4,15 @@ import (
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/internal/env"
+	"github.com/knackwurstking/pg-press/internal/logger"
 
 	ui "github.com/knackwurstking/ui/ui-templ"
 
 	"github.com/labstack/echo/v4"
+)
+
+var (
+	log = logger.New("Handler: Editor")
 )
 
 func Register(e *echo.Echo, path string) {

@@ -59,6 +59,7 @@ func Page(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
+// getQueryEditorType [required]
 func getQueryEditorType(c echo.Context) (shared.EditorType, *echo.HTTPError) {
 	t, merr := utils.GetQueryString(c, "type")
 	if merr != nil {
@@ -67,6 +68,7 @@ func getQueryEditorType(c echo.Context) (shared.EditorType, *echo.HTTPError) {
 	return shared.EditorType(t), nil
 }
 
+// getQueryID [optional]
 func getQueryID(c echo.Context) (shared.EntityID, *echo.HTTPError) {
 	id, merr := utils.GetQueryInt64(c, "id")
 	if merr != nil && !merr.IsNotFoundError() {
@@ -75,9 +77,10 @@ func getQueryID(c echo.Context) (shared.EntityID, *echo.HTTPError) {
 	return shared.EntityID(id), nil
 }
 
+// getQueryReturnURL [optional]
 func getQueryReturnURL(c echo.Context) (templ.SafeURL, *echo.HTTPError) {
 	u, merr := utils.GetQueryString(c, "return_url")
-	if merr != nil {
+	if merr != nil && !merr.IsNotFoundError() {
 		return "", merr.WrapEcho("editor return_url")
 	}
 	return templ.SafeURL(u), nil
