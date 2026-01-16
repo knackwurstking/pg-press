@@ -37,8 +37,21 @@ func Save(c echo.Context) *echo.HTTPError {
 	}
 
 	// TODO: Get linked attachments from form
+	// Form values: url.Values{
+	// 		"attachments":[]string{""},
+	// 		"content":[]string{"content..."},
+	// 		"existing_attachments_removal":[]string{""},
+	// 		"id":[]string{"0"},
+	// 		"return_url":[]string{"/trouble-reports"},
+	// 		"title":[]string{"test 1"},
+	// 		"type":[]string{"troublereport"},
+	// }
 	v, _ := c.FormParams()
 	log.Debug("Form values: %#v", v) // Need to check things first
+	//var (
+	//	vAttachments                = c.FormValue("attachments")
+	//	vExistingAttachmentsRemoval = c.FormValue("existing_attachments_removal")
+	//)
 
 	var id int64
 	if idParam != "" {
@@ -51,20 +64,34 @@ func Save(c echo.Context) *echo.HTTPError {
 	switch editorType {
 	case "troublereport":
 		tr, merr := db.GetTroubleReport(shared.EntityID(id))
-		if merr != nil {
+		if merr != nil && !merr.IsNotFoundError() {
 			return merr.Echo()
 		}
-		tr.Title = title
-		tr.Content = content
-		tr.UseMarkdown = useMarkdown
+		if tr == nil {
+			tr = &shared.TroubleReport{
+				Title:       title,
+				Content:     content,
+				UseMarkdown: useMarkdown,
+			}
+		} else {
+			tr.Title = title
+			tr.Content = content
+			tr.UseMarkdown = useMarkdown
+		}
 
 		// TODO: Handle linked attachments, uploads will be handled inside a
 		//       separate handler, Just set the linked attachments list here.
 		//       The page needs to be changed for this new attachment system.
-		//tr.LinkedAttachments =
+		//tr.LinkedAttachments = append(tr.LinkedAttachments, ...)
 
-		if merr = db.AddTroubleReport(tr); merr != nil {
-			return merr.Echo()
+		if merr != nil && merr.IsNotFoundError() {
+			if merr = db.AddTroubleReport(tr); merr != nil {
+				return merr.Echo()
+			}
+		} else {
+			if merr = db.UpdateTroubleReport(tr); merr != nil {
+				return merr.Echo()
+			}
 		}
 	}
 

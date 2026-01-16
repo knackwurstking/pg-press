@@ -224,6 +224,7 @@ templ pageAdditionalHead() {
 			return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 		}
 
+		// TODO: Handle attachments upload, data not in form values
 		function onAttachments(event) {
 			selectedFiles = Array.from(event.target.files);
 			var previewArea = document.getElementById("file-preview");

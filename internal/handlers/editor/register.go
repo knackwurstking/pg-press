@@ -21,7 +21,7 @@ func Register(e *echo.Echo, path string) {
 		env.ServerPathPrefix,
 		[]*ui.EchoRoute{
 			ui.NewEchoRoute(http.MethodGet, path, Page),
-			ui.NewEchoRoute(http.MethodPost, path, Save),
+			ui.NewEchoRoute(http.MethodPost, path+"/save", Save),
 		},
 	)
 }
