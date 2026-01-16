@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	"github.com/a-h/templ"
+	"github.com/knackwurstking/pg-press/internal/db"
+	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/knackwurstking/pg-press/internal/utils"
 	"github.com/labstack/echo/v4"
@@ -34,6 +36,8 @@ func Save(c echo.Context) *echo.HTTPError {
 		return echo.NewHTTPError(http.StatusBadRequest, "title and content are required")
 	}
 
+	// TODO: Get linked attachments from form
+
 	var id int64
 	if idParam != "" {
 		var err error
@@ -44,12 +48,22 @@ func Save(c echo.Context) *echo.HTTPError {
 
 	switch editorType {
 	case "troublereport":
+		tr, merr := db.GetTroubleReport(shared.EntityID(id))
+		if merr != nil {
+			return merr.Echo()
+		}
+		tr.Title = title
+		tr.Content = content
+		tr.UseMarkdown = useMarkdown
+
 		// TODO: Handle linked attachments, uploads will be handled inside a
 		//       separate handler, Just set the linked attachments list here.
 		//       The page needs to be changed for this new attachment system.
+		//tr.LinkedAttachments =
 
-		// TODO: Save content based on type, Check editor type and store to the
-		//       database
+		if merr = db.AddTroubleReport(tr); merr != nil {
+			return merr.Echo()
+		}
 	}
 
 	// Redirect back to return URL or appropriate page
