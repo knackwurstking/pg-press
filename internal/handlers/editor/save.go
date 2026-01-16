@@ -43,9 +43,6 @@ func Save(c echo.Context) *echo.HTTPError {
 		existingAttachmentsToRemove = strings.Split(vExistingAttachmentsRemoval, ",")
 	}
 
-	v, _ := c.FormParams()
-	log.Debug("Form values: existingAttachmentsToRemove=%#v, %#v", existingAttachmentsToRemove, v)
-
 	// Process new file uploads
 	attachments, err := processAttachments(c)
 	if err != nil {
@@ -59,6 +56,11 @@ func Save(c echo.Context) *echo.HTTPError {
 			return echo.NewHTTPError(http.StatusBadRequest, "invalid ID parameter")
 		}
 	}
+
+	v, _ := c.FormParams()
+	log.Debug("Form values: existingAttachmentsToRemove=%#v", existingAttachmentsToRemove)
+	log.Debug("Form values: attachments=%#v", attachments)
+	log.Debug("Form values: v=%#v", v)
 
 	switch editorType {
 	case "troublereport":
