@@ -37,6 +37,8 @@ func Save(c echo.Context) *echo.HTTPError {
 	}
 
 	// TODO: Get linked attachments from form
+	v, _ := c.FormParams()
+	log.Debug("Form values: %#v", v) // Need to check things first
 
 	var id int64
 	if idParam != "" {
