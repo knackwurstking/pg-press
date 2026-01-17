@@ -20,21 +20,25 @@ import (
 
 func Save(c echo.Context) *echo.HTTPError {
 	var (
-		editorType = c.FormValue("type")
-		idParam    = c.FormValue("id")
-	)
-
-	log.Info("Save editor content with type %s and ID %s", editorType, idParam)
-
-	// Parse form data
-	var (
+		editorType  = shared.EditorType(c.FormValue("type"))
+		vID         = c.FormValue("id")
 		title       = strings.TrimSpace(c.FormValue("title"))
 		content     = strings.TrimSpace(c.FormValue("content"))
 		useMarkdown = c.FormValue("use_markdown") == "on"
 	)
 
+	log.Info("Save editor content with type %s and ID %s", editorType, vID)
+
 	if editorType == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "editor type is required")
+	}
+
+	var id int64
+	if vID != "" {
+		var err error
+		if id, err = strconv.ParseInt(vID, 10, 64); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, "invalid ID parameter")
+		}
 	}
 
 	if title == "" || content == "" {
@@ -53,48 +57,13 @@ func Save(c echo.Context) *echo.HTTPError {
 		return echo.NewHTTPError(http.StatusBadRequest, "failed to process attachments: "+err.Error())
 	}
 
-	var id int64
-	if idParam != "" {
-		var err error
-		if id, err = strconv.ParseInt(idParam, 10, 64); err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, "invalid ID parameter")
-		}
-	}
-
-	// Without Attachments:
-	//
-	// existingAttachmentsToRemove=[]string(nil)
-	// attachments=[]string(nil)
-	// v=url.Values{
-	// 	"attachments":[]string{""},
-	// 	"content":[]string{"k"},
-	// 	"existing_attachments_removal":[]string{""},
-	// 	"id":[]string{"0"},
-	// 	"return_url":[]string{"/pg-press/trouble-reports"},
-	// 	"title":[]string{"l"},
-	// 	"type":[]string{"troublereport"},
-	// }
-	//
-	// With Attachments:
-	//
-	// existingAttachmentsToRemove=[]string(nil)
-	// attachments=[]string(nil)
-	// v=url.Values{
-	// 	"content":[]string{"fsf"},
-	// 	"existing_attachments_removal":[]string{""},
-	// 	"id":[]string{"0"},
-	// 	"return_url":[]string{"/pg-press/trouble-reports"},
-	// 	"title":[]string{"fewf"},
-	// 	"type":[]string{"troublereport"},
-	// }
-
 	v, _ := c.FormParams()
 	log.Debug("Form values: existingAttachmentsToRemove=%#v", existingAttachmentsToRemove)
 	log.Debug("Form values: attachments=%#v", attachments)
 	log.Debug("Form values: v=%#v", v)
 
 	switch editorType {
-	case "troublereport":
+	case shared.EditorTypeTroubleReport:
 		tr, merr := db.GetTroubleReport(shared.EntityID(id))
 		if merr != nil && !merr.IsNotFoundError() {
 			return merr.Echo()
@@ -111,24 +80,7 @@ func Save(c echo.Context) *echo.HTTPError {
 			tr.UseMarkdown = useMarkdown
 		}
 
-		// Handle attachments for trouble reports
-		if len(attachments) > 0 {
-			for _, attachment := range attachments {
-				log.Info("Processing attachment: %s", attachment)
-
-				// TODO: Implement local file storage
-				// attachmentPath := fmt.Sprintf("%s/attachment_%d.%s",
-				// 	env.ServerPathImages, time.Now().Unix(), getFileExtension(attachment.MimeType))
-				// err := os.WriteFile(attachmentPath, attachment.Data, 0644)
-				// if err != nil {
-				// 	log.Error("Failed to save attachment: %v", err)
-				// 	continue
-				// }
-
-				// TODO: Store attachment path in database instead of binary data
-				//tr.LinkedAttachments = append(tr.LinkedAttachments, attachment)
-			}
-		}
+		tr.LinkedAttachments = attachments
 
 		if merr != nil && merr.IsNotFoundError() {
 			if merr = db.AddTroubleReport(tr); merr != nil {
@@ -141,32 +93,7 @@ func Save(c echo.Context) *echo.HTTPError {
 		}
 	}
 
-	// Redirect back to return URL or appropriate page
-	returnURL := c.FormValue("return_url")
-	if returnURL != "" {
-		url := templ.SafeURL(returnURL)
-		if merr := utils.RedirectTo(c, url); merr != nil {
-			return merr.WrapEcho("redirect to %#v", url)
-		}
-		return nil
-	}
-
-	// Default redirects based on type
-	switch editorType {
-	case "troublereport":
-		url := urlb.TroubleReports()
-		if merr := utils.RedirectTo(c, url); merr != nil {
-			return merr.WrapEcho("redirect to %#v", url)
-		}
-		return nil
-
-	default:
-		url := urlb.Home()
-		if merr := utils.RedirectTo(c, url); merr != nil {
-			return merr.WrapEcho("redirect to %#v", url)
-		}
-		return nil
-	}
+	return handleRedirect(c, editorType)
 }
 
 func processAttachments(c echo.Context) ([]string, error) {
@@ -218,8 +145,46 @@ func processAttachments(c echo.Context) ([]string, error) {
 			uuid.New().ID(),
 			strings.ToLower(filepath.Ext(fileHeader.Filename)))
 
+		// TODO: Implement local file storage
+		// attachmentPath := fmt.Sprintf("%s/attachment_%d.%s",
+		// 	env.ServerPathImages, time.Now().Unix(), getFileExtension(attachment.MimeType))
+		// err := os.WriteFile(attachmentPath, attachment.Data, 0644)
+		// if err != nil {
+		// 	log.Error("Failed to save attachment: %v", err)
+		// 	continue
+		// }
+
 		attachments = append(attachments, fileName)
 	}
 
 	return attachments, nil
+}
+
+func handleRedirect(c echo.Context, editorType shared.EditorType) *echo.HTTPError {
+	// Redirect back to return URL or appropriate page
+	returnURL := c.FormValue("return_url")
+	if returnURL != "" {
+		url := templ.SafeURL(returnURL)
+		if merr := utils.RedirectTo(c, url); merr != nil {
+			return merr.WrapEcho("redirect to %#v", url)
+		}
+		return nil
+	}
+
+	// Default redirects based on type
+	switch editorType {
+	case shared.EditorTypeTroubleReport:
+		url := urlb.TroubleReports()
+		if merr := utils.RedirectTo(c, url); merr != nil {
+			return merr.WrapEcho("redirect to %#v", url)
+		}
+		return nil
+
+	default:
+		url := urlb.Home()
+		if merr := utils.RedirectTo(c, url); merr != nil {
+			return merr.WrapEcho("redirect to %#v", url)
+		}
+		return nil
+	}
 }
