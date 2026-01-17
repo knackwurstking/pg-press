@@ -18,11 +18,10 @@ func Register(e *echo.Echo, path string) {
 			ui.NewEchoRoute(http.MethodGet, path, GetPage),
 			ui.NewEchoRoute(http.MethodGet, path+"/data", GetData),
 			ui.NewEchoRoute(http.MethodDelete, path+"/delete", DeleteTroubleReport),
+			ui.NewEchoRoute(http.MethodGet, path+"/attachments-preview", GetAttachmentsPreview),
 
 			// TODO: ...
 			ui.NewEchoRoute(http.MethodGet, path+"/share-pdf", GetSharePDF),
-			ui.NewEchoRoute(http.MethodGet, path+"/attachment", GetAttachment),
-			ui.NewEchoRoute(http.MethodGet, path+"/attachments-preview", GetAttachmentsPreview),
 		},
 	)
 }
