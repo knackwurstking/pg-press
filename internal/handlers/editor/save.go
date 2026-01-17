@@ -3,6 +3,7 @@ package editor
 import (
 	"fmt"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -113,8 +114,6 @@ func Save(c echo.Context) *echo.HTTPError {
 		// Handle attachments for trouble reports
 		if len(attachments) > 0 {
 			for _, attachment := range attachments {
-				// TODO: Store attachment locally at SERVER_PATH_IMAGES
-				// For now, just log the attachment info
 				log.Info("Processing attachment: %s", attachment)
 
 				// TODO: Implement local file storage
@@ -127,7 +126,7 @@ func Save(c echo.Context) *echo.HTTPError {
 				// }
 
 				// TODO: Store attachment path in database instead of binary data
-				// tr.LinkedAttachments = append(tr.LinkedAttachments, attachmentPath)
+				//tr.LinkedAttachments = append(tr.LinkedAttachments, attachment)
 			}
 		}
 
@@ -213,34 +212,14 @@ func processAttachments(c echo.Context) ([]string, error) {
 			return nil, errors.NewValidationError("read file: %v", err).HTTPError()
 		}
 
-		// TODO: Get the mime type from the filename `fileHeader.Filename`
-		var mimeType string
-
 		// Generate a unique filename for this and add to attachments
 		fileName := fmt.Sprintf("%s%d%s",
 			time.Now().Format("20060102150405"),
 			uuid.New().ID(),
-			getFileExtension(mimeType))
+			strings.ToLower(filepath.Ext(fileHeader.Filename)))
+
 		attachments = append(attachments, fileName)
 	}
 
 	return attachments, nil
-}
-
-// getFileExtension returns a file extension based on MIME type
-func getFileExtension(mimeType string) string {
-	switch mimeType {
-	case "image/jpeg":
-		return "jpg"
-	case "image/png":
-		return "png"
-	case "image/gif":
-		return "gif"
-	case "image/webp":
-		return "webp"
-	case "image/svg+xml":
-		return "svg"
-	default:
-		return "bin"
-	}
 }
