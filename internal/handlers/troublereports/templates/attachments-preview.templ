@@ -24,9 +24,10 @@ templ AttachmentsPreview(attachments []string) {
 }
 
 templ attachmentPreviewItem(attachment string) {
+	{{ src := urlb.Attachment(attachment) }}
 	<div
 		class="attachment-preview-item flex flex-col gap items-center select-none ghost"
-		onclick={ components.OpenImageViewer(urlb.Attachment(attachment)) }
+		onclick={ components.OpenImageViewer(src) }
 		tabindex="0"
 		role="button"
 		aria-label={ fmt.Sprintf("Bild \"%s\" anzeigen", attachment) }
@@ -34,7 +35,7 @@ templ attachmentPreviewItem(attachment string) {
 		<div class="attachment-preview-image">
 			<img
 				loading="lazy"
-				src={ attachment }
+				src={ src }
 				alt={ fmt.Sprintf("Anhang \"%s\"", attachment) }
 				class="preview-thumbnail select-none"
 			/>
