@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/jung-kurt/gofpdf/v2"
+	"github.com/knackwurstking/pg-press/internal/shared"
 )
 
 type imageOptions struct {
@@ -33,7 +34,7 @@ func processImageRow(
 	o *imageOptions,
 	layout *imageLayoutProps,
 	position *imagePositionOptions,
-	images []*models.Attachment,
+	images []*shared.Image,
 ) {
 	leftHeight, rightHeight := calculateImageHeights(
 		o, images, position.StartIndex, layout.ImageWidth)
@@ -63,7 +64,7 @@ func processImageRow(
 
 func calculateImageHeights(
 	o *imageOptions,
-	images []*models.Attachment,
+	images []*shared.Image,
 	startIndex int,
 	imageWidth float64,
 ) (leftHeight, rightHeight float64) {
@@ -82,7 +83,7 @@ func calculateImageHeights(
 
 func calculateSingleImageHeight(
 	o *imageOptions,
-	image *models.Attachment,
+	image *shared.Image,
 	imageWidth float64,
 ) (height float64) {
 	tmpFile, err := createTempImageFile(image)
@@ -91,8 +92,7 @@ func calculateSingleImageHeight(
 	}
 	defer os.Remove(tmpFile)
 
-	imageType := getImageType(image.MimeType)
-	info := o.PDF.RegisterImage(tmpFile, imageType)
+	info := o.PDF.RegisterImageOptions(tmpFile, gofpdf.ImageOptions{})
 	if info != nil {
 		return (imageWidth * info.Height()) / info.Width()
 	}
@@ -126,7 +126,7 @@ func addImageCaptions(
 
 func addImages(
 	o *imageOptions,
-	images []*models.Attachment,
+	images []*shared.Image,
 	position *imagePositionOptions,
 	imageY float64,
 ) {
@@ -151,7 +151,7 @@ func addImages(
 
 func addSingleImage(
 	o *imageOptions,
-	image *models.Attachment,
+	image *shared.Image,
 	x, y, width float64,
 ) {
 	tmpFile, err := createTempImageFile(image)
@@ -160,13 +160,12 @@ func addSingleImage(
 	}
 	defer os.Remove(tmpFile)
 
-	imageType := getImageType(image.MimeType)
+	imageType := "JPG" // Default to JPG since we don't have MIME type info
 	o.PDF.Image(tmpFile, x, y, width, 0, false, imageType, 0, "")
 }
 
-func createTempImageFile(image *models.Attachment) (string, error) {
-	tmpFile, err := os.CreateTemp("",
-		fmt.Sprintf("attachment_%s_*.jpg", image.ID))
+func createTempImageFile(image *shared.Image) (string, error) {
+	tmpFile, err := os.CreateTemp("", fmt.Sprintf("attachment_%s_*.jpg", image.Name))
 	if err != nil {
 		return "", err
 	}
@@ -179,17 +178,4 @@ func createTempImageFile(image *models.Attachment) (string, error) {
 	}
 
 	return tmpFile.Name(), nil
-}
-
-func getImageType(mimeType string) string {
-	switch mimeType {
-	case "image/jpeg", "image/jpg":
-		return "JPG"
-	case "image/png":
-		return "PNG"
-	case "image/gif":
-		return "GIF"
-	default:
-		return "JPG"
-	}
 }

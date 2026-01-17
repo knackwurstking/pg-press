@@ -7,6 +7,7 @@ require (
 	github.com/SuperPaintman/nice v0.0.0-20211001214957-a29cd3367b17
 	github.com/a-h/templ v0.3.960
 	github.com/google/uuid v1.6.0
+	github.com/jung-kurt/gofpdf/v2 v2.17.3
 	github.com/knackwurstking/ui v1.1.2-0.20260102083016-769e09a0def8
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/mattn/go-sqlite3 v1.14.32

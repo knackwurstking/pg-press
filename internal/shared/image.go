@@ -32,3 +32,18 @@ func (i *Image) ReadFile() error {
 	}
 	return nil
 }
+
+func (i *Image) MimeType() string {
+	switch filepath.Ext(i.Name) {
+	case ".jpg", ".jpeg":
+		return "image/jpeg"
+	case ".png":
+		return "image/png"
+	case ".gif":
+		return "image/gif"
+	case ".svg":
+		return "image/svg+xml"
+	default:
+		return "application/octet-stream"
+	}
+}
