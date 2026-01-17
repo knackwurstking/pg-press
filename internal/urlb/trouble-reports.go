@@ -19,15 +19,6 @@ func TroubleReportsSharePDF(trID shared.EntityID) templ.SafeURL {
 	})
 }
 
-// TroubleReportsAttachment constructs trouble reports attachment URL
-func TroubleReportsAttachment(attachment string) templ.SafeURL {
-	params := map[string]string{}
-	if attachment != "" {
-		params["attachment"] = attachment
-	}
-	return BuildURLWithParams("/trouble-reports/attachment", params)
-}
-
 // TroubleReportsData constructs trouble reports data URL
 func TroubleReportsData() templ.SafeURL {
 	return BuildURL("/trouble-reports/data")
