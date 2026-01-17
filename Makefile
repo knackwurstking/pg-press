@@ -28,6 +28,7 @@ init: generate
 	go mod tidy -v
 	git submodule init
 	git submodule update --recursive
+	go install github.com/templui/templui/cmd/templui@latest
 	make templui
 
 define TEMPLUI
