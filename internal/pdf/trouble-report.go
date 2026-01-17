@@ -8,7 +8,7 @@ import (
 
 	"github.com/knackwurstking/pg-press/internal/shared"
 
-	gopdf "github.com/jung-kurt/gofpdf/v2"
+	"github.com/jung-kurt/gofpdf/v2"
 )
 
 // Options contains common options for PDF generation
@@ -34,10 +34,13 @@ func GenerateTroubleReportPDF(tr *shared.TroubleReport) (*bytes.Buffer, error) {
 	addTroubleReportHeader(o)
 	addTroubleReportTitleSection(o)
 	addTroubleReportContentSection(o)
-	addTroubleReportImagesSection(o)
+	err := addTroubleReportImagesSection(o)
+	if err != nil {
+		return nil, err
+	}
 
 	var buf bytes.Buffer
-	err := pdf.Output(&buf)
+	err = pdf.Output(&buf)
 	if err != nil {
 		return nil, err
 	}
@@ -164,14 +167,17 @@ func renderBasicMarkdownFormatting(text string) string {
 	return text
 }
 
-func addTroubleReportImagesSection(o *troubleReportOptions) {
+func addTroubleReportImagesSection(o *troubleReportOptions) error {
 	if len(o.Report.LinkedAttachments) == 0 {
-		return
+		return nil
 	}
 
-	images := getTroubleReportImages(o.Report.LinkedAttachments)
+	images, err := getTroubleReportImages(o.Report.LinkedAttachments)
+	if err != nil {
+		return err
+	}
 	if len(images) == 0 {
-		return
+		return nil
 	}
 
 	o.PDF.AddPage()
@@ -182,20 +188,23 @@ func addTroubleReportImagesSection(o *troubleReportOptions) {
 		"1", 1, "L", true, 0, "")
 
 	renderTroubleReportImagesInGrid(o, images)
+
+	return nil
 }
 
-// TODO: Get image and return files
-func getTroubleReportImages(attachments []string) []*shared.Image {
+func getTroubleReportImages(attachments []string) ([]*shared.Image, error) {
 	var images []*shared.Image
 	for _, a := range attachments {
-		if a.IsImage() {
-			images = append(images, a)
+		i := shared.NewImage(a, nil)
+		if err := i.ReadFile(); err != nil {
+			return images, err
 		}
+		images = append(images, i)
 	}
-	return images
+	return images, nil
 }
 
-func renderTroubleReportImagesInGrid(o *troubleReportOptions, images []*models.Attachment) {
+func renderTroubleReportImagesInGrid(o *troubleReportOptions, images []*shared.Image) {
 	pageWidth, _ := o.PDF.GetPageSize()
 	leftMargin, _, rightMargin, _ := o.PDF.GetMargins()
 	usableWidth := pageWidth - leftMargin - rightMargin

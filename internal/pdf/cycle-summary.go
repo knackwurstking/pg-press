@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pg-press/internal/env"
-	"github.com/knackwurstking/pg-press/models"
 
 	"github.com/jung-kurt/gofpdf/v2"
 )
