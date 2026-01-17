@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/shared"
 
 	"github.com/jung-kurt/gofpdf/v2"
@@ -18,6 +17,18 @@ type cycleSummaryOptions struct {
 	Cycles   []*shared.Cycle
 	ToolsMap map[shared.EntityID]*shared.Tool
 	UsersMap map[shared.TelegramID]*shared.User
+}
+
+// ToolSummary holds summary information for a tool in the cycle report
+type ToolSummary struct {
+	ToolID            shared.EntityID
+	ToolCode          string
+	Position          shared.Slot
+	StartDate         time.Time
+	EndDate           time.Time
+	MaxCycles         int64
+	TotalPartial      int64
+	IsFirstAppearance bool
 }
 
 // GenerateCycleSummaryPDF creates a PDF with cycle summary data for a press
@@ -108,23 +119,24 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 	o.PDF.CellFormat(0, 10, o.Translator("WERKZEUG-ÜBERSICHT"), "1", 1, "L", true, 0, "")
 	o.PDF.Ln(5)
 
-	var toolSummaries []*models.ToolSummary
+	var toolSummaries []*ToolSummary
 
 	// Create a summary for each individual cycle
 	for _, cycle := range o.Cycles {
 		// Create tool code string - handle missing tools gracefully
 		toolCode := fmt.Sprintf("Tool ID %d", cycle.ToolID)
 		if tool, exists := o.ToolsMap[cycle.ToolID]; exists && tool != nil {
-			toolCode = fmt.Sprintf("%s %s", tool.Format.String(), tool.Code)
+			toolCode = fmt.Sprintf("%s %s", tool.Type, tool.Code)
 		}
 
-		toolSummaries = append(toolSummaries, &models.ToolSummary{
+		// Convert UnixMilli to time.Time
+		toolSummaries = append(toolSummaries, &ToolSummary{
 			ToolID:            cycle.ToolID,
 			ToolCode:          toolCode,
-			Position:          cycle.ToolPosition,
-			StartDate:         cycle.Date,
-			EndDate:           cycle.Date,
-			MaxCycles:         cycle.TotalCycles,
+			Position:          shared.SlotUnknown, // We don't have position information in the cycle data
+			StartDate:         cycle.Start.ToTime(),
+			EndDate:           cycle.Stop.ToTime(),
+			MaxCycles:         cycle.PressCycles,
 			TotalPartial:      cycle.PartialCycles,
 			IsFirstAppearance: false, // Will be set during consolidation
 		})
@@ -157,9 +169,9 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 	}
 
 	// Consolidate consecutive entries for the same tool in the same position
-	var consolidatedSummaries []*models.ToolSummary
-	lastToolByPosition := make(map[models.Position]models.ToolID)
-	positionIndexMap := make(map[models.Position]int)
+	var consolidatedSummaries []*ToolSummary
+	lastToolByPosition := make(map[shared.Slot]shared.EntityID)
+	positionIndexMap := make(map[shared.Slot]int)
 
 	for _, summary := range toolSummaries {
 		lastToolID, hasLastTool := lastToolByPosition[summary.Position]
@@ -187,7 +199,7 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 			existingSummary.TotalPartial += summary.TotalPartial
 		} else {
 			// Create new entry (start date will be fixed in second pass)
-			newSummary := &models.ToolSummary{
+			newSummary := &ToolSummary{
 				ToolID:            summary.ToolID,
 				ToolCode:          summary.ToolCode,
 				Position:          summary.Position,
@@ -207,7 +219,7 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 	}
 
 	// Second pass: Fix start dates based on tool changes per position
-	positionEntries := make(map[models.Position][]*models.ToolSummary)
+	positionEntries := make(map[shared.Slot][]*ToolSummary)
 	for _, summary := range consolidatedSummaries {
 		positionEntries[summary.Position] = append(positionEntries[summary.Position], summary)
 	}
@@ -279,20 +291,20 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 		o.PDF.CellFormat(colWidths[0], 6, o.Translator(summary.ToolCode), "1", 0, "C", fill, 0, "")
 
 		// Position
-		o.PDF.CellFormat(colWidths[1], 6, o.Translator(summary.Position.GermanString()), "1", 0, "C", fill, 0, "")
+		o.PDF.CellFormat(colWidths[1], 6, o.Translator(summary.Position.German()), "1", 0, "C", fill, 0, "")
 
 		// Start date - show empty for first appearance of tool
 		var startDateStr string
 		if summary.IsFirstAppearance {
 			startDateStr = ""
 		} else {
-			startDateStr = summary.StartDate.Format(env.DateFormat)
+			startDateStr = summary.StartDate.Format("02.01.2006")
 		}
 
 		o.PDF.CellFormat(colWidths[2], 6, startDateStr, "1", 0, "C", fill, 0, "")
 
 		// End date
-		endDateStr := summary.EndDate.Format(env.DateFormat)
+		endDateStr := summary.EndDate.Format("02.01.2006")
 		o.PDF.CellFormat(colWidths[3], 6, endDateStr, "1", 0, "C", fill, 0, "")
 
 		// Max cycles
@@ -312,13 +324,13 @@ func addCycleSummaryTable(o *cycleSummaryOptions) {
 }
 
 // getPositionOrder returns the sort order for a position
-func getPositionOrder(position models.Position) int {
+func getPositionOrder(position shared.Slot) int {
 	switch position {
-	case models.PositionTop:
+	case shared.SlotUpper:
 		return 1
-	case models.PositionTopCassette:
+	case shared.SlotUpperCassette:
 		return 2
-	case models.PositionBottom:
+	case shared.SlotLower:
 		return 3
 	default:
 		return 999

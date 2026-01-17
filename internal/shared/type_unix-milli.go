@@ -29,3 +29,7 @@ func (um UnixMilli) FormatDateTime() string {
 	}
 	return time.UnixMilli(int64(um)).Format(fmt.Sprintf("%s %s", DateFormat, TimeFormat))
 }
+
+func (um UnixMilli) ToTime() time.Time {
+	return time.UnixMilli(int64(um))
+}

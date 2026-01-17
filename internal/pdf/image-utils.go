@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/knackwurstking/pg-press/models"
-
 	"github.com/jung-kurt/gofpdf/v2"
 )
 
