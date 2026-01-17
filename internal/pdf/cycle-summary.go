@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pg-press/internal/env"
+	"github.com/knackwurstking/pg-press/internal/shared"
 
 	"github.com/jung-kurt/gofpdf/v2"
 )
@@ -13,18 +14,18 @@ import (
 // cycleSummaryOptions contains options for cycle summary PDF generation
 type cycleSummaryOptions struct {
 	*imageOptions
-	Press    models.PressNumber
-	Cycles   []*models.Cycle
-	ToolsMap map[models.ToolID]*models.Tool
-	UsersMap map[models.TelegramID]*models.User
+	Press    shared.PressNumber
+	Cycles   []*shared.Cycle
+	ToolsMap map[shared.EntityID]*shared.Tool
+	UsersMap map[shared.TelegramID]*shared.User
 }
 
 // GenerateCycleSummaryPDF creates a PDF with cycle summary data for a press
 func GenerateCycleSummaryPDF(
-	press models.PressNumber,
-	cycles []*models.Cycle,
-	toolsMap map[models.ToolID]*models.Tool,
-	usersMap map[models.TelegramID]*models.User,
+	press shared.PressNumber,
+	cycles []*shared.Cycle,
+	toolsMap map[shared.EntityID]*shared.Tool,
+	usersMap map[shared.TelegramID]*shared.User,
 ) (*bytes.Buffer, error) {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.SetAutoPageBreak(true, 25)
@@ -80,11 +81,11 @@ func addCycleSummaryStats(o *cycleSummaryOptions) {
 	// Calculate statistics
 	totalCycles := int64(0)
 	totalPartialCycles := int64(0)
-	activeTools := make(map[models.ToolID]bool)
+	activeTools := make(map[shared.EntityID]bool)
 
 	for _, cycle := range o.Cycles {
-		if cycle.TotalCycles > totalCycles {
-			totalCycles = cycle.TotalCycles
+		if cycle.PressCycles > totalCycles {
+			totalCycles = cycle.PressCycles
 		}
 		totalPartialCycles += cycle.PartialCycles
 		activeTools[cycle.ToolID] = true
