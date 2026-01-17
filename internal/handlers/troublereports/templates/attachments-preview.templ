@@ -26,9 +26,7 @@ templ AttachmentsPreview(attachments []string) {
 templ attachmentPreviewItem(attachment string) {
 	<div
 		class="attachment-preview-item flex flex-col gap items-center select-none ghost"
-		onclick={ components.OpenImageViewer(
-			urlb.TroubleReportsAttachment(attachment),
-		) }
+		onclick={ components.OpenImageViewer(urlb.Attachment(attachment)) }
 		tabindex="0"
 		role="button"
 		aria-label={ fmt.Sprintf("Bild \"%s\" anzeigen", attachment) }
