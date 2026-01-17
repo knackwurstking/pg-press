@@ -6,20 +6,18 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/knackwurstking/pg-press/models"
+	"github.com/knackwurstking/pg-press/internal/shared"
 
-	"github.com/jung-kurt/gofpdf/v2"
+	gopdf "github.com/jung-kurt/gofpdf/v2"
 )
 
 // Options contains common options for PDF generation
 type troubleReportOptions struct {
 	*imageOptions
-	Report *models.TroubleReportWithAttachments
+	Report *shared.TroubleReport
 }
 
-func GenerateTroubleReportPDF(
-	tr *models.TroubleReportWithAttachments,
-) (*bytes.Buffer, error) {
+func GenerateTroubleReportPDF(tr *shared.TroubleReport) (*bytes.Buffer, error) {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.SetAutoPageBreak(true, 25)
 	pdf.AddPage()
@@ -167,11 +165,11 @@ func renderBasicMarkdownFormatting(text string) string {
 }
 
 func addTroubleReportImagesSection(o *troubleReportOptions) {
-	if len(o.Report.LoadedAttachments) == 0 {
+	if len(o.Report.LinkedAttachments) == 0 {
 		return
 	}
 
-	images := getTroubleReportImageAttachments(o.Report.LoadedAttachments)
+	images := getTroubleReportImages(o.Report.LinkedAttachments)
 	if len(images) == 0 {
 		return
 	}
@@ -186,8 +184,9 @@ func addTroubleReportImagesSection(o *troubleReportOptions) {
 	renderTroubleReportImagesInGrid(o, images)
 }
 
-func getTroubleReportImageAttachments(attachments []*models.Attachment) []*models.Attachment {
-	var images []*models.Attachment
+// TODO: Get image and return files
+func getTroubleReportImages(attachments []string) []*shared.Image {
+	var images []*shared.Image
 	for _, a := range attachments {
 		if a.IsImage() {
 			images = append(images, a)
