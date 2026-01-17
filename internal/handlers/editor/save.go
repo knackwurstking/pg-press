@@ -3,6 +3,7 @@ package editor
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -11,6 +12,7 @@ import (
 	"github.com/a-h/templ"
 	"github.com/google/uuid"
 	"github.com/knackwurstking/pg-press/internal/db"
+	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
@@ -145,14 +147,11 @@ func processAttachments(c echo.Context) ([]string, error) {
 			uuid.New().ID(),
 			strings.ToLower(filepath.Ext(fileHeader.Filename)))
 
-		// TODO: Implement local file storage
-		// attachmentPath := fmt.Sprintf("%s/attachment_%d.%s",
-		// 	env.ServerPathImages, time.Now().Unix(), getFileExtension(attachment.MimeType))
-		// err := os.WriteFile(attachmentPath, attachment.Data, 0644)
-		// if err != nil {
-		// 	log.Error("Failed to save attachment: %v", err)
-		// 	continue
-		// }
+		// Implement local file storage
+		if err = os.WriteFile(filepath.Join(env.ServerPathImages, fileName), data, 0644); err != nil {
+			log.Error("Failed to save attachment: %v", err)
+			continue
+		}
 
 		attachments = append(attachments, fileName)
 	}
