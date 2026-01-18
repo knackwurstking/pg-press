@@ -2,7 +2,6 @@ package db
 
 import (
 	"database/sql"
-	"fmt"
 
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -159,7 +158,7 @@ func GetPressUtilization(pressNumber shared.PressNumber) (*shared.PressUtilizati
 		&pu.Type,
 	)
 	if err != nil {
-		return pu, errors.NewHTTPError(fmt.Errorf("error query press utilization for press %d failed: %v", pressNumber, err))
+		return pu, errors.NewHTTPError(err).Wrap("error query press utilization for press %d failed", pressNumber)
 	}
 
 	if slotUpper > 0 {

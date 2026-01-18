@@ -15,7 +15,7 @@ func PressSection(c echo.Context) *echo.HTTPError {
 
 func renderPressSection(c echo.Context) *echo.HTTPError {
 	pressUtilizations, merr := db.GetPressUtilizations(shared.AllPressNumbers...)
-	if merr != nil {
+	if merr != nil && !merr.IsNotFoundError() {
 		return merr.Echo()
 	}
 
@@ -24,7 +24,7 @@ func renderPressSection(c echo.Context) *echo.HTTPError {
 	})
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return errors.NewRenderError(err, "SectionPress")
+		return errors.NewRenderError(err, "Section Press")
 	}
 
 	return nil
