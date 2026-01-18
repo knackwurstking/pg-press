@@ -5,7 +5,7 @@ function search(event) {
 
 	clearTimeout(searchTimer);
 
-	searchTimer = setTimeout(function () {
+	searchTimer = setTimeout(function() {
 		var url = new URL(window.location);
 		if (searchValue) {
 			url.searchParams.set("search", searchValue);
@@ -14,7 +14,7 @@ function search(event) {
 		}
 		history.replaceState(null, "", url);
 
-		var searchTerms = searchValue.split(/\s+/).filter(function (term) {
+		var searchTerms = searchValue.split(/\s+/).filter(function(term) {
 			return term.length > 0;
 		});
 
@@ -79,37 +79,8 @@ function updateURLHash(event) {
 	}
 }
 
-window.addEventListener("beforeunload", function () {
+window.addEventListener("beforeunload", function() {
 	clearTimeout(searchTimer);
 });
 
 window.search = search;
-
-document.addEventListener("DOMContentLoaded", function () {
-	if (location.hash !== "") {
-		var details = document.querySelector(location.hash);
-		console.debug(location.hash, details);
-		if (details) {
-			details.open = true;
-			setTimeout(
-				() =>
-					details.scrollIntoView({
-						behavior: "smooth",
-						block: "start",
-					}),
-				100,
-			);
-		}
-	}
-
-	var urlParams = new URLSearchParams(window.location.search);
-	var searchParam = urlParams.get("search");
-	if (searchParam) {
-		var searchInput = document.querySelector('input[name="search"]');
-		if (searchInput) {
-			searchInput.value = searchParam;
-			var inputEvent = new Event("input", { bubbles: true });
-			searchInput.dispatchEvent(inputEvent);
-		}
-	}
-});
