@@ -1,12 +1,10 @@
 package templates
 
-import (
-	"github.com/knackwurstking/pg-press/internal/components"
-	"github.com/knackwurstking/pg-press/utils"
-)
+import "github.com/knackwurstking/pg-press/internal/components"
+import "github.com/knackwurstking/pg-press/internal/urlb"
 
 templ MarkdownPage() {
-	@components.Layout(components.LayoutOptions{
+	@components.Layout(components.LayoutProps{
 		PageTitle:      "Markdown Hilfe",
 		AppBarTitle:    "Markdown Hilfe",
 		AdditionalHead: helpMarkdownPageAdditionalHead(),
@@ -36,7 +34,7 @@ templ MarkdownPage() {
 }
 
 templ helpMarkdownPageNavContent() {
-	<a href={ utils.UrlHome().Page } class="flex items-center gap-xs muted hover:contrast transition-colors">
+	<a href={ urlb.Home() } class="flex items-center gap-xs muted hover:contrast transition-colors">
 		<i class="bi bi-house"></i>
 		<span class="hidden sm:inline">Startseite</span>
 	</a>
