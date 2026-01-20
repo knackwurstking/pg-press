@@ -96,7 +96,7 @@ func PutNote(c echo.Context) *echo.HTTPError {
 
 func parseNoteForm(c echo.Context) (*shared.Note, *errors.HTTPError) {
 	// Parse level (required)
-	levelStr := c.FormValue("level")
+	levelStr := strings.TrimSpace(c.FormValue("level"))
 	if levelStr == "" {
 		return nil, errors.NewValidationError("level is required").HTTPError()
 	}
@@ -122,6 +122,6 @@ func parseNoteForm(c echo.Context) (*shared.Note, *errors.HTTPError) {
 		Level:     level,
 		Content:   content,
 		CreatedAt: shared.NewUnixMilli(time.Now()),
-		Linked:    c.FormValue("linked"),
+		Linked:    strings.TrimSpace(c.FormValue("linked")),
 	}, nil
 }

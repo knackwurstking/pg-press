@@ -192,8 +192,8 @@ func parseUpperMetalSheetForm(c echo.Context, ums *shared.UpperMetalSheet) (*sha
 	}
 
 	var (
-		tileHeightStr = c.FormValue("tile_height")
-		valueStr      = c.FormValue("value")
+		tileHeightStr = strings.TrimSpace(c.FormValue("tile_height"))
+		valueStr      = strings.TrimSpace(c.FormValue("value"))
 		err           error
 	)
 
@@ -216,11 +216,11 @@ func parseLowerMetalSheetForm(c echo.Context, lms *shared.LowerMetalSheet) (*sha
 	}
 
 	var (
-		tileHeightStr  = c.FormValue("tile_height")
-		valueStr       = c.FormValue("value")
-		markeHeightStr = c.FormValue("marke_height")
-		stfStr         = c.FormValue("stf")
-		stfMaxStr      = c.FormValue("stf_max")
+		tileHeightStr  = strings.TrimSpace(c.FormValue("tile_height"))
+		valueStr       = strings.TrimSpace(c.FormValue("value"))
+		markeHeightStr = strings.TrimSpace(c.FormValue("marke_height"))
+		stfStr         = strings.TrimSpace(c.FormValue("stf"))
+		stfMaxStr      = strings.TrimSpace(c.FormValue("stf_max"))
 		identifierStr  = strings.ToUpper(strings.TrimSpace(c.FormValue("identifier")))
 		err            error
 	)
