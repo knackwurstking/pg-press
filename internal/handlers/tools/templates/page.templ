@@ -36,22 +36,9 @@ templ Page(p PageProps) {
 					width: calc(100% - var(--ui-spacing) * 2);
 				"
 			>
-				if p.User.IsAdmin() {
-					// Admin Tools Tab - `AdminToolsSectionContent`
-					<div
-						data-index="0"
-						class="tab secondary ghost"
-						hx-get={ urlb.ToolsAdminOverlapping() }
-						hx-trigger="load-tab-content"
-						hx-target="#tab-content"
-						onclick="toggleTab(event)"
-					>
-						Admin Tools
-					</div>
-				}
 				// Press Section Tab - `SectionPress`
 				<div
-					data-index="1"
+					data-index="0"
 					class="tab secondary ghost"
 					hx-get={ urlb.ToolsSectionPress() }
 					hx-trigger="load-tab-content"
@@ -62,7 +49,7 @@ templ Page(p PageProps) {
 				</div>
 				// Tools Section Tab - `SectionTools`
 				<div
-					data-index="2"
+					data-index="1"
 					class="tab secondary ghost"
 					hx-get={ urlb.ToolsSectionTools() }
 					hx-trigger="load-tab-content"

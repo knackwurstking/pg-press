@@ -22,6 +22,5 @@ func Register(e *echo.Echo, path string) {
 		ui.NewEchoRoute(http.MethodPatch, path+"/mark-dead", MarkAsDead),
 		ui.NewEchoRoute(http.MethodGet, path+"/section/press", PressSection),
 		ui.NewEchoRoute(http.MethodGet, path+"/section/tools", ToolsSection),
-		ui.NewEchoRoute(http.MethodGet, path+"/admin/overlapping-tools", AdminOverlappingTools),
 	})
 }
