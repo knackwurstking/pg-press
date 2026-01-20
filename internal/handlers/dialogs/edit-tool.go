@@ -96,8 +96,10 @@ func parseToolForm(c echo.Context, tool *shared.Tool) (*shared.Tool, *errors.Val
 	if tool == nil {
 		tool = &shared.Tool{}
 	}
-	tool.Type = strings.Trim(c.FormValue("type"), " ")
-	tool.Code = strings.Trim(c.FormValue("code"), " ")
+
+	// Sanitize inputs by trimming whitespace
+	tool.Type = strings.TrimSpace(c.FormValue("type"))
+	tool.Code = strings.TrimSpace(c.FormValue("code"))
 
 	// Need to convert the vPosition to an integer
 	position, err := strconv.Atoi(c.FormValue("position"))
@@ -111,15 +113,20 @@ func parseToolForm(c echo.Context, tool *shared.Tool) (*shared.Tool, *errors.Val
 		return nil, errors.NewValidationError("invalid position: %d", position)
 	}
 
-	// Convert width and height to integers
-	tool.Width, err = strconv.Atoi(c.FormValue("width"))
+	// Convert width and height to integers with sanitization
+	widthStr := strings.TrimSpace(c.FormValue("width"))
+	width, err := strconv.Atoi(widthStr)
 	if err != nil {
-		return nil, errors.NewValidationError("invalid width: %s", c.FormValue("width"))
+		return nil, errors.NewValidationError("invalid width: %s", widthStr)
 	}
-	tool.Height, err = strconv.Atoi(c.FormValue("height"))
+	tool.Width = width
+
+	heightStr := strings.TrimSpace(c.FormValue("height"))
+	height, err := strconv.Atoi(heightStr)
 	if err != nil {
-		return nil, errors.NewValidationError("invalid height: %s", c.FormValue("height"))
+		return nil, errors.NewValidationError("invalid height: %s", heightStr)
 	}
+	tool.Height = height
 
 	log.Debug("Tool dialog form values: tool=%v", tool)
 
