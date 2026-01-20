@@ -100,30 +100,37 @@ func parseCassetteForm(c echo.Context, tool *shared.Tool) (*shared.Tool, *errors
 			Position: shared.SlotUpperCassette,
 		}
 	}
-	tool.Type = strings.Trim(c.FormValue("type"), " ")
-	tool.Code = strings.Trim(c.FormValue("code"), " ")
 
-	// Convert vWidth and vHeight to integers
+	// Sanitize inputs by trimming whitespace
+	tool.Type = strings.TrimSpace(c.FormValue("type"))
+	tool.Code = strings.TrimSpace(c.FormValue("code"))
+
+	// Convert vWidth and vHeight to integers with sanitization
 	var err error
-	tool.Width, err = strconv.Atoi(c.FormValue("width"))
+	widthStr := strings.TrimSpace(c.FormValue("width"))
+	tool.Width, err = strconv.Atoi(widthStr)
 	if err != nil {
-		return nil, errors.NewValidationError("invalid width: %s", c.FormValue("width"))
-	}
-	tool.Height, err = strconv.Atoi(c.FormValue("height"))
-	if err != nil {
-		return nil, errors.NewValidationError("invalid height: %s", c.FormValue("height"))
+		return nil, errors.NewValidationError("invalid width: %s", widthStr)
 	}
 
-	// Convert thickness values to floats
-	minThickness, err := strconv.ParseFloat(c.FormValue("min_thickness"), 32)
+	heightStr := strings.TrimSpace(c.FormValue("height"))
+	tool.Height, err = strconv.Atoi(heightStr)
 	if err != nil {
-		return nil, errors.NewValidationError("invalid min thickness: %s", c.FormValue("min_thickness"))
+		return nil, errors.NewValidationError("invalid height: %s", heightStr)
+	}
+
+	// Convert thickness values to floats with sanitization
+	minThicknessStr := strings.TrimSpace(c.FormValue("min_thickness"))
+	minThickness, err := strconv.ParseFloat(minThicknessStr, 32)
+	if err != nil {
+		return nil, errors.NewValidationError("invalid min thickness: %s", minThicknessStr)
 	}
 	tool.MinThickness = float32(minThickness)
 
-	maxThickness, err := strconv.ParseFloat(c.FormValue("max_thickness"), 32)
+	maxThicknessStr := strings.TrimSpace(c.FormValue("max_thickness"))
+	maxThickness, err := strconv.ParseFloat(maxThicknessStr, 32)
 	if err != nil {
-		return nil, errors.NewValidationError("invalid max thickness: %s", c.FormValue("max_thickness"))
+		return nil, errors.NewValidationError("invalid max thickness: %s", maxThicknessStr)
 	}
 	tool.MaxThickness = float32(maxThickness)
 

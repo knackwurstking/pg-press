@@ -94,6 +94,7 @@ type EditPressFormData struct {
 }
 
 func GetEditPressFormData(c echo.Context) (*EditPressFormData, *errors.HTTPError) {
+	// Sanitize and validate inputs
 	vPressNumber := c.FormValue("press_number")
 	if vPressNumber == "" {
 		return nil, errors.NewValidationError("press number is required").HTTPError()
@@ -103,10 +104,11 @@ func GetEditPressFormData(c echo.Context) (*EditPressFormData, *errors.HTTPError
 		return nil, errors.NewValidationError("invalid press number %s: %v", vPressNumber, err).HTTPError()
 	}
 
-	cyclesOffset, err := strconv.ParseInt(c.FormValue("cycles_offset"), 10, 64)
+	cyclesOffsetStr := c.FormValue("cycles_offset")
+	cyclesOffset, err := strconv.ParseInt(cyclesOffsetStr, 10, 64)
 	if err != nil {
 		return nil, errors.NewValidationError(
-			"invalid cycles offset %s: %v", c.FormValue("cycles_offset"), err,
+			"invalid cycles offset %s: %v", cyclesOffsetStr, err,
 		).HTTPError()
 	}
 
