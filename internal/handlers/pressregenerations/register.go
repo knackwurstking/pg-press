@@ -13,7 +13,7 @@ import (
 func Register(e *echo.Echo, path string) {
 	ui.RegisterEchoRoutes(e, env.ServerPathPrefix, []*ui.EchoRoute{
 		ui.NewEchoRoute(http.MethodGet, path+"/:press", GetPage),
-		ui.NewEchoRoute(http.MethodPost, path+"/:press", Add),
+		ui.NewEchoRoute(http.MethodPost, path+"/:press", PostPage),
 		ui.NewEchoRoute(http.MethodDelete, path+"/:press/delete", Delete),
 	})
 }

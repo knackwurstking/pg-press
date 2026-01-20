@@ -3,9 +3,9 @@ package templates
 import (
 	"fmt"
 
-	"github.com/knackwurstking/pg-press/components"
+	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/pg-press/internal/utils"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
 type PageProps struct {
@@ -14,7 +14,7 @@ type PageProps struct {
 
 templ Page(props PageProps) {
 	@components.Layout(
-		components.LayoutOptions{
+		components.LayoutProps{
 			PageTitle:   fmt.Sprintf("PG Presse | Regeneration P%d", props.Press),
 			AppBarTitle: fmt.Sprintf("Regeneration P%d", props.Press),
 			NavContent:  components.StandardNavContent(),
@@ -22,13 +22,13 @@ templ Page(props PageProps) {
 	) {
 		<div class="container fluid">
 			<form
-				hx-post={ utils.UrlPressRegeneration(props.Press, 0).Post }
+				class="container flex flex-col gap"
+				hx-post={ urlb.PressRegeneration(props.Press, 0) }
 				hx-trigger="submit"
 				hx-swap="none"
-				hx-on::response-error="alert(event.detail.xhr.responseText)"
 				hx-on::before-request="event.currentTarget.disabled = true"
 				hx-on::after-request="event.currentTarget.disabled = false"
-				class="container flex flex-col gap"
+				hx-on::response-error="alert(event.detail.xhr.responseText)"
 			>
 				<div class="flex gap justify-evenly w-full">
 					{{ startedID := "started" }}
@@ -57,16 +57,6 @@ templ Page(props PageProps) {
 							required
 						/>
 					</label>
-				</div>
-				{{ reasonID := "reason" }}
-				<div class="flex flex-col">
-					<label for={ reasonID }>Bemerkung</label>
-					<input
-						id={ reasonID }
-						name={ reasonID }
-						type="text"
-						class="border p-lg"
-					/>
 				</div>
 				<div class="w-full flex justify-end">
 					<input type="submit"/>
