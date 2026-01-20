@@ -1,3 +1,14 @@
+// Package db provides database access and management functionality for the PG Press application.
+//
+// It handles connections to multiple SQLite databases (tools, presses, notes, users, reports)
+// and manages the creation and maintenance of database tables and records.
+//
+// Database Overview:
+// - tools: Stores information about tools, including their physical properties and cycles
+// - presses: Manages press machines and their configuration in slots
+// - notes: Stores user notes associated with various entities
+// - users: Manages user accounts and authentication
+// - reports: Handles trouble reports and related data
 package db
 
 import (
@@ -13,10 +24,12 @@ import (
 	"github.com/knackwurstking/pg-press/internal/logger"
 )
 
+// Scannable interface defines the required scanning method for database rows.
 type Scannable interface {
 	Scan(dest ...any) error
 }
 
+// Database connection variables for different modules.
 var (
 	dbTool    *sql.DB
 	dbPress   *sql.DB
@@ -27,6 +40,17 @@ var (
 	log = logger.New("db")
 )
 
+// Open initializes and opens all database connections.
+//
+// It creates the necessary directories for database files, configures SQLite
+// connection parameters for optimal performance, and initializes all required tables.
+//
+// Parameters:
+//   - path: The directory path where database files should be stored
+//   - allowCreate: Whether to create new database files if they don't exist
+//
+// Returns:
+//   - error: An error if any database connection or initialization fails
 func Open(path string, allowCreate bool) error {
 	if err := os.MkdirAll(path, 0700); err != nil {
 		return fmt.Errorf("failed to create database directory: %v", err)
@@ -135,6 +159,7 @@ func Open(path string, allowCreate bool) error {
 	return nil
 }
 
+// Close closes all open database connections.
 func Close() {
 	for _, db := range []*sql.DB{dbTool, dbPress, dbNote, dbUser} {
 		if db != nil {
@@ -143,6 +168,14 @@ func Close() {
 	}
 }
 
+// createTable executes a SQL statement to create a database table.
+//
+// Parameters:
+//   - db: The database connection to use
+//   - query: The SQL CREATE TABLE statement to execute
+//
+// Returns:
+//   - error: An error if the table creation fails
 func createTable(db *sql.DB, query string) error {
 	_, err := db.Exec(query)
 	if err != nil {

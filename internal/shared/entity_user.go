@@ -59,7 +59,15 @@ func (u *User) IsAdmin() bool {
 	return slices.Contains(strings.Split(env.Admins, ","), fmt.Sprintf("%d", u.ID))
 }
 
-// ValidateAPIKey validates an API key according to the minimum length requirement
+// ValidateAPIKey validates an API key according to the minimum length requirement.
+//
+// It checks that the provided API key meets the minimum required length (32 characters).
+//
+// Parameters:
+//   - apiKey: The API key string to validate
+//
+// Returns:
+//   - bool: True if the API key meets the minimum length requirement, false otherwise
 func ValidateAPIKey(apiKey string) bool {
 	return len(apiKey) >= MinAPIKeyLength
 }

@@ -7,6 +7,7 @@ import (
 )
 
 var (
+	// CookieExpirationDuration is the duration after which cookies expire (6 months)
 	CookieExpirationDuration int64 = (time.Hour * 24 * 31 * 6).Milliseconds() // 6 months in milliseconds
 )
 

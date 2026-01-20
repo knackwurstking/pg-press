@@ -7,8 +7,11 @@ import (
 )
 
 const (
+	// ToolCyclesWarning is the threshold at which tools start showing warnings for high cycle counts
 	ToolCyclesWarning int64 = 800000
-	ToolCyclesError   int64 = 1000000
+
+	// ToolCyclesError is the threshold at which tools start showing errors for high cycle counts
+	ToolCyclesError int64 = 1000000
 )
 
 // -----------------------------------------------------------------------------
