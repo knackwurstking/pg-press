@@ -71,7 +71,7 @@ dev:
 	gow -e=go,json,html,js,css -r run ./cmd/${BINARY_NAME} server --addr ${SERVER_ADDR_DEV} --db data/
 
 build:
-	go build -v -o ./bin/${BINARY_NAME} ./cmd/${BINARY_NAME}
+	go build -v -o ./bin/${BINARY_NAME} ./cmd/pg-press
 
 count:
 	find . -name '*.go' -o -name '*.html' -o -name '*.css' -o -name '*.js' -o -name '*.templ' | grep -v '_templ\.go$$' | xargs cat | wc -l
