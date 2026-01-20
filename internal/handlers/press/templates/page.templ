@@ -136,7 +136,7 @@ templ sectionRegenerations(p PageProps) {
 		<div
 			id="press-regenerations-section-content"
 			hx-get={ urlb.PressRegenerations(p.PressNumber) }
-			hx-trigger="load, pageLoaded from:body"
+			hx-trigger="load, reload-press-regenerations from:body"
 			hx-on::response-error="alert('Fehler beim laden: ' + event.detail.xhr.responseText)"
 		>
 			@components.Spinner()

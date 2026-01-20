@@ -39,7 +39,7 @@ func PostPage(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	if _, merr = db.AddPressRegeneration(data); merr != nil {
+	if merr = db.AddPressRegeneration(data); merr != nil {
 		return merr.Echo()
 	}
 

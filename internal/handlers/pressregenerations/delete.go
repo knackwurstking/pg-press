@@ -13,8 +13,7 @@ func Delete(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	merr = db.DeletePressRegeneration(shared.EntityID(id))
-	if merr != nil {
+	if merr = db.DeletePressRegeneration(shared.EntityID(id)); merr != nil {
 		return merr.Echo()
 	}
 
