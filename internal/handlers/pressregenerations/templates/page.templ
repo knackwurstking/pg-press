@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pg-press/components"
-	"github.com/knackwurstking/pg-press/models"
-	"github.com/knackwurstking/pg-press/utils"
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/utils"
 )
 
 type PageProps struct {
-	Press models.PressNumber
+	Press shared.PressNumber
 }
 
 templ Page(props PageProps) {
