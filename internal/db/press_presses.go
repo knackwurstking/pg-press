@@ -11,7 +11,9 @@ import (
 // Table Creation Statements
 // -----------------------------------------------------------------------------
 
+// SQL statements for managing press records in the database.
 const (
+	// sqlCreatePressesTable creates the presses table with all required columns.
 	sqlCreatePressesTable string = `
 		CREATE TABLE IF NOT EXISTS presses (
 			id 					INTEGER NOT NULL,
@@ -24,6 +26,7 @@ const (
 		);
 	`
 
+	// sqlAddPress inserts a new press record into the database.
 	sqlAddPress string = `
 		INSERT INTO presses (
 			id,
@@ -40,6 +43,7 @@ const (
 		)
 	`
 
+	// sqlUpdatePress updates an existing press record in the database.
 	sqlUpdatePress string = `
 		UPDATE presses
 		SET
@@ -50,6 +54,7 @@ const (
 		WHERE id = :id
 	`
 
+	// sqlGetPress retrieves a single press record by ID.
 	sqlGetPress string = `
 		SELECT
 			id,
@@ -61,6 +66,7 @@ const (
 		WHERE id = :id
 	`
 
+	// sqlGetPressNumberForTool finds the press number that contains a specific tool in either slot.
 	sqlGetPressNumberForTool string = `
 		SELECT id
 		FROM presses
@@ -68,6 +74,7 @@ const (
 		LIMIT 1;
 	`
 
+	// sqlGetPressUtilization retrieves press details for utilization reporting.
 	sqlGetPressUtilization string = `
 		SELECT
 			id,
@@ -79,6 +86,7 @@ const (
 		WHERE id = :press_number;
 	`
 
+	// sqlDeletePress removes a press record from the database.
 	sqlDeletePress string = `
 		DELETE FROM presses
 		WHERE id = :id
@@ -89,7 +97,16 @@ const (
 // Press Functions
 // -----------------------------------------------------------------------------
 
-// AddPress adds a new press to the database
+// AddPress adds a new press to the database.
+//
+// It validates the press data before insertion and returns appropriate HTTP errors
+// if validation fails or database operations encounter issues.
+//
+// Parameters:
+//   - press: Pointer to the Press struct to be added
+//
+// Returns:
+//   - *errors.HTTPError: Error if operation fails, nil on success
 func AddPress(press *shared.Press) *errors.HTTPError {
 	if verr := press.Validate(); verr != nil {
 		return verr.HTTPError()
@@ -108,7 +125,16 @@ func AddPress(press *shared.Press) *errors.HTTPError {
 	return nil
 }
 
-// UpdatePress updates an existing press in the database
+// UpdatePress updates an existing press in the database.
+//
+// It validates the press data before updating and returns appropriate HTTP errors
+// if validation fails or database operations encounter issues.
+//
+// Parameters:
+//   - press: Pointer to the Press struct to be updated
+//
+// Returns:
+//   - *errors.HTTPError: Error if operation fails, nil on success
 func UpdatePress(press *shared.Press) *errors.HTTPError {
 	if verr := press.Validate(); verr != nil {
 		return verr.HTTPError()
@@ -127,12 +153,32 @@ func UpdatePress(press *shared.Press) *errors.HTTPError {
 	return nil
 }
 
-// GetPress retrieves a press by its ID
+// GetPress retrieves a press by its ID.
+//
+// It queries the database for a specific press record and returns it as a Press struct.
+// Returns an error if no record is found or database query fails.
+//
+// Parameters:
+//   - id: The press number to retrieve
+//
+// Returns:
+//   - *shared.Press: Pointer to the retrieved Press struct, or nil if not found
+//   - *errors.HTTPError: Error if operation fails, nil on success
 func GetPress(id shared.PressNumber) (*shared.Press, *errors.HTTPError) {
 	return ScanPress(dbPress.QueryRow(sqlGetPress, sql.Named("id", id)))
 }
 
-// GetPressNumberForTool retrieves the press number that has the given tool in either slot
+// GetPressNumberForTool retrieves the press number that has the given tool in either slot.
+//
+// It searches for a press record where the specified tool ID appears in either slot_up or slot_down.
+// Returns -1 if no press is found for the tool.
+//
+// Parameters:
+//   - toolID: The entity ID of the tool to search for
+//
+// Returns:
+//   - shared.PressNumber: The press number containing the tool, or -1 if not found
+//   - *errors.HTTPError: Error if database query fails, nil on success
 func GetPressNumberForTool(toolID shared.EntityID) (shared.PressNumber, *errors.HTTPError) {
 	var pressNumber shared.PressNumber = -1
 
@@ -144,6 +190,17 @@ func GetPressNumberForTool(toolID shared.EntityID) (shared.PressNumber, *errors.
 	return pressNumber, nil
 }
 
+// GetPressUtilization retrieves detailed utilization information for a specific press.
+//
+// It fetches the press details and resolves tool entities in both slots to provide
+// complete information about tools currently installed on the press.
+//
+// Parameters:
+//   - pressNumber: The press number to retrieve utilization for
+//
+// Returns:
+//   - *shared.PressUtilization: Pointer to the populated PressUtilization struct
+//   - *errors.HTTPError: Error if operation fails, nil on success
 func GetPressUtilization(pressNumber shared.PressNumber) (*shared.PressUtilization, *errors.HTTPError) {
 	var (
 		slotUpper shared.EntityID
@@ -190,7 +247,17 @@ func GetPressUtilization(pressNumber shared.PressNumber) (*shared.PressUtilizati
 	return pu, nil
 }
 
-// GetPressUtilizations retrieves all press utilizations with tool information
+// GetPressUtilizations retrieves all press utilizations with tool information.
+//
+// It fetches utilization details for multiple presses and resolves tool entities
+// to provide comprehensive information about all press configurations.
+//
+// Parameters:
+//   - pressNumbers: Slice of press numbers to retrieve utilization for
+//
+// Returns:
+//   - map[shared.PressNumber]*shared.PressUtilization: Map of press numbers to utilization info
+//   - *errors.HTTPError: Error if operation fails, nil on success
 func GetPressUtilizations(pressNumbers ...shared.PressNumber) (
 	pu map[shared.PressNumber]*shared.PressUtilization, merr *errors.HTTPError,
 ) {
@@ -206,7 +273,15 @@ func GetPressUtilizations(pressNumbers ...shared.PressNumber) (
 	return pu, nil
 }
 
-// DeletePress removes a press from the database
+// DeletePress removes a press from the database.
+//
+// It deletes the specified press record and returns an error if the operation fails.
+//
+// Parameters:
+//   - id: The press number to delete
+//
+// Returns:
+//   - *errors.HTTPError: Error if operation fails, nil on success
 func DeletePress(id shared.PressNumber) *errors.HTTPError {
 	_, err := dbPress.Exec(sqlDeletePress, sql.Named("id", id))
 	if err != nil {
@@ -219,7 +294,17 @@ func DeletePress(id shared.PressNumber) *errors.HTTPError {
 // Scan Helpers
 // -----------------------------------------------------------------------------
 
-// ScanPress scans a database row into a Press struct
+// ScanPress scans a database row into a Press struct.
+//
+// It takes a scannable database result and maps the columns to a Press struct,
+// returning any errors encountered during the scan operation.
+//
+// Parameters:
+//   - row: Scannable database row to read from
+//
+// Returns:
+//   - *shared.Press: Pointer to the populated Press struct, or nil if not found
+//   - *errors.HTTPError: Error if operation fails, nil on success
 func ScanPress(row Scannable) (press *shared.Press, merr *errors.HTTPError) {
 	press = &shared.Press{}
 	err := row.Scan(
