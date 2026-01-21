@@ -1,8 +1,6 @@
 package dialogs
 
 import (
-	"strconv"
-
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/dialogs/templates"
@@ -49,9 +47,9 @@ func PostToolRegeneration(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	formData, merr := GetEditToolRegenerationFormData(c)
-	if merr != nil {
-		return merr.Echo()
+	formData, verr := parseEditToolRegenerationForm(c)
+	if verr != nil {
+		return verr.HTTPError().Echo()
 	}
 
 	merr = db.AddToolRegeneration(&shared.ToolRegeneration{
@@ -74,9 +72,9 @@ func PutToolRegeneration(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	formData, merr := GetEditToolRegenerationFormData(c)
-	if merr != nil {
-		return merr.Echo()
+	formData, verr := parseEditToolRegenerationForm(c)
+	if verr != nil {
+		return verr.HTTPError().Echo()
 	}
 
 	merr = db.UpdateToolRegeneration(&shared.ToolRegeneration{
@@ -94,31 +92,24 @@ func PutToolRegeneration(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-type EditToolRegenerationForm struct {
+type editToolRegenerationForm struct {
 	Start shared.UnixMilli
 	Stop  shared.UnixMilli
 }
 
-func parseEditToolRegenerationForm(c echo.Context) (*EditToolRegenerationForm, *errors.ValidationError) {
+func parseEditToolRegenerationForm(c echo.Context) (*editToolRegenerationForm, *errors.ValidationError) {
 	// Parse start and stop dates from HTML input fields (type "date")
-	vStart := c.FormValue("start")
-	vStop := c.FormValue("stop")
-
-	if vStart == "" || vStop == "" {
-		return nil, errors.NewValidationError("missing start or stop").HTTPError()
-	}
-
-	startInt, err := strconv.ParseInt(vStart, 10, 64)
+	v, err := utils.SanitizeInt64(c.FormValue("start"))
 	if err != nil {
-		return nil, errors.NewValidationError("invalid start date").HTTPError()
+		return nil, errors.NewValidationError("invalid start date")
 	}
-	stopInt, err := strconv.ParseInt(vStop, 10, 64)
+	start := shared.UnixMilli(v)
+
+	v, err = utils.SanitizeInt64(c.FormValue("stop"))
 	if err != nil {
-		return nil, errors.NewValidationError("invalid stop date").HTTPError()
+		return nil, errors.NewValidationError("invalid stop date")
 	}
+	stop := shared.UnixMilli(v)
 
-	data.Start = shared.UnixMilli(startInt)
-	data.Stop = shared.UnixMilli(stopInt)
-
-	return &EditToolRegeneration{}, nil
+	return &editToolRegenerationForm{Start: start, Stop: stop}, nil
 }
