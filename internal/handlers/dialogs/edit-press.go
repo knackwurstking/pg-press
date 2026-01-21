@@ -1,8 +1,6 @@
 package dialogs
 
 import (
-	"strconv"
-
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/dialogs/templates"
@@ -43,12 +41,12 @@ func GetEditPress(c echo.Context) *echo.HTTPError {
 }
 
 func PostPress(c echo.Context) *echo.HTTPError {
-	data, merr := GetEditPressFormData(c)
-	if merr != nil {
-		return merr.Echo()
+	data, verr := parseEditPressForm(c)
+	if verr != nil {
+		return verr.HTTPError().Echo()
 	}
 
-	merr = db.AddPress(&shared.Press{
+	merr := db.AddPress(&shared.Press{
 		ID:           data.PressNumber,
 		Type:         data.MachineType,
 		CyclesOffset: data.CyclesOffset,
@@ -68,9 +66,9 @@ func PutPress(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	data, merr := GetEditPressFormData(c)
-	if merr != nil {
-		return merr.Echo()
+	data, verr := parseEditPressForm(c)
+	if verr != nil {
+		return verr.HTTPError().Echo()
 	}
 
 	merr = db.UpdatePress(&shared.Press{
@@ -87,34 +85,28 @@ func PutPress(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-type EditPressFormData struct {
+type editPressForm struct {
 	PressNumber  shared.PressNumber
 	MachineType  shared.MachineType
 	CyclesOffset int64
 }
 
-func GetEditPressFormData(c echo.Context) (*EditPressFormData, *errors.HTTPError) {
-	// Sanitize and validate inputs
-	vPressNumber := c.FormValue("press_number")
-	if vPressNumber == "" {
-		return nil, errors.NewValidationError("press number is required").HTTPError()
-	}
-	pressNumber, err := strconv.Atoi(vPressNumber)
+func parseEditPressForm(c echo.Context) (*editPressForm, *errors.ValidationError) {
+	// Press Number
+	vPressNumber, err := utils.SanitizeInt8(c.FormValue("press_number"))
 	if err != nil {
-		return nil, errors.NewValidationError("invalid press number %s: %v", vPressNumber, err).HTTPError()
+		return nil, errors.NewValidationError("invalid press number: %v", err)
 	}
 
-	cyclesOffsetStr := c.FormValue("cycles_offset")
-	cyclesOffset, err := strconv.ParseInt(cyclesOffsetStr, 10, 64)
+	// Cycles Offset
+	cyclesOffset, err := utils.SanitizeInt64(c.FormValue("cycles_offset"))
 	if err != nil {
-		return nil, errors.NewValidationError(
-			"invalid cycles offset %s: %v", cyclesOffsetStr, err,
-		).HTTPError()
+		return nil, errors.NewValidationError("invalid cycles offset: %v", err)
 	}
 
-	return &EditPressFormData{
-		PressNumber:  shared.PressNumber(pressNumber),
-		MachineType:  shared.MachineType(c.FormValue("machine_type")),
+	return &editPressForm{
+		PressNumber:  shared.PressNumber(vPressNumber),
+		MachineType:  shared.MachineType(utils.SanitizeText(c.FormValue("machine_type"))),
 		CyclesOffset: cyclesOffset,
 	}, nil
 }

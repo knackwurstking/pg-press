@@ -2,7 +2,6 @@ package dialogs
 
 import (
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/knackwurstking/pg-press/internal/db"
@@ -51,15 +50,14 @@ func GetEditNote(c echo.Context) *echo.HTTPError {
 }
 
 func PostNote(c echo.Context) *echo.HTTPError {
-	note, merr := parseNoteForm(c)
-	if merr != nil {
-		return merr.Echo()
+	note, verr := parseNoteForm(c)
+	if verr != nil {
+		return verr.HTTPError().Echo()
 	}
 
 	log.Debug("Creating new note [note=%v, user_name=%s]", note, c.Get("user-name"))
 
-	merr = db.AddNote(note)
-	if merr != nil {
+	if merr := db.AddNote(note); merr != nil {
 		return merr.Echo()
 	}
 
@@ -69,9 +67,9 @@ func PostNote(c echo.Context) *echo.HTTPError {
 }
 
 func PutNote(c echo.Context) *echo.HTTPError {
-	note, merr := parseNoteForm(c)
-	if merr != nil {
-		return merr.WrapEcho("failed to get note form data")
+	note, verr := parseNoteForm(c)
+	if verr != nil {
+		return verr.HTTPError().Echo()
 	}
 
 	id, merr := utils.GetQueryInt64(c, "id")
@@ -96,32 +94,29 @@ func PutNote(c echo.Context) *echo.HTTPError {
 
 func parseNoteForm(c echo.Context) (*shared.Note, *errors.ValidationError) {
 	// Parse level (required)
-	levelStr := strings.TrimSpace(c.FormValue("level"))
-	if levelStr == "" {
-		return nil, errors.NewValidationError("level is required").HTTPError()
+	vLevelString := utils.SanitizeText(c.FormValue("level"))
+	if vLevelString == "" {
+		return nil, errors.NewValidationError("level is required")
 	}
-
-	levelInt, err := strconv.Atoi(levelStr)
+	vLevelInt, err := strconv.Atoi(vLevelString)
 	if err != nil {
-		return nil, errors.NewValidationError("level must be an integer").HTTPError()
+		return nil, errors.NewValidationError("level must be an integer")
 	}
-
-	// Validate level is within valid range (0=INFO, 1=ATTENTION, 2=BROKEN)
-	level := shared.NoteLevel(levelInt)
+	level := shared.NoteLevel(vLevelInt)
 	if !level.IsValid() {
-		return nil, errors.NewValidationError("level is invalid").HTTPError()
+		return nil, errors.NewValidationError("level is invalid")
 	}
 
 	// Parse content (required)
-	content := strings.TrimSpace(c.FormValue("content"))
+	content := utils.SanitizeText(c.FormValue("content"))
 	if content == "" {
-		return nil, errors.NewValidationError("content is required").HTTPError()
+		return nil, errors.NewValidationError("content is required")
 	}
 
 	return &shared.Note{
 		Level:     level,
 		Content:   content,
 		CreatedAt: shared.NewUnixMilli(time.Now()),
-		Linked:    strings.TrimSpace(c.FormValue("linked")),
+		Linked:    utils.SanitizeText(c.FormValue("linked")),
 	}, nil
 }
