@@ -1,9 +1,6 @@
 package dialogs
 
 import (
-	"strconv"
-	"strings"
-
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/dialogs/templates"
@@ -108,9 +105,9 @@ func PostMetalSheet(c echo.Context) *echo.HTTPError {
 
 	switch tool.Position {
 	case shared.SlotUpper:
-		ums, merr := parseUpperMetalSheetForm(c, nil)
-		if merr != nil {
-			return merr.Wrap("could not parse upper metal sheet form").Echo()
+		ums, verr := parseUpperMetalSheetForm(c, nil)
+		if verr != nil {
+			return verr.HTTPError().Echo()
 		}
 		ums.ToolID = tool.ID
 		merr = db.AddUpperMetalSheet(ums)
@@ -119,9 +116,9 @@ func PostMetalSheet(c echo.Context) *echo.HTTPError {
 		}
 
 	case shared.SlotLower:
-		lms, merr := parseLowerMetalSheetForm(c, nil)
-		if merr != nil {
-			return merr.Wrap("could not parse lower metal sheet form").Echo()
+		lms, verr := parseLowerMetalSheetForm(c, nil)
+		if verr != nil {
+			return verr.HTTPError().Echo()
 		}
 		lms.ToolID = tool.ID
 		merr = db.AddLowerMetalSheet(lms)
@@ -154,9 +151,9 @@ func PutMetalSheet(c echo.Context) *echo.HTTPError {
 		if merr != nil {
 			return merr.Wrap("could not fetch existing upper metal sheet").Echo()
 		}
-		ums, merr = parseUpperMetalSheetForm(c, ums)
-		if merr != nil {
-			return merr.Wrap("could not parse upper metal sheet form").Echo()
+		ums, verr := parseUpperMetalSheetForm(c, ums)
+		if verr != nil {
+			return verr.HTTPError().Echo()
 		}
 		merr = db.UpdateUpperMetalSheet(ums)
 		if merr != nil {
@@ -168,9 +165,9 @@ func PutMetalSheet(c echo.Context) *echo.HTTPError {
 		if merr != nil {
 			return merr.Wrap("could not fetch existing upper metal sheet").Echo()
 		}
-		lms, merr = parseLowerMetalSheetForm(c, lms)
-		if merr != nil {
-			return merr.Wrap("could not parse lower metal sheet form").Echo()
+		lms, verr := parseLowerMetalSheetForm(c, lms)
+		if verr != nil {
+			return verr.HTTPError().Echo()
 		}
 		merr = db.UpdateLowerMetalSheet(lms)
 		if merr != nil {
@@ -191,20 +188,15 @@ func parseUpperMetalSheetForm(c echo.Context, ums *shared.UpperMetalSheet) (*sha
 		ums = &shared.UpperMetalSheet{}
 	}
 
-	var (
-		tileHeightStr = strings.TrimSpace(c.FormValue("tile_height"))
-		valueStr      = strings.TrimSpace(c.FormValue("value"))
-		err           error
-	)
-
-	ums.TileHeight, err = strconv.ParseFloat(tileHeightStr, 64)
+	var err error
+	ums.TileHeight, err = utils.SanitizeFloat(c.FormValue("tile_height"))
 	if err != nil {
-		return nil, errors.NewValidationError("invalid tile height: %v", err).HTTPError()
+		return nil, errors.NewValidationError("invalid tile height: %v", err)
 	}
 
-	ums.Value, err = strconv.ParseFloat(valueStr, 64)
+	ums.Value, err = utils.SanitizeFloat(c.FormValue("value"))
 	if err != nil {
-		return nil, errors.NewValidationError("invalid value: %v", err).HTTPError()
+		return nil, errors.NewValidationError("invalid value: %v", err)
 	}
 
 	return ums, nil
@@ -215,46 +207,37 @@ func parseLowerMetalSheetForm(c echo.Context, lms *shared.LowerMetalSheet) (*sha
 		lms = &shared.LowerMetalSheet{}
 	}
 
-	var (
-		tileHeightStr  = strings.TrimSpace(c.FormValue("tile_height"))
-		valueStr       = strings.TrimSpace(c.FormValue("value"))
-		markeHeightStr = strings.TrimSpace(c.FormValue("marke_height"))
-		stfStr         = strings.TrimSpace(c.FormValue("stf"))
-		stfMaxStr      = strings.TrimSpace(c.FormValue("stf_max"))
-		identifierStr  = strings.ToUpper(strings.TrimSpace(c.FormValue("identifier")))
-		err            error
-	)
-
-	lms.TileHeight, err = strconv.ParseFloat(tileHeightStr, 64)
+	var err error
+	lms.TileHeight, err = utils.SanitizeFloat(c.FormValue("tile_height"))
 	if err != nil {
-		return nil, errors.NewValidationError("invalid tile height: %v", err).HTTPError()
+		return nil, errors.NewValidationError("invalid tile height: %v", err)
 	}
 
-	lms.Value, err = strconv.ParseFloat(valueStr, 64)
+	lms.Value, err = utils.SanitizeFloat(c.FormValue("value"))
 	if err != nil {
-		return nil, errors.NewValidationError("invalid value: %v", err).HTTPError()
+		return nil, errors.NewValidationError("invalid value: %v", err)
 	}
 
-	lms.MarkeHeight, err = strconv.Atoi(markeHeightStr)
+	lms.MarkeHeight, err = utils.SanitizeInt(c.FormValue("marke_height"))
 	if err != nil {
-		return nil, errors.NewValidationError("invalid marke height: %v", err).HTTPError()
+		return nil, errors.NewValidationError("invalid marke height: %v", err)
 	}
 
-	lms.STF, err = strconv.ParseFloat(stfStr, 64)
+	lms.STF, err = utils.SanitizeFloat(c.FormValue("stf"))
 	if err != nil {
-		return nil, errors.NewValidationError("invalid STF value: %v", err).HTTPError()
+		return nil, errors.NewValidationError("invalid STF value: %v", err)
 	}
 
-	lms.STFMax, err = strconv.ParseFloat(stfMaxStr, 64)
+	lms.STFMax, err = utils.SanitizeFloat(c.FormValue("stf_max"))
 	if err != nil {
-		return nil, errors.NewValidationError("invalid STF max value: %v", err).HTTPError()
+		return nil, errors.NewValidationError("invalid STF max value: %v", err)
 	}
 
-	switch v := shared.MachineType(identifierStr); v {
+	switch v := shared.MachineType(utils.SanitizeText(c.FormValue("identifier"))); v {
 	case shared.MachineTypeSACMI, shared.MachineTypeSITI:
 		lms.Identifier = v
 	default:
-		return nil, errors.NewValidationError("identifier must be either 'SACMI' or 'SITI'").HTTPError()
+		return nil, errors.NewValidationError("identifier must be either 'SACMI' or 'SITI'")
 	}
 
 	return lms, nil

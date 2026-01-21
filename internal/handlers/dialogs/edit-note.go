@@ -94,7 +94,7 @@ func PutNote(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func parseNoteForm(c echo.Context) (*shared.Note, *errors.HTTPError) {
+func parseNoteForm(c echo.Context) (*shared.Note, *errors.ValidationError) {
 	// Parse level (required)
 	levelStr := strings.TrimSpace(c.FormValue("level"))
 	if levelStr == "" {
