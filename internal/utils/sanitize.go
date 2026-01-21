@@ -6,20 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
-
-	"github.com/knackwurstking/pg-press/internal/errors"
 )
-
-// SanitizeString removes or escapes potentially dangerous characters from a string
-func SanitizeString(s string) string {
-	// Remove or escape potentially dangerous HTML characters
-	s = html.EscapeString(s)
-
-	// Optionally trim whitespace
-	s = strings.TrimSpace(s)
-
-	return s
-}
 
 // SanitizeURL removes or escapes potentially dangerous characters from a URL string
 func SanitizeURL(u string) string {
@@ -103,7 +90,61 @@ func parseFloat(s string) (float64, error) {
 }
 
 // SanitizeInt removes or escapes potentially dangerous characters from integer input
-func SanitizeInt(s string) (int64, error) {
+func SanitizeInt(s string) (int, error) {
+	// Clean the string from whitespace and common dangerous characters
+	s = strings.TrimSpace(s)
+
+	// Remove any non numeric characters except minus sign for negative numbers
+	var clean strings.Builder
+	for i, r := range s {
+		if unicode.IsDigit(r) || (r == '-' && i == 0) {
+			clean.WriteRune(r)
+		}
+	}
+
+	s = clean.String()
+	if s == "" {
+		return 0, nil
+	}
+
+	// Parse the integer value
+	i, err := strconv.Atoi(s)
+	if err != nil {
+		return 0, err
+	}
+
+	return i, nil
+}
+
+// SanitizeInt8 removes or escapes potentially dangerous characters from integer input
+func SanitizeInt8(s string) (int8, error) {
+	// Clean the string from whitespace and common dangerous characters
+	s = strings.TrimSpace(s)
+
+	// Remove any non numeric characters except minus sign for negative numbers
+	var clean strings.Builder
+	for i, r := range s {
+		if unicode.IsDigit(r) || (r == '-' && i == 0) {
+			clean.WriteRune(r)
+		}
+	}
+
+	s = clean.String()
+	if s == "" {
+		return 0, nil
+	}
+
+	// Parse the integer value
+	i, err := strconv.ParseInt(s, 10, 8)
+	if err != nil {
+		return 0, err
+	}
+
+	return int8(i), nil
+}
+
+// SanitizeInt64 removes or escapes potentially dangerous characters from integer input
+func SanitizeInt64(s string) (int64, error) {
 	// Clean the string from whitespace and common dangerous characters
 	s = strings.TrimSpace(s)
 
@@ -127,17 +168,4 @@ func SanitizeInt(s string) (int64, error) {
 	}
 
 	return i, nil
-}
-
-// ValidateAndSanitizeString validates and sanitizes a string input
-func ValidateAndSanitizeString(s string, maxLength int) (string, error) {
-	// Sanitize the input
-	sanitized := SanitizeString(s)
-
-	// Validate length constraint (if specified)
-	if maxLength > 0 && len(sanitized) > maxLength {
-		return "", &errors.ValidationError{Message: "input exceeds maximum length of " + strconv.Itoa(maxLength)}
-	}
-
-	return sanitized, nil
 }

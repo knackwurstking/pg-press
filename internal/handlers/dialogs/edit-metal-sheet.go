@@ -186,7 +186,7 @@ func PutMetalSheet(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func parseUpperMetalSheetForm(c echo.Context, ums *shared.UpperMetalSheet) (*shared.UpperMetalSheet, *errors.HTTPError) {
+func parseUpperMetalSheetForm(c echo.Context, ums *shared.UpperMetalSheet) (*shared.UpperMetalSheet, *errors.ValidationError) {
 	if ums == nil {
 		ums = &shared.UpperMetalSheet{}
 	}
@@ -210,7 +210,7 @@ func parseUpperMetalSheetForm(c echo.Context, ums *shared.UpperMetalSheet) (*sha
 	return ums, nil
 }
 
-func parseLowerMetalSheetForm(c echo.Context, lms *shared.LowerMetalSheet) (*shared.LowerMetalSheet, *errors.HTTPError) {
+func parseLowerMetalSheetForm(c echo.Context, lms *shared.LowerMetalSheet) (*shared.LowerMetalSheet, *errors.ValidationError) {
 	if lms == nil {
 		lms = &shared.LowerMetalSheet{}
 	}

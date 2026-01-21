@@ -3,7 +3,6 @@ package dialogs
 import (
 	"net/http"
 	"sort"
-	"strconv"
 	"time"
 
 	"github.com/knackwurstking/pg-press/internal/db"
@@ -99,15 +98,14 @@ func GetEditCycle(c echo.Context) *echo.HTTPError {
 }
 
 func PostCycle(c echo.Context) *echo.HTTPError {
-	cycle, merr := parseCycleForm(c)
-	if merr != nil {
-		return merr.Echo()
+	cycle, verr := parseCycleForm(c)
+	if verr != nil {
+		return verr.HTTPError().Echo()
 	}
 
 	log.Debug("Create a new press cycles entry. [cycle=%v]", cycle)
 
-	merr = db.AddCycle(cycle)
-	if merr != nil {
+	if merr := db.AddCycle(cycle); merr != nil {
 		return merr.Echo()
 	}
 
@@ -117,15 +115,14 @@ func PostCycle(c echo.Context) *echo.HTTPError {
 }
 
 func PutCycle(c echo.Context) *echo.HTTPError {
-	cycle, merr := parseCycleForm(c)
-	if merr != nil {
-		return merr.Echo()
+	cycle, verr := parseCycleForm(c)
+	if verr != nil {
+		return verr.HTTPError().Echo()
 	}
 
 	log.Debug("Update existing cycle with ID %d. [cycle=%v]", cycle.ID, cycle)
 
-	merr = db.UpdateCycle(cycle)
-	if merr != nil {
+	if merr := db.UpdateCycle(cycle); merr != nil {
 		return merr.Echo()
 	}
 
@@ -134,43 +131,43 @@ func PutCycle(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func parseCycleForm(c echo.Context) (*shared.Cycle, *errors.HTTPError) {
+func parseCycleForm(c echo.Context) (*shared.Cycle, *errors.ValidationError) {
 	// Tool ID
 	var toolID shared.EntityID
-	vOriginalToolID, err := strconv.ParseInt(c.FormValue("original_tool_id"), 10, 64)
+	originalToolID, err := utils.SanitizeInt64(c.FormValue("original_tool_id"))
 	if err != nil {
-		return nil, errors.NewHTTPError(err).Wrap("original_tool_id")
+		return nil, errors.NewValidationError("original_tool_id: %v", err)
 	}
 	if c.FormValue("tool_id") != "" {
-		if newToolID, err := strconv.ParseInt(c.FormValue("tool_id"), 10, 64); err != nil {
-			return nil, errors.NewHTTPError(err).Wrap("tool_id")
-		} else {
-			toolID = shared.EntityID(newToolID)
+		newToolID, err := utils.SanitizeInt64(c.FormValue("tool_id"))
+		if err != nil {
+			return nil, errors.NewValidationError("tool_id: %v", err)
 		}
+		toolID = shared.EntityID(newToolID)
 	} else {
-		toolID = shared.EntityID(vOriginalToolID)
+		toolID = shared.EntityID(originalToolID)
 	}
 
 	// Press Number
-	vPressNumber, err := strconv.ParseInt(c.FormValue("press_number"), 10, 8)
+	pn, err := utils.SanitizeInt8(c.FormValue("press_number"))
 	if err != nil {
-		return nil, errors.NewHTTPError(err).Wrap("press_number")
+		return nil, errors.NewValidationError("press_number: %v", err)
 	}
-	pressNumber := shared.PressNumber(vPressNumber)
+	pressNumber := shared.PressNumber(pn)
 
 	// Press Cycles
-	vPressCycles, err := strconv.ParseInt(c.FormValue("press_cycles"), 10, 64)
+	pc, err := utils.SanitizeInt64(c.FormValue("press_cycles"))
 	if err != nil {
-		return nil, errors.NewHTTPError(err).Wrap("press_cycles")
+		return nil, errors.NewValidationError("press_cycles: %v", err)
 	}
-	pressCycles := vPressCycles
+	pressCycles := pc
 
 	// Stop
-	vStop, err := time.Parse("2006-01-02", c.FormValue("stop"))
+	stopTime, err := time.Parse("2006-01-02", c.FormValue("stop"))
 	if err != nil {
-		return nil, errors.NewHTTPError(err).Wrap("stop")
+		return nil, errors.NewValidationError("stop: %v", err)
 	}
-	stop := shared.NewUnixMilli(vStop)
+	stop := shared.NewUnixMilli(stopTime)
 
 	return shared.NewCycle(toolID, pressNumber, pressCycles, stop), nil
 }
