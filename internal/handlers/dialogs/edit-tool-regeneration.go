@@ -94,31 +94,31 @@ func PutToolRegeneration(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-type EditToolRegenerationFormData struct {
+type EditToolRegenerationForm struct {
 	Start shared.UnixMilli
 	Stop  shared.UnixMilli
 }
 
-func GetEditToolRegenerationFormData(c echo.Context) (data EditToolRegenerationFormData, merr *errors.HTTPError) {
+func parseEditToolRegenerationForm(c echo.Context) (*EditToolRegenerationForm, *errors.ValidationError) {
 	// Parse start and stop dates from HTML input fields (type "date")
 	vStart := c.FormValue("start")
 	vStop := c.FormValue("stop")
 
 	if vStart == "" || vStop == "" {
-		return data, errors.NewValidationError("missing start or stop").HTTPError()
+		return nil, errors.NewValidationError("missing start or stop").HTTPError()
 	}
 
 	startInt, err := strconv.ParseInt(vStart, 10, 64)
 	if err != nil {
-		return data, errors.NewValidationError("invalid start date").HTTPError()
+		return nil, errors.NewValidationError("invalid start date").HTTPError()
 	}
 	stopInt, err := strconv.ParseInt(vStop, 10, 64)
 	if err != nil {
-		return data, errors.NewValidationError("invalid stop date").HTTPError()
+		return nil, errors.NewValidationError("invalid stop date").HTTPError()
 	}
 
 	data.Start = shared.UnixMilli(startInt)
 	data.Stop = shared.UnixMilli(stopInt)
 
-	return data, nil
+	return &EditToolRegeneration{}, nil
 }

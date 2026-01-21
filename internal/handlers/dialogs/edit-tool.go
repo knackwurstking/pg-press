@@ -1,9 +1,6 @@
 package dialogs
 
 import (
-	"strconv"
-	"strings"
-
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/dialogs/templates"
@@ -98,35 +95,31 @@ func parseToolForm(c echo.Context, tool *shared.Tool) (*shared.Tool, *errors.Val
 	}
 
 	// Sanitize inputs by trimming whitespace
-	tool.Type = strings.TrimSpace(c.FormValue("type"))
-	tool.Code = strings.TrimSpace(c.FormValue("code"))
+	tool.Type = utils.SanitizeText(c.FormValue("type"))
+	tool.Code = utils.SanitizeText(c.FormValue("code"))
 
 	// Need to convert the vPosition to an integer
-	position, err := strconv.Atoi(c.FormValue("position"))
+	position, err := utils.SanitizeInt(c.FormValue("position"))
 	if err != nil {
-		return nil, errors.NewValidationError("invalid position: %d", position)
+		return nil, errors.NewValidationError("invalid position: %s", c.FormValue("position"))
 	}
-	switch shared.Slot(position) {
+	switch v := shared.Slot(position); v {
 	case shared.SlotUpper, shared.SlotLower:
 		tool.Position = shared.Slot(position)
 	default:
-		return nil, errors.NewValidationError("invalid position: %d", position)
+		return nil, errors.NewValidationError("invalid position: %v", v)
 	}
 
 	// Convert width and height to integers with sanitization
-	widthStr := strings.TrimSpace(c.FormValue("width"))
-	width, err := strconv.Atoi(widthStr)
+	tool.Width, err = utils.SanitizeInt(c.FormValue("width"))
 	if err != nil {
-		return nil, errors.NewValidationError("invalid width: %s", widthStr)
+		return nil, errors.NewValidationError("invalid width: %s", c.FormValue("width"))
 	}
-	tool.Width = width
 
-	heightStr := strings.TrimSpace(c.FormValue("height"))
-	height, err := strconv.Atoi(heightStr)
+	tool.Height, err = utils.SanitizeInt(c.FormValue("height"))
 	if err != nil {
-		return nil, errors.NewValidationError("invalid height: %s", heightStr)
+		return nil, errors.NewValidationError("invalid height: %s", c.FormValue("height"))
 	}
-	tool.Height = height
 
 	log.Debug("Tool dialog form values: tool=%v", tool)
 
