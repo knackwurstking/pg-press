@@ -17,3 +17,7 @@
 - [ ] Cassettes already bound to a tool should be disabled inside the select element (option)
 - [ ] Show position badges for tool anchors
 - [ ] ~Show the tool binding for cassettes, just an anchor linking to that tool~
+
+## Database
+
+- [ ] Script for database migration from the old version from the git [#c09f5620] to [main]
