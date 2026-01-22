@@ -1,13 +1,11 @@
 package editor
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/env"
@@ -17,7 +15,6 @@ import (
 	"github.com/knackwurstking/pg-press/internal/utils"
 
 	"github.com/a-h/templ"
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -142,14 +139,10 @@ func processAttachments(c echo.Context) ([]string, error) {
 			return nil, errors.NewValidationError("read file: %v", err).HTTPError()
 		}
 
-		// Generate a unique filename for this and add to attachments
-		fileName := fmt.Sprintf("%s%d%s",
-			time.Now().Format("20060102150405"),
-			uuid.New().ID(),
-			strings.ToLower(filepath.Ext(fileHeader.Filename)))
-
 		// Implement local file storage
-		if err = os.WriteFile(filepath.Join(env.ServerPathImages, fileName), data, 0644); err != nil {
+		fileName := utils.GetAttachmentFileName(fileHeader.Filename)
+		path := filepath.Join(env.ServerPathImages, fileName)
+		if err = os.WriteFile(path, data, 0644); err != nil {
 			log.Error("Failed to save attachment: %v", err)
 			continue
 		}

@@ -5,6 +5,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 )
 
 func main() {
@@ -18,5 +19,13 @@ func main() {
 
 	dbPath := args[0]
 
-	fmt.Printf("dbPath=%#v\n", dbPath) // TODO: Implement conversion logic for all database tables, use the "models" package types.
+	createAttachments(dbPath)
+}
+
+// createAttachments reads the attachments SQL table and creates the images
+// folder at "./images/*"
+func createAttachments(dbPath string) {
+	_ = os.Mkdir("./images", 0700)
+	// TODO: Read the attachments from the database and write them to the images folder
+	// Use `utils.GetAttachmentFileName` to generate the file names
 }
