@@ -20,4 +20,4 @@
 
 ## Database
 
-- [ ] Script for database migration from the old version from the git [#c09f5620] to [main]
+- [-] Script for database migration from an older SQLite database
