@@ -79,7 +79,7 @@ templ sectionNotes(p PageProps) {
 		<div
 			id="notes-content"
 			hx-get={ urlb.PressNotes(p.PressNumber) }
-			hx-trigger="load, pageLoaded from:body"
+			hx-trigger="load, reload-notes from:body"
 			hx-on:htmx:response-error="alert('Fehler beim Laden der Notizen: ' + event.detail.xhr.responseText)"
 		>
 			@components.Spinner()
@@ -118,7 +118,7 @@ templ sectionMetalSheets(p PageProps) {
 		<div
 			id="metal-sheets-content"
 			hx-get={ urlb.PressMetalSheets(p.PressNumber) }
-			hx-trigger="load, pageLoaded from:body"
+			hx-trigger="load, reload-metal-sheets from:body"
 			hx-on:htmx:response-error="alert('Fehler beim Laden der Blech Listen: ' + event.detail.xhr.responseText)"
 		>
 			@components.Spinner()
@@ -168,7 +168,7 @@ templ sectionCycles(p PageProps) {
 			id="cycles-content"
 			class="mt"
 			hx-get={ urlb.PressCycles(p.PressNumber) }
-			hx-trigger="load, pageLoaded from:body"
+			hx-trigger="load, reload-cycles from:body"
 			hx-on:htmx:response-error="alert('Fehler beim Laden des Pressennutzungsverlaufs: ' + event.detail.xhr.responseText)"
 		>
 			@components.Spinner()

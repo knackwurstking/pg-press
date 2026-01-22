@@ -1,4 +1,4 @@
-var globalHxTrigger = "pageLoaded";
+//var globalHxTrigger = "pageLoaded";
 
 // For the ui.min.css i need to set the data-theme to light/dark
 function updateDataTheme() {
@@ -18,7 +18,7 @@ updateDataTheme();
 
 matchMedia("(prefers-color-scheme: dark)").addEventListener(
 	"change",
-	function() {
+	function () {
 		updateDataTheme();
 	},
 );
