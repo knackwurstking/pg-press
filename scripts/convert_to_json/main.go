@@ -18,6 +18,5 @@ func main() {
 
 	dbPath := args[0]
 
-	// First, log the command line arguments
-	fmt.Printf("dbPath=%#v\n", dbPath)
+	fmt.Printf("dbPath=%#v\n", dbPath) // TODO: Implement conversion logic for all database tables, use the "models" package types.
 }
