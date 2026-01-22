@@ -78,7 +78,6 @@ type MetalSheet struct {
 	STFMax      float64      `json:"stf_max"`      // STF max value
 	Identifier  MachineType  `json:"identifier"`   // Machine type identifier ("SACMI" or "SITI")
 	ToolID      ToolID       `json:"tool_id"`      // Currently assigned tool
-
 }
 
 // New creates a new MetalSheet with default values
