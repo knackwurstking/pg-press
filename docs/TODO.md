@@ -1,10 +1,7 @@
 ## General
 
 - [ ] Check if hx-trigger are properly set (handlers & templates)
-- [ ] Press PDF Summary missing
 - [ ] Check cycles calculation (Press & Tool) if with regenerations
-- [ ] Show the tool binding for cassettes, just an anchor linking to that tool
-- [ ] Show position badges for tool anchors for the press and tools page
 - [ ] Verify actions for non admins
 
 ## Press Page
@@ -12,3 +9,11 @@
 - [ ] Add: Action button for adding MetalSheet
 - [ ] Add: Action button for adding Cycle
 - [ ] Check Press Regenerations handling (Edit/Add/Delete)
+- [ ] Show position badges for tool anchors
+- [ ] PDF Summary
+
+## Tool Page
+
+- [ ] Cassettes already bound to a tool should be disabled inside the select element (option)
+- [ ] Show position badges for tool anchors
+- [ ] ~Show the tool binding for cassettes, just an anchor linking to that tool~
