@@ -26,7 +26,8 @@ var (
 
 func main() {
 	{
-		flag.BoolVar(&FlagClean, "clean", false, "Clean the output folders before writing new data")
+		flag.BoolVar(&FlagClean, "clean", FlagClean,
+			"Clean the output folders before writing new data")
 
 		flag.Parse()
 	}
