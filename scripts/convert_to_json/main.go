@@ -65,7 +65,11 @@ func main() {
 		panic("failed to create press cycles: " + err.Error())
 	}
 
-	// TODO: Add "tool_regenerations"
+	if err = createToolRegenerations(dbPath); err != nil {
+		panic("failed to create tool regenerations: " + err.Error())
+	}
+
+	// TODO: Add "tools"
 }
 
 // createAttachments reads the attachments SQL table and creates the images
@@ -203,27 +207,7 @@ func createNotes(dbPath string) error {
 		}
 	}
 
-	// Write `notes` array to (JSON) "./json/notes.json"
-	jsonPath, err := filepath.Abs(PathToJSON)
-	if err != nil {
-		return err
-	}
-	os.Mkdir(jsonPath, 0700) // Ignore error if folder exists
-
-	jsonFilePath := filepath.Join(jsonPath, "notes.json")
-	jsonFile, err := os.Create(jsonFilePath)
-	if err != nil {
-		return fmt.Errorf("create json file: %v", err)
-	}
-	defer jsonFile.Close()
-
-	encoder := json.NewEncoder(jsonFile)
-	encoder.SetIndent("", "\t")
-	if err = encoder.Encode(notes); err != nil {
-		return fmt.Errorf("encode notes to json: %v", err)
-	}
-
-	return nil
+	return writeJSON(notes)
 }
 
 func createCycles(dbPath string) error {
@@ -260,14 +244,52 @@ func createCycles(dbPath string) error {
 		}
 	}
 
-	// Write `cycles` array to (JSON) "./json/cycles.json"
+	return writeJSON(cycles)
+}
+
+func createToolRegenerations(dbPath string) error {
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		return fmt.Errorf("open db: %v", err)
+	}
+
+	toolRegenerations := []ToolRegeneration{}
+	{
+		const query = `SELECT id, tool_id, cycle_id, reason, performed_by FROM tool_regenerations;`
+		r, err := db.Query(query)
+		if err != nil {
+			return fmt.Errorf("query: %v", err)
+		}
+		defer r.Close()
+
+		for r.Next() {
+			tr := ToolRegeneration{}
+			err := r.Scan(
+				&tr.ID,
+				&tr.ToolID,
+				&tr.CycleID,
+				&tr.Reason,
+				&tr.PerformedBy,
+			)
+			if err != nil {
+				return fmt.Errorf("scan tool regeneration: %v", err)
+			}
+			fmt.Fprintf(os.Stderr, "Read tool regeneration with ID of %d\n", tr.ID)
+			toolRegenerations = append(toolRegenerations, tr)
+		}
+	}
+
+	return writeJSON(toolRegenerations)
+}
+
+func writeJSON(data any) error {
 	jsonPath, err := filepath.Abs(PathToJSON)
 	if err != nil {
 		return err
 	}
 	os.Mkdir(jsonPath, 0700) // Ignore error if folder exists
 
-	jsonFilePath := filepath.Join(jsonPath, "cycles.json")
+	jsonFilePath := filepath.Join(jsonPath, "tool_regenerations.json")
 	jsonFile, err := os.Create(jsonFilePath)
 	if err != nil {
 		return fmt.Errorf("create json file: %v", err)
@@ -276,8 +298,8 @@ func createCycles(dbPath string) error {
 
 	encoder := json.NewEncoder(jsonFile)
 	encoder.SetIndent("", "\t")
-	if err = encoder.Encode(cycles); err != nil {
-		return fmt.Errorf("encode cycles to json: %v", err)
+	if err = encoder.Encode(data); err != nil {
+		return fmt.Errorf("encode tool regenerations to json: %v", err)
 	}
 
 	return nil
