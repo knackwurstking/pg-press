@@ -1,4 +1,4 @@
-package main
+package models
 
 // CREATE TABLE IF NOT EXISTS tools (
 // 		id INTEGER NOT NULL,

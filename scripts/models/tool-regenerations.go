@@ -1,4 +1,4 @@
-package main
+package models
 
 // CREATE TABLE IF NOT EXISTS tool_regenerations (
 // 		id INTEGER PRIMARY KEY AUTOINCREMENT,

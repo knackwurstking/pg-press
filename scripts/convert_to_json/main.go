@@ -10,6 +10,8 @@ import (
 	"os"
 	"path/filepath"
 
+	m "github.com/knackwurstking/pg-press/scripts/models"
+
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -91,7 +93,7 @@ func createAttachments(dbPath string) error {
 		return err
 	}
 
-	attachments := []Attachment{}
+	attachments := []m.Attachment{}
 	{
 		const query = `SELECT id, mime_type, data FROM attachments;`
 		r, err := db.Query(query)
@@ -101,7 +103,7 @@ func createAttachments(dbPath string) error {
 		defer r.Close()
 
 		for r.Next() {
-			a := Attachment{}
+			a := m.Attachment{}
 			if err = r.Scan(&a.ID, &a.MimeType, &a.Data); err != nil {
 				return fmt.Errorf("scan attachment: %v", err)
 			}
@@ -134,7 +136,7 @@ func createMetalSheets(dbPath string) error {
 		return fmt.Errorf("open db: %v", err)
 	}
 
-	metalSheets := []MetalSheet{}
+	metalSheets := []m.MetalSheet{}
 	{
 		const query = `SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id FROM metal_sheets;`
 		r, err := db.Query(query)
@@ -144,7 +146,7 @@ func createMetalSheets(dbPath string) error {
 		defer r.Close()
 
 		for r.Next() {
-			ms := MetalSheet{}
+			ms := m.MetalSheet{}
 			err := r.Scan(
 				&ms.ID,
 				&ms.TileHeight,
@@ -172,7 +174,7 @@ func createNotes(dbPath string) error {
 		return fmt.Errorf("open db: %v", err)
 	}
 
-	notes := []Note{}
+	notes := []m.Note{}
 	{
 		const query = `SELECT id, level, content, created_at, linked FROM notes;`
 		r, err := db.Query(query)
@@ -182,7 +184,7 @@ func createNotes(dbPath string) error {
 		defer r.Close()
 
 		for r.Next() {
-			n := Note{}
+			n := m.Note{}
 			err := r.Scan(
 				&n.ID,
 				&n.Level,
@@ -207,7 +209,7 @@ func createCycles(dbPath string) error {
 		return fmt.Errorf("open db: %v", err)
 	}
 
-	cycles := []Cycle{}
+	cycles := []m.Cycle{}
 	{
 		const query = `SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by FROM press_cycles;`
 		r, err := db.Query(query)
@@ -217,7 +219,7 @@ func createCycles(dbPath string) error {
 		defer r.Close()
 
 		for r.Next() {
-			c := Cycle{}
+			c := m.Cycle{}
 			err := r.Scan(
 				&c.ID,
 				&c.PressNumber,
@@ -244,7 +246,7 @@ func createToolRegenerations(dbPath string) error {
 		return fmt.Errorf("open db: %v", err)
 	}
 
-	toolRegenerations := []ToolRegeneration{}
+	toolRegenerations := []m.ToolRegeneration{}
 	{
 		const query = `SELECT id, tool_id, cycle_id, reason, performed_by FROM tool_regenerations;`
 		r, err := db.Query(query)
@@ -254,7 +256,7 @@ func createToolRegenerations(dbPath string) error {
 		defer r.Close()
 
 		for r.Next() {
-			tr := ToolRegeneration{}
+			tr := m.ToolRegeneration{}
 			err := r.Scan(
 				&tr.ID,
 				&tr.ToolID,
@@ -279,7 +281,7 @@ func createTools(dbPath string) error {
 		return fmt.Errorf("open db: %v", err)
 	}
 
-	tools := []Tool{}
+	tools := []m.Tool{}
 	{
 		const query = `SELECT id, position, format, type, code, regenerating, is_dead, press, binding FROM tools;`
 		r, err := db.Query(query)
@@ -289,7 +291,7 @@ func createTools(dbPath string) error {
 		defer r.Close()
 
 		for r.Next() {
-			t := Tool{}
+			t := m.Tool{}
 			var formatData []byte
 			err := r.Scan(
 				&t.ID,
@@ -322,7 +324,7 @@ func createTroubleReports(dbPath string) error {
 		return fmt.Errorf("open db: %v", err)
 	}
 
-	troubleReports := []TroubleReport{}
+	troubleReports := []m.TroubleReport{}
 	{
 		const query = `SELECT id, title, content, linked_attachments, use_markdown FROM trouble_reports;`
 		r, err := db.Query(query)
@@ -332,7 +334,7 @@ func createTroubleReports(dbPath string) error {
 		defer r.Close()
 
 		for r.Next() {
-			tr := TroubleReport{}
+			tr := m.TroubleReport{}
 			var linkedAttachmentsData []byte
 			err := r.Scan(
 				&tr.ID,
@@ -361,7 +363,7 @@ func createUsers(dbPath string) error {
 		return fmt.Errorf("open db: %v", err)
 	}
 
-	users := []User{}
+	users := []m.User{}
 	{
 		const query = `SELECT telegram_id, user_name, api_key, last_feed FROM users;`
 		r, err := db.Query(query)
@@ -371,7 +373,7 @@ func createUsers(dbPath string) error {
 		defer r.Close()
 
 		for r.Next() {
-			u := User{}
+			u := m.User{}
 			err := r.Scan(
 				&u.TelegramID,
 				&u.Name,

@@ -1,4 +1,4 @@
-package main
+package models
 
 // CREATE TABLE IF NOT EXISTS metal_sheets (
 //		id INTEGER NOT NULL,

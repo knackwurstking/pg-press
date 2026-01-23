@@ -1,4 +1,4 @@
-package main
+package models
 
 // CREATE TABLE IF NOT EXISTS trouble_reports (
 // 		id INTEGER NOT NULL,
