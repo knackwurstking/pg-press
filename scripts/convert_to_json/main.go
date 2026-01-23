@@ -164,27 +164,7 @@ func createMetalSheets(dbPath string) error {
 		}
 	}
 
-	// Write `metalSheets` array to (JSON) "./json/metal_sheets.json"
-	jsonPath, err := filepath.Abs(PathToImages)
-	if err != nil {
-		return err
-	}
-	os.Mkdir(jsonPath, 0700) // Ignore error if folder exists
-
-	jsonFilePath := filepath.Join(jsonPath, "metal_sheets.json")
-	jsonFile, err := os.Create(jsonFilePath)
-	if err != nil {
-		return fmt.Errorf("create json file: %v", err)
-	}
-	defer jsonFile.Close()
-
-	encoder := json.NewEncoder(jsonFile)
-	encoder.SetIndent("", "\t")
-	if err = encoder.Encode(metalSheets); err != nil {
-		return fmt.Errorf("encode metal sheets to json: %v", err)
-	}
-
-	return nil
+	return writeJSON("metal_sheets.json", metalSheets)
 }
 
 func createNotes(dbPath string) error {
@@ -219,7 +199,7 @@ func createNotes(dbPath string) error {
 		}
 	}
 
-	return writeJSON(notes)
+	return writeJSON("notes.json", notes)
 }
 
 func createCycles(dbPath string) error {
@@ -256,7 +236,7 @@ func createCycles(dbPath string) error {
 		}
 	}
 
-	return writeJSON(cycles)
+	return writeJSON("cycles.json", cycles)
 }
 
 func createToolRegenerations(dbPath string) error {
@@ -291,30 +271,7 @@ func createToolRegenerations(dbPath string) error {
 		}
 	}
 
-	return writeJSON(toolRegenerations)
-}
-
-func writeJSON(data any) error {
-	jsonPath, err := filepath.Abs(PathToJSON)
-	if err != nil {
-		return err
-	}
-	os.Mkdir(jsonPath, 0700) // Ignore error if folder exists
-
-	jsonFilePath := filepath.Join(jsonPath, "tool_regenerations.json")
-	jsonFile, err := os.Create(jsonFilePath)
-	if err != nil {
-		return fmt.Errorf("create json file: %v", err)
-	}
-	defer jsonFile.Close()
-
-	encoder := json.NewEncoder(jsonFile)
-	encoder.SetIndent("", "\t")
-	if err = encoder.Encode(data); err != nil {
-		return fmt.Errorf("encode tool regenerations to json: %v", err)
-	}
-
-	return nil
+	return writeJSON("tool-regenerations.json", toolRegenerations)
 }
 
 func createTools(dbPath string) error {
@@ -357,7 +314,7 @@ func createTools(dbPath string) error {
 		}
 	}
 
-	return writeJSON(tools)
+	return writeJSON("tools", tools)
 }
 
 func createTroubleReports(dbPath string) error {
@@ -396,7 +353,7 @@ func createTroubleReports(dbPath string) error {
 		}
 	}
 
-	return writeJSON(troubleReports)
+	return writeJSON("trouble-reports.json", troubleReports)
 }
 
 func createUsers(dbPath string) error {
@@ -430,5 +387,28 @@ func createUsers(dbPath string) error {
 		}
 	}
 
-	return writeJSON(users)
+	return writeJSON("users.json", users)
+}
+
+func writeJSON(filename string, data any) error {
+	jsonPath, err := filepath.Abs(PathToJSON)
+	if err != nil {
+		return err
+	}
+	os.Mkdir(jsonPath, 0700) // Ignore error if folder exists
+
+	jsonFilePath := filepath.Join(jsonPath, filename)
+	jsonFile, err := os.Create(jsonFilePath)
+	if err != nil {
+		return fmt.Errorf("create json file: %v", err)
+	}
+	defer jsonFile.Close()
+
+	encoder := json.NewEncoder(jsonFile)
+	encoder.SetIndent("", "\t")
+	if err = encoder.Encode(data); err != nil {
+		return fmt.Errorf("encode tool regenerations to json: %v", err)
+	}
+
+	return nil
 }
