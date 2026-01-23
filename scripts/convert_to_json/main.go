@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 
 	"github.com/knackwurstking/pg-press/internal/utils"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 const (
