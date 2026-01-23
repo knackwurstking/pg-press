@@ -4,6 +4,7 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
@@ -12,53 +13,84 @@ import (
 	"github.com/knackwurstking/pg-press/internal/utils"
 )
 
+const (
+	PathToImages = "./images"
+	PathToJSON   = "./json"
+)
+
+var (
+	FlagClean bool
+)
+
 func main() {
-	flag.Parse()
+	{
+		flag.BoolVar(&FlagClean, "clean", false, "Clean the output folders before writing new data")
+
+		flag.Parse()
+	}
 
 	args := flag.Args()
 	if len(args) < 1 {
 		fmt.Println("Usage: convert_to_json <path_to_sqlite_db>")
 		return
 	}
-
 	dbPath := args[0]
 
-	if err := createAttachments(dbPath); err != nil {
-		panic("failed to creaete attachments: " + err.Error())
+	if FlagClean {
+		for _, path := range []string{PathToImages, PathToJSON} {
+			absPath, err := filepath.Abs(path)
+			if err != nil {
+				panic("failed to get absolute path of " + path + " folder: " + err.Error())
+			}
+			if err = os.RemoveAll(absPath); err != nil {
+				panic("failed to clean " + path + " folder: " + err.Error())
+			}
+		}
 	}
 
-	// TODO: Convert "metal_sheets" table entries to JSON files []*MetalSheet
+	if err := createAttachments(dbPath); err != nil {
+		panic("failed to create attachments: " + err.Error())
+	}
+
+	if err := createMetalSheets(dbPath); err != nil {
+		panic("failed to create metal sheets: " + err.Error())
+	}
+
+	// TODO: scan the "notes" table and create "./json/notes.json"
 }
 
 // createAttachments reads the attachments SQL table and creates the images
 // folder at "./images/*"
 func createAttachments(dbPath string) error {
-	imagesPath, err := filepath.Abs("./images")
-	if err != nil {
-		return err
-	}
-	os.Mkdir(imagesPath, 0700) // Ignore error if folder exists
-
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		return err
 	}
 
-	const query = `SELECT id, mime_type, data FROM attachments;`
-	r, err := db.Query(query)
-	if err != nil {
-		return fmt.Errorf("query: %v", err)
-	}
-	defer r.Close()
-
 	attachments := []Attachment{}
-	for r.Next() {
-		a := Attachment{}
-		if err = r.Scan(&a.ID, &a.MimeType, &a.Data); err != nil {
-			return fmt.Errorf("scan attachment: %v", err)
+	{
+		const query = `SELECT id, mime_type, data FROM attachments;`
+		r, err := db.Query(query)
+		if err != nil {
+			return fmt.Errorf("query: %v", err)
 		}
-		attachments = append(attachments, a)
+		defer r.Close()
+
+		for r.Next() {
+			a := Attachment{}
+			if err = r.Scan(&a.ID, &a.MimeType, &a.Data); err != nil {
+				return fmt.Errorf("scan attachment: %v", err)
+			}
+			attachments = append(attachments, a)
+		}
 	}
+
+	imagesPath, err := filepath.Abs(PathToImages)
+	if err != nil {
+		return err
+	}
+
+	os.Mkdir(imagesPath, 0700) // Ignore error if folder exists
 
 	for _, a := range attachments {
 		fileName := utils.GetAttachmentFileName(a.ID + a.GetExtension())
@@ -67,6 +99,64 @@ func createAttachments(dbPath string) error {
 			return fmt.Errorf("write attachment file: %v", err)
 		}
 		fmt.Fprintf(os.Stderr, "Wrote attachment with ID of %s to %s\n", a.ID, path)
+	}
+
+	return nil
+}
+
+func createMetalSheets(dbPath string) error {
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		return fmt.Errorf("open db: %v", err)
+	}
+
+	metalSheets := []MetalSheet{}
+	{
+		const query = `SELECT id, tile_height, value, marke_height, stf, stf_max, identifier, tool_id FROM metal_sheets;`
+		r, err := db.Query(query)
+		if err != nil {
+			return fmt.Errorf("query: %v", err)
+		}
+		defer r.Close()
+
+		for r.Next() {
+			ms := MetalSheet{}
+			err := r.Scan(
+				&ms.ID,
+				&ms.TileHeight,
+				&ms.Value,
+				&ms.MarkeHeight,
+				&ms.STF,
+				&ms.STFMax,
+				&ms.Identifier,
+				&ms.ToolID,
+			)
+			if err != nil {
+				return fmt.Errorf("scan metal sheet: %v", err)
+			}
+			fmt.Fprintf(os.Stderr, "Read metal sheet with ID of %d\n", ms.ID)
+			metalSheets = append(metalSheets, ms)
+		}
+	}
+
+	// Write `metalSheets` array to (JSON) "./json/metal_sheets.json"
+	jsonPath, err := filepath.Abs(PathToImages)
+	if err != nil {
+		return err
+	}
+	os.Mkdir(jsonPath, 0700) // Ignore error if folder exists
+
+	jsonFilePath := filepath.Join(jsonPath, "metal_sheets.json")
+	jsonFile, err := os.Create(jsonFilePath)
+	if err != nil {
+		return fmt.Errorf("create json file: %v", err)
+	}
+	defer jsonFile.Close()
+
+	encoder := json.NewEncoder(jsonFile)
+	encoder.SetIndent("", "\t")
+	if err = encoder.Encode(metalSheets); err != nil {
+		return fmt.Errorf("encode metal sheets to json: %v", err)
 	}
 
 	return nil
