@@ -48,19 +48,24 @@ func main() {
 		}
 	}
 
-	if err := createAttachments(dbPath); err != nil {
+	var err error
+	if err = createAttachments(dbPath); err != nil {
 		panic("failed to create attachments: " + err.Error())
 	}
 
-	if err := createMetalSheets(dbPath); err != nil {
+	if err = createMetalSheets(dbPath); err != nil {
 		panic("failed to create metal sheets: " + err.Error())
 	}
 
-	if err := createNotes(dbPath); err != nil {
+	if err = createNotes(dbPath); err != nil {
 		panic("failed to create notes: " + err.Error())
 	}
 
-	// TODO: Create: "press_cycles"
+	if err = createCycles(dbPath); err != nil {
+		panic("failed to create press cycles: " + err.Error())
+	}
+
+	// TODO: Add "tool_regenerations"
 }
 
 // createAttachments reads the attachments SQL table and creates the images
@@ -216,6 +221,63 @@ func createNotes(dbPath string) error {
 	encoder.SetIndent("", "\t")
 	if err = encoder.Encode(notes); err != nil {
 		return fmt.Errorf("encode notes to json: %v", err)
+	}
+
+	return nil
+}
+
+func createCycles(dbPath string) error {
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		return fmt.Errorf("open db: %v", err)
+	}
+
+	cycles := []Cycle{}
+	{
+		const query = `SELECT id, press_number, tool_id, tool_position, total_cycles, date, performed_by FROM press_cycles;`
+		r, err := db.Query(query)
+		if err != nil {
+			return fmt.Errorf("query: %v", err)
+		}
+		defer r.Close()
+
+		for r.Next() {
+			c := Cycle{}
+			err := r.Scan(
+				&c.ID,
+				&c.PressNumber,
+				&c.ToolID,
+				&c.ToolPosition,
+				&c.TotalCycles,
+				&c.Date,
+				&c.PerformedBy,
+			)
+			if err != nil {
+				return fmt.Errorf("scan cycle: %v", err)
+			}
+			fmt.Fprintf(os.Stderr, "Read cycle with ID of %d\n", c.ID)
+			cycles = append(cycles, c)
+		}
+	}
+
+	// Write `cycles` array to (JSON) "./json/cycles.json"
+	jsonPath, err := filepath.Abs(PathToJSON)
+	if err != nil {
+		return err
+	}
+	os.Mkdir(jsonPath, 0700) // Ignore error if folder exists
+
+	jsonFilePath := filepath.Join(jsonPath, "cycles.json")
+	jsonFile, err := os.Create(jsonFilePath)
+	if err != nil {
+		return fmt.Errorf("create json file: %v", err)
+	}
+	defer jsonFile.Close()
+
+	encoder := json.NewEncoder(jsonFile)
+	encoder.SetIndent("", "\t")
+	if err = encoder.Encode(cycles); err != nil {
+		return fmt.Errorf("encode cycles to json: %v", err)
 	}
 
 	return nil
