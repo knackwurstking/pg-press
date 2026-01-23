@@ -73,7 +73,13 @@ func main() {
 		panic("failed to create tools: " + err.Error())
 	}
 
-	// TODO: Add "trouble_reports"
+	if err = createTroubleReports(dbPath); err != nil {
+		panic("failed to create trouble reports: " + err.Error())
+	}
+
+	if err = createUsers(dbPath); err != nil {
+		panic("failed to create users: " + err.Error())
+	}
 }
 
 // createAttachments reads the attachments SQL table and creates the images
@@ -350,4 +356,77 @@ func createTools(dbPath string) error {
 	}
 
 	return writeJSON(tools)
+}
+
+func createTroubleReports(dbPath string) error {
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		return fmt.Errorf("open db: %v", err)
+	}
+
+	troubleReports := []TroubleReport{}
+	{
+		const query = `SELECT id, title, content, linked_attachments, use_markdown FROM trouble_reports;`
+		r, err := db.Query(query)
+		if err != nil {
+			return fmt.Errorf("query: %v", err)
+		}
+		defer r.Close()
+
+		for r.Next() {
+			tr := TroubleReport{}
+			var linkedAttachmentsData []byte
+			err := r.Scan(
+				&tr.ID,
+				&tr.Title,
+				&tr.Content,
+				&linkedAttachmentsData,
+				&tr.UseMarkdown,
+			)
+			if err != nil {
+				return fmt.Errorf("scan trouble report: %v", err)
+			}
+			if err = json.Unmarshal(linkedAttachmentsData, &tr.LinkedAttachments); err != nil {
+				return fmt.Errorf("unmarshal linked attachments: %v", err)
+			}
+			fmt.Fprintf(os.Stderr, "Read trouble report with ID of %d\n", tr.ID)
+			troubleReports = append(troubleReports, tr)
+		}
+	}
+
+	return writeJSON(troubleReports)
+}
+
+func createUsers(dbPath string) error {
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		return fmt.Errorf("open db: %v", err)
+	}
+
+	users := []User{}
+	{
+		const query = `SELECT telegram_id, user_name, api_key, last_feed FROM users;`
+		r, err := db.Query(query)
+		if err != nil {
+			return fmt.Errorf("query: %v", err)
+		}
+		defer r.Close()
+
+		for r.Next() {
+			u := User{}
+			err := r.Scan(
+				&u.TelegramID,
+				&u.Name,
+				&u.ApiKey,
+				&u.LastFeed,
+			)
+			if err != nil {
+				return fmt.Errorf("scan user: %v", err)
+			}
+			fmt.Fprintf(os.Stderr, "Read user with Telegram ID of %d\n", u.TelegramID)
+			users = append(users, u)
+		}
+	}
+
+	return writeJSON(users)
 }
