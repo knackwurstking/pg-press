@@ -10,8 +10,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/knackwurstking/pg-press/internal/utils"
-
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -119,7 +117,7 @@ func createAttachments(dbPath string) error {
 	os.Mkdir(imagesPath, 0700) // Ignore error if folder exists
 
 	for _, a := range attachments {
-		fileName := utils.GetAttachmentFileName(a.ID + a.GetExtension())
+		fileName := a.ID + a.GetExtension()
 		path := filepath.Join(imagesPath, fileName)
 		if err = os.WriteFile(path, a.Data, 0644); err != nil {
 			return fmt.Errorf("write attachment file: %v", err)
