@@ -3,5 +3,5 @@
 convert_to_json:
 	@go run -v ./convert_to_json ~/Library/Application\ Support/pg-press/pg-press.db
 
-convert_to_json_test:
+test_convert_to_json:
 	@go run -v ./convert_to_json ./test/pg-press.db
