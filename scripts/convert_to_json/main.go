@@ -315,7 +315,7 @@ func createTools(dbPath string) error {
 		}
 	}
 
-	return writeJSON("tools", tools)
+	return writeJSON("tools.json", tools)
 }
 
 func createTroubleReports(dbPath string) error {
