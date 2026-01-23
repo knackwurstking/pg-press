@@ -2,6 +2,15 @@ package main
 
 import "time"
 
+// CREATE TABLE IF NOT EXISTS notes (
+// 		id INTEGER NOT NULL,
+// 		level INTEGER NOT NULL,
+// 		content TEXT NOT NULL,
+// 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+// 		linked TEXT,
+// 		PRIMARY KEY("id" AUTOINCREMENT)
+// 	)
+
 const (
 	LevelInfo Level = iota
 	LevelAttention
