@@ -24,5 +24,5 @@ type Note struct {
 	Level     Level     `json:"level"`
 	Content   string    `json:"content"`
 	CreatedAt time.Time `json:"created_at"`
-	Linked    string    `json:"linked,omitempty"` // Generic linked entity (e.g., "press_5", "tool_123")
+	Linked    string    `json:"linked,omitempty"`
 }

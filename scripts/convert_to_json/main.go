@@ -56,7 +56,11 @@ func main() {
 		panic("failed to create metal sheets: " + err.Error())
 	}
 
-	// TODO: scan the "notes" table and create "./json/notes.json"
+	if err := createNotes(dbPath); err != nil {
+		panic("failed to create notes: " + err.Error())
+	}
+
+	// TODO: Create: "press_cycles"
 }
 
 // createAttachments reads the attachments SQL table and creates the images
@@ -157,6 +161,61 @@ func createMetalSheets(dbPath string) error {
 	encoder.SetIndent("", "\t")
 	if err = encoder.Encode(metalSheets); err != nil {
 		return fmt.Errorf("encode metal sheets to json: %v", err)
+	}
+
+	return nil
+}
+
+func createNotes(dbPath string) error {
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		return fmt.Errorf("open db: %v", err)
+	}
+
+	notes := []Note{}
+	{
+		const query = `SELECT id, level, content, created_at, linked FROM notes;`
+		r, err := db.Query(query)
+		if err != nil {
+			return fmt.Errorf("query: %v", err)
+		}
+		defer r.Close()
+
+		for r.Next() {
+			n := Note{}
+			err := r.Scan(
+				&n.ID,
+				&n.Level,
+				&n.Content,
+				&n.CreatedAt,
+				&n.Linked,
+			)
+			if err != nil {
+				return fmt.Errorf("scan note: %v", err)
+			}
+			fmt.Fprintf(os.Stderr, "Read note with ID of %d\n", n.ID)
+			notes = append(notes, n)
+		}
+	}
+
+	// Write `notes` array to (JSON) "./json/notes.json"
+	jsonPath, err := filepath.Abs(PathToJSON)
+	if err != nil {
+		return err
+	}
+	os.Mkdir(jsonPath, 0700) // Ignore error if folder exists
+
+	jsonFilePath := filepath.Join(jsonPath, "notes.json")
+	jsonFile, err := os.Create(jsonFilePath)
+	if err != nil {
+		return fmt.Errorf("create json file: %v", err)
+	}
+	defer jsonFile.Close()
+
+	encoder := json.NewEncoder(jsonFile)
+	encoder.SetIndent("", "\t")
+	if err = encoder.Encode(notes); err != nil {
+		return fmt.Errorf("encode notes to json: %v", err)
 	}
 
 	return nil
