@@ -69,7 +69,11 @@ func main() {
 		panic("failed to create tool regenerations: " + err.Error())
 	}
 
-	// TODO: Add "tools"
+	if err = createTools(dbPath); err != nil {
+		panic("failed to create tools: " + err.Error())
+	}
+
+	// TODO: Add "trouble_reports"
 }
 
 // createAttachments reads the attachments SQL table and creates the images
@@ -303,4 +307,47 @@ func writeJSON(data any) error {
 	}
 
 	return nil
+}
+
+func createTools(dbPath string) error {
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		return fmt.Errorf("open db: %v", err)
+	}
+
+	tools := []Tool{}
+	{
+		const query = `SELECT id, position, format, type, code, regenerating, is_dead, press, binding FROM tools;`
+		r, err := db.Query(query)
+		if err != nil {
+			return fmt.Errorf("query: %v", err)
+		}
+		defer r.Close()
+
+		for r.Next() {
+			t := Tool{}
+			var formatData []byte
+			err := r.Scan(
+				&t.ID,
+				&t.Position,
+				&formatData,
+				&t.Type,
+				&t.Code,
+				&t.Regenerating,
+				&t.IsDead,
+				&t.Press,
+				&t.Binding,
+			)
+			if err != nil {
+				return fmt.Errorf("scan tool: %v", err)
+			}
+			if err = json.Unmarshal(formatData, &t.Format); err != nil {
+				return fmt.Errorf("unmarshal tool format: %v", err)
+			}
+			fmt.Fprintf(os.Stderr, "Read tool with ID of %d\n", t.ID)
+			tools = append(tools, t)
+		}
+	}
+
+	return writeJSON(tools)
 }
