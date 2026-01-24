@@ -69,6 +69,10 @@ const (
 		INSERT INTO metal_sheets (tool_id, tile_height, value, type, marke_height, stf, stf_max, identifier)
 		VALUES (:tool_id, :tile_height, :value, 'lower', :marke_height, :stf, :stf_max, :identifier);
 	`
+	sqlAddLowerMetalSheetWithID string = `
+		INSERT INTO metal_sheets (id, tool_id, tile_height, value, type, marke_height, stf, stf_max, identifier)
+		VALUES (:id, :tool_id, :tile_height, :value, 'lower', :marke_height, :stf, :stf_max, :identifier);
+	`
 
 	sqlUpdateLowerMetalSheet string = `
 		UPDATE metal_sheets
@@ -185,18 +189,35 @@ func AddLowerMetalSheet(lms *shared.LowerMetalSheet) *errors.HTTPError {
 		return verr.HTTPError().Wrap("invalid lower metal sheet")
 	}
 
-	_, err := dbTool.Exec(sqlAddLowerMetalSheet,
-		sql.Named("tool_id", lms.ToolID),
-		sql.Named("tile_height", lms.TileHeight),
-		sql.Named("value", lms.Value),
-		sql.Named("marke_height", lms.MarkeHeight),
-		sql.Named("stf", lms.STF),
-		sql.Named("stf_max", lms.STFMax),
-		sql.Named("identifier", lms.Identifier),
-	)
-	if err != nil {
+	var query string
+	{
+		if lms.ID > 0 {
+			query = sqlAddLowerMetalSheetWithID
+		} else {
+			query = sqlAddLowerMetalSheet
+		}
+	}
+
+	var queryArgs []any
+	{
+		if lms.ID > 0 {
+			queryArgs = append(queryArgs, sql.Named("id", lms.ID))
+		}
+		queryArgs = append(queryArgs,
+			sql.Named("tool_id", lms.ToolID),
+			sql.Named("tile_height", lms.TileHeight),
+			sql.Named("value", lms.Value),
+			sql.Named("marke_height", lms.MarkeHeight),
+			sql.Named("stf", lms.STF),
+			sql.Named("stf_max", lms.STFMax),
+			sql.Named("identifier", lms.Identifier),
+		)
+	}
+
+	if _, err := dbTool.Exec(query, queryArgs...); err != nil {
 		return errors.NewHTTPError(err)
 	}
+
 	return nil
 }
 

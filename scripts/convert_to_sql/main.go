@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/knackwurstking/pg-press/internal/db"
+	"github.com/knackwurstking/pg-press/internal/shared"
 	m "github.com/knackwurstking/pg-press/scripts/models"
 )
 
@@ -46,12 +48,75 @@ func main() {
 }
 
 func toolData() error {
-	databaseName := "tools.json"
-	metalSheets := readJSON(databaseName, []m.MetalSheet{})
-	toolRegenerations := readJSON(databaseName, []m.ToolRegeneration{})
-	tools := readJSON(databaseName, []m.Tool{})
+	if err := db.Open("sql", true); err != nil {
+		return err
+	}
 
-	// TODO: ...
+	{
+		oldMetalSheets := []m.MetalSheet{}
+		if err := readJSON("metal-sheets", oldMetalSheets); err != nil {
+			return err
+		}
+
+		for _, ms := range oldMetalSheets {
+			base := shared.BaseMetalSheet{
+				ID:         shared.EntityID(ms.ID),
+				ToolID:     shared.EntityID(ms.ToolID),
+				TileHeight: ms.TileHeight,
+				Value:      ms.Value,
+			}
+			isUpper := ms.MarkeHeight > 0
+			if isUpper {
+				lms := &shared.LowerMetalSheet{
+					BaseMetalSheet: base,
+					MarkeHeight:    ms.MarkeHeight,
+					STF:            ms.STF,
+					STFMax:         ms.STFMax,
+					Identifier:     shared.MachineType(ms.Identifier),
+				}
+				if err := db.AddLowerMetalSheet(lms); err != nil {
+					return err
+				}
+			} else {
+				ums := &shared.UpperMetalSheet{
+					BaseMetalSheet: base,
+				}
+				if err := db.AddUpperMetalSheet(ums); err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	{
+		oldToolRegenerations := []m.ToolRegeneration{}
+		err := readJSON("tool-regenerations", oldToolRegenerations)
+		if err != nil {
+			return err
+		}
+
+		newToolRegenerations := []*shared.ToolRegeneration{}
+		for _, r := range oldToolRegenerations {
+			// TODO: Convert old to new
+		}
+
+		// TODO: Write data to SQL database
+	}
+
+	{
+		oldTools := []m.Tool{}
+		err = readJSON("tools", oldTools)
+		if err != nil {
+			return err
+		}
+
+		newTools := []*shared.Tool{}
+		for _, t := range oldTools {
+			// TODO: Convert old to new
+		}
+
+		// TODO: Write data to SQL database
+	}
 
 	return nil
 }
