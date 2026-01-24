@@ -29,6 +29,11 @@ const (
 		VALUES (:tool_id, :press_number, :cycles, :stop)
 	`
 
+	sqlAddCycleWithID string = `
+		INSERT INTO cycles (id, tool_id, press_number, cycles, stop)
+		VALUES (:id, :tool_id, :press_number, :cycles, :stop)
+	`
+
 	sqlUpdateCycle string = `
 		UPDATE cycles
 		SET
@@ -83,13 +88,25 @@ func AddCycle(cycle *shared.Cycle) *errors.HTTPError {
 		return verr.HTTPError()
 	}
 
-	_, err := dbPress.Exec(sqlAddCycle,
+	var query string
+	if cycle.ID > 0 {
+		query = sqlAddCycleWithID
+	} else {
+		query = sqlAddCycle
+	}
+
+	var queryArgs []any
+	if cycle.ID > 0 {
+		queryArgs = append(queryArgs, sql.Named("id", cycle.ID))
+	}
+	queryArgs = append(queryArgs,
 		sql.Named("tool_id", cycle.ToolID),
 		sql.Named("press_number", cycle.PressNumber),
 		sql.Named("cycles", cycle.PressCycles),
 		sql.Named("stop", cycle.Stop),
 	)
-	if err != nil {
+
+	if _, err := dbPress.Exec(query, queryArgs...); err != nil {
 		return errors.NewHTTPError(err)
 	}
 

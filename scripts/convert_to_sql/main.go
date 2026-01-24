@@ -171,46 +171,91 @@ func createToolData(oldCycles []m.Cycle, oldTools []m.Tool) error {
 }
 
 func createPressData(cycles []m.Cycle, tools []m.Tool) error {
-	// Create presses from cycles and tools (`Press` & `PressNumber`)
-	pressNumbers := []shared.PressNumber{}
-	for _, c := range cycles {
-		if slices.Contains(pressNumbers, shared.PressNumber(c.PressNumber)) {
-			continue
-		}
-		pressNumbers = append(pressNumbers, shared.PressNumber(c.PressNumber))
-	}
-	for _, t := range tools {
-		if t.Press == nil {
-			continue
-		}
-		if slices.Contains(pressNumbers, shared.PressNumber(*t.Press)) {
-			continue
-		}
-		pressNumbers = append(pressNumbers, shared.PressNumber(*t.Press))
-	}
-
-	// Sort press numbers from low to high
-	slices.Sort(pressNumbers)
-	for _, p := range pressNumbers {
-		// TODO: Find tools for slots "up" and "down".
-		// 		 Set machine type (0 & 5 == SACMI, 2,3,4 == SITI).
-		press := &shared.Press{
-			ID: p,
-			//SlotUp: ,
-			//SlotDown: ,
-			CyclesOffset: 0,
-			//Type: ,
-		}
-		if err := db.AddPress(press); err != nil {
-			return err
+	{ // Cycles
+		for _, c := range cycles {
+			cycle := &shared.Cycle{
+				ID:          shared.EntityID(c.ID),
+				ToolID:      shared.EntityID(c.ToolID),
+				PressNumber: shared.PressNumber(c.PressNumber),
+				PressCycles: c.TotalCycles,
+				Stop:        shared.NewUnixMilli(c.Date),
+			}
+			if err := db.AddCycle(cycle); err != nil {
+				return err
+			}
 		}
 	}
 
-	return errors.New("not implemented")
+	{ // Create presses from cycles and tools (`Press` & `PressNumber`)
+		pressNumbers := []shared.PressNumber{}
+		for _, c := range cycles {
+			if slices.Contains(pressNumbers, shared.PressNumber(c.PressNumber)) {
+				continue
+			}
+			pressNumbers = append(pressNumbers, shared.PressNumber(c.PressNumber))
+		}
+		for _, t := range tools {
+			if t.Press == nil {
+				continue
+			}
+			if slices.Contains(pressNumbers, shared.PressNumber(*t.Press)) {
+				continue
+			}
+			pressNumbers = append(pressNumbers, shared.PressNumber(*t.Press))
+		}
+
+		// Sort press numbers from low to high
+		slices.Sort(pressNumbers)
+		for _, p := range pressNumbers {
+			// Find tools for slots "up" and "down". Set machine type
+			// (0 & 5 == SACMI, 2,3,4 == SITI).
+			slotUp := shared.EntityID(0)
+			slotDown := shared.EntityID(0)
+			for _, t := range tools {
+				if t.Press != nil && shared.PressNumber(*t.Press) == p {
+					switch t.Position {
+					case m.PositionTop:
+						slotUp = shared.EntityID(t.ID)
+					case m.PositionBottom:
+						slotDown = shared.EntityID(t.ID)
+					}
+				}
+			}
+
+			pressType := shared.MachineType("")
+			switch p {
+			case 0, 5:
+				pressType = shared.MachineTypeSACMI
+			case 2, 3, 4:
+				pressType = shared.MachineTypeSITI
+			default:
+				return fmt.Errorf("unknown press number: %d", p)
+			}
+
+			press := &shared.Press{
+				ID:           p,
+				SlotUp:       slotUp,
+				SlotDown:     slotDown,
+				CyclesOffset: 0,
+				Type:         pressType,
+			}
+			if err := db.AddPress(press); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 func createNoteData() error {
-	return errors.New("not implemented")
+	oldNotes := []m.Note{}
+	if err := readJSON("notes.json", oldNotes); err != nil {
+		panic("failed to read notes: " + err.Error())
+	}
+
+	// ...
+
 }
 
 func createUserData() error {
