@@ -51,6 +51,7 @@ func toolData() error {
 	if err := db.Open("sql", true); err != nil {
 		return err
 	}
+	defer db.Close()
 
 	{
 		oldMetalSheets := []m.MetalSheet{}
@@ -97,10 +98,8 @@ func toolData() error {
 
 		newToolRegenerations := []*shared.ToolRegeneration{}
 		for _, r := range oldToolRegenerations {
-			// TODO: Convert old to new
+			// TODO: Create regeneration and add to database
 		}
-
-		// TODO: Write data to SQL database
 	}
 
 	{
