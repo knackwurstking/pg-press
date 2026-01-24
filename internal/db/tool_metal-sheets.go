@@ -38,6 +38,11 @@ const (
 		VALUES (:tool_id, :tile_height, :value, 'upper');
 	`
 
+	sqlAddUpperMetalSheetWithID string = `
+		INSERT INTO metal_sheets (id, tool_id, tile_height, value, type)
+		VALUES (:id, :tool_id, :tile_height, :value, 'upper');
+	`
+
 	sqlUpdateUpperMetalSheet string = `
 		UPDATE metal_sheets
 		SET
@@ -112,12 +117,24 @@ func AddUpperMetalSheet(ums *shared.UpperMetalSheet) *errors.HTTPError {
 		return verr.HTTPError().Wrap("invalid upper metal sheet")
 	}
 
-	_, err := dbTool.Exec(sqlAddUpperMetalSheet,
+	var query string
+	if ums.ID > 0 {
+		query = sqlAddUpperMetalSheetWithID
+	} else {
+		query = sqlAddUpperMetalSheet
+	}
+
+	var queryArgs []any
+	if ums.ID > 0 {
+		queryArgs = append(queryArgs, sql.Named("id", ums.ID))
+	}
+	queryArgs = append(queryArgs,
 		sql.Named("tool_id", ums.ToolID),
 		sql.Named("tile_height", ums.TileHeight),
 		sql.Named("value", ums.Value),
 	)
-	if err != nil {
+
+	if _, err := dbTool.Exec(query, queryArgs...); err != nil {
 		return errors.NewHTTPError(err)
 	}
 	return nil

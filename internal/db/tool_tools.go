@@ -39,6 +39,11 @@ const (
 		VALUES (:width, :height, :position, :type, :code, :cycles_offset, :is_dead, :cassette, :min_thickness, :max_thickness);
 	`
 
+	sqlAddToolWithID string = `
+		INSERT INTO tools (id, width, height, position, type, code, cycles_offset, is_dead, cassette, min_thickness, max_thickness)
+		VALUES (:id, :width, :height, :position, :type, :code, :cycles_offset, :is_dead, :cassette, :min_thickness, :max_thickness);
+	`
+
 	sqlUpdateTool string = `
 		UPDATE tools
 		SET width 			= :width,
@@ -106,7 +111,18 @@ func AddTool(tool *shared.Tool) *errors.HTTPError {
 		return verr.HTTPError().Wrap("invalid tool data")
 	}
 
-	_, err := dbTool.Exec(sqlAddTool,
+	var query string
+	if tool.ID > 0 {
+		query = sqlAddToolWithID
+	} else {
+		query = sqlAddTool
+	}
+
+	var queryArgs []any
+	if tool.ID > 0 {
+		queryArgs = append(queryArgs, sql.Named("id", tool.ID))
+	}
+	queryArgs = append(queryArgs,
 		sql.Named("width", tool.Width),
 		sql.Named("height", tool.Height),
 		sql.Named("position", tool.Position),
@@ -118,10 +134,10 @@ func AddTool(tool *shared.Tool) *errors.HTTPError {
 		sql.Named("min_thickness", tool.MinThickness),
 		sql.Named("max_thickness", tool.MaxThickness),
 	)
-	if err != nil {
+
+	if _, err := dbTool.Exec(query, queryArgs...); err != nil {
 		return errors.NewHTTPError(err)
 	}
-
 	return nil
 }
 

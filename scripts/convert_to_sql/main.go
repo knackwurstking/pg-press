@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -24,38 +25,46 @@ func main() {
 	//  - "sql/user.sqlite"	    : cookies, users
 	//  - "sql/reports.sqlite"	: trouble_reports
 
-	var err error
+	if err := db.Open("sql", true); err != nil {
+		panic("failed to open database: " + err.Error())
+	}
+	defer db.Close()
 
-	if err = toolData(); err != nil {
+	oldCycles := []m.Cycle{}
+	if err := readJSON("cycles.json", oldCycles); err != nil {
+		panic("failed to read cycles: " + err.Error())
+	}
+
+	oldTools := []m.Tool{}
+	if err := readJSON("tools.json", oldTools); err != nil {
+		panic("failed to read tools: " + err.Error())
+	}
+
+	if err := createToolData(oldCycles, oldTools); err != nil {
 		panic("failed to convert tool data: " + err.Error())
 	}
 
-	if err = pressData(); err != nil {
+	if err := createPressData(oldCycles, oldTools); err != nil {
 		panic("failed to convert press data: " + err.Error())
 	}
 
-	if err = noteData(); err != nil {
+	if err := createNoteData(); err != nil {
 		panic("failed to convert note data: " + err.Error())
 	}
 
-	if err = userData(); err != nil {
+	if err := createUserData(); err != nil {
 		panic("failed to convert user data: " + err.Error())
 	}
 
-	if err = reportsData(); err != nil {
+	if err := createReportsData(); err != nil {
 		panic("failed to convert reports data: " + err.Error())
 	}
 }
 
-func toolData(cycles []m.Cycle) error {
-	if err := db.Open("sql", true); err != nil {
-		return err
-	}
-	defer db.Close()
-
-	{
+func createToolData(oldCycles []m.Cycle, oldTools []m.Tool) error {
+	{ // Metal Sheets
 		oldMetalSheets := []m.MetalSheet{}
-		if err := readJSON("metal-sheets", oldMetalSheets); err != nil {
+		if err := readJSON("metal-sheets.json", oldMetalSheets); err != nil {
 			return err
 		}
 
@@ -89,16 +98,16 @@ func toolData(cycles []m.Cycle) error {
 		}
 	}
 
-	{
+	{ // Tool Regenerations
 		oldToolRegenerations := []m.ToolRegeneration{}
-		if err := readJSON("tool-regenerations", oldToolRegenerations); err != nil {
+		if err := readJSON("tool-regenerations.json", oldToolRegenerations); err != nil {
 			return err
 		}
 
 		for _, r := range oldToolRegenerations {
 			var start, stop shared.UnixMilli
 			// Find cycle id inside the JSON data
-			for _, c := range cycles {
+			for _, c := range oldCycles {
 				if c.ID == r.CycleID {
 					stop = shared.NewUnixMilli(c.Date)
 					start = stop // NOTE: Start time is not available in old data
@@ -117,36 +126,65 @@ func toolData(cycles []m.Cycle) error {
 		}
 	}
 
-	{
-		oldTools := []m.Tool{}
-		if err := readJSON("tools", oldTools); err != nil {
-			return err
-		}
-
+	{ // Tools
 		for _, t := range oldTools {
-			// TODO: Convert old to new
-		}
+			position := shared.SlotUnknown
+			switch t.Position {
+			case m.PositionTop:
+				position = shared.SlotUpper
+			case m.PositionTopCassette:
+				position = shared.SlotUpperCassette
+			case m.PositionBottom:
+				position = shared.SlotLower
+			}
+			if position == shared.SlotUnknown {
+				return fmt.Errorf("unknown tool position: %s", t.Position)
+			}
 
-		// TODO: Write data to SQL database
+			binding := shared.EntityID(0)
+			if t.Binding == nil {
+				binding = shared.EntityID(*t.Binding)
+			}
+
+			tool := &shared.Tool{
+				ID:           shared.EntityID(t.ID),
+				Width:        t.Format.Width,
+				Height:       t.Format.Height,
+				Position:     position,
+				Type:         t.Type,
+				Code:         t.Code,
+				CyclesOffset: 0, // CyclesOffset does not exists in old data
+				IsDead:       t.IsDead,
+				Cassette:     binding,
+				MinThickness: 0, // MinThickness does not exists in old data
+				MaxThickness: 0, // MaxThickness does not exists in old data
+			}
+
+			if err := db.AddTool(tool); err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil
 }
 
-func pressData() error {
-	return readJSON("press.json")
+func createPressData(cycles []m.Cycle, tools []m.Tool) error {
+	// TODO: Create presses from cycles and tools (`Press` & `PressNumber`)
+
+	return errors.New("not implemented")
 }
 
-func noteData() error {
-	return readJSON("note.json")
+func createNoteData() error {
+	return errors.New("not implemented")
 }
 
-func userData() error {
-	return readJSON("user.json")
+func createUserData() error {
+	return errors.New("not implemented")
 }
 
-func reportsData() error {
-	return readJSON("reports.json")
+func createReportsData() error {
+	return errors.New("not implemented")
 }
 
 func readJSON(fileName string, t any) error {

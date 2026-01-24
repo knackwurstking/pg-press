@@ -27,7 +27,7 @@ type Tool struct {
 	Type         string   `json:"type"`          // Type represents the tool type, e.g., "MASS", "FC", "GTC", etc.
 	Code         string   `json:"code"`          // Code is the unique tool code/identifier, "G01", "12345", etc.
 	CyclesOffset int64    `json:"cycles_offset"` // CyclesOffset is an offset added to the cycles count
-	Cycles       int64    `json:"cycles"`        // Cycles indicates how many cycles this tool has done (injected)
+	Cycles       int64    `json:"cycles"`        // Cycles indicates how many cycles this tool has done [injected]
 	IsDead       bool     `json:"is_dead"`       // IsDead indicates if the tool is dead/destroyed
 	Cassette     EntityID `json:"cassette"`      // Cassette indicates the cassette ID this tool belongs to (if any)
 	MinThickness float32  `json:"min_thickness"`
@@ -134,7 +134,7 @@ func (t *Tool) Validate() *errors.ValidationError {
 			return errors.NewValidationError(
 				"cassette minimum thickness %.1f must be less than maximum thickness %.1f",
 				t.MinThickness, t.MaxThickness,
-		)
+			)
 		}
 	}
 
