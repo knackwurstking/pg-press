@@ -30,6 +30,11 @@ const (
 		VALUES (:level, :content, :created_at, :linked);
 	`
 
+	sqlAddNoteWithID string = `
+		INSERT INTO notes (id, level, content, created_at, linked)
+		VALUES (:id, :level, :content, :created_at, :linked);
+	`
+
 	sqlUpdateNote string = `
 		UPDATE notes
 		SET level 		= :level,
@@ -73,13 +78,25 @@ func AddNote(note *shared.Note) *errors.HTTPError {
 		return verr.HTTPError().Wrap("invalid note data")
 	}
 
-	_, err := dbNote.Exec(sqlAddNote,
+	var query string
+	if note.ID > 0 {
+		query = sqlAddNoteWithID
+	} else {
+		query = sqlAddNote
+	}
+
+	var queryArgs []any
+	if note.ID > 0 {
+		queryArgs = append(queryArgs, sql.Named("id", note.ID))
+	}
+	queryArgs = append(queryArgs,
 		sql.Named("level", note.Level),
 		sql.Named("content", note.Content),
 		sql.Named("created_at", note.CreatedAt),
 		sql.Named("linked", note.Linked),
 	)
-	if err != nil {
+
+	if _, err := dbNote.Exec(query, queryArgs...); err != nil {
 		return errors.NewHTTPError(err)
 	}
 	return nil

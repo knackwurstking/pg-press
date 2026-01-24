@@ -254,8 +254,32 @@ func createNoteData() error {
 		panic("failed to read notes: " + err.Error())
 	}
 
-	// ...
+	for _, n := range oldNotes {
+		level := shared.LevelNormal
+		switch n.Level {
+		case m.LevelInfo:
+			level = shared.LevelInfo
+		case m.LevelAttention:
+			level = shared.LevelAttention
+		case m.LevelBroken:
+			level = shared.LevelBroken
+		default:
+			return fmt.Errorf("unknown note level: %d", n.Level)
+		}
 
+		note := &shared.Note{
+			ID:        shared.EntityID(n.ID),
+			Level:     level,
+			Content:   n.Content,
+			CreatedAt: shared.NewUnixMilli(n.CreatedAt),
+			Linked:    n.Linked,
+		}
+		if err := db.AddNote(note); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func createUserData() error {
