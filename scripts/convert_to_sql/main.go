@@ -47,7 +47,7 @@ func main() {
 	}
 }
 
-func toolData() error {
+func toolData(cycles []m.Cycle) error {
 	if err := db.Open("sql", true); err != nil {
 		return err
 	}
@@ -91,25 +91,38 @@ func toolData() error {
 
 	{
 		oldToolRegenerations := []m.ToolRegeneration{}
-		err := readJSON("tool-regenerations", oldToolRegenerations)
-		if err != nil {
+		if err := readJSON("tool-regenerations", oldToolRegenerations); err != nil {
 			return err
 		}
 
-		newToolRegenerations := []*shared.ToolRegeneration{}
 		for _, r := range oldToolRegenerations {
-			// TODO: Create regeneration and add to database
+			var start, stop shared.UnixMilli
+			// Find cycle id inside the JSON data
+			for _, c := range cycles {
+				if c.ID == r.CycleID {
+					stop = shared.NewUnixMilli(c.Date)
+					start = stop // NOTE: Start time is not available in old data
+					break
+				}
+			}
+			err := db.AddToolRegeneration(&shared.ToolRegeneration{
+				ID:     shared.EntityID(r.ID),
+				ToolID: shared.EntityID(r.ToolID),
+				Start:  start,
+				Stop:   stop,
+			})
+			if err != nil {
+				return err
+			}
 		}
 	}
 
 	{
 		oldTools := []m.Tool{}
-		err = readJSON("tools", oldTools)
-		if err != nil {
+		if err := readJSON("tools", oldTools); err != nil {
 			return err
 		}
 
-		newTools := []*shared.Tool{}
 		for _, t := range oldTools {
 			// TODO: Convert old to new
 		}

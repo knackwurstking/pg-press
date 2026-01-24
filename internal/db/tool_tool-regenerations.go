@@ -25,6 +25,11 @@ const (
 		);
 	`
 
+	sqlAddToolRegenerationWithID string = `
+		INSERT INTO tool_regenerations (id, tool_id, start, stop)
+		VALUES (:id, :tool_id, :start, :stop);
+	`
+
 	sqlAddToolRegeneration string = `
 		INSERT INTO tool_regenerations (tool_id, start, stop)
 		VALUES (:tool_id, :start, :stop);
@@ -97,12 +102,28 @@ func AddToolRegeneration(tr *shared.ToolRegeneration) *errors.HTTPError {
 		return errors.NewHTTPError(verr)
 	}
 
-	_, err := dbTool.Exec(sqlAddToolRegeneration,
-		sql.Named("tool_id", tr.ToolID),
-		sql.Named("start", tr.Start),
-		sql.Named("stop", tr.Stop),
-	)
-	if err != nil {
+	var query string
+	{
+		if tr.ID > 0 {
+			query = sqlAddToolRegenerationWithID
+		} else {
+			query = sqlAddToolRegeneration
+		}
+	}
+
+	var queryArgs []any
+	{
+		if tr.ID > 0 {
+			queryArgs = append(queryArgs, sql.Named("id", tr.ID))
+		}
+		queryArgs = append(queryArgs,
+			sql.Named("tool_id", tr.ToolID),
+			sql.Named("start", tr.Start),
+			sql.Named("stop", tr.Stop),
+		)
+	}
+
+	if _, err := dbTool.Exec(query, queryArgs...); err != nil {
 		return errors.NewHTTPError(err)
 	}
 	return nil
