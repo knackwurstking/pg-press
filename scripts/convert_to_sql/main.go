@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -170,7 +171,40 @@ func createToolData(oldCycles []m.Cycle, oldTools []m.Tool) error {
 }
 
 func createPressData(cycles []m.Cycle, tools []m.Tool) error {
-	// TODO: Create presses from cycles and tools (`Press` & `PressNumber`)
+	// Create presses from cycles and tools (`Press` & `PressNumber`)
+	pressNumbers := []shared.PressNumber{}
+	for _, c := range cycles {
+		if slices.Contains(pressNumbers, shared.PressNumber(c.PressNumber)) {
+			continue
+		}
+		pressNumbers = append(pressNumbers, shared.PressNumber(c.PressNumber))
+	}
+	for _, t := range tools {
+		if t.Press == nil {
+			continue
+		}
+		if slices.Contains(pressNumbers, shared.PressNumber(*t.Press)) {
+			continue
+		}
+		pressNumbers = append(pressNumbers, shared.PressNumber(*t.Press))
+	}
+
+	// Sort press numbers from low to high
+	slices.Sort(pressNumbers)
+	for _, p := range pressNumbers {
+		// TODO: Find tools for slots "up" and "down".
+		// 		 Set machine type (0 & 5 == SACMI, 2,3,4 == SITI).
+		press := &shared.Press{
+			ID: p,
+			//SlotUp: ,
+			//SlotDown: ,
+			CyclesOffset: 0,
+			//Type: ,
+		}
+		if err := db.AddPress(press); err != nil {
+			return err
+		}
+	}
 
 	return errors.New("not implemented")
 }
