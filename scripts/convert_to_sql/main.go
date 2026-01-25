@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
+	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -13,20 +13,28 @@ import (
 	m "github.com/knackwurstking/pg-press/scripts/models"
 )
 
-const (
-	PathToImages = "./images"
-	PathToJSON   = "./json"
+var (
+	PathToImages, _ = filepath.Abs("./images")
+	PathToJSON, _   = filepath.Abs("./json")
+	PathToSQL, _    = filepath.Abs("./sql")
+
+	FlagClean bool
 )
 
 func main() {
-	// TODO: convert "./images" and "./json" to new SQL database format "..."
-	// 	- "sql/tool.sqlite"	    : metal_sheets, tool_regenerations, tools
-	//  - "sql/press.sqlite"    : cycles, presses, press_regenerations
-	//  - "sql/note.sqlite"	    : notes
-	//  - "sql/user.sqlite"	    : cookies, users
-	//  - "sql/reports.sqlite"	: trouble_reports
+	{ // Flags
+		flag.BoolVar(&FlagClean, "clean", false,
+			"clean existing SQL database files before conversion")
 
-	if err := db.Open("sql", true); err != nil {
+		flag.Parse()
+	}
+
+	sqlPath := PathToSQL
+	if FlagClean {
+		os.RemoveAll(sqlPath)
+	}
+
+	if err := db.Open(sqlPath, true); err != nil {
 		panic("failed to open database: " + err.Error())
 	}
 	defer db.Close()
@@ -41,28 +49,28 @@ func main() {
 		panic("failed to read tools: " + err.Error())
 	}
 
-	if err := createToolData(oldCycles, oldTools); err != nil {
+	if err := CreateToolData(oldCycles, oldTools); err != nil {
 		panic("failed to convert tool data: " + err.Error())
 	}
 
-	if err := createPressData(oldCycles, oldTools); err != nil {
+	if err := CreatePressData(oldCycles, oldTools); err != nil {
 		panic("failed to convert press data: " + err.Error())
 	}
 
-	if err := createNoteData(); err != nil {
+	if err := CreateNoteData(); err != nil {
 		panic("failed to convert note data: " + err.Error())
 	}
 
-	if err := createUserData(); err != nil {
+	if err := CreateUserData(); err != nil {
 		panic("failed to convert user data: " + err.Error())
 	}
 
-	if err := createReportsData(); err != nil {
+	if err := CreateReportsData(); err != nil {
 		panic("failed to convert reports data: " + err.Error())
 	}
 }
 
-func createToolData(oldCycles []m.Cycle, oldTools []m.Tool) error {
+func CreateToolData(oldCycles []m.Cycle, oldTools []m.Tool) error {
 	{ // Metal Sheets
 		oldMetalSheets := []m.MetalSheet{}
 		if err := readJSON("metal-sheets.json", oldMetalSheets); err != nil {
@@ -170,7 +178,7 @@ func createToolData(oldCycles []m.Cycle, oldTools []m.Tool) error {
 	return nil
 }
 
-func createPressData(cycles []m.Cycle, tools []m.Tool) error {
+func CreatePressData(cycles []m.Cycle, tools []m.Tool) error {
 	{ // Cycles
 		for _, c := range cycles {
 			cycle := &shared.Cycle{
@@ -248,7 +256,7 @@ func createPressData(cycles []m.Cycle, tools []m.Tool) error {
 	return nil
 }
 
-func createNoteData() error {
+func CreateNoteData() error {
 	oldNotes := []m.Note{}
 	if err := readJSON("notes.json", oldNotes); err != nil {
 		panic("failed to read notes: " + err.Error())
@@ -282,12 +290,36 @@ func createNoteData() error {
 	return nil
 }
 
-func createUserData() error {
-	return errors.New("not implemented")
+func CreateUserData() error {
+	oldUsers := []m.User{}
+	if err := readJSON("users.json", oldUsers); err != nil {
+		panic("failed to read users: " + err.Error())
+	}
+
+	for _, u := range oldUsers {
+		user := &shared.User{
+			ID:     shared.TelegramID(u.TelegramID),
+			Name:   u.Name,
+			ApiKey: u.ApiKey,
+		}
+		if err := db.AddUser(user); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
-func createReportsData() error {
-	return errors.New("not implemented")
+// CreateReportsData migrates trouble reports from old JSON data to the new SQL database.
+func CreateReportsData() error {
+	troubleReports := []m.TroubleReport{}
+	if err := readJSON("trouble-reports.json", troubleReports); err != nil {
+		return err
+	}
+
+	// TODO: ...
+
+	return nil
 }
 
 func readJSON(fileName string, t any) error {
