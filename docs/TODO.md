@@ -4,6 +4,10 @@
 - [ ] Check cycles calculation (Press & Tool) if with regenerations
 - [ ] Verify actions for non admins
 
+## Tools Page
+
+- [ ] Sort presses from low to hight
+
 ## Press Page
 
 - [ ] Add: Action button for adding MetalSheet
