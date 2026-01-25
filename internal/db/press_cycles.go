@@ -84,8 +84,8 @@ const (
 
 // AddCycle adds a new cycle entry to the database
 func AddCycle(cycle *shared.Cycle) *errors.HTTPError {
-	if verr := cycle.Validate(); verr != nil {
-		return verr.HTTPError()
+	if err := cycle.Validate(); err != nil {
+		return err.HTTPError()
 	}
 
 	var query string
@@ -115,8 +115,8 @@ func AddCycle(cycle *shared.Cycle) *errors.HTTPError {
 
 // UpdateCycle updates an existing cycle entry in the database
 func UpdateCycle(cycle *shared.Cycle) *errors.HTTPError {
-	if verr := cycle.Validate(); verr != nil {
-		return verr.HTTPError()
+	if err := cycle.Validate(); err != nil {
+		return err.HTTPError()
 	}
 
 	_, err := dbPress.Exec(sqlUpdateCycle,
@@ -148,12 +148,12 @@ func GetCycle(id shared.EntityID) (*shared.Cycle, *errors.HTTPError) {
 
 // TotalToolCycles since last tool regeneration
 func GetTotalToolCycles(id shared.EntityID) (int64, *errors.HTTPError) {
-	cycles, merr := ListToolCycles(id)
-	if merr != nil {
-		return 0, merr.Wrap("failed to list tool cycles for tool ID %d", id)
+	cycles, herr := ListToolCycles(id)
+	if herr != nil {
+		return 0, herr.Wrap("failed to list tool cycles for tool ID %d", id)
 	}
 
-	// TODO: Get last tool regeneration
+	// TODO: Get last tool regeneration...
 
 	// Inject partial cycles for each cycle
 	var totalCycles int64 = 0
@@ -173,19 +173,19 @@ func ListToolCycles(toolID shared.EntityID) ([]*shared.Cycle, *errors.HTTPError)
 
 	var cycles []*shared.Cycle
 	for rows.Next() {
-		cycle, merr := ScanCycle(rows)
-		if merr != nil {
+		cycle, herr := ScanCycle(rows)
+		if herr != nil {
 			rows.Close()
-			return nil, merr
+			return nil, herr
 		}
 		cycles = append(cycles, cycle)
 	}
 	rows.Close()
 
-	var merr *errors.HTTPError
+	var herr *errors.HTTPError
 	for _, c := range cycles {
-		if merr = CycleInject(c); merr != nil {
-			return nil, merr.Wrap("failed to inject into cycle with ID %d", c.ID)
+		if herr = CycleInject(c); herr != nil {
+			return nil, herr.Wrap("failed to inject into cycle with ID %d", c.ID)
 		}
 	}
 
@@ -202,17 +202,17 @@ func ListCyclesByPressNumber(pressNumber shared.PressNumber) ([]*shared.Cycle, *
 
 	var cycles []*shared.Cycle
 	for rows.Next() {
-		cycle, merr := ScanCycle(rows)
-		if merr != nil {
-			return nil, merr
+		cycle, herr := ScanCycle(rows)
+		if herr != nil {
+			return nil, herr
 		}
 		cycles = append(cycles, cycle)
 	}
 
-	var merr *errors.HTTPError
+	var herr *errors.HTTPError
 	for _, c := range cycles {
-		if merr = CycleInject(c); merr != nil {
-			return nil, merr.Wrap("failed to inject into cycle with ID %d", c.ID)
+		if herr = CycleInject(c); herr != nil {
+			return nil, herr.Wrap("failed to inject into cycle with ID %d", c.ID)
 		}
 	}
 
@@ -247,7 +247,7 @@ func CycleInject(cycle *shared.Cycle) *errors.HTTPError {
 // -----------------------------------------------------------------------------
 
 // ScanCycle scans a database row into a Cycle struct
-func ScanCycle(row Scannable) (cycle *shared.Cycle, merr *errors.HTTPError) {
+func ScanCycle(row Scannable) (cycle *shared.Cycle, herr *errors.HTTPError) {
 	cycle = &shared.Cycle{}
 	err := row.Scan(
 		&cycle.ID,
