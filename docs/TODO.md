@@ -26,3 +26,4 @@
 ## Database
 
 - [x] Script for database migration from an older SQLite database
+
