@@ -11,6 +11,8 @@ import (
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	m "github.com/knackwurstking/pg-press/scripts/models"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var (
