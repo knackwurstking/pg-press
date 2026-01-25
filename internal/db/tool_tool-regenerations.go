@@ -53,14 +53,15 @@ const (
 	sqlListToolRegenerations string = `
 		SELECT id, tool_id, start, stop
 		FROM tool_regenerations
-		ORDER BY start DESC
+		ORDER BY stop DESC
 	;
 	`
 
 	sqlListToolRegenerationsByTool string = `
 		SELECT id, tool_id, start, stop
 		FROM tool_regenerations
-		WHERE tool_id = :tool_id;
+		WHERE tool_id = :tool_id
+		ORDER BY stop DESC;
 	`
 
 	sqlDeleteToolRegeneration string = `
@@ -77,7 +78,7 @@ const (
 		SELECT COUNT(*)
 		FROM tool_regenerations
 		WHERE stop = 0 AND tool_id = :tool_id
-		ORDER BY start DESC;
+		ORDER BY stop DESC;
 	`
 
 	sqlStartToolRegeneration string = `
@@ -98,8 +99,8 @@ const (
 
 // AddToolRegeneration adds a new tool regeneration to the database
 func AddToolRegeneration(tr *shared.ToolRegeneration) *errors.HTTPError {
-	if verr := tr.Validate(); verr != nil {
-		return errors.NewHTTPError(verr)
+	if err := tr.Validate(); err != nil {
+		return errors.NewHTTPError(err)
 	}
 
 	var query string
@@ -131,8 +132,8 @@ func AddToolRegeneration(tr *shared.ToolRegeneration) *errors.HTTPError {
 
 // UpdateToolRegeneration updates an existing tool regeneration in the database
 func UpdateToolRegeneration(tr *shared.ToolRegeneration) *errors.HTTPError {
-	if verr := tr.Validate(); verr != nil {
-		return errors.NewHTTPError(verr)
+	if err := tr.Validate(); err != nil {
+		return errors.NewHTTPError(err)
 	}
 
 	_, err := dbTool.Exec(sqlUpdateToolRegeneration,
@@ -150,9 +151,9 @@ func UpdateToolRegeneration(tr *shared.ToolRegeneration) *errors.HTTPError {
 // GetToolRegeneration retrieves a tool regeneration by its ID
 func GetToolRegeneration(id shared.EntityID) (*shared.ToolRegeneration, *errors.HTTPError) {
 	row := dbTool.QueryRow(sqlGetToolRegeneration, sql.Named("id", int64(id)))
-	tr, merr := ScanToolRegeneration(row)
-	if merr != nil {
-		return nil, merr
+	tr, herr := ScanToolRegeneration(row)
+	if herr != nil {
+		return nil, herr
 	}
 	return tr, nil
 }
@@ -165,16 +166,16 @@ func ListToolRegenerations() ([]*shared.ToolRegeneration, *errors.HTTPError) {
 	}
 	defer r.Close()
 
-	var trs []*shared.ToolRegeneration
+	var tres []*shared.ToolRegeneration
 	for r.Next() {
-		tr, merr := ScanToolRegeneration(r)
-		if merr != nil {
-			return nil, merr
+		tr, herr := ScanToolRegeneration(r)
+		if herr != nil {
+			return nil, herr
 		}
-		trs = append(trs, tr)
+		tres = append(tres, tr)
 	}
 
-	return trs, nil
+	return tres, nil
 }
 
 // ListToolRegenerationsByTool retrieves all tool regenerations for a specific tool
@@ -184,18 +185,18 @@ func ListToolRegenerationsByTool(toolID shared.EntityID) ([]*shared.ToolRegenera
 		return nil, errors.NewHTTPError(err)
 	}
 
-	var trs []*shared.ToolRegeneration
+	var tres []*shared.ToolRegeneration
 	for rows.Next() {
-		tr, merr := ScanToolRegeneration(rows)
-		if merr != nil {
+		tr, herr := ScanToolRegeneration(rows)
+		if herr != nil {
 			rows.Close()
-			return nil, merr
+			return nil, herr
 		}
-		trs = append(trs, tr)
+		tres = append(tres, tr)
 	}
 	rows.Close()
 
-	return trs, nil
+	return tres, nil
 }
 
 // DeleteToolRegeneration removes a tool regeneration from the database
@@ -229,14 +230,14 @@ func ToolRegenerationInProgress(toolID shared.EntityID) (bool, *errors.HTTPError
 
 // StartToolRegeneration starts a new tool regeneration
 func StartToolRegeneration(toolID shared.EntityID) *errors.HTTPError {
-	tool, merr := GetTool(toolID)
-	if merr != nil {
-		return merr.Wrap("getting tool by ID failed")
+	tool, herr := GetTool(toolID)
+	if herr != nil {
+		return herr.Wrap("getting tool by ID failed")
 	}
 
 	// Check if a already started regeneration exists for this tool
-	if inProgress, merr := ToolRegenerationInProgress(tool.ID); merr != nil {
-		return merr.Wrap("checking for in-progress regeneration failed (Tool ID %d)", tool.ID)
+	if inProgress, herr := ToolRegenerationInProgress(tool.ID); herr != nil {
+		return herr.Wrap("checking for in-progress regeneration failed (Tool ID %d)", tool.ID)
 	} else if inProgress {
 		return errors.NewHTTPError(fmt.Errorf("a tool regeneration is already in progress for tool with ID %d", tool.ID))
 	}
@@ -254,9 +255,9 @@ func StartToolRegeneration(toolID shared.EntityID) *errors.HTTPError {
 
 // StopToolRegeneration stops an ongoing tool regeneration
 func StopToolRegeneration(toolID shared.EntityID) *errors.HTTPError {
-	tool, merr := GetTool(toolID)
-	if merr != nil {
-		return merr.Wrap("getting tool by ID failed")
+	tool, herr := GetTool(toolID)
+	if herr != nil {
+		return herr.Wrap("getting tool by ID failed")
 	}
 
 	_, err := dbTool.Exec(sqlStopToolRegeneration,
@@ -270,9 +271,9 @@ func StopToolRegeneration(toolID shared.EntityID) *errors.HTTPError {
 	// Reset tool cycles to zero
 	tool.CyclesOffset = 0
 	tool.Cycles = 0
-	merr = UpdateTool(tool)
-	if merr != nil {
-		return merr.Wrap("updating tool after regeneration failed")
+	herr = UpdateTool(tool)
+	if herr != nil {
+		return herr.Wrap("updating tool after regeneration failed")
 	}
 
 	return nil
@@ -280,9 +281,9 @@ func StopToolRegeneration(toolID shared.EntityID) *errors.HTTPError {
 
 // AbortToolRegeneration aborts an ongoing tool regeneration
 func AbortToolRegeneration(toolID shared.EntityID) *errors.HTTPError {
-	merr := DeleteToolRegenerationByTool(toolID)
-	if merr != nil {
-		return merr.Wrap("deleting tool regeneration failed")
+	herr := DeleteToolRegenerationByTool(toolID)
+	if herr != nil {
+		return herr.Wrap("deleting tool regeneration failed")
 	}
 	return nil
 }
