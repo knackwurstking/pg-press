@@ -30,6 +30,11 @@ const (
 		VALUES (:title, :content, :linked_attachments, :use_markdown);
 	`
 
+	sqlAddTroubleReportWithID string = `
+		INSERT INTO trouble_reports (id, title, content, linked_attachments, use_markdown)
+		VALUES (:id, :title, :content, :linked_attachments, :use_markdown);
+	`
+
 	sqlUpdateTroubleReport string = `
 		UPDATE trouble_reports
 		SET title               = :title,
@@ -73,13 +78,25 @@ func AddTroubleReport(report *shared.TroubleReport) *errors.HTTPError {
 		return errors.NewHTTPError(err).Wrap("failed to marshal linked attachments")
 	}
 
-	_, err = dbReports.Exec(sqlAddTroubleReport,
+	var query string
+	if report.ID > 0 {
+		query = sqlAddTroubleReportWithID
+	} else {
+		query = sqlAddTroubleReport
+	}
+
+	var queryArgs []any
+	if report.ID > 0 {
+		queryArgs = append(queryArgs, sql.Named("id", report.ID))
+	}
+	queryArgs = append(queryArgs,
 		sql.Named("title", report.Title),
 		sql.Named("content", report.Content),
 		sql.Named("linked_attachments", string(linkedAttachmentsJSON)),
 		sql.Named("use_markdown", boolToInt(report.UseMarkdown)),
 	)
-	if err != nil {
+
+	if _, err = dbReports.Exec(query, queryArgs...); err != nil {
 		return errors.NewHTTPError(err)
 	}
 
