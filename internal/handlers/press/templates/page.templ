@@ -34,32 +34,33 @@ templ Page(p PageProps) {
 
 // Actions section - contains buttons for umbau and regeneration
 templ sectionActions(p PageProps) {
+	if !p.User.IsAdmin() {
+		{{ return }}
+	}
 	@components.ActionBar(nil) {
-		if p.User.IsAdmin() {
-			<button
-				class="secondary"
-				hx-get={ urlb.DialogEditPressGet(p.PressNumber) }
-				hx-trigger="click"
-				hx-target="body"
-				hx-swap="beforeend"
-			>
-				Bearbeiten
-			</button>
-			<a
-				role="button"
-				class="secondary"
-				href={ urlb.PressRegeneration(p.PressNumber, 0) }
-			>
-				Regeneration
-			</a>
-			<a
-				role="button"
-				class="primary"
-				href={ urlb.Umbau(p.PressNumber) }
-			>
-				Umbau
-			</a>
-		}
+		<button
+			class="secondary"
+			hx-get={ urlb.DialogEditPressGet(p.PressNumber) }
+			hx-trigger="click"
+			hx-target="body"
+			hx-swap="beforeend"
+		>
+			Bearbeiten
+		</button>
+		<a
+			role="button"
+			class="secondary"
+			href={ urlb.PressRegeneration(p.PressNumber, 0) }
+		>
+			Regeneration
+		</a>
+		<a
+			role="button"
+			class="primary"
+			href={ urlb.Umbau(p.PressNumber) }
+		>
+			Umbau
+		</a>
 	}
 }
 

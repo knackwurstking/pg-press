@@ -22,9 +22,7 @@ templ Page(p *PageProps) {
 		},
 	) {
 		<main class="container fluid flex flex-col gap">
-			@components.ActionBar(nil) {
-				@actionBarContent(p)
-			}
+			@actionBarContent(p)
 			@components.Section(templ.Attributes{
 				"id":                    "notes-section",
 				"hx-get":                string(urlb.ToolNotes(p.Tool.ID)),
@@ -51,7 +49,10 @@ templ Page(p *PageProps) {
 }
 
 templ actionBarContent(p *PageProps) {
-	if p.User.IsAdmin() {
+	if !p.User.IsAdmin() {
+		{{ return }}
+	}
+	@components.ActionBar(nil) {
 		if p.Tool.IsDead {
 			// TODO: Revive tool/cassette button here
 		} else {
@@ -65,20 +66,20 @@ templ actionBarContent(p *PageProps) {
 				Mark as Dead
 			</button>
 		}
+		<button
+			class="primary flex gap"
+			if p.Tool.IsCassette() {
+				hx-get={ urlb.DialogEditCassette(p.Tool.ID) }
+			} else {
+				hx-get={ urlb.DialogEditTool(p.Tool.ID) }
+			}
+			hx-trigger="click"
+			hx-target="body"
+			hx-swap="beforeend"
+			hx-on::response-error="alert(event.detail.xhr.responseText)"
+		>
+			<i class="bi bi-pencil"></i>
+			Bearbeiten
+		</button>
 	}
-	<button
-		class="primary flex gap"
-		if p.Tool.IsCassette() {
-			hx-get={ urlb.DialogEditCassette(p.Tool.ID) }
-		} else {
-			hx-get={ urlb.DialogEditTool(p.Tool.ID) }
-		}
-		hx-trigger="click"
-		hx-target="body"
-		hx-swap="beforeend"
-		hx-on::response-error="alert(event.detail.xhr.responseText)"
-	>
-		<i class="bi bi-pencil"></i>
-		Bearbeiten
-	</button>
 }
