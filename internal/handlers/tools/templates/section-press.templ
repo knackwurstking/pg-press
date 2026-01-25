@@ -9,6 +9,7 @@ import (
 
 type SectionPressProps struct {
 	PressUtilizations map[shared.PressNumber]*shared.PressUtilization
+	User              *shared.User
 }
 
 templ SectionPress(p SectionPressProps) {
@@ -24,6 +25,7 @@ templ SectionPress(p SectionPressProps) {
 			hx-target="body"
 			hx-swap="beforeend"
 			class="flex gap small"
+			disabled?={ !p.User.IsAdmin() }
 		>
 			<i class="bi bi-plus-lg"></i> Presse hinzufügen
 		</button>

@@ -28,7 +28,26 @@ templ SectionTools(p SectionToolsProps) {
 	@components.ActionBar(templ.Attributes{
 		"style": "margin-top: 3.5rem;",
 	}) {
-		@actionBarContent()
+		<button
+			hx-get={ urlb.DialogEditCassette(0) }
+			hx-trigger="click"
+			hx-swap="beforeend"
+			class="flex gap secondary small"
+			disabled?={ !p.User.IsAdmin() }
+		>
+			<i class="bi bi-plus-lg"></i>
+			<span>Kassette</span>
+		</button>
+		<button
+			hx-get={ urlb.DialogEditTool(0) }
+			hx-trigger="click"
+			hx-swap="beforeend"
+			class="flex gap primary small"
+			disabled?={ !p.User.IsAdmin() }
+		>
+			<i class="bi bi-plus-lg"></i>
+			<span>Werkzeug</span>
+		</button>
 	}
 	<div id="tools-container" class="flex flex-col gap">
 		@ToolsList(p)
@@ -56,27 +75,6 @@ templ inputFilterTools(tools []*shared.Tool) {
 		</label>
 	</div>
 	<script>initFilterInputFromQuery()</script>
-}
-
-templ actionBarContent() {
-	<button
-		hx-get={ urlb.DialogEditCassette(0) }
-		hx-trigger="click"
-		hx-swap="beforeend"
-		class="flex gap secondary small"
-	>
-		<i class="bi bi-plus-lg"></i>
-		<span>Kassette</span>
-	</button>
-	<button
-		hx-get={ urlb.DialogEditTool(0) }
-		hx-trigger="click"
-		hx-swap="beforeend"
-		class="flex gap primary small"
-	>
-		<i class="bi bi-plus-lg"></i>
-		<span>Werkzeug</span>
-	</button>
 }
 
 templ ToolsList(p SectionToolsProps) {
