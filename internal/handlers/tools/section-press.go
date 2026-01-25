@@ -1,6 +1,8 @@
 package tools
 
 import (
+	"slices"
+
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/tools/templates"
@@ -20,14 +22,21 @@ func renderPressSection(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
+	var pressUtilizationsOrder []shared.PressNumber
+	for p, _ := range pressUtilizations {
+		pressUtilizationsOrder = append(pressUtilizationsOrder, p)
+	}
+	slices.Sort(pressUtilizationsOrder)
+
 	user, herr := utils.GetUserFromContext(c)
 	if herr != nil {
 		return herr.Echo()
 	}
 
 	t := templates.SectionPress(templates.SectionPressProps{
-		PressUtilizations: pressUtilizations,
-		User:              user,
+		PressUtilizations:      pressUtilizations,
+		PressUtilizationsOrder: pressUtilizationsOrder,
+		User:                   user,
 	})
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {

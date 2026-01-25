@@ -6,7 +6,7 @@
 
 ## Tools Page
 
-- [ ] Sort presses from low to hight
+- [x] Sort presses from low to hight
 
 ## Press Page
 

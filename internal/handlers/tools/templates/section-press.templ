@@ -8,8 +8,9 @@ import (
 )
 
 type SectionPressProps struct {
-	PressUtilizations map[shared.PressNumber]*shared.PressUtilization
-	User              *shared.User
+	PressUtilizations      map[shared.PressNumber]*shared.PressUtilization
+	PressUtilizationsOrder []shared.PressNumber
+	User                   *shared.User
 }
 
 templ SectionPress(p SectionPressProps) {
@@ -31,14 +32,15 @@ templ SectionPress(p SectionPressProps) {
 		</button>
 	}
 	<div id="press-container" class="flex flex-col gap">
-		for pn, u := range p.PressUtilizations {
+		for _, press := range p.PressUtilizationsOrder {
+			{{ u := p.PressUtilizations[press] }}
 			if u == nil {
 				@listPressItem(listPressItemProps{
-					PressNumber: pn,
+					PressNumber: press,
 				})
 			} else {
 				@listPressItem(listPressItemProps{
-					PressNumber:       pn,
+					PressNumber:       press,
 					SlotUpper:         u.SlotUpper,
 					SlotUpperCassette: u.SlotUpperCassette,
 					SlotLower:         u.SlotLower,
