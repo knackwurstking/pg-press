@@ -20,14 +20,14 @@ func renderToolsSection(c echo.Context) *echo.HTTPError {
 	var (
 		tools              []*shared.Tool
 		cassettes          []*shared.Tool
-		errCh              = make(chan *echo.HTTPError, 3)
+		errCh              = make(chan *echo.HTTPError, 4)
 		isRegenerating     = make(map[shared.EntityID]bool)
 		regenerationsCount = 0
 	)
 
 	wg := &sync.WaitGroup{}
 
-	// Load all tools
+	// All Tools
 	wg.Go(func() {
 		allTools, merr := db.ListTools()
 		if merr != nil {
@@ -45,6 +45,27 @@ func renderToolsSection(c echo.Context) *echo.HTTPError {
 		errCh <- nil
 	})
 
+	// Active Tools
+	activeTools := make(map[shared.EntityID]shared.PressNumber)
+	wg.Go(func() {
+		for _, press := range shared.AllPressNumbers {
+			p, herr := db.GetPress(press)
+			if herr != nil {
+				errCh <- herr.Echo()
+				return
+			}
+			if p.SlotUp > 0 {
+				activeTools[p.SlotUp] = press
+			}
+			if p.SlotDown > 0 {
+				activeTools[p.SlotDown] = press
+			}
+		}
+
+		errCh <- nil
+	})
+
+	// Tool Regenerations
 	wg.Go(func() {
 		regenerations, merr := db.ListToolRegenerations()
 		if merr != nil {
@@ -60,6 +81,7 @@ func renderToolsSection(c echo.Context) *echo.HTTPError {
 		errCh <- nil
 	})
 
+	// Notes Count
 	notesCount := 0
 	wg.Go(func() {
 		notes, merr := db.ListNotes()
@@ -88,6 +110,7 @@ func renderToolsSection(c echo.Context) *echo.HTTPError {
 	t := templates.SectionTools(templates.SectionToolsProps{
 		Tools:              tools,
 		Cassettes:          cassettes,
+		ActiveTools:        activeTools,
 		User:               user,
 		IsRegenerating:     isRegenerating,
 		RegenerationsCount: regenerationsCount,

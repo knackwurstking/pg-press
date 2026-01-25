@@ -7,7 +7,7 @@
 ## Tools Page
 
 - [x] Sort presses from low to height
-- [ ] Fix badges for all active tools (non cassettes)
+- [-] Fix badges for all active tools (non cassettes)
 
 ## Press Page
 

@@ -23,7 +23,7 @@ func renderPressSection(c echo.Context) *echo.HTTPError {
 	}
 
 	var pressUtilizationsOrder []shared.PressNumber
-	for p, _ := range pressUtilizations {
+	for p := range pressUtilizations {
 		pressUtilizationsOrder = append(pressUtilizationsOrder, p)
 	}
 	slices.Sort(pressUtilizationsOrder)

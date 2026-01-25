@@ -12,6 +12,7 @@ import (
 type SectionToolsProps struct {
 	Tools              []*shared.Tool
 	Cassettes          []*shared.Tool
+	ActiveTools        map[shared.EntityID]shared.PressNumber
 	User               *shared.User
 	IsRegenerating     map[shared.EntityID]bool
 	RegenerationsCount int
@@ -110,9 +111,16 @@ templ ToolsList(p SectionToolsProps) {
 							isRegenerating = v
 						}
 					}}
+					{{
+						pressNumber := shared.PressNumber(-1)
+						if p, ok := p.ActiveTools[t.ID]; ok {
+							pressNumber = shared.PressNumber(p)
+						}
+					}}
 					@components.ToolAnchor(components.ToolAnchorProps{
 						Tool:               t,
 						BindingCassette:    cassette,
+						PressNumber:        pressNumber,
 						EnableBadges:       true,
 						IsRegenerating:     isRegenerating,
 						EnableCounts:       true,

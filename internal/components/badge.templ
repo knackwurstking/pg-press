@@ -20,7 +20,9 @@ templ ToolStateBadge(tool *shared.Tool, pressNumber shared.PressNumber, isRegene
 		}
 
 		var color string
-		if isRegenerating {
+		if pressNumber.IsValid() {
+			color = "secondary"
+		} else if isRegenerating {
 			color = "warning"
 		} else if tool.IsDead {
 			color = "destructive"
