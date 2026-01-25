@@ -20,4 +20,4 @@
 
 ## Database
 
-- [-] Script for database migration from an older SQLite database
+- [x] Script for database migration from an older SQLite database
