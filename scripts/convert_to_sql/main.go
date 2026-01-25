@@ -54,12 +54,12 @@ func main() {
 	}
 
 	oldCycles := []m.Cycle{}
-	if err := readJSON("cycles.json", oldCycles); err != nil {
+	if err := readJSON("cycles.json", &oldCycles); err != nil {
 		panic("failed to read cycles: " + err.Error())
 	}
 
 	oldTools := []m.Tool{}
-	if err := readJSON("tools.json", oldTools); err != nil {
+	if err := readJSON("tools.json", &oldTools); err != nil {
 		panic("failed to read tools: " + err.Error())
 	}
 
@@ -87,7 +87,7 @@ func main() {
 func CreateToolData(oldCycles []m.Cycle, oldTools []m.Tool) error {
 	{ // Metal Sheets
 		oldMetalSheets := []m.MetalSheet{}
-		if err := readJSON("metal-sheets.json", oldMetalSheets); err != nil {
+		if err := readJSON("metal-sheets.json", &oldMetalSheets); err != nil {
 			return err
 		}
 
@@ -123,7 +123,7 @@ func CreateToolData(oldCycles []m.Cycle, oldTools []m.Tool) error {
 
 	{ // Tool Regenerations
 		oldToolRegenerations := []m.ToolRegeneration{}
-		if err := readJSON("tool-regenerations.json", oldToolRegenerations); err != nil {
+		if err := readJSON("tool-regenerations.json", &oldToolRegenerations); err != nil {
 			return err
 		}
 
@@ -165,8 +165,12 @@ func CreateToolData(oldCycles []m.Cycle, oldTools []m.Tool) error {
 			}
 
 			binding := shared.EntityID(0)
-			if t.Binding == nil {
+			if t.Binding != nil {
 				binding = shared.EntityID(*t.Binding)
+			}
+
+			if t.Type == "" {
+				t.Type = "?"
 			}
 
 			tool := &shared.Tool{
@@ -179,11 +183,12 @@ func CreateToolData(oldCycles []m.Cycle, oldTools []m.Tool) error {
 				CyclesOffset: 0, // CyclesOffset does not exists in old data
 				IsDead:       t.IsDead,
 				Cassette:     binding,
-				MinThickness: 0, // MinThickness does not exists in old data
-				MaxThickness: 0, // MaxThickness does not exists in old data
+				MinThickness: 1, // MinThickness does not exists in old data
+				MaxThickness: 2, // MaxThickness does not exists in old data
 			}
 
 			if err := db.AddTool(tool); err != nil {
+				fmt.Printf("Failed to add tool: %#v\n", tool)
 				return err
 			}
 		}
@@ -272,7 +277,7 @@ func CreatePressData(cycles []m.Cycle, tools []m.Tool) error {
 
 func CreateNoteData() error {
 	oldNotes := []m.Note{}
-	if err := readJSON("notes.json", oldNotes); err != nil {
+	if err := readJSON("notes.json", &oldNotes); err != nil {
 		panic("failed to read notes: " + err.Error())
 	}
 
@@ -306,7 +311,7 @@ func CreateNoteData() error {
 
 func CreateUserData() error {
 	oldUsers := []m.User{}
-	if err := readJSON("users.json", oldUsers); err != nil {
+	if err := readJSON("users.json", &oldUsers); err != nil {
 		panic("failed to read users: " + err.Error())
 	}
 
@@ -327,7 +332,7 @@ func CreateUserData() error {
 // CreateReportsData migrates trouble reports from old JSON data to the new SQL database.
 func CreateReportsData(images []string) error {
 	troubleReports := []m.TroubleReport{}
-	if err := readJSON("trouble-reports.json", troubleReports); err != nil {
+	if err := readJSON("trouble-reports.json", &troubleReports); err != nil {
 		return err
 	}
 

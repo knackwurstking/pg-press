@@ -170,7 +170,7 @@ func createMetalSheets(dbPath string) error {
 		}
 	}
 
-	return writeJSON("metal_sheets.json", metalSheets)
+	return writeJSON("metal-sheets.json", metalSheets)
 }
 
 func createNotes(dbPath string) error {
