@@ -10,9 +10,10 @@ package models
 // 	);
 
 type TroubleReport struct {
-	ID                int64   `json:"id"`
-	Title             string  `json:"title"`
-	Content           string  `json:"content"`
-	LinkedAttachments []int64 `json:"linked_attachments"`
-	UseMarkdown       bool    `json:"use_markdown"`
+	ID                   int64    `json:"id"`
+	Title                string   `json:"title"`
+	Content              string   `json:"content"`
+	LinkedAttachments    []int64  `json:"linked_attachments"`
+	NewLinkedAttachments []string `json:"new_linked_attachments"`
+	UseMarkdown          bool     `json:"use_markdown"`
 }

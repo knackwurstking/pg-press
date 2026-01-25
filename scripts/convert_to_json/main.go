@@ -9,7 +9,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 
+	"github.com/knackwurstking/pg-press/internal/utils"
 	m "github.com/knackwurstking/pg-press/scripts/models"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -51,8 +53,8 @@ func main() {
 		}
 	}
 
-	var err error
-	if err = createAttachments(dbPath); err != nil {
+	attachmentsMap, err := createAttachments(dbPath)
+	if err != nil {
 		panic("failed to create attachments: " + err.Error())
 	}
 
@@ -76,7 +78,7 @@ func main() {
 		panic("failed to create tools: " + err.Error())
 	}
 
-	if err = createTroubleReports(dbPath); err != nil {
+	if err = createTroubleReports(dbPath, attachmentsMap); err != nil {
 		panic("failed to create trouble reports: " + err.Error())
 	}
 
@@ -87,25 +89,26 @@ func main() {
 
 // createAttachments reads the attachments SQL table and creates the images
 // folder at "./images/*"
-func createAttachments(dbPath string) error {
+func createAttachments(dbPath string) (map[int64]string, error) {
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	attachments := []m.Attachment{}
+	attachmentsMap := map[int64]string{}
 	{
 		const query = `SELECT id, mime_type, data FROM attachments;`
 		r, err := db.Query(query)
 		if err != nil {
-			return fmt.Errorf("query: %v", err)
+			return attachmentsMap, fmt.Errorf("query: %v", err)
 		}
 		defer r.Close()
 
 		for r.Next() {
 			a := m.Attachment{}
 			if err = r.Scan(&a.ID, &a.MimeType, &a.Data); err != nil {
-				return fmt.Errorf("scan attachment: %v", err)
+				return attachmentsMap, fmt.Errorf("scan attachment: %v", err)
 			}
 			attachments = append(attachments, a)
 		}
@@ -113,21 +116,23 @@ func createAttachments(dbPath string) error {
 
 	imagesPath, err := filepath.Abs(PathToImages)
 	if err != nil {
-		return err
+		return attachmentsMap, err
 	}
 
 	os.Mkdir(imagesPath, 0700) // Ignore error if folder exists
 
 	for _, a := range attachments {
-		fileName := a.ID + a.GetExtension()
+		id, _ := strconv.ParseInt(a.ID, 10, 64)
+		fileName := utils.GetAttachmentFileName(a.ID + a.GetExtension())
+		attachmentsMap[id] = fileName
 		path := filepath.Join(imagesPath, fileName)
 		if err = os.WriteFile(path, a.Data, 0644); err != nil {
-			return fmt.Errorf("write attachment file: %v", err)
+			return attachmentsMap, fmt.Errorf("write attachment file: %v", err)
 		}
 		fmt.Fprintf(os.Stderr, "Wrote attachment with ID of %s to %s\n", a.ID, path)
 	}
 
-	return nil
+	return attachmentsMap, nil
 }
 
 func createMetalSheets(dbPath string) error {
@@ -318,7 +323,7 @@ func createTools(dbPath string) error {
 	return writeJSON("tools.json", tools)
 }
 
-func createTroubleReports(dbPath string) error {
+func createTroubleReports(dbPath string, attachmentsMap map[int64]string) error {
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		return fmt.Errorf("open db: %v", err)
@@ -349,6 +354,12 @@ func createTroubleReports(dbPath string) error {
 			if err = json.Unmarshal(linkedAttachmentsData, &tr.LinkedAttachments); err != nil {
 				return fmt.Errorf("unmarshal linked attachments: %v", err)
 			}
+
+			for _, la := range tr.LinkedAttachments {
+				a, _ := attachmentsMap[la]
+				tr.NewLinkedAttachments = append(tr.NewLinkedAttachments, a)
+			}
+
 			fmt.Fprintf(os.Stderr, "Read trouble report with ID of %d\n", tr.ID)
 			troubleReports = append(troubleReports, tr)
 		}
