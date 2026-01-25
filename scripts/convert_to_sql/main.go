@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -39,6 +40,18 @@ func main() {
 	}
 	defer db.Close()
 
+	images := []string{}
+	{ // Load Attachments (images)
+		imagesDir, err := os.ReadDir(PathToImages)
+		if err != nil {
+			panic("failed to read images directory: " + err.Error())
+		}
+
+		for _, img := range imagesDir {
+			images = append(images, img.Name())
+		}
+	}
+
 	oldCycles := []m.Cycle{}
 	if err := readJSON("cycles.json", oldCycles); err != nil {
 		panic("failed to read cycles: " + err.Error())
@@ -65,7 +78,7 @@ func main() {
 		panic("failed to convert user data: " + err.Error())
 	}
 
-	if err := CreateReportsData(); err != nil {
+	if err := CreateReportsData(images); err != nil {
 		panic("failed to convert reports data: " + err.Error())
 	}
 }
@@ -311,13 +324,34 @@ func CreateUserData() error {
 }
 
 // CreateReportsData migrates trouble reports from old JSON data to the new SQL database.
-func CreateReportsData() error {
+func CreateReportsData(images []string) error {
 	troubleReports := []m.TroubleReport{}
 	if err := readJSON("trouble-reports.json", troubleReports); err != nil {
 		return err
 	}
 
-	// TODO: ...
+	for _, tr := range troubleReports {
+		linkedAttachments := []string{}
+		for _, la := range tr.LinkedAttachments {
+			for _, img := range images {
+				if las := fmt.Sprintf("%d", la); strings.HasPrefix(img, las) {
+					linkedAttachments = append(linkedAttachments, las)
+					break
+				}
+			}
+		}
+
+		report := &shared.TroubleReport{
+			ID:                shared.EntityID(tr.ID),
+			Title:             tr.Title,
+			Content:           tr.Content,
+			LinkedAttachments: linkedAttachments,
+			UseMarkdown:       tr.UseMarkdown,
+		}
+		if err := db.AddTroubleReport(report); err != nil {
+			return err
+		}
+	}
 
 	return nil
 }
