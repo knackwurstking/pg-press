@@ -1,7 +1,7 @@
 ## General
 
 - [ ] Check if hx-trigger are properly set (handlers & templates)
-- [ ] Check cycles calculation (Press & Tool) if with regenerations
+- [ ] Need to take care of regenerations in cycle calculations
 - [ ] Verify actions for non admins
 
 ## Tools Page
