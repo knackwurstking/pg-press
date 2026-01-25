@@ -147,13 +147,27 @@ func GetCycle(id shared.EntityID) (*shared.Cycle, *errors.HTTPError) {
 }
 
 // TotalToolCycles since last tool regeneration
-func GetTotalToolCycles(id shared.EntityID) (int64, *errors.HTTPError) {
-	cycles, herr := ListToolCycles(id)
+func GetTotalToolCycles(toolID shared.EntityID) (int64, *errors.HTTPError) {
+	cycles, herr := ListToolCycles(toolID)
 	if herr != nil {
-		return 0, herr.Wrap("failed to list tool cycles for tool ID %d", id)
+		return 0, herr.Wrap("failed to list tool cycles for tool ID %d", toolID)
 	}
 
-	// TODO: Get last tool regeneration...
+	// Filter out cycles before last tool regeneration, if any
+	regenerations, herr := ListToolRegenerationsByTool(toolID)
+	if herr != nil {
+		return 0, herr.Wrap("failed to list tool regenerations for tool ID %d", toolID)
+	}
+	if len(regenerations) > 0 {
+		lastRegeneration := regenerations[0]
+		var filteredCycles []*shared.Cycle
+		for _, c := range cycles {
+			if c.Stop > lastRegeneration.Stop {
+				filteredCycles = append(filteredCycles, c)
+			}
+		}
+		cycles = filteredCycles
+	}
 
 	// Inject partial cycles for each cycle
 	var totalCycles int64 = 0

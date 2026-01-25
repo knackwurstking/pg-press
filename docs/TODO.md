@@ -1,7 +1,7 @@
 ## General
 
 - [ ] Check if hx-trigger are properly set (handlers & templates)
-- [ ] Need to take care of regenerations in cycle calculations
+- [-] Need to take care of regenerations in cycle calculations (tools/presses)
 - [ ] Verify actions for non admins
 
 ## Tools Page
@@ -27,4 +27,3 @@
 ## Database
 
 - [x] Script for database migration from an older SQLite database
-
