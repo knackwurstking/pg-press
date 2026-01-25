@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
-	"strings"
 
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -331,21 +330,11 @@ func CreateReportsData(images []string) error {
 	}
 
 	for _, tr := range troubleReports {
-		linkedAttachments := []string{}
-		for _, la := range tr.LinkedAttachments {
-			for _, img := range images {
-				if las := fmt.Sprintf("%d", la); strings.HasPrefix(img, las) {
-					linkedAttachments = append(linkedAttachments, las)
-					break
-				}
-			}
-		}
-
 		report := &shared.TroubleReport{
 			ID:                shared.EntityID(tr.ID),
 			Title:             tr.Title,
 			Content:           tr.Content,
-			LinkedAttachments: linkedAttachments,
+			LinkedAttachments: tr.NewLinkedAttachments,
 			UseMarkdown:       tr.UseMarkdown,
 		}
 		if err := db.AddTroubleReport(report); err != nil {
