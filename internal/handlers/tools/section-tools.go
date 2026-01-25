@@ -1,6 +1,8 @@
 package tools
 
 import (
+	"slices"
+	"strings"
 	"sync"
 
 	"github.com/knackwurstking/pg-press/internal/db"
@@ -17,23 +19,19 @@ func ToolsSection(c echo.Context) *echo.HTTPError {
 }
 
 func renderToolsSection(c echo.Context) *echo.HTTPError {
-	var (
-		tools              []*shared.Tool
-		cassettes          []*shared.Tool
-		errCh              = make(chan *echo.HTTPError, 4)
-		isRegenerating     = make(map[shared.EntityID]bool)
-		regenerationsCount = 0
-	)
-
 	wg := &sync.WaitGroup{}
+	errCh := make(chan *echo.HTTPError, 4)
 
 	// All Tools
+	tools := []*shared.Tool{}
+	cassettes := []*shared.Tool{}
 	wg.Go(func() {
 		allTools, merr := db.ListTools()
 		if merr != nil {
 			errCh <- merr.Echo()
 			return
 		}
+
 		// Filter tools into cassettes and non-cassettes
 		for _, t := range allTools {
 			if t.IsCassette() {
@@ -42,6 +40,15 @@ func renderToolsSection(c echo.Context) *echo.HTTPError {
 				tools = append(tools, t)
 			}
 		}
+
+		// Sort tools and cassettes alphabetically
+		slices.SortFunc(tools, func(a, b *shared.Tool) int {
+			return strings.Compare(a.German(), b.German())
+		})
+		slices.SortFunc(cassettes, func(a, b *shared.Tool) int {
+			return strings.Compare(a.German(), b.German())
+		})
+
 		errCh <- nil
 	})
 
@@ -66,30 +73,54 @@ func renderToolsSection(c echo.Context) *echo.HTTPError {
 	})
 
 	// Tool Regenerations
+	isRegenerating := make(map[shared.EntityID]bool)
+	regenerationsCount := make(map[shared.EntityID]int)
 	wg.Go(func() {
 		regenerations, merr := db.ListToolRegenerations()
 		if merr != nil {
 			errCh <- merr.Echo()
 			return
 		}
+
+		rmap := map[shared.EntityID][]*shared.ToolRegeneration{}
 		for _, r := range regenerations {
 			if r.Stop == 0 {
 				isRegenerating[r.ToolID] = true
 			}
+			if _, ok := rmap[r.ToolID]; !ok {
+				rmap[r.ToolID] = []*shared.ToolRegeneration{}
+			}
+			rmap[r.ToolID] = append(rmap[r.ToolID], r)
 		}
-		regenerationsCount = len(regenerations)
+		for toolID, regs := range rmap {
+			regenerationsCount[toolID] = len(regs)
+		}
+
 		errCh <- nil
 	})
 
 	// Notes Count
-	notesCount := 0
+	notesCount := map[shared.EntityID]int{}
 	wg.Go(func() {
 		notes, merr := db.ListNotes()
 		if merr != nil {
 			errCh <- merr.Echo()
 			return
 		}
-		notesCount = len(notes)
+
+		for _, n := range notes {
+			l := n.GetLinked()
+			if l.Name != "tool" {
+				continue
+			}
+
+			toolID := shared.EntityID(l.ID)
+			if _, ok := notesCount[toolID]; ok {
+				notesCount[toolID] = 0
+			}
+			notesCount[toolID]++
+		}
+
 		errCh <- nil
 	})
 

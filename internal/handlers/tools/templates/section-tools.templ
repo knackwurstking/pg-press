@@ -15,8 +15,8 @@ type SectionToolsProps struct {
 	ActiveTools        map[shared.EntityID]shared.PressNumber
 	User               *shared.User
 	IsRegenerating     map[shared.EntityID]bool
-	RegenerationsCount int
-	NotesCount         int
+	RegenerationsCount map[shared.EntityID]int
+	NotesCount         map[shared.EntityID]int
 }
 
 templ SectionTools(p SectionToolsProps) {
@@ -124,8 +124,8 @@ templ ToolsList(p SectionToolsProps) {
 						EnableBadges:       true,
 						IsRegenerating:     isRegenerating,
 						EnableCounts:       true,
-						RegenerationsCount: p.RegenerationsCount,
-						NotesCount:         p.NotesCount,
+						RegenerationsCount: p.RegenerationsCount[t.ID],
+						NotesCount:         p.NotesCount[t.ID],
 					})
 				</li>
 			}
@@ -162,8 +162,8 @@ templ ToolsList(p SectionToolsProps) {
 						EnableBadges:       true,
 						IsRegenerating:     isRegenerating,
 						EnableCounts:       true,
-						RegenerationsCount: p.RegenerationsCount,
-						NotesCount:         p.NotesCount,
+						RegenerationsCount: p.RegenerationsCount[c.ID],
+						NotesCount:         p.NotesCount[c.ID],
 					})
 				</li>
 			}
