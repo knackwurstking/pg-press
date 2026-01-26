@@ -211,7 +211,9 @@ func ListTools() (tools []*shared.Tool, merr *errors.HTTPError) {
 // ListBindableCassettes retrieves cassettes that can be bound to a given tool
 //
 // TODO: Make sure to only include cassettes not already bound to another tool
-func ListBindableCassettes(id shared.EntityID) (cassettes []*shared.Tool, merr *errors.HTTPError) {
+func ListBindableCassettes(id shared.EntityID) (
+	cassettes []*shared.Tool, merr *errors.HTTPError,
+) {
 	tool, merr := GetTool(id)
 	if merr != nil {
 		return nil, merr
