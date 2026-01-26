@@ -1,7 +1,7 @@
 ## General
 
 - [ ] Check if hx-trigger are properly set (handlers & templates)
-- [-] Need to take care of regenerations in cycle calculations (tools/presses)
+- [x] Need to take care of regenerations in cycle calculations (tools)
 - [ ] Verify actions for non admins
 
 ## Tools Page
@@ -14,7 +14,6 @@
 
 - [ ] Add: Action button for adding MetalSheet
 - [ ] Add: Action button for adding Cycle
-- [ ] Check Press Regenerations handling (Edit/Add/Delete)
 - [ ] Show position badges for tool anchors
 - [ ] PDF Summary
 

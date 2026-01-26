@@ -33,16 +33,15 @@ func init() {
 	pages = []string{
 		env.ServerPathPrefix + "",
 		env.ServerPathPrefix + "/profile",
-		//env.ServerPathPrefix + "/feed",
-		//env.ServerPathPrefix + "/editor",
-		//env.ServerPathPrefix + "/help",
-		//env.ServerPathPrefix + "/trouble-reports",
-		//env.ServerPathPrefix + "/notes",
-		//env.ServerPathPrefix + "/tools",
-		//env.ServerPathPrefix + "/tool",
-		//env.ServerPathPrefix + "/press",
-		//env.ServerPathPrefix + "/umbau",
-		//env.ServerPathPrefix + "/press-regenerations",
+		env.ServerPathPrefix + "/feed",
+		env.ServerPathPrefix + "/editor",
+		env.ServerPathPrefix + "/help",
+		env.ServerPathPrefix + "/trouble-reports",
+		env.ServerPathPrefix + "/notes",
+		env.ServerPathPrefix + "/tools",
+		env.ServerPathPrefix + "/tool",
+		env.ServerPathPrefix + "/press",
+		env.ServerPathPrefix + "/umbau",
 	}
 
 	// NOTE: Important for skipping key authentication

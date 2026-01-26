@@ -130,7 +130,6 @@ GET    /umbau/*         # Umbau operations (see [umbau/](file:///Users/knackwurs
 GET    /metal-sheets/*  # Metal sheets management (see [metalsheets/](file:///Users/knackwurstking/Git/pg-press/internal/handlers/metalsheets))
 GET    /trouble-reports/* # Trouble reports (see [troublereports/](file:///Users/knackwurstking/Git/pg-press/internal/handlers/troublereports))
 GET    /dialog/*        # Dialog operations (see [dialogs/](file:///Users/knackwurstking/Git/pg-press/internal/handlers/dialogs))
-GET    /press-regeneration/* # Press regeneration operations (see [pressregenerations/](file:///Users/knackwurstking/Git/pg-press/internal/handlers/pressregenerations))
 GET    /editor/*        # Editor operations (see [editor/](file:///Users/knackwurstking/Git/pg-press/internal/handlers/editor))
 GET    /help/markdown   # Help documentation (see [help/](file:///Users/knackwurstking/Git/pg-press/internal/handlers/help))
 ```

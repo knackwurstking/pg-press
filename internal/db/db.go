@@ -109,10 +109,6 @@ func Open(path string, allowCreate bool) error {
 					chErr <- errors.Wrap(err, "failed to create presses table")
 					return
 				}
-				if err = createTable(db, sqlCreatePressRegenerationsTable); err != nil {
-					chErr <- errors.Wrap(err, "failed to create press_regenerations table")
-					return
-				}
 
 			case "note":
 				dbNote = db

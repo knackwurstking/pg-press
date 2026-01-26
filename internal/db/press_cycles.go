@@ -155,7 +155,7 @@ func GetTotalToolCycles(toolID shared.EntityID) (int64, *errors.HTTPError) {
 
 	// Filter out cycles before last tool regeneration, if any
 	regenerations, herr := ListToolRegenerationsByTool(toolID)
-	if herr != nil {
+	if herr != nil && !herr.IsNotFoundError() {
 		return 0, herr.Wrap("failed to list tool regenerations for tool ID %d", toolID)
 	}
 	if len(regenerations) > 0 {
@@ -235,22 +235,29 @@ func ListCyclesByPressNumber(pressNumber shared.PressNumber) ([]*shared.Cycle, *
 
 // CycleInject injects "start" and `PartialCycles` into cycle
 func CycleInject(cycle *shared.Cycle) *errors.HTTPError {
+	// Inject partial cycles (press cycle offset)
 	var lastCycles int64 = 0
 	var lastStop int64 = 0
-	err := dbPress.QueryRow(sqlGetPrevCycle, cycle.PressNumber, cycle.Stop).Scan(&lastCycles, &lastStop)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			// No previous cycles found, return full cycles
-			cycle.PartialCycles = cycle.PressCycles
-		} else {
-			return errors.NewHTTPError(err)
-		}
+
+	err := dbPress.QueryRow(sqlGetPrevCycle,
+		cycle.PressNumber, cycle.Stop).Scan(&lastCycles, &lastStop)
+	if err != nil && err != sql.ErrNoRows {
+		cycle.PartialCycles = cycle.PressCycles
+	} else if err != nil {
+		return errors.NewHTTPError(err)
 	} else {
 		cycle.PartialCycles = cycle.PressCycles - lastCycles
 	}
 
-	// TODO: Check press regenerations before calculating the partial cycles here
+	press, herr := GetPress(cycle.PressNumber)
+	if herr != nil && !herr.IsNotFoundError() {
+		return herr.Wrap("failed to get press %d for cycle injection", cycle.PressNumber)
+	}
+	if press != nil { // Press could be not found
+		cycle.PartialCycles += press.CyclesOffset
+	}
 
+	// Inject start time
 	cycle.Start = shared.UnixMilli(lastStop)
 
 	return nil

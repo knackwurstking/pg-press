@@ -26,7 +26,6 @@ templ Page(p PageProps) {
 			@sectionNotes(p)
 			@sectionActiveTools(p)
 			@sectionMetalSheets(p)
-			@sectionRegenerations(p)
 			@sectionCycles(p)
 		</main>
 	}
@@ -47,13 +46,6 @@ templ sectionActions(p PageProps) {
 		>
 			Bearbeiten
 		</button>
-		<a
-			role="button"
-			class="secondary"
-			href={ urlb.PressRegeneration(p.PressNumber, 0) }
-		>
-			Regeneration
-		</a>
 		<a
 			role="button"
 			class="primary"
@@ -121,24 +113,6 @@ templ sectionMetalSheets(p PageProps) {
 			hx-get={ urlb.PressMetalSheets(p.PressNumber) }
 			hx-trigger="load, reload-metal-sheets from:body"
 			hx-on:htmx:response-error="alert('Fehler beim Laden der Blech Listen: ' + event.detail.xhr.responseText)"
-		>
-			@components.Spinner()
-		</div>
-	}
-}
-
-templ sectionRegenerations(p PageProps) {
-	@components.Section(templ.Attributes{
-		"id": "press-regenerations-section",
-	}) {
-		<div class="flex justify-between items-center mb">
-			<h5>Regenerationen</h5>
-		</div>
-		<div
-			id="press-regenerations-section-content"
-			hx-get={ urlb.PressRegenerations(p.PressNumber) }
-			hx-trigger="load, reload-press-regenerations from:body"
-			hx-on::response-error="alert('Fehler beim laden: ' + event.detail.xhr.responseText)"
 		>
 			@components.Spinner()
 		</div>

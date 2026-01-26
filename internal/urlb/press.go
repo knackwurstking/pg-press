@@ -32,11 +32,6 @@ func PressNotes(pressNumber shared.PressNumber) templ.SafeURL {
 	return BuildURL(fmt.Sprintf("/press/%d/notes", pressNumber))
 }
 
-// PressRegenerations constructs press regenerations URL
-func PressRegenerations(pressNumber shared.PressNumber) templ.SafeURL {
-	return BuildURL(fmt.Sprintf("/press/%d/regenerations", pressNumber))
-}
-
 // PressCycleSummaryPDF constructs press cycle summary PDF URL
 func PressCycleSummaryPDF(pressNumber shared.PressNumber) templ.SafeURL {
 	return BuildURL(fmt.Sprintf("/press/%d/cycle-summary-pdf", pressNumber))

@@ -21,18 +21,17 @@ type Translate interface {
 // Ensure Entity implementations
 
 var (
-	_ Entity[*Cycle]             = (*Cycle)(nil)
-	_ Entity[*UpperMetalSheet]   = (*UpperMetalSheet)(nil)
-	_ Entity[*LowerMetalSheet]   = (*LowerMetalSheet)(nil)
-	_ Entity[*Note]              = (*Note)(nil)
-	_ Entity[*PressRegeneration] = (*PressRegeneration)(nil)
-	_ Entity[*Press]             = (*Press)(nil)
-	_ Entity[*ToolRegeneration]  = (*ToolRegeneration)(nil)
-	_ Entity[*Tool]              = (*Tool)(nil)
-	_ Entity[*Cookie]            = (*Cookie)(nil)
-	_ Entity[*Session]           = (*Session)(nil)
-	_ Entity[*User]              = (*User)(nil)
-	_ Entity[*TroubleReport]     = (*TroubleReport)(nil)
+	_ Entity[*Cycle]            = (*Cycle)(nil)
+	_ Entity[*UpperMetalSheet]  = (*UpperMetalSheet)(nil)
+	_ Entity[*LowerMetalSheet]  = (*LowerMetalSheet)(nil)
+	_ Entity[*Note]             = (*Note)(nil)
+	_ Entity[*Press]            = (*Press)(nil)
+	_ Entity[*ToolRegeneration] = (*ToolRegeneration)(nil)
+	_ Entity[*Tool]             = (*Tool)(nil)
+	_ Entity[*Cookie]           = (*Cookie)(nil)
+	_ Entity[*Session]          = (*Session)(nil)
+	_ Entity[*User]             = (*User)(nil)
+	_ Entity[*TroubleReport]    = (*TroubleReport)(nil)
 )
 
 // Ensure Translate implementations

@@ -9,7 +9,6 @@ import (
 	"github.com/knackwurstking/pg-press/internal/handlers/metalsheets"
 	"github.com/knackwurstking/pg-press/internal/handlers/notes"
 	"github.com/knackwurstking/pg-press/internal/handlers/press"
-	"github.com/knackwurstking/pg-press/internal/handlers/pressregenerations"
 	"github.com/knackwurstking/pg-press/internal/handlers/profile"
 	"github.com/knackwurstking/pg-press/internal/handlers/tool"
 	"github.com/knackwurstking/pg-press/internal/handlers/tools"
@@ -37,7 +36,6 @@ func RegisterAll(e *echo.Echo) {
 		{handler: troublereports.Register, subPath: "/trouble-reports"},
 		{handler: editor.Register, subPath: "/editor"},
 		{handler: help.Register, subPath: "/help"},
-		{handler: pressregenerations.Register, subPath: "/press-regeneration"},
 	}
 	for _, reg := range registers {
 		reg.handler(e, reg.subPath)

@@ -122,12 +122,3 @@ func DialogEditNote(noteID shared.EntityID, linked string) templ.SafeURL {
 
 	return BuildURLWithParams("/dialog/edit-note", params)
 }
-
-func DialogEditPressRegeneration(pressRegenerationID shared.EntityID) templ.SafeURL {
-	params := map[string]string{}
-	if pressRegenerationID != 0 {
-		params["id"] = fmt.Sprintf("%d", pressRegenerationID)
-	}
-
-	return BuildURLWithParams("/dialog/edit-press-regeneration", params)
-}
