@@ -19,7 +19,7 @@
 
 ## Tool Page
 
-- [ ] Cassettes already bound to a tool should be disabled inside the select element (option)
+- [-] Cassettes already bound to a tool should be disabled inside the select element (option)
 - [ ] Show position badges for tool anchors
 
 ## Database

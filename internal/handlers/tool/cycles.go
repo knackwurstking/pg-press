@@ -30,36 +30,31 @@ func renderCyclesSectionContent(c echo.Context) *echo.HTTPError {
 	if merr != nil {
 		return merr.Echo()
 	}
-	toolID := shared.EntityID(id)
-
-	tool, merr := db.GetTool(toolID)
+	tool, merr := db.GetTool(shared.EntityID(id))
 	if merr != nil {
 		return merr.Echo()
 	}
 
 	// Get cycles for this specific tool
-	toolCycles, merr := db.ListToolCycles(toolID)
+	toolCycles, merr := db.ListToolCycles(tool.ID)
 	if merr != nil {
 		return merr.Echo()
 	}
 
 	// Get active press number for this tool, -1 if none
-	activePressNumber, merr := db.GetPressNumberForTool(toolID)
+	activePressNumber, merr := db.GetPressNumberForTool(tool.ID)
 	if merr != nil && !merr.IsNotFoundError() {
 		return merr.Echo()
 	}
 
 	// Get bindable cassettes for this tool, if it is a tool and not a cassette
-	var cassettesForBinding []*shared.Tool
-	if !tool.IsCassette() {
-		cassettesForBinding, merr = db.ListBindableCassettes(toolID)
-		if merr != nil {
-			return merr.Echo()
-		}
+	bindableCassettes, eerr := listBindableCassettes(tool)
+	if eerr != nil {
+		return eerr
 	}
 
 	// Get regenerations for this tool
-	regenerations, merr := db.ListToolRegenerationsByTool(toolID)
+	regenerations, merr := db.ListToolRegenerationsByTool(tool.ID)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -74,7 +69,7 @@ func renderCyclesSectionContent(c echo.Context) *echo.HTTPError {
 		Tool:                tool,
 		ToolCycles:          toolCycles,
 		ActivePressNumber:   activePressNumber,
-		CassettesForBinding: cassettesForBinding,
+		CassettesForBinding: bindableCassettes,
 		Regenerations:       regenerations,
 		User:                user,
 	})

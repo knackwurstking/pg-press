@@ -51,26 +51,34 @@ func ToolBinding(c echo.Context) *echo.HTTPError {
 	return renderBindingSection(c, tool)
 }
 
+func ToolUnBinding(c echo.Context) *echo.HTTPError {
+	id, merr := utils.GetParamInt64(c, "id")
+	if merr != nil {
+		return merr.Echo()
+	}
+	toolID := shared.EntityID(id)
+	merr = db.UnbindTool(toolID)
+	if merr != nil {
+		return merr.Echo()
+	}
+	tool, merr := db.GetTool(toolID)
+	if merr != nil {
+		return merr.Echo()
+	}
+
+	return renderBindingSection(c, tool)
+}
+
 func renderBindingSection(c echo.Context, tool *shared.Tool) *echo.HTTPError {
 	user, merr := utils.GetUserFromContext(c)
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	bindableCassettes, merr := db.ListTools()
-	if merr != nil {
-		return merr.Echo()
+	bindableCassettes, herr := listBindableCassettes(tool)
+	if herr != nil {
+		return herr
 	}
-
-	// Filter bindable cassettes
-	i := 0
-	for _, t := range bindableCassettes {
-		if t.IsCassette() && t.Width == tool.Width && t.Height == tool.Width {
-			bindableCassettes[i] = t
-			i++
-		}
-	}
-	bindableCassettes = bindableCassettes[:i]
 
 	// Render the template
 	t := templates.BindingSection(templates.BindingSectionProps{
