@@ -39,7 +39,13 @@ templ ActiveToolsSection(pu *shared.PressUtilization, toolsForSelection map[shar
 	</div>
 }
 
-templ toolSelection(pn shared.PressNumber, position shared.Slot, currentToolID shared.EntityID, tools []*shared.Tool, user *shared.User) {
+templ toolSelection(
+	pn shared.PressNumber,
+	position shared.Slot,
+	currentToolID shared.EntityID,
+	tools []*shared.Tool,
+	user *shared.User,
+) {
 	<form
 		hx-post={ urlb.PressReplaceTool(pn, position) }
 		hx-trigger="change"
@@ -50,7 +56,7 @@ templ toolSelection(pn shared.PressNumber, position shared.Slot, currentToolID s
 			name="tool_id"
 		>
 			<option value="" disabled>
-				Wählen Sie 
+				Wählen Sie
 				switch position {
 					case shared.SlotUpper:
 						ein Oberteil
