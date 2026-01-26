@@ -84,8 +84,6 @@ make generate
 
 # Run tests
 go test ./...
-
-
 ```
 
 ### Environment Variables
@@ -170,5 +168,58 @@ The UI library provides:
 - Check `go.mod` for dependency issues
 - Verify database migrations
 - Review logs in `internal/logger/`
+
+## Project Agents
+
+### Agent Types
+
+PG Press implements various agent patterns to handle different aspects of the application:
+
+#### 1. User Management Agent
+
+- Handles user authentication and session management
+- Manages user profiles and permissions
+- Integrates with Keymaker for secure authentication
+
+#### 2. Database Agent
+
+- Manages all database operations using SQLite
+- Handles transactions and prepared statements
+- Provides centralized access to database tables
+
+#### 3. UI Agent
+
+- Renders HTML templates using A-H Templ engine
+- Manages component rendering and state
+- Handles dynamic content via HTMX
+
+#### 4. Logging Agent
+
+- Provides structured logging capabilities
+- Manages log levels and output formats
+- Supports contextual logging
+
+#### 5. Configuration Agent
+
+- Handles environment variable parsing and validation
+- Manages application configuration loading
+- Provides centralized config access
+
+### Agent Architecture
+
+Agents are designed with the following principles:
+
+1. **Single Responsibility**: Each agent handles a specific domain
+2. **Loose Coupling**: Agents communicate through well-defined interfaces
+3. **Reusability**: Agents can be reused across different parts of the application
+4. **Testability**: Each agent is designed to be easily unit tested
+
+### Agent Integration
+
+Agents integrate through:
+
+- Shared interfaces for consistent communication
+- Context propagation for request-scoped data
+- Error handling middleware for centralized error management
 
 This document provides an overview of the PG Press project architecture and development workflow.
