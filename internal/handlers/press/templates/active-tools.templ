@@ -7,7 +7,7 @@ import (
 )
 
 // Active tools section component
-templ ActiveToolsSection(pu *shared.PressUtilization, toolsForSelection map[shared.Slot][]*shared.Tool) {
+templ ActiveToolsSection(pu *shared.PressUtilization, toolsForSelection map[shared.Slot][]*shared.Tool, user *shared.User) {
 	<div class="flex flex-col gap">
 		// Upper Tool Selection
 		{{
@@ -16,7 +16,7 @@ templ ActiveToolsSection(pu *shared.PressUtilization, toolsForSelection map[shar
 				currentToolID = pu.SlotUpper.ID
 			}
 		}}
-		@toolSelection(pu.PressNumber, shared.SlotUpper, currentToolID, toolsForSelection[shared.SlotUpper])
+		@toolSelection(pu.PressNumber, shared.SlotUpper, currentToolID, toolsForSelection[shared.SlotUpper], user)
 		if pu.SlotUpper != nil {
 			@components.ToolAnchor(components.ToolAnchorProps{
 				Tool:            pu.SlotUpper,
@@ -30,7 +30,7 @@ templ ActiveToolsSection(pu *shared.PressUtilization, toolsForSelection map[shar
 				currentToolID = pu.SlotLower.ID
 			}
 		}}
-		@toolSelection(pu.PressNumber, shared.SlotLower, currentToolID, toolsForSelection[shared.SlotLower])
+		@toolSelection(pu.PressNumber, shared.SlotLower, currentToolID, toolsForSelection[shared.SlotLower], user)
 		if pu.SlotLower != nil {
 			@components.ToolAnchor(components.ToolAnchorProps{
 				Tool: pu.SlotLower,
@@ -39,10 +39,11 @@ templ ActiveToolsSection(pu *shared.PressUtilization, toolsForSelection map[shar
 	</div>
 }
 
-templ toolSelection(pn shared.PressNumber, position shared.Slot, currentToolID shared.EntityID, tools []*shared.Tool) {
+templ toolSelection(pn shared.PressNumber, position shared.Slot, currentToolID shared.EntityID, tools []*shared.Tool, user *shared.User) {
 	<form
 		hx-post={ urlb.PressReplaceTool(pn, position) }
 		hx-trigger="change"
+		disabled?={ !user.IsAdmin() }
 	>
 		<select
 			class="select"

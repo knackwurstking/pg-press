@@ -35,10 +35,15 @@ func GetActiveTools(c echo.Context) *echo.HTTPError {
 		}
 	}
 
-	t := templates.ActiveToolsSection(pu[shared.PressNumber(pressNumber)], toolsForSelection)
+	user, herr := utils.GetUserFromContext(c)
+	if herr != nil {
+		return herr.Echo()
+	}
+
+	t := templates.ActiveToolsSection(pu[shared.PressNumber(pressNumber)], toolsForSelection, user)
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
-		return errors.NewRenderError(err, "ActiveToolsSection")
+		return errors.NewRenderError(err, "Active Tools Section")
 	}
 
 	return nil
