@@ -241,7 +241,7 @@ func CycleInject(cycle *shared.Cycle) *errors.HTTPError {
 
 	err := dbPress.QueryRow(sqlGetPrevCycle,
 		cycle.PressNumber, cycle.Stop).Scan(&lastCycles, &lastStop)
-	if err != nil && err != sql.ErrNoRows {
+	if err != nil && err == sql.ErrNoRows {
 		cycle.PartialCycles = cycle.PressCycles
 	} else if err != nil {
 		return errors.NewHTTPError(err)
