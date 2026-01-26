@@ -2,7 +2,7 @@
 
 - [ ] Check if hx-trigger are properly set (handlers & templates)
 - [x] Need to take care of regenerations in cycle calculations (tools)
-- [ ] Verify actions for non admins
+- [-] Verify actions for non admins
 
 ## Tools Page
 
@@ -21,7 +21,6 @@
 
 - [ ] Cassettes already bound to a tool should be disabled inside the select element (option)
 - [ ] Show position badges for tool anchors
-- [ ] ~Show the tool binding for cassettes, just an anchor linking to that tool~
 
 ## Database
 
