@@ -20,7 +20,7 @@
 - [ ] Show badges for tool anchors
 - [ ] PDF Summary
 - [x] Fix: Edit press removes all the active tools
-- [ ] Ignore non trackable cassettes in the cycles list and summary
+- [x] Ignore non trackable cassettes in the cycles list and summary
 
 ## Tool Page
 

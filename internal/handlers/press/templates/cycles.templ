@@ -45,6 +45,9 @@ templ renderPressCyclesRows(p CyclesProps) {
 	} else {
 		for _, cycle := range p.Cycles {
 			{{ tool, _ := p.Tools[cycle.ToolID] }}
+			if !tool.IsTrackable() {
+				{{ continue }}
+			}
 			@renderPressCycleRow(cycle, tool, p.User)
 		}
 	}
