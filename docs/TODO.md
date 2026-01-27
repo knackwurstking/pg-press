@@ -9,6 +9,7 @@
 
 ## Tools Page
 
+- [ ] Handler page back events, make page reload data properly
 - [x] Sort presses from low to height
 - [x] Sort tools in alphabetical order
 - [x] Fix badges for all active tools (non cassettes)
