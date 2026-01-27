@@ -43,7 +43,7 @@ templ Page(p *PageProps) {
 					@components.Spinner()
 				}
 			}
-			if p.Tool.IsCassette() && p.Tool.Code == "" {
+			if !p.Tool.IsTrackable() {
 				@components.NotFoundText("Dies ist ein nicht nachverfolgbares Werkzeug, da keine Code vorhanden ist.")
 			} else {
 				@CyclesSection(false, p.Tool.ID)

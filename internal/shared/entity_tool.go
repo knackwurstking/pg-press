@@ -34,6 +34,10 @@ type Tool struct {
 	MaxThickness float32  `json:"max_thickness"`
 }
 
+func (t *Tool) IsTrackable() bool {
+	return t.Code != ""
+}
+
 func (t *Tool) IsCassette() bool {
 	return t.Position == SlotUpperCassette
 }
@@ -118,7 +122,7 @@ func (t *Tool) Validate() *errors.ValidationError {
 	if t.Type == "" {
 		return errors.NewValidationError("tool type is required")
 	}
-	if !t.IsCassette() && t.Code == "" {
+	if !t.IsTrackable() {
 		return errors.NewValidationError("tool code is required for all tools except cassettes")
 	}
 
