@@ -35,10 +35,9 @@ func renderCyclesSectionContent(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	// Get cycles for this specific tool
-	toolCycles, merr := db.ListToolCycles(tool.ID)
-	if merr != nil {
-		return merr.Echo()
+	toolCycles, herr := db.ListToolCycles(tool.ID)
+	if herr != nil {
+		return herr.Echo()
 	}
 
 	// Get active press number for this tool, -1 if none
@@ -54,9 +53,9 @@ func renderCyclesSectionContent(c echo.Context) *echo.HTTPError {
 	}
 
 	// Get regenerations for this tool
-	regenerations, merr := db.ListToolRegenerationsByTool(tool.ID)
-	if merr != nil {
-		return merr.Echo()
+	regenerations, herr := db.ListToolRegenerationsByTool(tool.ID)
+	if herr != nil {
+		return herr.Echo()
 	}
 
 	// Get user from context

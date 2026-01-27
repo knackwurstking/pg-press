@@ -139,12 +139,14 @@ templ CassetteAnchor(p CassetteAnchorProps) {
 						{ p.Cassette.Position.German() }
 					}
 					@CassetteStateBadge(p.Cassette, p.BindingTool, p.IsRegenerating)
-					<span
-						class="total-cycles-container flex justify-end items-center w-full pr text-sm"
-						hx-get={ urlb.ToolTotalCycles(p.Cassette.ID) }
-						hx-trigger="load"
-						hx-swap="innerHTML"
-					></span>
+					if p.Cassette.Code != "" {
+						<span
+							class="total-cycles-container flex justify-end items-center w-full pr text-sm"
+							hx-get={ urlb.ToolTotalCycles(p.Cassette.ID) }
+							hx-trigger="load"
+							hx-swap="innerHTML"
+						></span>
+					}
 				</div>
 			}
 		</div>
