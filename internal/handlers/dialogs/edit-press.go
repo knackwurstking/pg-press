@@ -71,10 +71,17 @@ func PutPress(c echo.Context) *echo.HTTPError {
 		return verr.HTTPError().Echo()
 	}
 
+	press, herr := db.GetPress(shared.PressNumber(id))
+	if herr != nil {
+		return herr.Echo()
+	}
+
 	merr = db.UpdatePress(&shared.Press{
-		ID:           shared.PressNumber(id),
+		ID:           press.ID,
 		Type:         data.MachineType,
 		CyclesOffset: data.CyclesOffset,
+		SlotUp:       press.SlotUp,
+		SlotDown:     press.SlotDown,
 	})
 	if merr != nil {
 		return merr.Echo()

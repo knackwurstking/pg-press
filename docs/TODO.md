@@ -19,7 +19,8 @@
 - [ ] Add: Action button for adding Cycle
 - [ ] Show badges for tool anchors
 - [ ] PDF Summary
-- [ ] Fix: Edit press removes all the active tools
+- [x] Fix: Edit press removes all the active tools
+- [ ] Ignore non trackable cassettes in the cycles list and summary
 
 ## Tool Page
 
