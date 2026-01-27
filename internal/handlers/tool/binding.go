@@ -75,9 +75,9 @@ func renderBindingSection(c echo.Context, tool *shared.Tool) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	bindableCassettes, herr := listBindableCassettes(tool)
-	if herr != nil {
-		return herr
+	bindableCassettes, eerr := listBindableCassettes(tool)
+	if eerr != nil {
+		return eerr
 	}
 
 	// Render the template
@@ -86,8 +86,7 @@ func renderBindingSection(c echo.Context, tool *shared.Tool) *echo.HTTPError {
 		CassettesForBinding: bindableCassettes,
 		IsAdmin:             user.IsAdmin(),
 	})
-	err := t.Render(c.Request().Context(), c.Response())
-	if err != nil {
+	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.NewRenderError(err, "BindingSection")
 	}
 	return nil

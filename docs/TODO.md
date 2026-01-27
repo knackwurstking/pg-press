@@ -19,7 +19,8 @@
 
 ## Tool Page
 
-- [-] Binding: Cassettes already bound to a tool should be disabled (or removed) [Needs Testing...]
+- [x] Binding: Cassettes already bound to a tool should be disabled (or removed)
+- [x] Fix: Binding section always shows the first option as selected if binded
 - [ ] Show position badges for tool anchors
 
 ## Database

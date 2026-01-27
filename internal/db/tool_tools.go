@@ -233,22 +233,6 @@ func ListBindableCassettes(id shared.EntityID) (
 			}
 			cassettes = append(cassettes, t)
 		}
-
-		// Remove cassettes that are already bound to other tools
-		var unboundCassettes []*shared.Tool
-		for _, c := range cassettes {
-			isBound := false
-			for _, t := range tools {
-				if t.Cassette == c.ID {
-					isBound = true
-					break
-				}
-			}
-			if !isBound {
-				unboundCassettes = append(unboundCassettes, c)
-			}
-		}
-		cassettes = unboundCassettes
 	}
 
 	return cassettes, nil
