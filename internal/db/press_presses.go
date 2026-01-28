@@ -86,6 +86,23 @@ const (
 		WHERE id = :press_number;
 	`
 
+	// sqlListPress retrieves all press records from the database.
+	sqlListPress string = `
+		SELECT
+			id,
+			slot_up,
+			slot_down,
+			cycles_offset,
+			type
+		FROM presses
+		ORDER BY id ASC
+	`
+
+	// sqlListPressNumbers retrieves all press numbers from the database.
+	sqlListPressNumbers = `
+		SELECT id FROM presses ORDER BY id ASC
+	`
+
 	// sqlDeletePress removes a press record from the database.
 	sqlDeletePress string = `
 		DELETE FROM presses
@@ -272,6 +289,10 @@ func GetPressUtilizations(pressNumbers ...shared.PressNumber) (
 
 	return pu, nil
 }
+
+// TODO: ListPress function...
+
+// TODO: ListPressNumbers function...
 
 // DeletePress removes a press from the database.
 //

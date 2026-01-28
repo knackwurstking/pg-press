@@ -17,9 +17,20 @@ func PressSection(c echo.Context) *echo.HTTPError {
 }
 
 func renderPressSection(c echo.Context) *echo.HTTPError {
-	pressUtilizations, merr := db.GetPressUtilizations(shared.AllPressNumbers...)
-	if merr != nil && !merr.IsNotFoundError() {
-		return merr.Echo()
+	var pressNumbers []shared.PressNumber
+	{
+		presses, herr := db.ListPress()
+		if herr != nil {
+			return herr.Echo()
+		}
+		for _, p := range presses {
+			pressNumbers = append(pressNumbers, p.ID)
+		}
+	}
+
+	pressUtilizations, herr := db.GetPressUtilizations(presses...)
+	if herr != nil && !herr.IsNotFoundError() {
+		return herr.Echo()
 	}
 
 	var pressUtilizationsOrder []shared.PressNumber
