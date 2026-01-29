@@ -16,9 +16,10 @@ templ Page(p PageProps) {
 	{{ title := fmt.Sprintf("Presse %d", p.PressNumber) }}
 	@components.Layout(
 		components.LayoutProps{
-			PageTitle:   title,
-			AppBarTitle: title,
-			NavContent:  components.StandardNavContent(),
+			PageTitle:      title,
+			AppBarTitle:    title,
+			NavContent:     components.StandardNavContent(),
+			AdditionalHead: additionalHead(),
 		},
 	) {
 		<main class="container fluid flex flex-col gap-lg py">
@@ -29,6 +30,19 @@ templ Page(p PageProps) {
 			@sectionCycles(p)
 		</main>
 	}
+}
+
+templ additionalHead() {
+	<script>
+		document.AddEventListener('DOMContentLoaded', function() {
+			window.setTriggers(
+				"reload-notes",
+				"reload-active-tools",
+				"reload-metal-sheets",
+				"reload-cycles",
+			);
+		});
+	</script>
 }
 
 // Actions section - contains buttons for umbau and regeneration

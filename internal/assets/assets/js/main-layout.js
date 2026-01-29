@@ -19,14 +19,14 @@ matchMedia("(prefers-color-scheme: dark)").addEventListener(
 	updateDataTheme,
 );
 
-document.addEventListener("DOMContentLoaded", function () {
-	window.hxTriggers = window.hxTriggers || [];
+document.addEventListener("DOMContentLoaded", function() {
+	window.triggers = window.triggers || [];
 
 	// Debounce function to prevent rapid reloads
 	function debounce(func, wait) {
 		let timeout;
 		return function executedFunction(...args) {
-			const later = function () {
+			const later = function() {
 				clearTimeout(timeout);
 				func(...args);
 			};
@@ -38,12 +38,12 @@ document.addEventListener("DOMContentLoaded", function () {
 	// Listen for visibility changes
 	window.addEventListener(
 		"visibilitychange",
-		debounce(function () {
+		debounce(function() {
 			if (document.visibilityState === "visible") {
 				console.log("Page became visible - reloading HTMX sections");
-				if (window.hxTriggers.length > 0) {
-					console.debug("Triggers: ", window.hxTriggers);
-					window.hxTriggers.forEach(function (trigger) {
+				if (window.triggers.length > 0) {
+					console.debug("Triggers: ", window.triggers);
+					window.triggers.forEach(function(trigger) {
 						// Add error handling for custom event dispatch
 						try {
 							document.body.dispatchEvent(
@@ -63,10 +63,10 @@ document.addEventListener("DOMContentLoaded", function () {
 	);
 });
 
-window.setHxTrigger = function (...triggers) {
-	triggers.forEach(function (trigger) {
-		if (!window.hxTriggers.includes(trigger)) {
-			window.hxTriggers.push(trigger);
+window.setTriggers = function(...triggers) {
+	triggers.forEach(function(trigger) {
+		if (!window.triggers.includes(trigger)) {
+			window.triggers.push(trigger);
 		}
 	});
 };
