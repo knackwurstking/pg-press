@@ -1,9 +1,9 @@
 ## General
 
-- [-] Handle page back events properly, hx reload, using the global js `window.hxTriggers`
 - [ ] Check if hx-trigger is properly set (handlers & templates)
 - [ ] Make sure the tool cycles offset is used properly in total cycle calculations
 - [ ] Verify actions for non admins
+- [x] Handle page back events properly, hx reload, using the global js `window.hxTriggers`
 - [x] Remove `shared.AllPressNumbers` and use `db.ListPress` or `db.ListPressNumbers`
 - [x] Need to take care of regenerations in cycle calculations (tools)
 - [x] Implement a rule: cycles will not be tracked for cassettes with an empty "code"
@@ -11,6 +11,8 @@
 
 ## Tools Page
 
+- [ ] Re-Open last used details tags after visibilitychange (page back navigation) `?tool_filter=...`
+- [ ] Fix missing search query after page back navigation
 - [x] Sort presses from low to high
 - [x] Sort tools in alphabetical order
 - [x] Fix badges for all active tools (non cassettes)
