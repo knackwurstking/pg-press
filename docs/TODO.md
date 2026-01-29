@@ -1,7 +1,7 @@
 ## General
 
 - [x] Remove `shared.AllPressNumbers` and use `db.ListPress` or `db.ListPressNumbers`
-- [ ] Check if hx-trigger are properly set (handlers & templates)
+- [ ] Check if hx-trigger is properly set (handlers & templates)
 - [ ] Make sure the tool cycles offset is used properly in total cycle calculations
 - [ ] Verify actions for non admins
 - [x] Need to take care of regenerations in cycle calculations (tools)
@@ -10,8 +10,8 @@
 
 ## Tools Page
 
-- [ ] Handler page back events, make page reload data properly
-- [x] Sort presses from low to height
+- [ ] Handle page back events properly, hx reload
+- [x] Sort presses from low to high
 - [x] Sort tools in alphabetical order
 - [x] Fix badges for all active tools (non cassettes)
 
@@ -29,7 +29,7 @@
 
 - [ ] Show badges for tool anchors
 - [x] Binding: Cassettes already bound to a tool should be disabled (or removed)
-- [x] Fix: Binding section always shows the first option as selected if binded
+- [x] Fix: Binding section always shows the first option as selected if bound
 
 ## Database
 
