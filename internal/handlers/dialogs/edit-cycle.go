@@ -18,6 +18,11 @@ func GetEditCycle(c echo.Context) *echo.HTTPError {
 	// Check if we're in tool change mode
 	toolChangeMode := utils.GetQueryBool(c, "tool_change_mode")
 
+	pressNumbers, herr := db.ListPressNumbers()
+	if herr != nil {
+		return herr.Echo()
+	}
+
 	// Edit Cycle Dialog
 	if c.QueryParam("id") != "" {
 		cycleIDQuery, merr := utils.GetQueryInt64(c, "id")
@@ -60,7 +65,7 @@ func GetEditCycle(c echo.Context) *echo.HTTPError {
 			})
 		}
 
-		t := templates.EditCycleDialog(cycle, tool, tools)
+		t := templates.EditCycleDialog(cycle, tool, tools, pressNumbers)
 		err := t.Render(c.Request().Context(), c.Response())
 		if err != nil {
 			return errors.NewRenderError(err, "EditCycleDialog")
@@ -88,7 +93,7 @@ func GetEditCycle(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	t := templates.NewCycleDialog(tool, pressNumber)
+	t := templates.NewCycleDialog(tool, pressNumber, pressNumbers)
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "NewCycleDialog")
