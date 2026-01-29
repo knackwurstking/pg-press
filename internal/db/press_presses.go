@@ -236,16 +236,16 @@ func GetPressUtilization(pressNumber shared.PressNumber) (*shared.PressUtilizati
 	}
 
 	if slotUpper > 0 {
-		tool, merr := GetTool(slotUpper)
-		if merr != nil {
-			return nil, merr
+		tool, herr := GetTool(slotUpper)
+		if herr != nil {
+			return nil, herr
 		}
 		pu.SlotUpper = tool
 
 		if tool.Cassette > 0 {
-			cassette, merr := GetTool(tool.Cassette)
-			if merr != nil {
-				return nil, merr.Wrap(
+			cassette, herr := GetTool(tool.Cassette)
+			if herr != nil {
+				return nil, herr.Wrap(
 					"error getting upper cassette tool (%d) for tool ID %d",
 					tool.Cassette, tool.ID,
 				)
@@ -254,9 +254,9 @@ func GetPressUtilization(pressNumber shared.PressNumber) (*shared.PressUtilizati
 		}
 	}
 	if slotLower > 0 {
-		tool, merr := GetTool(slotLower)
-		if merr != nil {
-			return nil, merr
+		tool, herr := GetTool(slotLower)
+		if herr != nil {
+			return nil, herr
 		}
 		pu.SlotLower = tool
 	}
@@ -276,13 +276,13 @@ func GetPressUtilization(pressNumber shared.PressNumber) (*shared.PressUtilizati
 //   - map[shared.PressNumber]*shared.PressUtilization: Map of press numbers to utilization info
 //   - *errors.HTTPError: Error if operation fails, nil on success
 func GetPressUtilizations(pressNumbers ...shared.PressNumber) (
-	pu map[shared.PressNumber]*shared.PressUtilization, merr *errors.HTTPError,
+	pu map[shared.PressNumber]*shared.PressUtilization, herr *errors.HTTPError,
 ) {
 	pu = make(map[shared.PressNumber]*shared.PressUtilization)
 	for _, pn := range pressNumbers {
-		u, merr := GetPressUtilization(pn)
-		if merr != nil {
-			return pu, merr.Wrap("%d", pn)
+		u, herr := GetPressUtilization(pn)
+		if herr != nil {
+			return pu, herr.Wrap("%d", pn)
 		}
 		pu[pn] = u
 	}
@@ -290,7 +290,35 @@ func GetPressUtilizations(pressNumbers ...shared.PressNumber) (
 	return pu, nil
 }
 
-// TODO: ListPress function...
+// ListPress retrieves all presses from the database.
+//
+// It queries the database for all press records and returns them as a slice of Press structs.
+// Returns an error if the query fails.
+//
+// Returns:
+//   - []*shared.Press: Slice of pointers to Press structs
+//   - *errors.HTTPError: Error if operation fails, nil on success
+func ListPress() (presses []*shared.Press, herr *errors.HTTPError) {
+	r, err := dbPress.Query(sqlListPress)
+	if err != nil {
+		return nil, errors.NewHTTPError(err)
+	}
+	defer r.Close()
+
+	for r.Next() {
+		press, herr := ScanPress(r)
+		if herr != nil {
+			return nil, herr.Wrap("scanning press row failed")
+		}
+		presses = append(presses, press)
+	}
+
+	if err := r.Err(); err != nil {
+		return nil, errors.NewHTTPError(err)
+	}
+
+	return presses, nil
+}
 
 // TODO: ListPressNumbers function...
 
@@ -326,7 +354,7 @@ func DeletePress(id shared.PressNumber) *errors.HTTPError {
 // Returns:
 //   - *shared.Press: Pointer to the populated Press struct, or nil if not found
 //   - *errors.HTTPError: Error if operation fails, nil on success
-func ScanPress(row Scannable) (press *shared.Press, merr *errors.HTTPError) {
+func ScanPress(row Scannable) (press *shared.Press, herr *errors.HTTPError) {
 	press = &shared.Press{}
 	err := row.Scan(
 		&press.ID,

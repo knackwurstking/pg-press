@@ -55,7 +55,13 @@ func renderToolsSection(c echo.Context) *echo.HTTPError {
 	// Active Tools
 	activeTools := make(map[shared.EntityID]shared.PressNumber)
 	wg.Go(func() {
-		for _, press := range shared.AllPressNumbers {
+		pressNumbers, herr := db.ListPressNumbers()
+		if herr != nil {
+			errCh <- herr.Echo()
+			return
+		}
+
+		for _, press := range pressNumbers {
 			p, herr := db.GetPress(press)
 			if herr != nil {
 				errCh <- herr.Echo()
