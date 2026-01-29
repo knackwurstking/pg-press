@@ -5,17 +5,23 @@
 // ----------------------------------------------------------------------------
 
 document.addEventListener("DOMContentLoaded", () => {
-	let lastActiveTab = parseInt(localStorage.getItem("last-active-tab"));
-
-	if (isNaN(lastActiveTab)) {
-		lastActiveTab = 1;
+	{ // TODO: Initialize filter input from URL query parameter...
+		// ...
 	}
 
-	toggleTab({
-		currentTarget: document.querySelector(
-			`.tabs > .tab[data-index="${lastActiveTab}"]`,
-		),
-	});
+	{ // Toggle last active tab
+		let lastActiveTab = parseInt(localStorage.getItem("last-active-tab"));
+
+		if (isNaN(lastActiveTab)) {
+			lastActiveTab = 1;
+		}
+
+		toggleTab({
+			currentTarget: document.querySelector(
+				`.tabs > .tab[data-index="${lastActiveTab}"]`,
+			),
+		});
+	}
 });
 
 // ----------------------------------------------------------------------------
@@ -106,6 +112,7 @@ function updateUrlQueryParam(query) {
 
 let currentTab = null;
 
+// Tab toggle handler
 function toggleTab(event) {
 	document
 		.querySelectorAll(".tabs .tab")
