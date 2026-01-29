@@ -16,15 +16,13 @@ updateDataTheme();
 
 matchMedia("(prefers-color-scheme: dark)").addEventListener(
 	"change",
-	function () {
-		updateDataTheme();
-	},
+	updateDataTheme,
 );
 
 document.addEventListener("DOMContentLoaded", function () {
 	window.hxTriggers = window.hxTriggers || [];
 
-	//// Debounce function to prevent rapid reloads
+	// Debounce function to prevent rapid reloads
 	function debounce(func, wait) {
 		let timeout;
 		return function executedFunction(...args) {
@@ -38,19 +36,31 @@ document.addEventListener("DOMContentLoaded", function () {
 	}
 
 	// Listen for visibility changes
-	window.addEventListener("visibilitychange", function () {
+	window.addEventListener(
+		"visibilitychange",
 		debounce(function () {
 			if (document.visibilityState === "visible") {
 				console.log("Page became visible - reloading HTMX sections");
 				if (window.hxTriggers.length > 0) {
 					console.debug("Triggers: ", window.hxTriggers);
-					window.hxTrigger.forEach(function (trigger) {
-						document.body.dispatchEvent(new CustomEvent(trigger));
+					window.hxTriggers.forEach(function (trigger) {
+						// Add error handling for custom event dispatch
+						try {
+							document.body.dispatchEvent(
+								new CustomEvent(trigger),
+							);
+						} catch (error) {
+							console.warn(
+								"Failed to dispatch HTMX trigger:",
+								trigger,
+								error,
+							);
+						}
 					});
 				}
 			}
-		}, 500);
-	});
+		}, 500),
+	);
 });
 
 window.setHxTrigger = function (...triggers) {
