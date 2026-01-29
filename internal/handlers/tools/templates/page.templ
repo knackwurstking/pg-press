@@ -72,4 +72,9 @@ templ Page(p PageProps) {
 
 templ additionalHead() {
 	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/page-tools.js") }></script>
+	<script>
+		document.addEventListener("DOMContentLoaded", function () {
+			window.setHxTrigger("tools-tab");
+		});
+	</script>
 }
