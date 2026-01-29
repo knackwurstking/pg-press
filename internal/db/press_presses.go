@@ -320,7 +320,36 @@ func ListPress() (presses []*shared.Press, herr *errors.HTTPError) {
 	return presses, nil
 }
 
-// TODO: ListPressNumbers function...
+// ListPressNumbers retrieves all press numbers from the database.
+//
+// It queries the database for all press IDs and returns them as a slice.
+// Returns an error if the query fails.
+//
+// Returns:
+//   - []shared.PressNumber: Slice of press numbers
+//   - *errors.HTTPError: Error if operation fails, nil on success
+func ListPressNumbers() (pressNumbers []shared.PressNumber, herr *errors.HTTPError) {
+	r, err := dbPress.Query(sqlListPressNumbers)
+	if err != nil {
+		return nil, errors.NewHTTPError(err)
+	}
+	defer r.Close()
+
+	for r.Next() {
+		var pn shared.PressNumber
+		err := r.Scan(&pn)
+		if err != nil {
+			return nil, errors.NewHTTPError(err).Wrap("scanning press number row failed")
+		}
+		pressNumbers = append(pressNumbers, pn)
+	}
+
+	if err := r.Err(); err != nil {
+		return nil, errors.NewHTTPError(err)
+	}
+
+	return pressNumbers, nil
+}
 
 // DeletePress removes a press from the database.
 //

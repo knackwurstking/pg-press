@@ -1,6 +1,6 @@
 ## General
 
-- [-] Remove `shared.AllPressNumbers` and use `db.ListPress` or `db.ListPressNumbers`
+- [x] Remove `shared.AllPressNumbers` and use `db.ListPress` or `db.ListPressNumbers`
 - [ ] Check if hx-trigger are properly set (handlers & templates)
 - [ ] Make sure the tool cycles offset is used properly in total cycle calculations
 - [ ] Verify actions for non admins
@@ -21,7 +21,7 @@
 - [ ] Add: Action button for adding Cycle
 - [ ] Show badges for tool anchors
 - [ ] PDF Summary
-- [-] Fix missing presses, stop using
+- [x] Fix missing presses
 - [x] Fix: Edit press removes all the active tools
 - [x] Ignore non trackable cassettes in the cycles list and summary
 
