@@ -55,7 +55,7 @@ templ Page(p *PageProps) {
 
 templ additionalHead() {
 	<script>
-		document.AddEventListener('DOMContentLoaded', function() {
+		document.addEventListener('DOMContentLoaded', function() {
 			window.setTriggers(
 				"reload-notes",
 				"reload-metal-sheets",
