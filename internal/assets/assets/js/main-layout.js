@@ -1,5 +1,3 @@
-//var globalHxTrigger = "pageLoaded";
-
 // For the ui.min.css i need to set the data-theme to light/dark
 function updateDataTheme() {
 	const themeColorMeta = document.getElementById("theme-color-meta");
@@ -23,35 +21,42 @@ matchMedia("(prefers-color-scheme: dark)").addEventListener(
 	},
 );
 
-// TODO: Can be removed? Not sure if needed anymore, but we will see.
-//document.addEventListener("DOMContentLoaded", function() {
-//	//// Debounce function to prevent rapid reloads
-//	function debounce(func, wait) {
-//		let timeout;
-//		return function executedFunction(...args) {
-//			const later = function() {
-//				clearTimeout(timeout);
-//				func(...args);
-//			};
-//			clearTimeout(timeout);
-//			timeout = setTimeout(later, wait);
-//		};
-//	}
-//
-//	// Debounced reload function
-//	const debouncedReload = debounce(function() {
-//		if (document.visibilityState === "visible") {
-//			console.log("Page became visible - reloading HTMX sections");
-//			document.body.dispatchEvent(new CustomEvent(globalHxTrigger));
-//		}
-//	}, 500);
-//
-//	// Listen for visibility changes
-//	window.addEventListener("visibilitychange", debouncedReload);
-//
-//	// Add manual refresh functionality
-//	window.refreshPressSections = function() {
-//		console.log("Manual refresh triggered");
-//		document.body.dispatchEvent(new CustomEvent(globalHxTrigger));
-//	};
-//});
+document.addEventListener("DOMContentLoaded", function () {
+	window.hxTriggers = window.hxTriggers || [];
+
+	//// Debounce function to prevent rapid reloads
+	function debounce(func, wait) {
+		let timeout;
+		return function executedFunction(...args) {
+			const later = function () {
+				clearTimeout(timeout);
+				func(...args);
+			};
+			clearTimeout(timeout);
+			timeout = setTimeout(later, wait);
+		};
+	}
+
+	// Listen for visibility changes
+	window.addEventListener("visibilitychange", function () {
+		debounce(function () {
+			if (document.visibilityState === "visible") {
+				console.log("Page became visible - reloading HTMX sections");
+				if (window.hxTriggers.length > 0) {
+					console.debug("Triggers: ", window.hxTriggers);
+					window.hxTrigger.forEach(function (trigger) {
+						document.body.dispatchEvent(new CustomEvent(trigger));
+					});
+				}
+			}
+		}, 500);
+	});
+});
+
+window.setHxTrigger = function (...triggers) {
+	triggers.forEach(function (trigger) {
+		if (!window.hxTriggers.includes(trigger)) {
+			window.hxTriggers.push(trigger);
+		}
+	});
+};
