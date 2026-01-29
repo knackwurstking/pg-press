@@ -1,16 +1,16 @@
 ## General
 
-- [x] Remove `shared.AllPressNumbers` and use `db.ListPress` or `db.ListPressNumbers`
+- [-] Handle page back events properly, hx reload, using the global js `window.hxTriggers`
 - [ ] Check if hx-trigger is properly set (handlers & templates)
 - [ ] Make sure the tool cycles offset is used properly in total cycle calculations
 - [ ] Verify actions for non admins
+- [x] Remove `shared.AllPressNumbers` and use `db.ListPress` or `db.ListPressNumbers`
 - [x] Need to take care of regenerations in cycle calculations (tools)
 - [x] Implement a rule: cycles will not be tracked for cassettes with an empty "code"
 - [x] Remove the unknown special tool and use the press and tool cycle offsets instead
 
 ## Tools Page
 
-- [ ] Handle page back events properly, hx reload
 - [x] Sort presses from low to high
 - [x] Sort tools in alphabetical order
 - [x] Fix badges for all active tools (non cassettes)
