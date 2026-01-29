@@ -5,7 +5,7 @@
 // ----------------------------------------------------------------------------
 
 document.addEventListener("DOMContentLoaded", () => {
-	{ // TODO: Initialize filter input from URL query parameter...
+	{ // TODO: Initialize filter input from URL query parameter (only for the tools tab)
 		// ...
 	}
 
