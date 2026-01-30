@@ -5,8 +5,8 @@
 // ----------------------------------------------------------------------------
 
 document.addEventListener("DOMContentLoaded", () => {
-	{ // TODO: Initialize filter input from URL query parameter (only for the tools tab)
-		// ...
+	{ // Initialize filter input from URL query parameter (only for the tools tab)
+		initFilterInputFromQuery();
 	}
 
 	{ // Toggle last active tab
@@ -31,19 +31,20 @@ document.addEventListener("DOMContentLoaded", () => {
 // Query id constants
 const idListsContainer = "tools-container";
 const idFilterInput = "tools-filter";
+const queryToolsFilter = "tools_filter";
 
 // Query class constants
 const classToolItem = "tool-item";
 
 function initFilterInputFromQuery() {
 	const urlParams = new URLSearchParams(window.location.search);
-	const query = urlParams.get("tools_filter");
+	const query = urlParams.get(queryToolsFilter);
+	console.debug(`Initializing filter input from URL query param: [${query}]`, window.location);
 	if (query) document.querySelector(`#${idFilterInput}`).value = query;
 }
 
 const detailsOpenStates = new Map();
 
-// TODO: Update details summary tools count to match filtered results
 function filterToolsList(event = null, skipHistory = false) {
 	const target = event
 		? event.currentTarget
@@ -102,7 +103,7 @@ function filterToolsList(event = null, skipHistory = false) {
 
 function updateUrlQueryParam(query) {
 	const urlParams = new URLSearchParams(window.location.search);
-	urlParams.set("tool_filter", query.join(" "));
+	urlParams.set(queryToolsFilter, query.join(" "));
 	window.history.replaceState({}, "", `?${urlParams.toString()}`);
 }
 
