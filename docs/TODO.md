@@ -11,8 +11,8 @@
 
 ## Tools Page
 
-- [ ] Re-Open last used details tags after visibilitychange (page back navigation)
-- [ ] Fix missing search query after page back navigation
+- [-] Re-Open last used details tags after visibilitychange (page back navigation)
+- [-] Fix missing search query after page back navigation
 - [x] Sort presses from low to high
 - [x] Sort tools in alphabetical order
 - [x] Fix badges for all active tools (non cassettes)
