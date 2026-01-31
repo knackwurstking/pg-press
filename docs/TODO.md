@@ -19,6 +19,7 @@
 
 ## Press Page
 
+- [ ] Add a proper redirect after press deletion
 - [ ] Add: Action button for adding MetalSheet
 - [ ] Add: Action button for adding Cycle
 - [ ] Show badges for tool anchors
