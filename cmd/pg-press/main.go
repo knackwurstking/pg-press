@@ -4,9 +4,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/SuperPaintman/nice/cli"
 	"github.com/knackwurstking/pg-press/internal/logger"
-	ui "github.com/knackwurstking/ui/ui-templ"
+
+	"github.com/SuperPaintman/nice/cli"
+	"github.com/knackwurstking/ui"
 )
 
 const (

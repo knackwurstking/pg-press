@@ -5,8 +5,7 @@ import (
 
 	"github.com/knackwurstking/pg-press/internal/env"
 
-	ui "github.com/knackwurstking/ui/ui-templ"
-
+	"github.com/knackwurstking/ui"
 	"github.com/labstack/echo/v4"
 )
 

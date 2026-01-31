@@ -12,6 +12,8 @@ github.com/jung-kurt/gofpdf/v2 v2.17.3 h1:otZXZby2gXJ7uU6pzprXHq/R57lsHLi0WtH79V
 github.com/jung-kurt/gofpdf/v2 v2.17.3/go.mod h1:Qx8ZNg4cNsO5i6uLDiBngnm+ii/FjtAqjRNO6drsoYU=
 github.com/knackwurstking/ui v1.1.2-0.20260102083016-769e09a0def8 h1:XpRSkUen+q/uTKMbbskJyG3c33UdnY3U5QQsW1igR08=
 github.com/knackwurstking/ui v1.1.2-0.20260102083016-769e09a0def8/go.mod h1:3BhNRbXTNI459c7h32wYBxfsimtekTHMt3ZYkUeo1dM=
+github.com/knackwurstking/ui v1.1.2-0.20260131173511-058626340fc5 h1:UgMzCWilnuH9JGkdk+Rt00Y526RJd7oqiOg242lfhj8=
+github.com/knackwurstking/ui v1.1.2-0.20260131173511-058626340fc5/go.mod h1:3BhNRbXTNI459c7h32wYBxfsimtekTHMt3ZYkUeo1dM=
 github.com/labstack/echo/v4 v4.13.4 h1:oTZZW+T3s9gAu5L8vmzihV7/lkXGZuITzTQkTEhcXEA=
 github.com/labstack/echo/v4 v4.13.4/go.mod h1:g63b33BZ5vZzcIUF8AtRH40DrTlXnx4UMC8rBdndmjQ=
 github.com/labstack/gommon v0.4.2 h1:F8qTUNXgG1+6WQmqoUWnz8WiEU60mXVVw0P4ht1WRA0=

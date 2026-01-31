@@ -1,11 +1,13 @@
 package templates
 
 import (
-	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/pg-press/internal/urlb"
-	"github.com/knackwurstking/ui/ui-templ"
 	"net/http"
 	"slices"
+
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
+
+	"github.com/knackwurstking/ui"
 )
 
 templ NewPressDialog() {
@@ -67,7 +69,7 @@ templ PressContent(press *shared.Press) {
 				<option
 					vlaue=""
 					disabled
-					selected?={ !slices.Contains( 
+					selected?={ !slices.Contains(
 						[]shared.MachineType{"SACMI", "SITI"}, press.Type,
 					) }
 				>

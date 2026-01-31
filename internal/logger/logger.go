@@ -2,7 +2,8 @@ package logger
 
 import (
 	"github.com/knackwurstking/pg-press/internal/env"
-	"github.com/knackwurstking/ui/ui-templ"
+
+	"github.com/knackwurstking/ui"
 )
 
 func New(group string) *ui.Logger {
