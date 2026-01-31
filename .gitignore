@@ -5,3 +5,4 @@ test.db
 pg-press.db
 *\.sqlite*
 /.*.vim
+.templui.json

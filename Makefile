@@ -38,8 +38,8 @@ define TEMPLUI
 	"componentsDir": "internal/components",
 	"utilsDir": "internal/utils",
 	"moduleName": "github.com/knackwurstking/pg-press",
-	"jsDir": "internal/assets/js",
-	"jsPublicPath": "$(SERVER_PATH_PREFIX)/assets/js"
+	"jsDir": "internal/assets/assets/js",
+	"jsPublicPath": "$(SERVER_PATH_PREFIX)/js"
 }
 endef
 
@@ -52,8 +52,8 @@ test:
 	go test -v ./...
 
 lint:
-	#find . -name '*.go' | xargs -- gopls check -severity=hint 
-	golangci-lint run 
+	#find . -name '*.go' | xargs -- gopls check -severity=hint
+	golangci-lint run
 
 run: generate
 	SERVER_PATH_PREFIX=${SERVER_PATH_PREFIX} \
@@ -159,4 +159,3 @@ macos-update: all
 	sudo chmod +x $(INSTALL_PATH)/$(BINARY_NAME)
 	make macos-start-service
 	make macos-watch-service
-
