@@ -20,7 +20,7 @@ func DeletePress(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	utils.SetHXRedirect(c, urlb.Press(pressNumber))
+	utils.SetHXRedirect(c, urlb.Tools())
 
 	return nil
 }
