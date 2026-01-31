@@ -5,11 +5,13 @@
 // ----------------------------------------------------------------------------
 
 document.addEventListener("DOMContentLoaded", () => {
-	{ // Initialize filter input from URL query parameter (only for the tools tab)
+	{
+		// Initialize filter input from URL query parameter (only for the tools tab)
 		initFilterInputFromQuery();
 	}
 
-	{ // Toggle last active tab
+	{
+		// Toggle last active tab
 		let lastActiveTab = parseInt(localStorage.getItem("last-active-tab"));
 
 		if (isNaN(lastActiveTab)) {
@@ -39,7 +41,6 @@ const classToolItem = "tool-item";
 function initFilterInputFromQuery() {
 	const urlParams = new URLSearchParams(window.location.search);
 	const query = urlParams.get(queryToolsFilter);
-	console.debug(`Initializing filter input from URL query param: [${query}]`, window.location);
 	if (query) document.querySelector(`#${idFilterInput}`).value = query;
 }
 
@@ -55,7 +56,9 @@ function filterToolsList(event = null, skipHistory = false) {
 		.toLowerCase()
 		.split(" ")
 		.filter((v) => !!v);
-	const targets = document.querySelectorAll(`#${idListsContainer} .${classToolItem}`);
+	const targets = document.querySelectorAll(
+		`#${idListsContainer} .${classToolItem}`,
+	);
 
 	if (!skipHistory) {
 		updateUrlQueryParam(query);
@@ -63,9 +66,11 @@ function filterToolsList(event = null, skipHistory = false) {
 
 	// Save details tag open states before filtering
 	if (query.length > 0 && detailsOpenStates.size === 0) {
-		document.querySelectorAll(`#${idListsContainer} details`).forEach((details) => {
-			detailsOpenStates.set(details, details.hasAttribute("open"));
-		});
+		document
+			.querySelectorAll(`#${idListsContainer} details`)
+			.forEach((details) => {
+				detailsOpenStates.set(details, details.hasAttribute("open"));
+			});
 	}
 
 	if (query.length === 0) {
@@ -86,11 +91,11 @@ function filterToolsList(event = null, skipHistory = false) {
 		return;
 	}
 
-	console.debug(`Filtering tools list with query: [${query}] [skipHistory=${skipHistory}]`);
-
 	matchingDetails = new Set();
 	targets.forEach((child) => {
-		const match = query.every((value) => child.textContent.toLowerCase().includes(value));
+		const match = query.every((value) =>
+			child.textContent.toLowerCase().includes(value),
+		);
 		if (match) {
 			child.style.display = "block";
 			// If this item is inside a details tag, ensure it's open, query details tag from stack
@@ -125,5 +130,3 @@ function toggleTab(event) {
 
 	localStorage.setItem("last-active-tab", currentTab.dataset.index);
 }
-
-
