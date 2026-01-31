@@ -1,7 +1,7 @@
 ## General
 
-- [ ] Fix: keyAuthFilesToSkip, include all relevant files (templui static files for example)
 - [ ] Make sure the tool cycles offset is used properly in total cycle calculations
+- [-] Kick templui files from this project for now
 - [x] Handle page back events properly, hx reload, using the global js `window.hxTriggers`
 - [x] Remove `shared.AllPressNumbers` and use `db.ListPress` or `db.ListPressNumbers`
 - [x] Need to take care of regenerations in cycle calculations (tools)

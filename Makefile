@@ -24,29 +24,10 @@ clean:
 generate:
 	templ generate
 
-dependencies:
-	go install github.com/templui/templui/cmd/templui@latest
-	make templui
-
 init: generate
 	go mod tidy -v
 	git submodule init
 	git submodule update --recursive
-
-define TEMPLUI
-{
-	"componentsDir": "internal/components",
-	"utilsDir": "internal/utils",
-	"moduleName": "github.com/knackwurstking/pg-press",
-	"jsDir": "internal/assets/public/js",
-	"jsPublicPath": "$(SERVER_PATH_PREFIX)/js"
-}
-endef
-
-export TEMPLUI
-templui:
-	echo "$$TEMPLUI" > .templui.json
-	yes | templui add "*"
 
 test:
 	go test -v ./...
