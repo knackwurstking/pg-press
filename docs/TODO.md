@@ -11,19 +11,18 @@
 
 ## Tools Page
 
-- [ ] ~Re-Open last used details tags after visibilitychange~
-- [x] Fix tools filtering on page load and visibilitychange
+- [x] Fix tools filtering on page load if query tools_filter is set
 - [x] Sort presses from low to high
 - [x] Sort tools in alphabetical order
 - [x] Fix badges for all active tools (non cassettes)
 
 ## Press Page
 
-- [ ] Add a proper redirect after press deletion
 - [ ] Add: Action button for adding MetalSheet
 - [ ] Add: Action button for adding Cycle
 - [ ] Show badges for tool anchors
 - [ ] PDF Summary
+- [x] Add a proper redirect after press deletion
 - [x] Fix missing presses
 - [x] Fix: Edit press removes all the active tools
 - [x] Ignore non trackable cassettes in the cycles list and summary
