@@ -5,28 +5,31 @@
 // ----------------------------------------------------------------------------
 
 // Query parameter constants
-const queryToolsFilter = "tools_filter";
+const QUERY_TOOLS_FILTER = "tools_filter";
 
 // ID constants
-const idFilterInput = "tools-filter";
-const idListsContainer = "tools-container";
-//const idDetailsTools = "tools-details";
-//const idDetailsCassettes = "cassettes-details";
+const IDS = {
+	INPUT_FILTER: "tools-filter",
+	LISTS_CONTAINER: "tools-container",
+	//DETAILS_TOOLS: "tools-details",
+	//DETAILS_CASSETTES: "cassettes-details",
+};
 
 // Class constants
-const classToolItem = "tool-item";
+const CLASSES = {
+	TOOL_ITEM: "tool-item",
+};
 
 // Store details open states to preserve them during filtering
-const detailsOpenStates = new Map();
+const DETAILS_OPEN_STATES = new Map();
 
 document.addEventListener("DOMContentLoaded", () => {
 	{
-		initFilterInputFromQuery();
 		// Init filter input from URL query parameter
 		const urlParams = new URLSearchParams(window.location.search);
-		const query = urlParams.get(queryToolsFilter);
+		const query = urlParams.get(QUERY_TOOLS_FILTER);
 		if (query) {
-			const el = document.querySelector(`#${idFilterInput}`);
+			const el = document.querySelector(`#${IDS.INPUT_FILTER}`);
 			if (el) {
 				el.value = query;
 			}
@@ -56,7 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function filterToolsList(event = null, skipHistory = false) {
 	const target = event
 		? event.currentTarget
-		: document.querySelector(`#${idFilterInput}`);
+		: document.querySelector(`#${IDS.INPUT_FILTER}`);
 	if (!target) return;
 
 	const query = target.value
@@ -64,7 +67,7 @@ function filterToolsList(event = null, skipHistory = false) {
 		.split(" ")
 		.filter((v) => !!v);
 	const targets = document.querySelectorAll(
-		`#${idListsContainer} .${classToolItem}`,
+		`#${IDS.LISTS_CONTAINER} .${CLASSES.TOOL_ITEM}`,
 	);
 
 	if (!skipHistory) {
@@ -72,11 +75,11 @@ function filterToolsList(event = null, skipHistory = false) {
 	}
 
 	// Save details tag open states before filtering
-	if (query.length > 0 && detailsOpenStates.size === 0) {
+	if (query.length > 0 && DETAILS_OPEN_STATES.size === 0) {
 		document
-			.querySelectorAll(`#${idListsContainer} details`)
+			.querySelectorAll(`#${IDS.LISTS_CONTAINER} details`)
 			.forEach((details) => {
-				detailsOpenStates.set(details, details.hasAttribute("open"));
+				DETAILS_OPEN_STATES.set(details, details.hasAttribute("open"));
 			});
 	}
 
@@ -86,19 +89,18 @@ function filterToolsList(event = null, skipHistory = false) {
 		});
 
 		// Restore details tag open states
-		detailsOpenStates.forEach((isOpen, details) => {
+		DETAILS_OPEN_STATES.forEach((isOpen, details) => {
 			if (isOpen) {
 				details.setAttribute("open", "true");
 			} else {
 				details.removeAttribute("open");
 			}
 		});
-		detailsOpenStates.clear();
+		DETAILS_OPEN_STATES.clear();
 
 		return;
 	}
 
-	matchingDetails = new Set();
 	targets.forEach((child) => {
 		const match = query.every((value) =>
 			child.textContent.toLowerCase().includes(value),
@@ -115,7 +117,7 @@ function filterToolsList(event = null, skipHistory = false) {
 
 function updateUrlQueryParam(query) {
 	const urlParams = new URLSearchParams(window.location.search);
-	urlParams.set(queryToolsFilter, query.join(" "));
+	urlParams.set(QUERY_TOOLS_FILTER, query.join(" "));
 	window.history.replaceState({}, "", `?${urlParams.toString()}`);
 }
 
