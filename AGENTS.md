@@ -223,23 +223,3 @@ Agents integrate through:
 - Error handling middleware for centralized error management
 
 This document provides an overview of the PG Press project architecture and development workflow.
-
-## Development Guidelines
-
-### Git Commit Style
-
-All git commits must follow semantic commit conventions to ensure consistent and meaningful version control history:
-
-- Use conventional commit types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
-- Write commit messages in present tense
-- Keep commit messages concise but descriptive
-- Use imperative mood for commit messages (e.g., "Add feature" not "Added feature")
-- Follow the format: `<type>(<scope>): <subject>`
-
-Example commit messages:
-
-- `feat(auth): add user login functionality`
-- `fix(database): resolve connection timeout issue`
-- `docs(readme): update installation instructions`
-
-This ensures consistent commit history that's easy to understand and parse for automated tooling.
