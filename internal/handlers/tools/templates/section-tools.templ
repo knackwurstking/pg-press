@@ -54,6 +54,7 @@ templ SectionTools(p SectionToolsProps) {
 		@ToolsList(p)
 	</div>
 	<script>
+	(() => {
 		var urlParams = new URLSearchParams(window.location.search);
 
 		var query = urlParams.get(QUERY_TOOLS_FILTER);
@@ -65,6 +66,7 @@ templ SectionTools(p SectionToolsProps) {
 				el.value = query;
 			}
 		}
+	})();
 	</script>
 }
 

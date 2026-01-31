@@ -8,10 +8,10 @@ import (
 )
 
 var (
-	//go:embed assets
-	Assets embed.FS
+	//go:embed public
+	Public embed.FS
 )
 
-func GetAssets() fs.FS {
-	return echo.MustSubFS(Assets, "assets")
+func GetPublic() fs.FS {
+	return echo.MustSubFS(Public, "public")
 }

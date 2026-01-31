@@ -75,7 +75,7 @@ func middlewareConfiguration(e *echo.Echo) {
  ******************************************************************************/
 
 func setupRouter(e *echo.Echo, prefix string) {
-	e.StaticFS(prefix+"/", assets.GetAssets())
+	e.StaticFS(prefix+"/", assets.GetPublic())
 	e.Static(prefix+"/images", env.ServerPathImages)
 	handlers.RegisterAll(e)
 }

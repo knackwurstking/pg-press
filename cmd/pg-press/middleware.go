@@ -54,9 +54,9 @@ func init() {
 		env.ServerPathPrefix + "/css/ui.min.css",
 		env.ServerPathPrefix + "/css/main-layout.css",
 
-		// Libraries
+		// JS
 		env.ServerPathPrefix + "/js/htmx-v2.0.7.min.js",
-		env.ServerPathPrefix + "/js/main-layout.js",
+		env.ServerPathPrefix + "/js/layout.js",
 
 		// Fonts
 		env.ServerPathPrefix + "/bootstrap-icons.woff",
