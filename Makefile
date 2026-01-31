@@ -38,7 +38,7 @@ define TEMPLUI
 	"componentsDir": "internal/components",
 	"utilsDir": "internal/utils",
 	"moduleName": "github.com/knackwurstking/pg-press",
-	"jsDir": "internal/assets/assets/js",
+	"jsDir": "internal/assets/public/js",
 	"jsPublicPath": "$(SERVER_PATH_PREFIX)/js"
 }
 endef
