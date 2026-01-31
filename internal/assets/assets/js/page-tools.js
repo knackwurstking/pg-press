@@ -4,10 +4,33 @@
 // the last active tab using localStorage.
 // ----------------------------------------------------------------------------
 
+// Query parameter constants
+const queryToolsFilter = "tools_filter";
+
+// ID constants
+const idFilterInput = "tools-filter";
+const idListsContainer = "tools-container";
+//const idDetailsTools = "tools-details";
+//const idDetailsCassettes = "cassettes-details";
+
+// Class constants
+const classToolItem = "tool-item";
+
+// Store details open states to preserve them during filtering
+const detailsOpenStates = new Map();
+
 document.addEventListener("DOMContentLoaded", () => {
 	{
-		// Initialize filter input from URL query parameter (only for the tools tab)
 		initFilterInputFromQuery();
+		// Init filter input from URL query parameter
+		const urlParams = new URLSearchParams(window.location.search);
+		const query = urlParams.get(queryToolsFilter);
+		if (query) {
+			const el = document.querySelector(`#${idFilterInput}`);
+			if (el) {
+				el.value = query;
+			}
+		}
 	}
 
 	{
@@ -29,22 +52,6 @@ document.addEventListener("DOMContentLoaded", () => {
 // ----------------------------------------------------------------------------
 // Tool Filtering
 // ----------------------------------------------------------------------------
-
-// Query id constants
-const idListsContainer = "tools-container";
-const idFilterInput = "tools-filter";
-const queryToolsFilter = "tools_filter";
-
-// Query class constants
-const classToolItem = "tool-item";
-
-function initFilterInputFromQuery() {
-	const urlParams = new URLSearchParams(window.location.search);
-	const query = urlParams.get(queryToolsFilter);
-	if (query) document.querySelector(`#${idFilterInput}`).value = query;
-}
-
-const detailsOpenStates = new Map();
 
 function filterToolsList(event = null, skipHistory = false) {
 	const target = event
