@@ -24,20 +24,8 @@ const CLASSES = {
 const DETAILS_OPEN_STATES = new Map();
 
 document.addEventListener("DOMContentLoaded", () => {
+	// Toggle last active tab
 	{
-		// Init filter input from URL query parameter
-		const urlParams = new URLSearchParams(window.location.search);
-		const query = urlParams.get(QUERY_TOOLS_FILTER);
-		if (query) {
-			const el = document.querySelector(`#${IDS.INPUT_FILTER}`);
-			if (el) {
-				el.value = query;
-			}
-		}
-	}
-
-	{
-		// Toggle last active tab
 		let lastActiveTab = parseInt(localStorage.getItem("last-active-tab"));
 
 		if (isNaN(lastActiveTab)) {

@@ -53,6 +53,19 @@ templ SectionTools(p SectionToolsProps) {
 	<div id="tools-container" class="flex flex-col gap">
 		@ToolsList(p)
 	</div>
+	<script>
+		var urlParams = new URLSearchParams(window.location.search);
+
+		var query = urlParams.get(QUERY_TOOLS_FILTER);
+		if (query) {
+			console.debug("Restoring tools filter from URL:", query);
+
+			var el = document.querySelector(`#${IDS.INPUT_FILTER}`);
+			if (el) {
+				el.value = query;
+			}
+		}
+	</script>
 }
 
 templ inputFilterTools(tools []*shared.Tool) {
