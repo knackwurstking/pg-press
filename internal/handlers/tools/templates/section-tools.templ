@@ -73,7 +73,7 @@ templ SectionTools(p SectionToolsProps) {
 			// Get state from localStorage an set to details
 			detail.open = localStorage.getItem(`details-open-${id}`) === "true";
 
-			details.addEventListener("toggle", function() {
+			detail.addEventListener("toggle", function() {
 				// Save state to localStorage
 				localStorage.setItem(`details-open-${id}`, detail.open);
 			});
