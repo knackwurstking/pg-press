@@ -5,7 +5,7 @@
 
 ## Trouble Reports
 
-- [ ] Attachments are available but not shown, the preview is missing but in edit mode they are visible
+- [x] Attachments are available but not shown, the preview is missing but in edit mode they are visible
 
 ## Dialogs
 
