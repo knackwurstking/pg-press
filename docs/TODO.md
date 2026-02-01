@@ -6,6 +6,10 @@
 
 - [x] Edit Cassette: Allow only max thickness (ex.: 14mm or 20mm)
 
+## Tools Page
+
+- [-] Restore details open state after visibility change
+
 ## Press Page
 
 - [ ] Add: Action button for adding MetalSheet
