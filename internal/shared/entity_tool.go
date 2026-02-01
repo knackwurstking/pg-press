@@ -122,9 +122,6 @@ func (t *Tool) Validate() *errors.ValidationError {
 	if t.Type == "" {
 		return errors.NewValidationError("tool type is required")
 	}
-	if !t.IsTrackable() {
-		return errors.NewValidationError("tool code is required for all tools except cassettes")
-	}
 
 	// For cassettes, MinThickness must be less than MaxThickness
 	if t.IsCassette() {
