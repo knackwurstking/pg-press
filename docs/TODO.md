@@ -8,6 +8,11 @@
 - [x] Implement a rule: cycles will not be tracked for cassettes with an empty "code"
 - [x] Remove the unknown special tool and use the press and tool cycle offsets instead
 
+## Notes
+
+- [x] "Achtung" notes is using wrong color, should be "orange"
+- [x] Use "red" color for "Defekt" note level
+
 ## Tools Page
 
 - [x] Fix tools filtering on page load if query tools_filter is set
