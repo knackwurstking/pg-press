@@ -61,7 +61,11 @@ templ ToolAnchor(p ToolAnchorProps) {
 			if p.BindingCassette != nil {
 				<div class="text-sm italic info ghost">
 					<i class="text-xs">
-						Kassette: { p.BindingCassette.MinThickness }mm -> { p.BindingCassette.MaxThickness }mm
+						if p.BindingCassette.MinThickness == 0 {
+							Kassette: { p.BindingCassette.MaxThickness }mm
+						} else {
+							Kassette: { p.BindingCassette.MinThickness }mm -> { p.BindingCassette.MaxThickness }mm
+						}
 					</i>
 				</div>
 			}

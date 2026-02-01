@@ -1,6 +1,7 @@
 ## General
 
 - [ ] Make sure the tool cycles offset is used properly in total cycle calculations
+- [x] Fix: tool anchor binding cassette thickness if min thickness is zero
 
 ## Dialogs
 
