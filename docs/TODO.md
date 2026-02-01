@@ -2,6 +2,10 @@
 
 - [ ] Make sure the tool cycles offset is used properly in total cycle calculations
 
+## Dialogs
+
+- [ ] Edit Cassette: Allow only max thickness (ex.: 14mm or 20mm)
+
 ## Press Page
 
 - [ ] Add: Action button for adding MetalSheet
