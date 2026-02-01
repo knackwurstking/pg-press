@@ -130,7 +130,7 @@ script MarkdownScript() {
 				return paragraph;
 			}
 
-			var withLineBreaks = paragraph.replace(/\n/g, '<br>');
+			var withLineBreaks = paragraph.replace(/\n/g, '<br/>');
 			return '<p>' + withLineBreaks + '</p>';
 		}).join('\n\n');
 	}
