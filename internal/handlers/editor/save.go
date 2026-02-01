@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -57,11 +58,6 @@ func Save(c echo.Context) *echo.HTTPError {
 		return echo.NewHTTPError(http.StatusBadRequest, "failed to process attachments: "+err.Error())
 	}
 
-	v, _ := c.FormParams()
-	log.Debug("Form values: existingAttachmentsToRemove=%#v", existingAttachmentsToRemove)
-	log.Debug("Form values: attachments=%#v", attachments)
-	log.Debug("Form values: v=%#v", v)
-
 	switch editorType {
 	case shared.EditorTypeTroubleReport:
 		tr, merr := db.GetTroubleReport(shared.EntityID(id))
@@ -78,6 +74,16 @@ func Save(c echo.Context) *echo.HTTPError {
 			tr.Title = title
 			tr.Content = content
 			tr.UseMarkdown = useMarkdown
+
+			// Remove existing attachments marked for removal
+			filteredAttachments := []string{}
+			for _, a := range tr.LinkedAttachments {
+				if !slices.Contains(existingAttachmentsToRemove, a) {
+					filteredAttachments = append(filteredAttachments, a)
+				}
+			}
+			// Append new attachments to the existing ones
+			attachments = append(filteredAttachments, attachments...)
 		}
 
 		tr.LinkedAttachments = attachments
