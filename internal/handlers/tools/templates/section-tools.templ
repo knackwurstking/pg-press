@@ -57,15 +57,27 @@ templ SectionTools(p SectionToolsProps) {
 	(() => {
 		var urlParams = new URLSearchParams(window.location.search);
 
-		var query = urlParams.get(QUERY_TOOLS_FILTER);
+		var query = urlParams.get("tools_filter");
 		if (query) {
 			console.debug("Restoring tools filter from URL:", query);
 
-			var el = document.querySelector(`#${IDS.INPUT_FILTER}`);
+			var el = document.querySelector(`input#tools-filter`);
 			if (el) {
 				el.value = query;
 			}
 		}
+
+		document.querySelectorAll("#tools-container details").forEach(function(detail) {
+			var id = detail.id;
+
+			// Get state from localStorage an set to details
+			detail.open = localStorage.getItem(`details-open-${id}`) === "true";
+
+			details.addEventListener("toggle", function() {
+				// Save state to localStorage
+				localStorage.setItem(`details-open-${id}`, detail.open);
+			});
+		});
 	})();
 	</script>
 }
@@ -85,7 +97,7 @@ templ inputFilterTools(tools []*shared.Tool) {
 			<input
 				id="tools-filter"
 				type="search"
-				oninput="filterToolsList(event);"
+				oninput={ filterToolsList(templ.JSExpression("event"), false) }
 				hx-preserve="true"
 			/>
 		</label>

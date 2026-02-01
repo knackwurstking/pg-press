@@ -64,15 +64,47 @@ templ Page(p PageProps) {
 				id="tab-content"
 				class="p w-full h-fit"
 				style="margin-top: 50px;"
-				hx-on::after-request="filterToolsList(null, true)"
+				hx-on::after-request={ filterToolsList(templ.JSExpression("null"), true) }
 			></div>
 		</main>
+		<script>
+		(() => {
+			var lastActiveTab = parseInt(localStorage.getItem("last-active-tab"));
+
+			if (isNaN(lastActiveTab)) {
+				lastActiveTab = 1;
+			}
+
+			toggleTab({
+				currentTarget: document.querySelector(
+					`.tabs > .tab[data-index="${lastActiveTab}"]`,
+				),
+			});
+		})();
+		</script>
 	}
 }
 
 templ additionalHead() {
 	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/pages/tools.js") }></script>
 	<script>
+		var currentTab = null;
+
+		// Tab toggle handler
+		//
+		// @param {Event & { currentTarget: HTMLElement }} event
+		function toggleTab(event) {
+			document
+				.querySelectorAll(".tabs .tab")
+				.forEach((tab) => tab.classList.remove("active"));
+
+			currentTab = event.currentTarget;
+			currentTab.classList.add("active");
+			currentTab.dispatchEvent(new Event("load-tab-content"));
+
+			localStorage.setItem("last-active-tab", currentTab.dataset.index);
+		}
+
 		document.addEventListener("DOMContentLoaded", function () {
 			window.setTriggers("tools-tab");
 		});
