@@ -58,9 +58,9 @@ func (t *Tool) German() string {
 	if t.IsCassette() {
 		thickness := ""
 		if t.MinThickness == 0 {
-			thickness = fmt.Sprintf("(%.1fmm)", t.MaxThickness)
+			thickness = fmt.Sprintf("%.1fmm", t.MaxThickness)
 		} else {
-			thickness = fmt.Sprintf("(%.1f-%.1fmm)", t.MinThickness, t.MaxThickness)
+			thickness = fmt.Sprintf("%.1f-%.1fmm", t.MinThickness, t.MaxThickness)
 		}
 
 		if t.Code == "" {
