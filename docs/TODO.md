@@ -8,7 +8,7 @@
 
 ## Tools Page
 
-- [x] Restore details open state after visibility change [Needs testing...]
+- [x] Restore details open state after visibility change
 
 ## Press Page
 
