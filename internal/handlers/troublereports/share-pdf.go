@@ -14,7 +14,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// TODO: Continue here
 func GetSharePDF(c echo.Context) *echo.HTTPError {
 	id, merr := utils.GetQueryInt64(c, "id")
 	if merr != nil {
