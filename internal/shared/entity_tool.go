@@ -56,12 +56,20 @@ func (t *Tool) IsLowerTool() bool {
 
 func (t *Tool) German() string {
 	if t.IsCassette() {
-		// TODO: Only show max thickness if min is zero
-		if t.Code == "" {
-			return fmt.Sprintf("%dx%d %s (%.1f-%.1fmm)", t.Width, t.Height, t.Type, t.MinThickness, t.MaxThickness)
+		thickness := ""
+		if t.MinThickness == 0 {
+			thickness = fmt.Sprintf("(%.1fmm)", t.MaxThickness)
+		} else {
+			thickness = fmt.Sprintf("(%.1f-%.1fmm)", t.MinThickness, t.MaxThickness)
 		}
-		return fmt.Sprintf("%dx%d %s %s (%.1f-%.1fmm)", t.Width, t.Height, t.Type, t.Code, t.MinThickness, t.MaxThickness)
+
+		if t.Code == "" {
+			return fmt.Sprintf("%dx%d %s (%s)", t.Width, t.Height, t.Type, thickness)
+		}
+
+		return fmt.Sprintf("%dx%d %s %s (%s)", t.Width, t.Height, t.Type, t.Code, thickness)
 	}
+
 	return fmt.Sprintf("%dx%d %s %s", t.Width, t.Height, t.Type, t.Code)
 }
 
