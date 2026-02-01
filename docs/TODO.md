@@ -4,7 +4,7 @@
 
 ## Dialogs
 
-- [ ] Edit Cassette: Allow only max thickness (ex.: 14mm or 20mm)
+- [x] Edit Cassette: Allow only max thickness (ex.: 14mm or 20mm)
 
 ## Press Page
 
