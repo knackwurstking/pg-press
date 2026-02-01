@@ -56,6 +56,7 @@ func (t *Tool) IsLowerTool() bool {
 
 func (t *Tool) German() string {
 	if t.IsCassette() {
+		// TODO: Only show max thickness if min is zero
 		if t.Code == "" {
 			return fmt.Sprintf("%dx%d %s (%.1f-%.1fmm)", t.Width, t.Height, t.Type, t.MinThickness, t.MaxThickness)
 		}
@@ -125,7 +126,7 @@ func (t *Tool) Validate() *errors.ValidationError {
 
 	// For cassettes, MinThickness must be less than MaxThickness
 	if t.IsCassette() {
-		if t.MinThickness <= 0 {
+		if t.MinThickness < 0 {
 			return errors.NewValidationError("cassette minimum thickness must be positive, got %.1f", t.MinThickness)
 		}
 		if t.MaxThickness <= 0 {

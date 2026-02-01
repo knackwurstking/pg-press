@@ -115,11 +115,8 @@ func parseCassetteForm(c echo.Context, tool *shared.Tool) (*shared.Tool, *errors
 		return nil, errors.NewValidationError("invalid height: %s", c.FormValue("height"))
 	}
 
-	// Convert thickness values to floats with sanitization
-	minThickness, err := utils.SanitizeFloat(c.FormValue("min_thickness"))
-	if err != nil {
-		return nil, errors.NewValidationError("invalid min thickness: %s", c.FormValue("min_thickness"))
-	}
+	// Convert thickness values to floats with sanitization, min thickness can be zero
+	minThickness, _ := utils.SanitizeFloat(c.FormValue("min_thickness"))
 	tool.MinThickness = float32(minThickness)
 
 	maxThickness, err := utils.SanitizeFloat(c.FormValue("max_thickness"))
