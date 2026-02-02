@@ -2,10 +2,7 @@
 
 - [ ] Make sure the tool cycles offset is used properly in total cycle calculations
 - [x] Fix: tool anchor binding cassette thickness if min thickness is zero
-
-## Editor
-
-- [ ] Fix input elements still holding on old values if you want to edit an existing report a 3th time or whatever, it seems to load this page from the browser cache, this should be prevented for this page
+- [x] Fix cache control, especially for the editor page (trouble reports)
 
 ## Trouble Reports
 
