@@ -4,17 +4,20 @@
 - [x] Fix: tool anchor binding cassette thickness if min thickness is zero
 - [x] Fix cache control, especially for the editor page (trouble reports)
 
-## Trouble Reports
+## Presses
 
-- [x] Attachments are available but not shown, the preview is missing but in edit mode they are visible
+```
+Presse: 5
+Type: SACMI
+Code: PH5000
 
-## Dialogs
+Presse: 5
+Type: SITI
+Code: PH4000
+```
 
-- [x] Edit Cassette: Allow only max thickness (ex.: 14mm or 20mm)
-
-## Tools Page
-
-- [x] Restore details open state after visibility change
+- [ ] Add to presses table: "code"
+- [ ] Make presses table columns unique (union) `<press-number>, <press-type>, <press-code>`
 
 ## Press Page
 
