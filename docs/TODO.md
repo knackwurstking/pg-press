@@ -5,7 +5,7 @@
 
 ## Editor
 
-- [ ] Fix input elements still holding on old values if you want to edit an existing report a 3th time or whatever
+- [ ] Fix input elements still holding on old values if you want to edit an existing report a 3th time or whatever, it seems to load this page from the browser cache, this should be prevented for this page
 
 ## Trouble Reports
 
