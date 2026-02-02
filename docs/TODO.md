@@ -3,6 +3,10 @@
 - [ ] Make sure the tool cycles offset is used properly in total cycle calculations
 - [x] Fix: tool anchor binding cassette thickness if min thickness is zero
 
+## Editor
+
+- [ ] Fix input elements still holding on old values if you want to edit an existing report a 3th time or whatever
+
 ## Trouble Reports
 
 - [x] Attachments are available but not shown, the preview is missing but in edit mode they are visible
