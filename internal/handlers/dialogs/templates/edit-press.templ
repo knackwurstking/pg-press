@@ -52,6 +52,7 @@ templ PressContent(press *shared.Press) {
 			press = &shared.Press{}
 		}
 	}}
+	// Press Number and Machine Type
 	<span class="flex flex-row gap justify-between">
 		<label for="press_number" class="flex flex-col">
 			<span>Pressen Number</span>
@@ -84,6 +85,18 @@ templ PressContent(press *shared.Press) {
 			</select>
 		</label>
 	</span>
+	// Press Code
+	<label for="code" class="flex flex-col">
+		<span>Code</span>
+		<input
+			id="code"
+			name="code"
+			type="text"
+			value={ press.Code }
+			required
+		/>
+	</label>
+	// Cycles Offset
 	<label for="cycles_offset" class="flex flex-col">
 		<span>Zyklen Offset</span>
 		<input

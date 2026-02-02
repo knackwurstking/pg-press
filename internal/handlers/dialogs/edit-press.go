@@ -49,6 +49,7 @@ func PostPress(c echo.Context) *echo.HTTPError {
 	merr := db.AddPress(&shared.Press{
 		ID:           data.PressNumber,
 		Type:         data.MachineType,
+		Code:         data.Code,
 		CyclesOffset: data.CyclesOffset,
 	})
 	if merr != nil {
@@ -79,6 +80,7 @@ func PutPress(c echo.Context) *echo.HTTPError {
 	merr = db.UpdatePress(&shared.Press{
 		ID:           press.ID,
 		Type:         data.MachineType,
+		Code:         data.Code,
 		CyclesOffset: data.CyclesOffset,
 		SlotUp:       press.SlotUp,
 		SlotDown:     press.SlotDown,
@@ -95,6 +97,7 @@ func PutPress(c echo.Context) *echo.HTTPError {
 type editPressForm struct {
 	PressNumber  shared.PressNumber
 	MachineType  shared.MachineType
+	Code         string
 	CyclesOffset int64
 }
 
@@ -103,6 +106,11 @@ func parseEditPressForm(c echo.Context) (*editPressForm, *errors.ValidationError
 	vPressNumber, err := utils.SanitizeInt8(c.FormValue("press_number"))
 	if err != nil {
 		return nil, errors.NewValidationError("invalid press number: %v", err)
+	}
+
+	code := utils.SanitizeText(c.FormValue("code"))
+	if code == "" {
+		return nil, errors.NewValidationError("code cannot be empty")
 	}
 
 	// Cycles Offset
@@ -114,6 +122,7 @@ func parseEditPressForm(c echo.Context) (*editPressForm, *errors.ValidationError
 	return &editPressForm{
 		PressNumber:  shared.PressNumber(vPressNumber),
 		MachineType:  shared.MachineType(utils.SanitizeText(c.FormValue("machine_type"))),
+		Code:         code,
 		CyclesOffset: cyclesOffset,
 	}, nil
 }

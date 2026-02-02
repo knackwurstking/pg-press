@@ -11,13 +11,17 @@ Presse: 5
 Type: SACMI
 Code: PH5000
 
+# Key: 5SACMIPH5000
+
 Presse: 5
 Type: SITI
 Code: PH4000
+
+# Key: 5SITIPH4000
 ```
 
-- [ ] Add to presses table: "code"
-- [ ] Make presses table columns unique (union) `<press-number>, <press-type>, <press-code>`
+- [-] Add to presses table: "code"
+- [-] Make presses table columns unique (union) `<press-number>, <press-type>, <press-code>`
 
 ## Press Page
 
