@@ -285,16 +285,19 @@ func GetPressUtilization(pressID shared.EntityID) (*shared.PressUtilization, *er
 // Returns:
 //   - map[shared.PressNumber]*shared.PressUtilization: Map of press numbers to utilization info
 //   - *errors.HTTPError: Error if operation fails, nil on success
-func GetPressUtilizations(pressIDs ...shared.EntityID) (
-	pu map[shared.EntityID]*shared.PressUtilization, herr *errors.HTTPError,
-) {
+func GetPressUtilizations() (pu map[shared.EntityID]*shared.PressUtilization, herr *errors.HTTPError) {
+	presses, herr := ListPress()
+	if herr != nil {
+		return pu, herr.Wrap("listing presses for utilization retrieval failed")
+	}
+
 	pu = make(map[shared.EntityID]*shared.PressUtilization)
-	for _, pID := range pressIDs {
-		u, herr := GetPressUtilization(pID)
+	for _, p := range presses {
+		u, herr := GetPressUtilization(p.ID)
 		if herr != nil {
-			return pu, herr.Wrap("%d", pID)
+			return pu, herr.Wrap("%d", p.ID)
 		}
-		pu[pID] = u
+		pu[p.ID] = u
 	}
 
 	return pu, nil

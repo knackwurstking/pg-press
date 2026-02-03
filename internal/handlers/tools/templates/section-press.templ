@@ -8,8 +8,8 @@ import (
 )
 
 type SectionPressProps struct {
-	PressUtilizations      map[shared.PressNumber]*shared.PressUtilization
-	PressUtilizationsOrder []shared.PressNumber
+	PressUtilizations      map[shared.EntityID]*shared.PressUtilization
+	PressUtilizationsOrder []shared.EntityID
 	User                   *shared.User
 }
 
@@ -32,37 +32,19 @@ templ SectionPress(p SectionPressProps) {
 		</button>
 	}
 	<div id="press-container" class="flex flex-col gap">
-		for _, press := range p.PressUtilizationsOrder {
-			{{ u := p.PressUtilizations[press] }}
-			if u == nil {
-				@listPressItem(listPressItemProps{
-					PressNumber: press,
-				})
-			} else {
-				@listPressItem(listPressItemProps{
-					PressNumber:       press,
-					SlotUpper:         u.SlotUpper,
-					SlotUpperCassette: u.SlotUpperCassette,
-					SlotLower:         u.SlotLower,
-				})
-			}
+		for _, e := range p.PressUtilizationsOrder {
+			{{ u := p.PressUtilizations[e] }}
+			@listPressItem(u)
 		}
 	</div>
 }
 
-type listPressItemProps struct {
-	PressNumber       shared.PressNumber
-	SlotUpper         *shared.Tool
-	SlotUpperCassette *shared.Tool
-	SlotLower         *shared.Tool
-}
-
-templ listPressItem(p listPressItemProps) {
-	{{ title := fmt.Sprintf("Presse %d", p.PressNumber) }}
+templ listPressItem(p *shared.PressUtilization) {
+	{{ title := fmt.Sprintf("Presse %d", p.PressID) }}
 	<li title={ title }>
 		<a
 			role="button"
-			href={ urlb.Press(p.PressNumber) }
+			href={ urlb.Press(p.PressID) }
 			class="outline contrast flex justify-between items-center"
 		>
 			<span class="flex flex-col gap-lg w-full">

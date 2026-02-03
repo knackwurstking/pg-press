@@ -17,23 +17,14 @@ func PressSection(c echo.Context) *echo.HTTPError {
 }
 
 func renderPressSection(c echo.Context) *echo.HTTPError {
-	var pressNumbers []shared.PressNumber
-	{
-		var herr *errors.HTTPError
-		pressNumbers, herr = db.ListPressNumbers()
-		if herr != nil {
-			return herr.Echo()
-		}
-	}
-
-	pressUtilizations, herr := db.GetPressUtilizations(pressNumbers...)
+	pressUtilizations, herr := db.GetPressUtilizations()
 	if herr != nil && !herr.IsNotFoundError() {
 		return herr.Echo()
 	}
 
-	var pressUtilizationsOrder []shared.PressNumber
-	for p := range pressUtilizations {
-		pressUtilizationsOrder = append(pressUtilizationsOrder, p)
+	var pressUtilizationsOrder []shared.EntityID
+	for e := range pressUtilizations {
+		pressUtilizationsOrder = append(pressUtilizationsOrder, e)
 	}
 	slices.Sort(pressUtilizationsOrder)
 
@@ -47,8 +38,7 @@ func renderPressSection(c echo.Context) *echo.HTTPError {
 		PressUtilizationsOrder: pressUtilizationsOrder,
 		User:                   user,
 	})
-	err := t.Render(c.Request().Context(), c.Response())
-	if err != nil {
+	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.NewRenderError(err, "Section Press")
 	}
 
