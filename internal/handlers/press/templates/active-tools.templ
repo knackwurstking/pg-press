@@ -16,7 +16,7 @@ templ ActiveToolsSection(pu *shared.PressUtilization, toolsForSelection map[shar
 				currentToolID = pu.SlotUpper.ID
 			}
 		}}
-		@toolSelection(pu.PressNumber, shared.SlotUpper, currentToolID, toolsForSelection[shared.SlotUpper], user)
+		@toolSelection(pu.PressID, shared.SlotUpper, currentToolID, toolsForSelection[shared.SlotUpper], user)
 		if pu.SlotUpper != nil {
 			@components.ToolAnchor(components.ToolAnchorProps{
 				Tool:            pu.SlotUpper,
@@ -30,7 +30,7 @@ templ ActiveToolsSection(pu *shared.PressUtilization, toolsForSelection map[shar
 				currentToolID = pu.SlotLower.ID
 			}
 		}}
-		@toolSelection(pu.PressNumber, shared.SlotLower, currentToolID, toolsForSelection[shared.SlotLower], user)
+		@toolSelection(pu.PressID, shared.SlotLower, currentToolID, toolsForSelection[shared.SlotLower], user)
 		if pu.SlotLower != nil {
 			@components.ToolAnchor(components.ToolAnchorProps{
 				Tool: pu.SlotLower,
@@ -40,14 +40,14 @@ templ ActiveToolsSection(pu *shared.PressUtilization, toolsForSelection map[shar
 }
 
 templ toolSelection(
-	pn shared.PressNumber,
+	pressID shared.EntityID,
 	position shared.Slot,
 	currentToolID shared.EntityID,
 	tools []*shared.Tool,
 	user *shared.User,
 ) {
 	<form
-		hx-post={ urlb.PressReplaceTool(pn, position) }
+		hx-post={ urlb.PressReplaceTool(pressID, position) }
 		hx-trigger="change"
 		disabled?={ !user.IsAdmin() }
 	>

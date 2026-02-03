@@ -28,13 +28,14 @@ templ CyclesSection(oob bool, id shared.EntityID) {
 type CyclesSectionContentProps struct {
 	Tool                *shared.Tool
 	ToolCycles          []*shared.Cycle
-	ActivePressNumber   shared.PressNumber
+	PressMap            map[shared.EntityID]*shared.Press
+	ActivePress         *shared.Press
 	CassettesForBinding []*shared.Tool
 	Regenerations       []*shared.ToolRegeneration
 	User                *shared.User
 }
 
-templ CyclesSectionContent(p CyclesSectionContentProps) {
+templ CyclesSectionContent(p *CyclesSectionContentProps) {
 	@components.SectionTitle(components.MainTitle, "Werkzeugnutzung & Zyklen")
 	<div class="flex flex-col gap">
 		@components.Section(templ.Attributes{
@@ -49,24 +50,24 @@ templ CyclesSectionContent(p CyclesSectionContentProps) {
 	</div>
 }
 
-templ toolStatus(p CyclesSectionContentProps) {
+templ toolStatus(p *CyclesSectionContentProps) {
 	<div class="flex flex-col gap">
 		<span class="flex gap-lg">
 			@RegenerationEdit(RegenerationEditProps{
 				Tool:              p.Tool,
-				ActivePressNumber: p.ActivePressNumber,
+				ToolIsActive:      p.ActivePress != nil,
 				Editable:          false,
 				UserHasPermission: p.User.IsAdmin(),
 			})
-			if p.ActivePressNumber.IsValid() {
+			if p.ActivePress != nil {
 				<a
 					role="button"
 					class="small ghost flex gap"
-					href={ urlb.Press(p.ActivePressNumber) }
+					href={ urlb.Press(p.ActivePress.ID) }
 					title="Zur Pressenübersicht"
 				>
 					<i class="bi bi-arrow-right"></i>
-					Presse { fmt.Sprintf("%d", p.ActivePressNumber) }
+					Presse { fmt.Sprintf("%d", p.ActivePress.German()) }
 				</a>
 			}
 		</span>
@@ -81,7 +82,7 @@ templ toolStatus(p CyclesSectionContentProps) {
 	</div>
 }
 
-templ regenerations(p CyclesSectionContentProps) {
+templ regenerations(p *CyclesSectionContentProps) {
 	@components.Section(templ.Attributes{
 		"id": "regenerations-section",
 	}) {
@@ -143,7 +144,7 @@ templ regenerationsTableRow(r *shared.ToolRegeneration, u *shared.User) {
 	</tr>
 }
 
-templ cyclesTable(p CyclesSectionContentProps) {
+templ cyclesTable(p *CyclesSectionContentProps) {
 	{{
 		var lastRegeneration *shared.ToolRegeneration
 		if len(p.Regenerations) > 0 {
@@ -189,7 +190,7 @@ templ cyclesTable(p CyclesSectionContentProps) {
 					</thead>
 					<tbody>
 						for _, cycle := range p.ToolCycles {
-							@cycleTableRow(cycle, lastRegeneration, p.User)
+							@cycleTableRow(cycle, p.PressMap[cycle.PressID], lastRegeneration, p.User)
 						}
 					</tbody>
 				</table>
@@ -198,14 +199,14 @@ templ cyclesTable(p CyclesSectionContentProps) {
 	}
 }
 
-templ cycleTableRow(cycle *shared.Cycle, lastRegeneration *shared.ToolRegeneration, user *shared.User) {
+templ cycleTableRow(cycle *shared.Cycle, press *shared.Press, lastRegeneration *shared.ToolRegeneration, user *shared.User) {
 	<tr
 		if lastRegeneration != nil && lastRegeneration.Start >= cycle.Stop {
 			style="color: var(--ui-muted);"
 		}
 	>
 		<td>
-			<span>{ fmt.Sprintf("%d", cycle.PressNumber) }</span>
+			<span>{ press.German() }</span>
 		</td>
 		<td>
 			<span class="text-sm">{ cycle.Start.FormatDate() }</span>

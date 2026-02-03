@@ -40,8 +40,17 @@ func renderCyclesSectionContent(c echo.Context) *echo.HTTPError {
 		return herr.Echo()
 	}
 
+	presses, herr := db.ListPress()
+	if herr != nil {
+		return herr.Echo()
+	}
+	pressMap := map[shared.EntityID]*shared.Press{}
+	for _, p := range presses {
+		pressMap[p.ID] = p
+	}
+
 	// Get active press number for this tool, -1 if none
-	activePressNumber, merr := db.GetPressNumberForTool(tool.ID)
+	activePress, merr := db.GetPressForTool(tool.ID)
 	if merr != nil && !merr.IsNotFoundError() {
 		return merr.Echo()
 	}
@@ -64,10 +73,11 @@ func renderCyclesSectionContent(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	t := templates.CyclesSectionContent(templates.CyclesSectionContentProps{
+	t := templates.CyclesSectionContent(&templates.CyclesSectionContentProps{
 		Tool:                tool,
 		ToolCycles:          toolCycles,
-		ActivePressNumber:   activePressNumber,
+		PressMap:            pressMap,
+		ActivePress:         activePress,
 		CassettesForBinding: bindableCassettes,
 		Regenerations:       regenerations,
 		User:                user,

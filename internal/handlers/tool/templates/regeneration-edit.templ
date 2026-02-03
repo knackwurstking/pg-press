@@ -9,7 +9,7 @@ import (
 
 type RegenerationEditProps struct {
 	Tool              *shared.Tool
-	ActivePressNumber shared.PressNumber
+	ToolIsActive      bool
 	IsRegenerating    bool
 	Editable          bool
 	UserHasPermission bool
@@ -46,9 +46,7 @@ templ regenerationEditShowcase(p RegenerationEditProps) {
 			hx-target={ hxTarget }
 			hx-swap="outerHTML"
 			title="Status bearbeiten"
-			if p.ActivePressNumber.IsValid() {
-				disabled
-			}
+			disabled?={ p.ToolIsActive }
 		>
 			<i class="bi bi-pencil-square text-sm"></i>
 			Regenerierung
