@@ -11,7 +11,7 @@ import (
 )
 
 func GetActiveTools(c echo.Context) *echo.HTTPError {
-	id, merr := utils.GetParamInt8(c, "press")
+	id, merr := utils.GetParamInt64(c, "press")
 	if merr != nil {
 		return merr.Echo()
 	}

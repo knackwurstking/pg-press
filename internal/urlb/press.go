@@ -18,7 +18,6 @@ func PressActiveTools(pressID shared.EntityID) templ.SafeURL {
 }
 
 // PressMetalSheets constructs press metal sheets URL
-// TODO: Continue here...
 func PressMetalSheets(pressID shared.EntityID) templ.SafeURL {
 	return BuildURL(fmt.Sprintf("/press/%d/metal-sheets", pressID))
 }

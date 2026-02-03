@@ -16,12 +16,13 @@ func GetCycles(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	pressNumber, merr := utils.GetParamInt8(c, "press")
+	id, merr := utils.GetParamInt64(c, "press")
 	if merr != nil {
 		return merr.Echo()
 	}
+	pressID := shared.EntityID(id)
 
-	cycles, merr := db.ListCyclesByPressNumber(shared.PressNumber(pressNumber))
+	cycles, merr := db.ListCyclesByPressID(pressID)
 	if merr != nil {
 		return merr.Echo()
 	}

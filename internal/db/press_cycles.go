@@ -16,7 +16,7 @@ const (
 		CREATE TABLE IF NOT EXISTS cycles (
 			id           INTEGER NOT NULL,
 			tool_id      INTEGER NOT NULL,
-			press_number INTEGER NOT NULL,
+			press_id     INTEGER NOT NULL,
 			cycles       INTEGER NOT NULL, -- Cycles at stop time
 			stop         INTEGER NOT NULL,
 
@@ -25,20 +25,20 @@ const (
 	`
 
 	sqlAddCycle string = `
-		INSERT INTO cycles (tool_id, press_number, cycles, stop)
-		VALUES (:tool_id, :press_number, :cycles, :stop)
+		INSERT INTO cycles (tool_id, press_id, cycles, stop)
+		VALUES (:tool_id, :press_id, :cycles, :stop)
 	`
 
 	sqlAddCycleWithID string = `
-		INSERT INTO cycles (id, tool_id, press_number, cycles, stop)
-		VALUES (:id, :tool_id, :press_number, :cycles, :stop)
+		INSERT INTO cycles (id, tool_id, press_id, cycles, stop)
+		VALUES (:id, :tool_id, :press_id, :cycles, :stop)
 	`
 
 	sqlUpdateCycle string = `
 		UPDATE cycles
 		SET
 			tool_id = :tool_id,
-			press_number = :press_number,
+			press_id = :press_id,
 			cycles = :cycles,
 			stop = :stop
 		WHERE id = :id
@@ -50,29 +50,29 @@ const (
 	`
 
 	sqlGetCycle string = `
-		SELECT id, tool_id, press_number, cycles, stop
+		SELECT id, tool_id, press_id, cycles, stop
 		FROM cycles
 		WHERE id = :id
 	`
 
 	sqlListToolCycles string = `
-		SELECT id, tool_id, press_number, cycles, stop
+		SELECT id, tool_id, press_id, cycles, stop
 		FROM cycles
 		WHERE tool_id = :tool_id
 		ORDER BY stop DESC;
 	`
 
-	sqlListCyclesByPressNumber string = `
-		SELECT id, tool_id, press_number, cycles, stop
+	sqlListCyclesByPressID string = `
+		SELECT id, tool_id, press_id, cycles, stop
 		FROM cycles
-		WHERE press_number = :press_number
+		WHERE press_id = :press_id
 		ORDER BY stop DESC;
 	`
 
 	sqlGetPrevCycle string = `
 		SELECT cycles, stop
 		FROM cycles
-		WHERE press_number = ? AND stop < ?
+		WHERE press_id = ? AND stop < ?
 		ORDER BY stop DESC
 		LIMIT 1;
 	`
@@ -101,7 +101,7 @@ func AddCycle(cycle *shared.Cycle) *errors.HTTPError {
 	}
 	queryArgs = append(queryArgs,
 		sql.Named("tool_id", cycle.ToolID),
-		sql.Named("press_number", cycle.PressNumber),
+		sql.Named("press_id", cycle.PressID),
 		sql.Named("cycles", cycle.PressCycles),
 		sql.Named("stop", cycle.Stop),
 	)
@@ -122,7 +122,7 @@ func UpdateCycle(cycle *shared.Cycle) *errors.HTTPError {
 	_, err := dbPress.Exec(sqlUpdateCycle,
 		sql.Named("id", cycle.ID),
 		sql.Named("tool_id", cycle.ToolID),
-		sql.Named("press_number", cycle.PressNumber),
+		sql.Named("press_id", cycle.PressID),
 		sql.Named("cycles", cycle.PressCycles),
 		sql.Named("stop", cycle.Stop),
 	)
@@ -134,7 +134,7 @@ func UpdateCycle(cycle *shared.Cycle) *errors.HTTPError {
 
 // DeleteCycle removes a cycle entry from the database
 func DeleteCycle(id shared.EntityID) *errors.HTTPError {
-	_, err := dbPress.Exec(sqlDeleteCycle, sql.Named("id", int64(id)))
+	_, err := dbPress.Exec(sqlDeleteCycle, sql.Named("id", id))
 	if err != nil {
 		return errors.NewHTTPError(err)
 	}
@@ -206,9 +206,8 @@ func ListToolCycles(toolID shared.EntityID) ([]*shared.Cycle, *errors.HTTPError)
 	return cycles, nil
 }
 
-// ListCyclesByPressNumber retrieves all cycle entries for a specific press number
-func ListCyclesByPressNumber(pressNumber shared.PressNumber) ([]*shared.Cycle, *errors.HTTPError) {
-	rows, err := dbPress.Query(sqlListCyclesByPressNumber, sql.Named("press_number", int64(pressNumber)))
+func ListCyclesByPressID(pressID shared.EntityID) ([]*shared.Cycle, *errors.HTTPError) {
+	rows, err := dbPress.Query(sqlListCyclesByPressID, sql.Named("press_id", pressID))
 	if err != nil {
 		return nil, errors.NewHTTPError(err)
 	}
@@ -236,9 +235,9 @@ func ListCyclesByPressNumber(pressNumber shared.PressNumber) ([]*shared.Cycle, *
 // CycleInject injects "start" and `PartialCycles` into cycle
 func CycleInject(cycle *shared.Cycle) *errors.HTTPError {
 	var cycleOffset int64 = 0
-	press, herr := GetPress(cycle.PressNumber)
+	press, herr := GetPress(cycle.PressID)
 	if herr != nil && !herr.IsNotFoundError() {
-		return herr.Wrap("failed to get press %d for cycle injection", cycle.PressNumber)
+		return herr.Wrap("failed to get press ID %d for cycle injection", cycle.PressID)
 	}
 	if press != nil { // Press could be not found
 		cycleOffset = press.CyclesOffset
@@ -247,7 +246,7 @@ func CycleInject(cycle *shared.Cycle) *errors.HTTPError {
 	// Inject partial cycles (press cycle offset)
 	var lastCycles int64 = 0
 	var lastStop int64 = 0
-	err := dbPress.QueryRow(sqlGetPrevCycle, cycle.PressNumber, cycle.Stop).Scan(&lastCycles, &lastStop)
+	err := dbPress.QueryRow(sqlGetPrevCycle, cycle.PressID, cycle.Stop).Scan(&lastCycles, &lastStop)
 	if err != nil && err == sql.ErrNoRows {
 		cycle.PartialCycles = cycle.PressCycles - cycleOffset
 	} else if err != nil {
@@ -272,7 +271,7 @@ func ScanCycle(row Scannable) (cycle *shared.Cycle, herr *errors.HTTPError) {
 	err := row.Scan(
 		&cycle.ID,
 		&cycle.ToolID,
-		&cycle.PressNumber,
+		&cycle.PressID,
 		&cycle.PressCycles,
 		&cycle.Stop,
 	)

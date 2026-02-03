@@ -11,23 +11,21 @@ import (
 )
 
 func GetNotes(c echo.Context) *echo.HTTPError {
-	var pressNumber shared.PressNumber
-	if press, merr := utils.GetParamInt8(c, "press"); merr != nil {
+	id, merr := utils.GetParamInt8(c, "press")
+	if merr != nil {
 		return merr.Echo()
-	} else {
-		pressNumber = shared.PressNumber(press)
 	}
+	pressID := shared.EntityID(id)
 
-	pressNotes, merr := db.ListNotesForLinked("press", int(pressNumber))
+	pressNotes, merr := db.ListNotesForLinked("press", int(pressID))
 	if merr != nil {
 		return merr.Echo()
 	}
 
-	pu, merr := db.GetPressUtilizations(pressNumber)
+	u, merr := db.GetPressUtilization(pressID)
 	if merr != nil {
 		return merr.Echo()
 	}
-	u := pu[pressNumber]
 
 	toolsMap := make(map[shared.EntityID]*shared.Tool)
 	if u.SlotUpper != nil {
@@ -50,10 +48,9 @@ func GetNotes(c echo.Context) *echo.HTTPError {
 	}
 
 	t := templates.Notes(templates.NotesProps{
-		PressNumber: pressNumber,
-		PressNotes:  pressNotes,
-		ToolNotes:   toolNotes,
-		Tools:       toolsMap,
+		PressNotes: pressNotes,
+		ToolNotes:  toolNotes,
+		Tools:      toolsMap,
 	})
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {

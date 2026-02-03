@@ -9,20 +9,19 @@ import (
 )
 
 type NotesProps struct {
-	PressNumber shared.PressNumber
-	PressNotes  []*shared.Note
-	ToolNotes   []*shared.Note
-	Tools       map[shared.EntityID]*shared.Tool
+	PressNotes []*shared.Note
+	ToolNotes  []*shared.Note
+	Tools      map[shared.EntityID]*shared.Tool
 }
 
 templ Notes(p NotesProps) {
-	@pressNotes(p.PressNumber, p.PressNotes)
+	@pressNotes(p.PressNotes)
 	if len(p.ToolNotes) > 0 {
-		@toolNotes(p.PressNumber, p.ToolNotes, p.Tools)
+		@toolNotes(p.ToolNotes, p.Tools)
 	}
 }
 
-templ pressNotes(pressNumber shared.PressNumber, notes []*shared.Note) {
+templ pressNotes(notes []*shared.Note) {
 	// Press Notes
 	@components.Section(templ.Attributes{
 		"class": "notes-list flex flex-col gap-lg p",
@@ -33,7 +32,7 @@ templ pressNotes(pressNumber shared.PressNumber, notes []*shared.Note) {
 	}
 }
 
-templ toolNotes(pressNumber shared.PressNumber, notes []*shared.Note, tools map[shared.EntityID]*shared.Tool) {
+templ toolNotes(notes []*shared.Note, tools map[shared.EntityID]*shared.Tool) {
 	@components.Section(templ.Attributes{
 		"class": "notes-list flex flex-col gap-lg p",
 	}) {
