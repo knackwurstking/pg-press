@@ -108,16 +108,8 @@ templ regenerations(p *CyclesSectionContentProps) {
 						</tr>
 					</thead>
 					<tbody>
-						if len(p.Regenerations) == 0 {
-							<tr>
-								<td colspan="3" class="text-center">
-									<i><small>Keine Regenerationen verzeichnet</small></i>
-								</td>
-							</tr>
-						} else {
-							for _, r := range p.Regenerations {
-								@regenerationsTableRow(r, p.User)
-							}
+						for _, r := range p.Regenerations {
+							@regenerationsTableRow(r, p.User)
 						}
 					</tbody>
 				</table>
