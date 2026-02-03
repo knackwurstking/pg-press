@@ -86,7 +86,7 @@ templ NoteCard(note *shared.Note, tools []*shared.Tool) {
 							}
 						case "press":
 							<a
-								href={ urlb.Press(shared.PressNumber(linked.ID)) }
+								href={ urlb.Press(shared.EntityID(linked.ID)) }
 								class="press-link"
 							>
 								{ fmt.Sprintf("Presse %d", linked.ID) }

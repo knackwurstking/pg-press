@@ -39,5 +39,6 @@ var (
 var (
 	_ Translate = (*Tool)(nil)
 	_ Translate = (*TroubleReport)(nil)
+	_ Translate = (*Press)(nil)
 	_ Translate = Slot(0)
 )

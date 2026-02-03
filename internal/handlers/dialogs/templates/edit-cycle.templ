@@ -14,8 +14,8 @@ import (
 
 templ NewCycleDialog(
 	tool *shared.Tool,
-	currentPress shared.PressNumber,
-	pressNumbers []shared.PressNumber,
+	currentPress *shared.Press,
+	presses []*shared.Press,
 ) {
 	@ui.Dialog(ui.DialogOptions{
 		Method:           http.MethodPost,
@@ -41,7 +41,7 @@ templ NewCycleDialog(
 				</div>
 			</div>
 		}
-		@cyclePressNumber(currentPress, pressNumbers)
+		@cyclePressNumber(currentPress, presses)
 		@cycleStop(0)
 		@cycleTotalCycles(0)
 	}
@@ -51,7 +51,7 @@ templ EditCycleDialog(
 	cycle *shared.Cycle,
 	tool *shared.Tool,
 	availableTools []*shared.Tool,
-	pressNumbers []shared.PressNumber,
+	presses []*shared.Press,
 ) {
 	{{ toolChangeMode := len(availableTools) > 0 }}
 	@ui.Dialog(ui.DialogOptions{
@@ -90,31 +90,41 @@ templ EditCycleDialog(
 				</select>
 			}
 		}
-		@cyclePressNumber(cycle.PressNumber, pressNumbers)
+		{{
+			var currentPress *shared.Press
+			for _, p := range presses {
+				if p.ID == cycle.PressID {
+					currentPress = p
+					break
+				}
+			}
+		}}
+		@cyclePressNumber(currentPress, presses)
 		@cycleStop(cycle.Stop)
 		@cycleTotalCycles(cycle.PressCycles)
 	}
 }
 
-templ cyclePressNumber(current shared.PressNumber, pressNumbers []shared.PressNumber) {
+templ cyclePressNumber(current *shared.Press, presses []*shared.Press) {
 	@components.Section(templ.Attributes{
 		"class": "press flex flex-col gap-sm",
 	}) {
+		// TODO: Update this list from "press_number" to "press_id"
 		<label for="press_number">Presse</label>
 		<select id="press_number" name="press_number" required>
 			<option
 				value=""
 				disabled
-				selected?={ !current.IsValid() }
+				selected?={ current == nil }
 			>
 				Presse auswählen
 			</option>
-			for _, p := range pressNumbers {
+			for _, p := range presses {
 				<option
-					value={ p }
-					selected?={ current == p }
+					value={ p.ID }
+					selected?={ current.ID == p.ID }
 				>
-					Presse { p }
+					{ p.German() }
 				</option>
 			}
 		</select>

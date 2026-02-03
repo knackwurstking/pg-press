@@ -77,9 +77,16 @@ const (
 		WHERE id = :id
 	`
 
-	// sqlGetPressNumberForTool finds the press number that contains a specific tool in either slot.
-	sqlGetPressNumberForTool string = `
-		SELECT number
+	// sqlGetPressForTool finds the press number that contains a specific tool in either slot.
+	sqlGetPressForTool string = `
+		SELECT
+			id,
+			number,
+			type
+			code,
+			slot_up,
+			slot_down,
+			cycles_offset
 		FROM presses
 		WHERE slot_up = :tool_id OR slot_down = :tool_id
 		LIMIT 1;
@@ -199,26 +206,13 @@ func GetPress(id shared.EntityID) (*shared.Press, *errors.HTTPError) {
 	return ScanPress(dbPress.QueryRow(sqlGetPress, sql.Named("id", id)))
 }
 
-// GetPressNumberForTool retrieves the press number that has the given tool in either slot.
-//
-// It searches for a press record where the specified tool ID appears in either slot_up or slot_down.
-// Returns -1 if no press is found for the tool.
-//
-// Parameters:
-//   - toolID: The entity ID of the tool to search for
-//
-// Returns:
-//   - shared.PressNumber: The press number containing the tool, or -1 if not found
-//   - *errors.HTTPError: Error if database query fails, nil on success
-func GetPressNumberForTool(toolID shared.EntityID) (shared.PressNumber, *errors.HTTPError) {
-	var pressNumber shared.PressNumber = -1
-
-	err := dbPress.QueryRow(sqlGetPressNumberForTool, sql.Named("tool_id", toolID)).Scan(&pressNumber)
-	if err != nil && err != sql.ErrNoRows {
-		return pressNumber, errors.NewHTTPError(err)
+func GetPressForTool(toolID shared.EntityID) (*shared.Press, *errors.HTTPError) {
+	press, herr := ScanPress(dbPress.QueryRow(sqlGetPressForTool, sql.Named("tool_id", toolID)))
+	if herr != nil && !herr.IsNotFoundError() {
+		return nil, herr
 	}
 
-	return pressNumber, nil
+	return press, nil
 }
 
 // GetPressUtilization retrieves detailed utilization information for a specific press.

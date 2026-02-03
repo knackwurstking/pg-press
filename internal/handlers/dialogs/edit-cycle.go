@@ -18,7 +18,7 @@ func GetEditCycle(c echo.Context) *echo.HTTPError {
 	// Check if we're in tool change mode
 	toolChangeMode := utils.GetQueryBool(c, "tool_change_mode")
 
-	pressNumbers, herr := db.ListPressNumbers()
+	presses, herr := db.ListPress()
 	if herr != nil {
 		return herr.Echo()
 	}
@@ -65,7 +65,7 @@ func GetEditCycle(c echo.Context) *echo.HTTPError {
 			})
 		}
 
-		t := templates.EditCycleDialog(cycle, tool, tools, pressNumbers)
+		t := templates.EditCycleDialog(cycle, tool, tools, presses)
 		err := t.Render(c.Request().Context(), c.Response())
 		if err != nil {
 			return errors.NewRenderError(err, "EditCycleDialog")
@@ -88,12 +88,12 @@ func GetEditCycle(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	pressNumber, merr := db.GetPressNumberForTool(tool.ID)
-	if merr != nil {
-		return merr.Echo()
+	currentPress, herr := db.GetPressForTool(tool.ID)
+	if herr != nil {
+		return herr.Echo()
 	}
 
-	t := templates.NewCycleDialog(tool, pressNumber, pressNumbers)
+	t := templates.NewCycleDialog(tool, currentPress, presses)
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "NewCycleDialog")
@@ -154,11 +154,11 @@ func parseCycleForm(c echo.Context) (*shared.Cycle, *errors.ValidationError) {
 	}
 
 	// Press Number
-	pn, err := utils.SanitizeInt8(c.FormValue("press_number"))
+	id, err := utils.SanitizeInt8(c.FormValue("press_id"))
 	if err != nil {
 		return nil, errors.NewValidationError("press_number: %v", err)
 	}
-	pressNumber := shared.PressNumber(pn)
+	pressID := shared.EntityID(id)
 
 	// Press Cycles
 	pc, err := utils.SanitizeInt64(c.FormValue("press_cycles"))
@@ -174,5 +174,5 @@ func parseCycleForm(c echo.Context) (*shared.Cycle, *errors.ValidationError) {
 	}
 	stop := shared.NewUnixMilli(stopTime)
 
-	return shared.NewCycle(toolID, pressNumber, pressCycles, stop), nil
+	return shared.NewCycle(toolID, pressID, pressCycles, stop), nil
 }

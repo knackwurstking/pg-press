@@ -79,9 +79,9 @@ script DownloadPDF(url templ.SafeURL, defaultFilename, loadingContent, resetCont
 	downloadPDF();
 }
 
-func DownloadCycleSummaryPDF(press shared.PressNumber) templ.ComponentScript {
+func DownloadCycleSummaryPDF(pressID shared.EntityID) templ.ComponentScript {
 	return DownloadPDF(
-		urlb.PressCycleSummaryPDF(press),
+		urlb.PressCycleSummaryPDF(pressID),
 		"cycle_summary.pdf",
 		"Lädt...",
 		"Zusammenfassung (PDF)",
