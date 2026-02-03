@@ -22,7 +22,7 @@ func RegenerationEditable(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	eerr := renderRegenerationEdit(c, tool, true, nil)
+	eerr := renderRegenerationEdit(c, tool, true)
 	if eerr != nil {
 		return eerr
 	}
@@ -40,7 +40,7 @@ func RegenerationNonEditable(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	eerr := renderRegenerationEdit(c, tool, false, nil)
+	eerr := renderRegenerationEdit(c, tool, false)
 	if eerr != nil {
 		return eerr
 	}
@@ -49,11 +49,6 @@ func RegenerationNonEditable(c echo.Context) *echo.HTTPError {
 }
 
 func Regeneration(c echo.Context) *echo.HTTPError {
-	user, merr := utils.GetUserFromContext(c)
-	if merr != nil {
-		return merr.Echo()
-	}
-
 	id, merr := utils.GetParamInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
@@ -104,7 +99,7 @@ func Regeneration(c echo.Context) *echo.HTTPError {
 	}
 
 	// Render the updated status component
-	eerr := renderRegenerationEdit(c, tool, false, user)
+	eerr := renderRegenerationEdit(c, tool, false)
 	if eerr != nil {
 		return eerr
 	}
@@ -112,18 +107,15 @@ func Regeneration(c echo.Context) *echo.HTTPError {
 	return renderCyclesSection(c, tool)
 }
 
-func renderRegenerationEdit(c echo.Context, tool *shared.Tool, editable bool, user *shared.User) *echo.HTTPError {
-	if user == nil {
-		var merr *errors.HTTPError
-		user, merr = utils.GetUserFromContext(c)
-		if merr != nil {
-			return merr.Wrap("getting user from context failed").Echo()
-		}
+func renderRegenerationEdit(c echo.Context, tool *shared.Tool, editable bool) *echo.HTTPError {
+	user, herr := utils.GetUserFromContext(c)
+	if herr != nil {
+		return herr.Wrap("getting user from context failed").Echo()
 	}
 
-	regenerations, merr := db.ListToolRegenerationsByTool(tool.ID)
-	if merr != nil && !merr.IsNotFoundError() {
-		return merr.Wrap("listing regenerations for tool ID %d failed", tool.ID).Echo()
+	regenerations, herr := db.ListToolRegenerationsByTool(tool.ID)
+	if herr != nil && !herr.IsNotFoundError() {
+		return herr.Wrap("listing regenerations for tool ID %d failed", tool.ID).Echo()
 	}
 	isRegenerating := false
 	for _, r := range regenerations {
@@ -133,14 +125,14 @@ func renderRegenerationEdit(c echo.Context, tool *shared.Tool, editable bool, us
 		}
 	}
 
-	pressNumber, merr := db.GetPressNumberForTool(tool.ID)
-	if merr != nil {
-		return merr.Wrap("getting press number for tool ID %d failed", tool.ID).Echo()
+	press, herr := db.GetPressForTool(tool.ID)
+	if herr != nil {
+		return herr.Wrap("getting press number for tool ID %d failed", tool.ID).Echo()
 	}
 
 	t := templates.RegenerationEdit(templates.RegenerationEditProps{
 		Tool:              tool,
-		ActivePressNumber: pressNumber,
+		ToolIsActive:      press != nil,
 		IsRegenerating:    isRegenerating,
 		Editable:          editable,
 		UserHasPermission: user.IsAdmin(),
