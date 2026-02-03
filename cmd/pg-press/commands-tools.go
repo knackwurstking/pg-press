@@ -227,7 +227,7 @@ func listCyclesCommand() cli.Command {
 						fmt.Fprintf(w, "%d\t%d\t%d\t%d\t%d\t%s\n%s",
 							c.ID,
 							c.ToolID,
-							c.PressNumber,
+							c.PressID,
 							c.PressCycles,
 							c.PartialCycles,
 							c.Start.FormatDate(),

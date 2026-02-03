@@ -72,8 +72,6 @@ func main() {
 				},
 			},
 
-			cyclesCommand(),
-
 			toolsCommand(),
 
 			serverCommand(),
