@@ -9,14 +9,14 @@ import (
 )
 
 func DeletePress(c echo.Context) *echo.HTTPError {
-	var pressNumber shared.PressNumber
-	if pn, merr := utils.GetParamInt8(c, "press"); merr != nil {
+	var pressID shared.EntityID
+	if id, merr := utils.GetParamInt64(c, "press"); merr != nil {
 		return merr.Echo()
 	} else {
-		pressNumber = shared.PressNumber(pn)
+		pressID = shared.EntityID(id)
 	}
 
-	if merr := db.DeletePress(pressNumber); merr != nil {
+	if merr := db.DeletePress(pressID); merr != nil {
 		return merr.Echo()
 	}
 

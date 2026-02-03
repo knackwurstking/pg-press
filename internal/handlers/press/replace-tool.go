@@ -12,11 +12,11 @@ import (
 
 func ReplaceTool(c echo.Context) *echo.HTTPError {
 	// Get press number from param
-	var pressNumber shared.PressNumber
-	if p, merr := utils.GetParamInt8(c, "press"); merr != nil {
+	var pressID shared.EntityID
+	if id, merr := utils.GetParamInt8(c, "press"); merr != nil {
 		return merr.Echo()
 	} else {
-		pressNumber = shared.PressNumber(p)
+		pressID = shared.EntityID(id)
 	}
 
 	// Get position from query
@@ -41,7 +41,7 @@ func ReplaceTool(c echo.Context) *echo.HTTPError {
 		newToolID = shared.EntityID(i)
 	}
 
-	if press, merr := db.GetPress(pressNumber); merr != nil {
+	if press, merr := db.GetPress(pressID); merr != nil {
 		return merr.Echo()
 	} else {
 		switch position {

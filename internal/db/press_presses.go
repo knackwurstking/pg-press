@@ -17,6 +17,7 @@ const (
 	sqlCreatePressesTable string = `
 		CREATE TABLE IF NOT EXISTS presses (
 			id 					INTEGER NOT NULL,
+			number 				INTEGER NOT NULL,
 			type 				TEXT NOT NULL,
 			code 				TEXT NOT NULL,
 			slot_up 			INTEGER NOT NULL,
@@ -32,6 +33,7 @@ const (
 	sqlAddPress string = `
 		INSERT INTO presses (
 			id,
+			number,
 			type,
 			code,
 			slot_up,
@@ -39,6 +41,7 @@ const (
 			cycles_offset
 		) VALUES (
 			:id,
+			:number,
 			:type,
 			:code,
 			:slot_up,
@@ -51,6 +54,7 @@ const (
 	sqlUpdatePress string = `
 		UPDATE presses
 		SET
+			number = :number,
 			type = :type
 			code = :code,
 			slot_up = :slot_up,
@@ -63,6 +67,7 @@ const (
 	sqlGetPress string = `
 		SELECT
 			id,
+			number,
 			type
 			code,
 			slot_up,
@@ -74,7 +79,7 @@ const (
 
 	// sqlGetPressNumberForTool finds the press number that contains a specific tool in either slot.
 	sqlGetPressNumberForTool string = `
-		SELECT id, type, code
+		SELECT number
 		FROM presses
 		WHERE slot_up = :tool_id OR slot_down = :tool_id
 		LIMIT 1;
@@ -84,19 +89,21 @@ const (
 	sqlGetPressUtilization string = `
 		SELECT
 			id,
+			number,
 			type,
 			code,
 			slot_up,
 			slot_down,
 			cycles_offset
 		FROM presses
-		WHERE id = :press_number, type = :type, code = :code;
+		WHERE id = :id;
 	`
 
 	// sqlListPress retrieves all press records from the database.
 	sqlListPress string = `
 		SELECT
 			id,
+			number,
 			type,
 			code,
 			slot_up,
@@ -106,15 +113,10 @@ const (
 		ORDER BY id ASC
 	`
 
-	// sqlListPressNumbers retrieves all press numbers from the database.
-	sqlListPressNumbers = `
-		SELECT id, type, code FROM presses ORDER BY id ASC
-	`
-
 	// sqlDeletePress removes a press record from the database.
 	sqlDeletePress string = `
 		DELETE FROM presses
-		WHERE id = :id, type = :type, code = :code
+		WHERE id = :id
 	`
 )
 
@@ -139,6 +141,7 @@ func AddPress(press *shared.Press) *errors.HTTPError {
 
 	_, err := dbPress.Exec(sqlAddPress,
 		sql.Named("id", press.ID),
+		sql.Named("number", press.Number),
 		sql.Named("type", press.Type),
 		sql.Named("code", press.Code),
 		sql.Named("slot_up", press.SlotUp),
@@ -168,6 +171,7 @@ func UpdatePress(press *shared.Press) *errors.HTTPError {
 
 	_, err := dbPress.Exec(sqlUpdatePress,
 		sql.Named("id", press.ID),
+		sql.Named("number", press.Number),
 		sql.Named("type", press.Type),
 		sql.Named("code", press.Code),
 		sql.Named("slot_up", press.SlotUp),
@@ -191,7 +195,7 @@ func UpdatePress(press *shared.Press) *errors.HTTPError {
 // Returns:
 //   - *shared.Press: Pointer to the retrieved Press struct, or nil if not found
 //   - *errors.HTTPError: Error if operation fails, nil on success
-func GetPress(id shared.PressNumber) (*shared.Press, *errors.HTTPError) {
+func GetPress(id shared.EntityID) (*shared.Press, *errors.HTTPError) {
 	return ScanPress(dbPress.QueryRow(sqlGetPress, sql.Named("id", id)))
 }
 
@@ -228,26 +232,23 @@ func GetPressNumberForTool(toolID shared.EntityID) (shared.PressNumber, *errors.
 // Returns:
 //   - *shared.PressUtilization: Pointer to the populated PressUtilization struct
 //   - *errors.HTTPError: Error if operation fails, nil on success
-func GetPressUtilization(pressNumber shared.PressNumber) (*shared.PressUtilization, *errors.HTTPError) {
+func GetPressUtilization(pressID shared.EntityID) (*shared.PressUtilization, *errors.HTTPError) {
 	var (
 		slotUpper shared.EntityID
 		slotLower shared.EntityID
 	)
 	pu := &shared.PressUtilization{}
-	err := dbPress.QueryRow(sqlGetPressUtilization,
-		sql.Named("press_number", pressNumber),
-		sql.Named("type", pressNumber),
-		sql.Named("code", pressNumber),
-	).Scan(
+	err := dbPress.QueryRow(sqlGetPressUtilization, sql.Named("id", pressID)).Scan(
+		&pu.PressID,
 		&pu.PressNumber,
-		&pu.Type,
-		&pu.Code,
+		&pu.PressType,
+		&pu.PressCode,
 		&slotUpper,
 		&slotLower,
 		&pu.CyclesOffset,
 	)
 	if err != nil {
-		return pu, errors.NewHTTPError(err).Wrap("error query press utilization for press %d failed", pressNumber)
+		return pu, errors.NewHTTPError(err).Wrap("error query press utilization for press with ID %d failed", pressID)
 	}
 
 	if slotUpper > 0 {
@@ -290,16 +291,16 @@ func GetPressUtilization(pressNumber shared.PressNumber) (*shared.PressUtilizati
 // Returns:
 //   - map[shared.PressNumber]*shared.PressUtilization: Map of press numbers to utilization info
 //   - *errors.HTTPError: Error if operation fails, nil on success
-func GetPressUtilizations(pressNumbers ...shared.PressNumber) (
-	pu map[shared.PressNumber]*shared.PressUtilization, herr *errors.HTTPError,
+func GetPressUtilizations(pressIDs ...shared.EntityID) (
+	pu map[shared.EntityID]*shared.PressUtilization, herr *errors.HTTPError,
 ) {
-	pu = make(map[shared.PressNumber]*shared.PressUtilization)
-	for _, pn := range pressNumbers {
-		u, herr := GetPressUtilization(pn)
+	pu = make(map[shared.EntityID]*shared.PressUtilization)
+	for _, pID := range pressIDs {
+		u, herr := GetPressUtilization(pID)
 		if herr != nil {
-			return pu, herr.Wrap("%d", pn)
+			return pu, herr.Wrap("%d", pID)
 		}
-		pu[pn] = u
+		pu[pID] = u
 	}
 
 	return pu, nil
@@ -335,37 +336,6 @@ func ListPress() (presses []*shared.Press, herr *errors.HTTPError) {
 	return presses, nil
 }
 
-// ListPressNumbers retrieves all press numbers from the database.
-//
-// It queries the database for all press IDs and returns them as a slice.
-// Returns an error if the query fails.
-//
-// Returns:
-//   - []shared.PressNumber: Slice of press numbers
-//   - *errors.HTTPError: Error if operation fails, nil on success
-func ListPressNumbers() (pressNumbers []shared.PressNumber, herr *errors.HTTPError) {
-	r, err := dbPress.Query(sqlListPressNumbers)
-	if err != nil {
-		return nil, errors.NewHTTPError(err)
-	}
-	defer r.Close()
-
-	for r.Next() {
-		var pn shared.PressNumber
-		err := r.Scan(&pn)
-		if err != nil {
-			return nil, errors.NewHTTPError(err).Wrap("scanning press number row failed")
-		}
-		pressNumbers = append(pressNumbers, pn)
-	}
-
-	if err := r.Err(); err != nil {
-		return nil, errors.NewHTTPError(err)
-	}
-
-	return pressNumbers, nil
-}
-
 // DeletePress removes a press from the database.
 //
 // It deletes the specified press record and returns an error if the operation fails.
@@ -375,7 +345,7 @@ func ListPressNumbers() (pressNumbers []shared.PressNumber, herr *errors.HTTPErr
 //
 // Returns:
 //   - *errors.HTTPError: Error if operation fails, nil on success
-func DeletePress(id shared.PressNumber) *errors.HTTPError {
+func DeletePress(id shared.EntityID) *errors.HTTPError {
 	_, err := dbPress.Exec(sqlDeletePress, sql.Named("id", id), sql.Named("type", id), sql.Named("code", id))
 	if err != nil {
 		return errors.NewHTTPError(err)
@@ -402,6 +372,7 @@ func ScanPress(row Scannable) (press *shared.Press, herr *errors.HTTPError) {
 	press = &shared.Press{}
 	err := row.Scan(
 		&press.ID,
+		&press.Number,
 		&press.Type,
 		&press.Code,
 		&press.SlotUp,

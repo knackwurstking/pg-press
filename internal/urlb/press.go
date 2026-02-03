@@ -8,43 +8,44 @@ import (
 )
 
 // Press constructs press page URL
-func Press(pressNumber shared.PressNumber) templ.SafeURL {
-	return BuildURL(fmt.Sprintf("/press/%d", pressNumber))
+func Press(pressID shared.EntityID) templ.SafeURL {
+	return BuildURL(fmt.Sprintf("/press/%d", pressID))
 }
 
 // PressActiveTools constructs press active tools URL
-func PressActiveTools(pressNumber shared.PressNumber) templ.SafeURL {
-	return BuildURL(fmt.Sprintf("/press/%d/active-tools", pressNumber))
+func PressActiveTools(pressID shared.EntityID) templ.SafeURL {
+	return BuildURL(fmt.Sprintf("/press/%d/active-tools", pressID))
 }
 
 // PressMetalSheets constructs press metal sheets URL
-func PressMetalSheets(pressNumber shared.PressNumber) templ.SafeURL {
-	return BuildURL(fmt.Sprintf("/press/%d/metal-sheets", pressNumber))
+// TODO: Continue here...
+func PressMetalSheets(pressID shared.EntityID) templ.SafeURL {
+	return BuildURL(fmt.Sprintf("/press/%d/metal-sheets", pressID))
 }
 
 // PressCycles constructs press cycles URL
-func PressCycles(pressNumber shared.PressNumber) templ.SafeURL {
-	return BuildURL(fmt.Sprintf("/press/%d/cycles", pressNumber))
+func PressCycles(pressID shared.EntityID) templ.SafeURL {
+	return BuildURL(fmt.Sprintf("/press/%d/cycles", pressID))
 }
 
 // PressNotes constructs press notes URL
-func PressNotes(pressNumber shared.PressNumber) templ.SafeURL {
-	return BuildURL(fmt.Sprintf("/press/%d/notes", pressNumber))
+func PressNotes(pressID shared.EntityID) templ.SafeURL {
+	return BuildURL(fmt.Sprintf("/press/%d/notes", pressID))
 }
 
 // PressCycleSummaryPDF constructs press cycle summary PDF URL
-func PressCycleSummaryPDF(pressNumber shared.PressNumber) templ.SafeURL {
-	return BuildURL(fmt.Sprintf("/press/%d/cycle-summary-pdf", pressNumber))
+func PressCycleSummaryPDF(pressID shared.EntityID) templ.SafeURL {
+	return BuildURL(fmt.Sprintf("/press/%d/cycle-summary-pdf", pressID))
 }
 
 // PressDelete constructs press delete URL
-func PressDelete(pressNumber shared.PressNumber) templ.SafeURL {
-	return BuildURL(fmt.Sprintf("/press/%d", pressNumber))
+func PressDelete(pressID shared.EntityID) templ.SafeURL {
+	return BuildURL(fmt.Sprintf("/press/%d", pressID))
 }
 
 // PressReplaceTool constructs press replace tool URL
-func PressReplaceTool(pn shared.PressNumber, p shared.Slot) templ.SafeURL {
-	return BuildURLWithParams(fmt.Sprintf("/press/%d/replace-tool", pn), map[string]string{
+func PressReplaceTool(pressID shared.EntityID, p shared.Slot) templ.SafeURL {
+	return BuildURLWithParams(fmt.Sprintf("/press/%d/replace-tool", pressID), map[string]string{
 		"position": fmt.Sprintf("%d", p),
 	})
 }

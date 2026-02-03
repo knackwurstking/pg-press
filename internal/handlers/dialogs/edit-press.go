@@ -11,15 +11,13 @@ import (
 )
 
 func GetEditPress(c echo.Context) *echo.HTTPError {
-	pn, merr := utils.GetQueryInt8(c, "id")
-	if merr != nil && merr.IsNotFoundError() {
-		pn = -1
-	} else if merr != nil {
+	id, merr := utils.GetQueryInt8(c, "id")
+	if merr != nil && !merr.IsNotFoundError() {
 		return merr.Echo()
 	}
 
-	if pn > -1 {
-		press, merr := db.GetPress(shared.PressNumber(pn))
+	if id > 0 {
+		press, merr := db.GetPress(shared.EntityID(id))
 		if merr != nil {
 			return merr.Echo()
 		}
@@ -47,7 +45,7 @@ func PostPress(c echo.Context) *echo.HTTPError {
 	}
 
 	merr := db.AddPress(&shared.Press{
-		ID:           data.PressNumber,
+		Number:       data.PressNumber,
 		Type:         data.MachineType,
 		Code:         data.Code,
 		CyclesOffset: data.CyclesOffset,
@@ -62,22 +60,17 @@ func PostPress(c echo.Context) *echo.HTTPError {
 }
 
 func PutPress(c echo.Context) *echo.HTTPError {
-	id, merr := utils.GetQueryInt64(c, "id")
-	if merr != nil {
-		return merr.Echo()
-	}
-
 	data, verr := parseEditPressForm(c)
 	if verr != nil {
 		return verr.HTTPError().Echo()
 	}
 
-	press, herr := db.GetPress(shared.PressNumber(id))
+	press, herr := db.GetPress(data.PressID)
 	if herr != nil {
 		return herr.Echo()
 	}
 
-	merr = db.UpdatePress(&shared.Press{
+	merr := db.UpdatePress(&shared.Press{
 		ID:           press.ID,
 		Type:         data.MachineType,
 		Code:         data.Code,
@@ -95,6 +88,7 @@ func PutPress(c echo.Context) *echo.HTTPError {
 }
 
 type editPressForm struct {
+	PressID      shared.EntityID
 	PressNumber  shared.PressNumber
 	MachineType  shared.MachineType
 	Code         string
@@ -102,6 +96,12 @@ type editPressForm struct {
 }
 
 func parseEditPressForm(c echo.Context) (*editPressForm, *errors.ValidationError) {
+	// Press ID
+	vPressID, err := utils.SanitizeInt64(c.FormValue("press_id"))
+	if err != nil {
+		return nil, errors.NewValidationError("invalid press ID: %v", err)
+	}
+
 	// Press Number
 	vPressNumber, err := utils.SanitizeInt8(c.FormValue("press_number"))
 	if err != nil {
@@ -120,6 +120,7 @@ func parseEditPressForm(c echo.Context) (*editPressForm, *errors.ValidationError
 	}
 
 	return &editPressForm{
+		PressID:      shared.EntityID(vPressID),
 		PressNumber:  shared.PressNumber(vPressNumber),
 		MachineType:  shared.MachineType(utils.SanitizeText(c.FormValue("machine_type"))),
 		Code:         code,

@@ -11,15 +11,11 @@ import (
 )
 
 func GetActiveTools(c echo.Context) *echo.HTTPError {
-	pressNumber, merr := utils.GetParamInt8(c, "press")
+	id, merr := utils.GetParamInt8(c, "press")
 	if merr != nil {
 		return merr.Echo()
 	}
-
-	pu, merr := db.GetPressUtilizations([]shared.PressNumber{shared.PressNumber(pressNumber)}...)
-	if merr != nil {
-		return merr.WrapEcho("get press utilizations for press %d", pressNumber)
-	}
+	pressID := shared.EntityID(id)
 
 	toolsForSelection := make(map[shared.Slot][]*shared.Tool)
 	toolsForSelection[shared.SlotUpper] = []*shared.Tool{}
@@ -40,7 +36,12 @@ func GetActiveTools(c echo.Context) *echo.HTTPError {
 		return herr.Echo()
 	}
 
-	t := templates.ActiveToolsSection(pu[shared.PressNumber(pressNumber)], toolsForSelection, user)
+	u, merr := db.GetPressUtilization(pressID)
+	if merr != nil {
+		return merr.WrapEcho("get press utilizations for press %d", pressID)
+	}
+
+	t := templates.ActiveToolsSection(u, toolsForSelection, user)
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "Active Tools Section")

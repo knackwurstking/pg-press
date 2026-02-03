@@ -1,6 +1,7 @@
 package press
 
 import (
+	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/press/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -15,14 +16,18 @@ func GetPage(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	pressNumber, merr := utils.GetParamInt8(c, "press")
+	id, merr := utils.GetParamInt8(c, "press")
+	if merr != nil {
+		return merr.Echo()
+	}
+	press, merr := db.GetPress(shared.EntityID(id))
 	if merr != nil {
 		return merr.Echo()
 	}
 
 	t := templates.Page(templates.PageProps{
-		PressNumber: shared.PressNumber(pressNumber),
-		User:        user,
+		Press: press,
+		User:  user,
 	})
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {

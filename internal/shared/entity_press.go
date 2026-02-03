@@ -17,8 +17,8 @@ import (
 //   - This is a new type which does not exist in the original models package
 //   - The upper cassette is handled by the tool type, the press does not care about it
 type Press struct {
-	// ID for this press machine (e.g., 1, 2, 3) (press number)
-	ID PressNumber `json:"id"`
+	ID     EntityID    `json:"id"`
+	Number PressNumber `json:"number"`
 
 	// Type specifies the type of press (e.g., "SACMI", "SITI")
 	Type MachineType `json:"type"`

@@ -31,6 +31,7 @@ templ EditPressDialog(press *shared.Press) {
 		FormClasses:       templ.CSSClasses{"container"},
 		AdditionalActions: editPressActions(press),
 	}) {
+		<input type="hidden" name="press_id" value={ press.ID }/>
 		@PressContent(press)
 	}
 }

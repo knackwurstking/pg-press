@@ -7,27 +7,27 @@ import (
 )
 
 type Cycle struct {
-	ID            EntityID    `json:"id"`             // ID is the unique identifier for the Cycle entity
-	ToolID        EntityID    `json:"tool_id"`        // ToolID is the identifier for the associated Tool entity
-	PressNumber   PressNumber `json:"press_number"`   // PressNumber indicates which press machine performed the cycles
-	PressCycles   int64       `json:"cycles"`         // PressCycles is the number of cycles completed during this time period
-	PartialCycles int64       `json:"partial_cycles"` // PartialCycles are the completed cycles during this time period (calculated)
-	Start         UnixMilli   `json:"start"`          // Start timestamp in milliseconds (injected)
-	Stop          UnixMilli   `json:"stop"`           // Stop timestamp in milliseconds, should be the date were the press cycles got read
+	ID            EntityID  `json:"id"`             // ID is the unique identifier for the Cycle entity
+	ToolID        EntityID  `json:"tool_id"`        // ToolID is the identifier for the associated Tool entity
+	PressID       EntityID  `json:"press_id"`       // PressID is the identifier for the associated Press entity
+	PressCycles   int64     `json:"cycles"`         // PressCycles is the number of cycles completed during this time period
+	PartialCycles int64     `json:"partial_cycles"` // PartialCycles are the completed cycles during this time period (calculated)
+	Start         UnixMilli `json:"start"`          // Start timestamp in milliseconds (injected)
+	Stop          UnixMilli `json:"stop"`           // Stop timestamp in milliseconds, should be the date were the press cycles got read
 }
 
-func NewCycle(toolID EntityID, pn PressNumber, pressCycles int64, stop UnixMilli) *Cycle {
+func NewCycle(toolID EntityID, pressID EntityID, pressCycles int64, stop UnixMilli) *Cycle {
 	return &Cycle{
 		ToolID:      toolID,
-		PressNumber: pn,
+		PressID:     pressID,
 		PressCycles: pressCycles,
 		Stop:        stop,
 	}
 }
 
 func (c *Cycle) Validate() *errors.ValidationError {
-	if c.PressNumber < 0 {
-		return errors.NewValidationError("press number must be 0 or greater")
+	if c.PressID <= 0 {
+		return errors.NewValidationError("press ID must be specified")
 	}
 
 	if c.PressCycles < 0 {
@@ -55,7 +55,7 @@ func (c *Cycle) Clone() *Cycle {
 	return &Cycle{
 		ID:            c.ID,
 		ToolID:        c.ToolID,
-		PressNumber:   c.PressNumber,
+		PressID:       c.PressID,
 		PressCycles:   c.PressCycles,
 		PartialCycles: c.PartialCycles,
 		Start:         c.Start,
@@ -65,7 +65,7 @@ func (c *Cycle) Clone() *Cycle {
 
 func (c *Cycle) String() string {
 	return fmt.Sprintf(
-		"Cycle{ID:%d, ToolID:%d, PressNumber:%d, PressCycles:%d, PartialCycles:%d, Start:%d, Stop:%d}",
-		c.ID, c.ToolID, c.PressNumber, c.PressCycles, c.PartialCycles, c.Start, c.Stop,
+		"Cycle{ID:%d, ToolID:%d, PressID:%d, PressCycles:%d, PartialCycles:%d, Start:%d, Stop:%d}",
+		c.ID, c.ToolID, c.PressID, c.PressCycles, c.PartialCycles, c.Start, c.Stop,
 	)
 }
