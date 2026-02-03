@@ -109,9 +109,8 @@ templ cyclePressNumber(current *shared.Press, presses []*shared.Press) {
 	@components.Section(templ.Attributes{
 		"class": "press flex flex-col gap-sm",
 	}) {
-		// TODO: Update this list from "press_number" to "press_id"
-		<label for="press_number">Presse</label>
-		<select id="press_number" name="press_number" required>
+		<label for="press_id">Presse</label>
+		<select id="press_id" name="press_id" required>
 			<option
 				value=""
 				disabled

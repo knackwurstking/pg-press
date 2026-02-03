@@ -156,7 +156,7 @@ func parseCycleForm(c echo.Context) (*shared.Cycle, *errors.ValidationError) {
 	// Press Number
 	id, err := utils.SanitizeInt8(c.FormValue("press_id"))
 	if err != nil {
-		return nil, errors.NewValidationError("press_number: %v", err)
+		return nil, errors.NewValidationError("press_id: %v", err)
 	}
 	pressID := shared.EntityID(id)
 
