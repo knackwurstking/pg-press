@@ -1,7 +1,6 @@
 package umbau
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -21,11 +20,16 @@ func GetUmbauPage(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	pressNumber, eerr := getParamPressNumber(c)
-	if eerr != nil {
-		return eerr
+	id, herr := utils.GetParamInt64(c, "press")
+	if herr != nil {
+		return herr.Echo()
 	}
-	u, merr := db.GetPressUtilization(pressNumber)
+	press, herr := db.GetPress(shared.EntityID(id))
+	if herr != nil {
+		return herr.Echo()
+	}
+
+	u, merr := db.GetPressUtilization(press.ID)
 	if merr != nil {
 		return merr.Echo()
 	}
@@ -46,7 +50,7 @@ func GetUmbauPage(c echo.Context) *echo.HTTPError {
 	}
 
 	t := templates.Page(&templates.PageProps{
-		PressNumber:      pressNumber,
+		Press:            press,
 		User:             user,
 		CurrentUpperTool: u.SlotUpper,
 		CurrentLowerTool: u.SlotLower,
@@ -61,10 +65,11 @@ func GetUmbauPage(c echo.Context) *echo.HTTPError {
 }
 
 func PostUmbauPage(c echo.Context) *echo.HTTPError {
-	pressNumber, eerr := getParamPressNumber(c)
-	if eerr != nil {
-		return eerr
+	id, herr := utils.GetParamInt64(c, "press")
+	if herr != nil {
+		return herr.Echo()
 	}
+	pressID := shared.EntityID(id)
 
 	data, eerr := getFormData(c)
 	if eerr != nil {
@@ -72,32 +77,28 @@ func PostUmbauPage(c echo.Context) *echo.HTTPError {
 	}
 
 	// Press Utilization
-	pu, merr := db.GetPressUtilizations(pressNumber)
+	u, merr := db.GetPressUtilization(pressID)
 	if merr != nil {
 		return merr.WrapEcho("get press utilization")
-	}
-	pressUtilization, ok := pu[pressNumber]
-	if !ok {
-		return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("no data for press %d", pressNumber))
 	}
 
 	// Old Tools for setting cycles
 	tools := make([]*shared.Tool, 0)
-	if pressUtilization.SlotUpper != nil {
-		tools = append(tools, pressUtilization.SlotLower)
+	if u.SlotUpper != nil {
+		tools = append(tools, u.SlotLower)
 	}
-	if pressUtilization.SlotUpperCassette != nil {
-		tools = append(tools, pressUtilization.SlotUpperCassette)
+	if u.SlotUpperCassette != nil {
+		tools = append(tools, u.SlotUpperCassette)
 	}
-	if pressUtilization.SlotLower != nil {
-		tools = append(tools, pressUtilization.SlotLower)
+	if u.SlotLower != nil {
+		tools = append(tools, u.SlotLower)
 	}
 	// Set cycles for old tools
 	for _, t := range tools {
 		merr = db.AddCycle(
 			shared.NewCycle(
 				t.ID,
-				pressNumber,
+				pressID,
 				data.totalCycles,
 				shared.NewUnixMilli(time.Now()),
 			),
@@ -108,7 +109,7 @@ func PostUmbauPage(c echo.Context) *echo.HTTPError {
 	}
 
 	// Update press with new tools
-	press := pressUtilization.Press()
+	press := u.Press()
 	tools = []*shared.Tool{data.upperTool, data.lowerTool}
 	for _, t := range tools {
 		switch t.Position {
@@ -124,24 +125,6 @@ func PostUmbauPage(c echo.Context) *echo.HTTPError {
 	}
 
 	return nil
-}
-
-func getParamPressNumber(c echo.Context) (shared.PressNumber, *echo.HTTPError) {
-	// PressNumber from param
-	var pressNumber shared.PressNumber
-	pn, merr := utils.GetParamInt8(c, "press")
-	if merr != nil {
-		return pressNumber, merr.Echo()
-	}
-	pressNumber = shared.PressNumber(pn)
-	if !pressNumber.IsValid() {
-		return pressNumber, echo.NewHTTPError(
-			http.StatusBadRequest,
-			fmt.Sprintf("invalid press number: %d", pressNumber),
-		)
-	}
-
-	return pressNumber, nil
 }
 
 type formData struct {

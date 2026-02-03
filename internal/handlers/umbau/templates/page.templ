@@ -10,7 +10,7 @@ import (
 
 type PageProps struct {
 	User             *shared.User
-	PressNumber      shared.PressNumber
+	Press            *shared.Press
 	CurrentUpperTool *shared.Tool
 	CurrentLowerTool *shared.Tool
 	UpperTools       []*shared.Tool
@@ -20,15 +20,15 @@ type PageProps struct {
 templ Page(props *PageProps) {
 	@components.Layout(
 		components.LayoutProps{
-			PageTitle:   fmt.Sprintf("PG Presse | Umbau Presse %d", props.PressNumber),
-			AppBarTitle: fmt.Sprintf("Umbau Presse %d", props.PressNumber),
+			PageTitle:   fmt.Sprintf("PG Presse | Umbau Presse %d", props.Press.Number),
+			AppBarTitle: fmt.Sprintf("Umbau Presse %d", props.Press.Number),
 			NavContent:  components.StandardNavContent(),
 		},
 	) {
 		<main class="container fluid">
-			<h2>Werkzeugumbau an Presse { fmt.Sprintf("%d", props.PressNumber) }</h2>
+			<h2>Werkzeugumbau an Presse { fmt.Sprintf("%d", props.Press.Number) }</h2>
 			<form
-				hx-post={ urlb.Umbau(props.PressNumber) }
+				hx-post={ urlb.Umbau(props.Press.ID) }
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 				hx-on:htmx:after-request="if(event.detail.successful) history.back()"
 			>

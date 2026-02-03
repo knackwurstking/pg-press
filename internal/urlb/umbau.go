@@ -8,6 +8,6 @@ import (
 )
 
 // Umbau constructs umbau URL
-func Umbau(press shared.PressNumber) templ.SafeURL {
-	return BuildURL(fmt.Sprintf("/umbau/%d", press))
+func Umbau(pressID shared.EntityID) templ.SafeURL {
+	return BuildURL(fmt.Sprintf("/umbau/%d", pressID))
 }
