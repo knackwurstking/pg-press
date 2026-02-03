@@ -10,10 +10,12 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// GetCyclesSectionContent handles the request to get the cycles section content
 func GetCyclesSectionContent(c echo.Context) *echo.HTTPError {
 	return renderCyclesSectionContent(c)
 }
 
+// renderCyclesSection renders the cycles section for a tool
 func renderCyclesSection(c echo.Context, tool *shared.Tool) *echo.HTTPError {
 	// Render out-of-band swap for cycles section to trigger reload
 	t := templates.CyclesSection(true, tool.ID)
@@ -24,12 +26,14 @@ func renderCyclesSection(c echo.Context, tool *shared.Tool) *echo.HTTPError {
 	return nil
 }
 
+// renderCyclesSectionContent renders the content for the cycles section
 func renderCyclesSectionContent(c echo.Context) *echo.HTTPError {
 	// Get tool from URL param "id"
 	id, merr := utils.GetParamInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
 	}
+
 	tool, merr := db.GetTool(shared.EntityID(id))
 	if merr != nil {
 		return merr.Echo()
@@ -44,7 +48,9 @@ func renderCyclesSectionContent(c echo.Context) *echo.HTTPError {
 	if herr != nil {
 		return herr.Echo()
 	}
-	pressMap := map[shared.EntityID]*shared.Press{}
+
+	// Create press map for easy lookup
+	pressMap := make(map[shared.EntityID]*shared.Press)
 	for _, p := range presses {
 		pressMap[p.ID] = p
 	}
@@ -82,6 +88,7 @@ func renderCyclesSectionContent(c echo.Context) *echo.HTTPError {
 		Regenerations:       regenerations,
 		User:                user,
 	})
+
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "Cycles")
