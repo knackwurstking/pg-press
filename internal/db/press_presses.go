@@ -31,6 +31,24 @@ const (
 	// sqlAddPress inserts a new press record into the database.
 	sqlAddPress string = `
 		INSERT INTO presses (
+			number,
+			type,
+			code,
+			slot_up,
+			slot_down,
+			cycles_offset
+		) VALUES (
+			:number,
+			:type,
+			:code,
+			:slot_up,
+			:slot_down,
+			:cycles_offset
+		)
+	`
+
+	sqlAddPressWithID string = `
+		INSERT INTO presses (
 			id,
 			number,
 			type,
@@ -145,8 +163,18 @@ func AddPress(press *shared.Press) *errors.HTTPError {
 		return verr.HTTPError()
 	}
 
-	_, err := dbPress.Exec(sqlAddPress,
-		sql.Named("id", press.ID),
+	var query string
+	if press.ID > 0 {
+		query = sqlAddPressWithID
+	} else {
+		query = sqlAddPress
+	}
+
+	var queryArgs []any
+	if press.ID > 0 {
+		queryArgs = append(queryArgs, sql.Named("id", press.ID))
+	}
+	queryArgs = append(queryArgs,
 		sql.Named("number", press.Number),
 		sql.Named("type", press.Type),
 		sql.Named("code", press.Code),
@@ -154,7 +182,8 @@ func AddPress(press *shared.Press) *errors.HTTPError {
 		sql.Named("slot_down", press.SlotDown),
 		sql.Named("cycles_offset", press.CyclesOffset),
 	)
-	if err != nil {
+
+	if _, err := dbPress.Exec(query, queryArgs...); err != nil {
 		return errors.NewHTTPError(err)
 	}
 	return nil
