@@ -21,7 +21,7 @@ Code: PH4000
 ```
 
 - [x] Add to presses table: "code"
-- [x] ~Make presses table columns unique (union) `<press-number>, <press-type>, <press-code>`~
+- [ ] ~Make presses table columns unique (union) `<press-number>, <press-type>, <press-code>`~
 - [x] Need to fix all conversion scripts after this
 
 ## Press Page
