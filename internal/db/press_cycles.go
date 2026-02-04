@@ -13,69 +13,60 @@ import (
 
 const (
 	sqlCreateCyclesTable string = `
-		CREATE TABLE IF NOT EXISTS cycles (
-			id           INTEGER NOT NULL,
-			tool_id      INTEGER NOT NULL,
-			press_id     INTEGER NOT NULL,
-			cycles       INTEGER NOT NULL, -- Cycles at stop time
-			stop         INTEGER NOT NULL,
+CREATE TABLE IF NOT EXISTS cycles (
+	id INTEGER NOT NULL,
+	tool_id INTEGER NOT NULL,
+	press_id INTEGER NOT NULL,
+	cycles INTEGER NOT NULL, -- Cycles at stop time
+	stop INTEGER NOT NULL,
 
-			PRIMARY KEY("id" AUTOINCREMENT)
-		);
-	`
+	PRIMARY KEY("id" AUTOINCREMENT)
+);`
 
 	sqlAddCycle string = `
-		INSERT INTO cycles (tool_id, press_id, cycles, stop)
-		VALUES (:tool_id, :press_id, :cycles, :stop)
-	`
+INSERT INTO cycles (tool_id, press_id, cycles, stop)
+VALUES (:tool_id, :press_id, :cycles, :stop)`
 
 	sqlAddCycleWithID string = `
-		INSERT INTO cycles (id, tool_id, press_id, cycles, stop)
-		VALUES (:id, :tool_id, :press_id, :cycles, :stop)
-	`
+INSERT INTO cycles (id, tool_id, press_id, cycles, stop)
+VALUES (:id, :tool_id, :press_id, :cycles, :stop)`
 
 	sqlUpdateCycle string = `
-		UPDATE cycles
-		SET
-			tool_id = :tool_id,
-			press_id = :press_id,
-			cycles = :cycles,
-			stop = :stop
-		WHERE id = :id
-	`
+UPDATE cycles
+SET
+	tool_id = :tool_id,
+	press_id = :press_id,
+	cycles = :cycles,
+	stop = :stop
+WHERE id = :id`
 
 	sqlDeleteCycle string = `
-		DELETE FROM cycles
-		WHERE id = :id;
-	`
+DELETE FROM cycles
+WHERE id = :id;`
 
 	sqlGetCycle string = `
-		SELECT id, tool_id, press_id, cycles, stop
-		FROM cycles
-		WHERE id = :id
-	`
+SELECT id, tool_id, press_id, cycles, stop
+FROM cycles
+WHERE id = :id`
 
 	sqlListToolCycles string = `
-		SELECT id, tool_id, press_id, cycles, stop
-		FROM cycles
-		WHERE tool_id = :tool_id
-		ORDER BY stop DESC;
-	`
+SELECT id, tool_id, press_id, cycles, stop
+FROM cycles
+WHERE tool_id = :tool_id
+ORDER BY stop DESC;`
 
 	sqlListCyclesByPressID string = `
-		SELECT id, tool_id, press_id, cycles, stop
-		FROM cycles
-		WHERE press_id = :press_id
-		ORDER BY stop DESC;
-	`
+SELECT id, tool_id, press_id, cycles, stop
+FROM cycles
+WHERE press_id = :press_id
+ORDER BY stop DESC;`
 
 	sqlGetPrevCycle string = `
-		SELECT cycles, stop
-		FROM cycles
-		WHERE press_id = ? AND stop < ?
-		ORDER BY stop DESC
-		LIMIT 1;
-	`
+SELECT cycles, stop
+FROM cycles
+WHERE press_id = ? AND stop < ?
+ORDER BY stop DESC
+LIMIT 1;`
 )
 
 // -----------------------------------------------------------------------------

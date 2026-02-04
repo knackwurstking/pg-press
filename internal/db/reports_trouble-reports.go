@@ -14,52 +14,45 @@ import (
 
 const (
 	sqlCreateTroubleReportsTable string = `
-		CREATE TABLE IF NOT EXISTS trouble_reports (
-			id                  INTEGER NOT NULL,
-			title               TEXT NOT NULL,
-			content             TEXT NOT NULL,
-			linked_attachments  TEXT,
-			use_markdown        INTEGER NOT NULL DEFAULT 0,
+CREATE TABLE IF NOT EXISTS trouble_reports (
+	id INTEGER NOT NULL,
+	title TEXT NOT NULL,
+	content TEXT NOT NULL,
+	linked_attachments TEXT,
+	use_markdown INTEGER NOT NULL DEFAULT 0,
 
-			PRIMARY KEY("id" AUTOINCREMENT)
-		);
-	`
+	PRIMARY KEY("id" AUTOINCREMENT)
+);`
 
 	sqlAddTroubleReport string = `
-		INSERT INTO trouble_reports (title, content, linked_attachments, use_markdown)
-		VALUES (:title, :content, :linked_attachments, :use_markdown);
-	`
+INSERT INTO trouble_reports (title, content, linked_attachments, use_markdown)
+VALUES (:title, :content, :linked_attachments, :use_markdown);`
 
 	sqlAddTroubleReportWithID string = `
-		INSERT INTO trouble_reports (id, title, content, linked_attachments, use_markdown)
-		VALUES (:id, :title, :content, :linked_attachments, :use_markdown);
-	`
+INSERT INTO trouble_reports (id, title, content, linked_attachments, use_markdown)
+VALUES (:id, :title, :content, :linked_attachments, :use_markdown);`
 
 	sqlUpdateTroubleReport string = `
-		UPDATE trouble_reports
-		SET title               = :title,
-		    content             = :content,
-		    linked_attachments  = :linked_attachments,
-		    use_markdown        = :use_markdown
-		WHERE id = :id;
-	`
+UPDATE trouble_reports
+SET title = :title,
+	content = :content,
+	linked_attachments = :linked_attachments,
+	use_markdown = :use_markdown
+WHERE id = :id;`
 
 	sqlGetTroubleReport string = `
-		SELECT id, title, content, linked_attachments, use_markdown
-		FROM trouble_reports
-		WHERE id = :id;
-	`
+SELECT id, title, content, linked_attachments, use_markdown
+FROM trouble_reports
+WHERE id = :id;`
 
 	sqlListTroubleReports string = `
-		SELECT id, title, content, linked_attachments, use_markdown
-		FROM trouble_reports
-		ORDER BY id DESC;
-	`
+SELECT id, title, content, linked_attachments, use_markdown
+FROM trouble_reports
+ORDER BY id DESC;`
 
 	sqlDeleteTroubleReport string = `
-		DELETE FROM trouble_reports
-		WHERE id = :id;
-	`
+DELETE FROM trouble_reports
+WHERE id = :id;`
 )
 
 // -----------------------------------------------------------------------------

@@ -15,133 +15,124 @@ import (
 const (
 	// sqlCreatePressesTable creates the presses table with all required columns.
 	sqlCreatePressesTable string = `
-		CREATE TABLE IF NOT EXISTS presses (
-			id 					INTEGER NOT NULL,
-			number 				INTEGER NOT NULL,
-			type 				TEXT NOT NULL,
-			code 				TEXT NOT NULL,
-			slot_up 			INTEGER NOT NULL,
-			slot_down 			INTEGER NOT NULL,
-			cycles_offset 		INTEGER NOT NULL,
+CREATE TABLE IF NOT EXISTS presses (
+	id INTEGER NOT NULL,
+	number INTEGER NOT NULL,
+	type TEXT NOT NULL,
+	code TEXT NOT NULL,
+	slot_up INTEGER NOT NULL,
+	slot_down INTEGER NOT NULL,
+	cycles_offset INTEGER NOT NULL,
 
-			PRIMARY KEY("id" AUTOINCREMENT)
-		);
-	`
+	PRIMARY KEY("id" AUTOINCREMENT)
+);`
 
 	// sqlAddPress inserts a new press record into the database.
 	sqlAddPress string = `
-		INSERT INTO presses (
-			number,
-			type,
-			code,
-			slot_up,
-			slot_down,
-			cycles_offset
-		) VALUES (
-			:number,
-			:type,
-			:code,
-			:slot_up,
-			:slot_down,
-			:cycles_offset
-		)
-	`
+INSERT INTO presses (
+	number,
+	type,
+	code,
+	slot_up,
+	slot_down,
+	cycles_offset
+) VALUES (
+	:number,
+	:type,
+	:code,
+	:slot_up,
+	:slot_down,
+	:cycles_offset
+)`
 
 	sqlAddPressWithID string = `
-		INSERT INTO presses (
-			id,
-			number,
-			type,
-			code,
-			slot_up,
-			slot_down,
-			cycles_offset
-		) VALUES (
-			:id,
-			:number,
-			:type,
-			:code,
-			:slot_up,
-			:slot_down,
-			:cycles_offset
-		)
-	`
+INSERT INTO presses (
+	id,
+	number,
+	type,
+	code,
+	slot_up,
+	slot_down,
+	cycles_offset
+) VALUES (
+	:id,
+	:number,
+	:type,
+	:code,
+	:slot_up,
+	:slot_down,
+	:cycles_offset
+)`
 
 	// sqlUpdatePress updates an existing press record in the database.
 	sqlUpdatePress string = `
-		UPDATE presses
-		SET
-			number = :number,
-			type = :type
-			code = :code,
-			slot_up = :slot_up,
-			slot_down = :slot_down,
-			cycles_offset = :cycles_offset
-		WHERE id = :id
-	`
+UPDATE presses
+SET
+	number = :number,
+	type = :type,
+	code = :code,
+	slot_up = :slot_up,
+	slot_down = :slot_down,
+	cycles_offset = :cycles_offset
+WHERE id = :id`
 
 	// sqlGetPress retrieves a single press record by ID.
 	sqlGetPress string = `
-		SELECT
-			id,
-			number,
-			type,
-			code,
-			slot_up,
-			slot_down,
-			cycles_offset
-		FROM presses
-		WHERE id = :id
-	`
+SELECT
+	id,
+	number,
+	type,
+	code,
+	slot_up,
+	slot_down,
+	cycles_offset
+FROM presses
+WHERE id = :id`
 
 	// sqlGetPressForTool finds the press number that contains a specific tool in either slot.
 	sqlGetPressForTool string = `
-		SELECT
-			id,
-			number,
-			type
-			code,
-			slot_up,
-			slot_down,
-			cycles_offset
-		FROM presses
-		WHERE slot_up = :tool_id OR slot_down = :tool_id
-		LIMIT 1;
-	`
+SELECT
+	id,
+	number,
+	type,
+	code,
+	slot_up,
+	slot_down,
+	cycles_offset
+FROM presses
+WHERE slot_up = :tool_id OR slot_down = :tool_id
+LIMIT 1;`
 
 	// sqlGetPressUtilization retrieves press details for utilization reporting.
 	sqlGetPressUtilization string = `
-		SELECT
-			id,
-			number,
-			type,
-			code,
-			slot_up,
-			slot_down,
-			cycles_offset
-		FROM presses
-		WHERE id = :id;
-	`
+SELECT
+	id,
+	number,
+	type,
+	code,
+	slot_up,
+	slot_down,
+	cycles_offset
+FROM presses
+WHERE id = :id;`
 
 	// sqlListPress retrieves all press records from the database.
 	sqlListPress string = `
-		SELECT
-			id,
-			number,
-			type,
-			code,
-			slot_up,
-			slot_down,
-			cycles_offset
-		FROM presses
-		ORDER BY id ASC
-	`
+SELECT
+	id,
+	number,
+	type,
+	code,
+	slot_up,
+	slot_down,
+	cycles_offset
+FROM presses
+ORDER BY id ASC`
 
 	// sqlDeletePress removes a press record from the database.
 	sqlDeletePress string = `
-		DELETE FROM presses
-		WHERE id = :id
-	`
+DELETE FROM presses
+WHERE id = :id`
 )
 
 // -----------------------------------------------------------------------------

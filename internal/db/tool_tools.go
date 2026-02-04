@@ -14,91 +14,80 @@ import (
 
 const (
 	sqlCreateToolsTable string = `
-		CREATE TABLE IF NOT EXISTS tools (
-			id					INTEGER NOT NULL, 			-- Base Tool
-			width 				INTEGER NOT NULL, 			-- Base Tool
-			height 				INTEGER NOT NULL, 			-- Base Tool
-			position 			INTEGER NOT NULL, 			-- Base Tool
-			type 				TEXT NOT NULL, 				-- Base Tool
-			code 				TEXT NOT NULL, 				-- Base Tool
-			cycles_offset 		INTEGER NOT NULL DEFAULT 0, -- Base Tool
-			is_dead 			INTEGER NOT NULL DEFAULT 0, -- Base Tool
-			cassette			INTEGER NOT NULL DEFAULT 0, -- Tool
-			min_thickness		REAL NOT NULL DEFAULT 0, 	-- Cassette
-			max_thickness		REAL NOT NULL DEFAULT 0, 	-- Cassette
+CREATE TABLE IF NOT EXISTS tools (
+	id INTEGER NOT NULL, -- Base Tool
+	width INTEGER NOT NULL, -- Base Tool
+	height INTEGER NOT NULL, -- Base Tool
+	position INTEGER NOT NULL, -- Base Tool
+	type TEXT NOT NULL, -- Base Tool
+	code TEXT NOT NULL, -- Base Tool
+	cycles_offset INTEGER NOT NULL DEFAULT 0, -- Base Tool
+	is_dead INTEGER NOT NULL DEFAULT 0, -- Base Tool
+	cassette INTEGER NOT NULL DEFAULT 0, -- Tool
+	min_thickness REAL NOT NULL DEFAULT 0, -- Cassette
+	max_thickness REAL NOT NULL DEFAULT 0, -- Cassette
 
-			PRIMARY KEY("id" AUTOINCREMENT),
+	PRIMARY KEY("id" AUTOINCREMENT),
 
-			-- FOREIGN KEY for cassette to tools.id
-			FOREIGN KEY(cassette) REFERENCES tools(id)
-		);
-	`
+	-- FOREIGN KEY for cassette to tools.id
+	FOREIGN KEY(cassette) REFERENCES tools(id)
+);`
 
 	sqlAddTool string = `
-		INSERT INTO tools (width, height, position, type, code, cycles_offset, is_dead, cassette, min_thickness, max_thickness)
-		VALUES (:width, :height, :position, :type, :code, :cycles_offset, :is_dead, :cassette, :min_thickness, :max_thickness);
-	`
+INSERT INTO tools (width, height, position, type, code, cycles_offset, is_dead, cassette, min_thickness, max_thickness)
+VALUES (:width, :height, :position, :type, :code, :cycles_offset, :is_dead, :cassette, :min_thickness, :max_thickness);`
 
 	sqlAddToolWithID string = `
-		INSERT INTO tools (id, width, height, position, type, code, cycles_offset, is_dead, cassette, min_thickness, max_thickness)
-		VALUES (:id, :width, :height, :position, :type, :code, :cycles_offset, :is_dead, :cassette, :min_thickness, :max_thickness);
-	`
+INSERT INTO tools (id, width, height, position, type, code, cycles_offset, is_dead, cassette, min_thickness, max_thickness)
+VALUES (:id, :width, :height, :position, :type, :code, :cycles_offset, :is_dead, :cassette, :min_thickness, :max_thickness);`
 
 	sqlUpdateTool string = `
-		UPDATE tools
-		SET width 			= :width,
-			height 			= :height,
-			position 		= :position,
-			type 			= :type,
-			code 			= :code,
-			cycles_offset 	= :cycles_offset,
-			is_dead 		= :is_dead,
-			cassette 		= :cassette,
-			min_thickness 	= :min_thickness,
-			max_thickness 	= :max_thickness
-		WHERE id = :id;
-	`
+UPDATE tools
+SET width = :width,
+	height = :height,
+	position = :position,
+	type = :type,
+	code = :code,
+	cycles_offset = :cycles_offset,
+	is_dead = :is_dead,
+	cassette = :cassette,
+	min_thickness = :min_thickness,
+	max_thickness = :max_thickness
+WHERE id = :id;`
 
 	sqlGetTool string = `
-		SELECT id, width, height, position, type, code, cycles_offset, is_dead, cassette, min_thickness, max_thickness
-		FROM tools
-		WHERE id = :id;
-	`
+SELECT id, width, height, position, type, code, cycles_offset, is_dead, cassette, min_thickness, max_thickness
+FROM tools
+WHERE id = :id;`
 
 	sqlListTools string = `
-		SELECT id, width, height, position, type, code, cycles_offset, is_dead, cassette, min_thickness, max_thickness
-		FROM tools
-		ORDER BY id ASC;
-	`
+SELECT id, width, height, position, type, code, cycles_offset, is_dead, cassette, min_thickness, max_thickness
+FROM tools
+ORDER BY id ASC;`
 
 	sqlDeleteTool string = `
-		DELETE FROM tools
-		WHERE id = :id;
-	`
+DELETE FROM tools
+WHERE id = :id;`
 
 	sqlMarkToolAsDead string = `
-		UPDATE tools
-		SET is_dead = 1
-		WHERE id = :id;
-	`
+UPDATE tools
+SET is_dead = 1
+WHERE id = :id;`
 
 	sqlReviveTool string = `
-		UPDATE tools
-		SET is_dead = 0
-		WHERE id = :id;
-	`
+UPDATE tools
+SET is_dead = 0
+WHERE id = :id;`
 
 	sqlBindTool string = `
-		UPDATE tools
-		SET cassette = :target_id
-		WHERE id = :source_id AND cassette = 0;
-	`
+UPDATE tools
+SET cassette = :target_id
+WHERE id = :source_id AND cassette = 0;`
 
 	sqlUnbindTool string = `
-		UPDATE tools
-		SET cassette = 0
-		WHERE id = :id;
-	`
+UPDATE tools
+SET cassette = 0
+WHERE id = :id;`
 )
 
 // -----------------------------------------------------------------------------

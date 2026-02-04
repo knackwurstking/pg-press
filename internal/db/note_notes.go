@@ -14,58 +14,50 @@ import (
 
 const (
 	sqlCreateNotesTable string = `
-		CREATE TABLE IF NOT EXISTS notes (
-			id 			INTEGER NOT NULL,
-			level 		INTEGER NOT NULL,
-			content 	TEXT NOT NULL,
-			created_at 	INTEGER NOT NULL,
-			linked 		TEXT NOT NULL,
+CREATE TABLE IF NOT EXISTS notes (
+	id INTEGER NOT NULL,
+	level INTEGER NOT NULL,
+	content TEXT NOT NULL,
+	created_at INTEGER NOT NULL,
+	linked TEXT NOT NULL,
 
-			PRIMARY KEY("id" AUTOINCREMENT)
-		);
-	`
+	PRIMARY KEY("id" AUTOINCREMENT)
+);`
 
 	sqlAddNote string = `
-		INSERT INTO notes (level, content, created_at, linked)
-		VALUES (:level, :content, :created_at, :linked);
-	`
+INSERT INTO notes (level, content, created_at, linked)
+VALUES (:level, :content, :created_at, :linked);`
 
 	sqlAddNoteWithID string = `
-		INSERT INTO notes (id, level, content, created_at, linked)
-		VALUES (:id, :level, :content, :created_at, :linked);
-	`
+INSERT INTO notes (id, level, content, created_at, linked)
+VALUES (:id, :level, :content, :created_at, :linked);`
 
 	sqlUpdateNote string = `
-		UPDATE notes
-		SET level 		= :level,
-			content 	= :content,
-			created_at 	= :created_at,
-			linked 		= :linked
-		WHERE id = :id;
-	`
+UPDATE notes
+SET level = :level,
+	content = :content,
+	created_at = :created_at,
+	linked = :linked
+WHERE id = :id;`
 
 	sqlGetNote string = `
-		SELECT id, level, content, created_at, linked
-		FROM notes
-		WHERE id = :id;
-	`
+SELECT id, level, content, created_at, linked
+FROM notes
+WHERE id = :id;`
 
 	sqlListNotes string = `
-		SELECT id, level, content, created_at, linked
-		FROM notes
-		ORDER BY created_at DESC;
-	`
+SELECT id, level, content, created_at, linked
+FROM notes
+ORDER BY created_at DESC;`
 
 	sqlListNotesForLinked string = `
-		SELECT id, level, content, created_at, linked
-		FROM notes
-		ORDER BY created_at DESC;
-	`
+SELECT id, level, content, created_at, linked
+FROM notes
+ORDER BY created_at DESC;`
 
 	sqlDeleteNote string = `
-		DELETE FROM notes
-		WHERE id = :id;
-	`
+DELETE FROM notes
+WHERE id = :id;`
 )
 
 // -----------------------------------------------------------------------------

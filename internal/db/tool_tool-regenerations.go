@@ -15,82 +15,69 @@ import (
 
 const (
 	sqlCreateToolRegenerationsTable string = `
-		CREATE TABLE IF NOT EXISTS tool_regenerations (
-			id 		INTEGER NOT NULL,
-			tool_id INTEGER NOT NULL,
-			start 	INTEGER NOT NULL,
-			stop 	INTEGER NOT NULL DEFAULT 0,
+CREATE TABLE IF NOT EXISTS tool_regenerations (
+	id INTEGER NOT NULL,
+	tool_id INTEGER NOT NULL,
+	start INTEGER NOT NULL,
+	stop INTEGER NOT NULL DEFAULT 0,
 
-			PRIMARY KEY("id" AUTOINCREMENT)
-		);
-	`
+	PRIMARY KEY("id" AUTOINCREMENT)
+);`
 
 	sqlAddToolRegenerationWithID string = `
-		INSERT INTO tool_regenerations (id, tool_id, start, stop)
-		VALUES (:id, :tool_id, :start, :stop);
-	`
+INSERT INTO tool_regenerations (id, tool_id, start, stop)
+VALUES (:id, :tool_id, :start, :stop);`
 
 	sqlAddToolRegeneration string = `
-		INSERT INTO tool_regenerations (tool_id, start, stop)
-		VALUES (:tool_id, :start, :stop);
-	`
+INSERT INTO tool_regenerations (tool_id, start, stop)
+VALUES (:tool_id, :start, :stop);`
 
 	sqlUpdateToolRegeneration string = `
-		UPDATE tool_regenerations
-		SET
-			tool_id = :tool_id,
-			start = :start,
-			stop = :stop,
-		WHERE id = :id;
-	`
+UPDATE tool_regenerations
+SET
+	tool_id = :tool_id,
+	start = :start,
+	stop = :stop
+WHERE id = :id;`
 
 	sqlGetToolRegeneration string = `
-		SELECT id, tool_id, start, stop
-		FROM tool_regenerations
-		WHERE id = :id;
-	`
+SELECT id, tool_id, start, stop
+FROM tool_regenerations
+WHERE id = :id;`
 
 	sqlListToolRegenerations string = `
-		SELECT id, tool_id, start, stop
-		FROM tool_regenerations
-		ORDER BY stop DESC
-	;
-	`
+SELECT id, tool_id, start, stop
+FROM tool_regenerations
+ORDER BY stop DESC;`
 
 	sqlListToolRegenerationsByTool string = `
-		SELECT id, tool_id, start, stop
-		FROM tool_regenerations
-		WHERE tool_id = :tool_id
-		ORDER BY stop DESC;
-	`
+SELECT id, tool_id, start, stop
+FROM tool_regenerations
+WHERE tool_id = :tool_id
+ORDER BY stop DESC;`
 
 	sqlDeleteToolRegeneration string = `
-		DELETE FROM tool_regenerations
-		WHERE id = :id;
-	`
+DELETE FROM tool_regenerations
+WHERE id = :id;`
 
 	sqlDeleteToolRegenerationByTool string = `
-		DELETE FROM tool_regenerations
-		WHERE tool_id = :tool_id;
-	`
+DELETE FROM tool_regenerations
+WHERE tool_id = :tool_id;`
 
 	sqlToolRegenerationInProgress string = `
-		SELECT COUNT(*)
-		FROM tool_regenerations
-		WHERE stop = 0 AND tool_id = :tool_id
-		ORDER BY stop DESC;
-	`
+SELECT COUNT(*)
+FROM tool_regenerations
+WHERE stop = 0 AND tool_id = :tool_id
+ORDER BY stop DESC;`
 
 	sqlStartToolRegeneration string = `
-		INSERT INTO tool_regenerations (tool_id, start)
-		VALUES (:tool_id, :start);
-	`
+INSERT INTO tool_regenerations (tool_id, start)
+VALUES (:tool_id, :start);`
 
 	sqlStopToolRegeneration string = `
-		UPDATE tool_regenerations
-		SET stop = :stop
-		WHERE tool_id = :tool_id AND stop = 0;
-	`
+UPDATE tool_regenerations
+SET stop = :stop
+WHERE tool_id = :tool_id AND stop = 0;`
 )
 
 // -----------------------------------------------------------------------------

@@ -13,98 +13,87 @@ import (
 
 const (
 	sqlCreateMetalSheetsTable string = `
-		CREATE TABLE IF NOT EXISTS metal_sheets (
-			id				INTEGER NOT NULL,
-			tool_id			INTEGER NOT NULL,
-			tile_height 	REAL NOT NULL,
-			value			REAL NOT NULL,
-			type			TEXT NOT NULL,			-- 'upper' | 'lower'
-			marke_height 	INTEGER,
-			stf				REAL,
-			stf_max 		REAL,
-			identifier 		TEXT, 					-- e.g. 'SACMI' | 'SITI'
+CREATE TABLE IF NOT EXISTS metal_sheets (
+	id INTEGER NOT NULL,
+	tool_id INTEGER NOT NULL,
+	tile_height REAL NOT NULL,
+	value REAL NOT NULL,
+	type TEXT NOT NULL, -- 'upper' | 'lower'
+	marke_height INTEGER,
+	stf REAL,
+	stf_max REAL,
+	identifier TEXT, -- e.g. 'SACMI' | 'SITI'
 
-			PRIMARY KEY("id" AUTOINCREMENT),
-			FOREIGN KEY(tool_id) REFERENCES tools(id) ON DELETE CASCADE
-		);
-	`
+	PRIMARY KEY("id" AUTOINCREMENT),
+	FOREIGN KEY(tool_id) REFERENCES tools(id) ON DELETE CASCADE
+);`
 
 	// -----------------------------------------------------------------------------
 	// Upper Metal Sheets Queries
 	// -----------------------------------------------------------------------------
 
 	sqlAddUpperMetalSheet string = `
-		INSERT INTO metal_sheets (tool_id, tile_height, value, type)
-		VALUES (:tool_id, :tile_height, :value, 'upper');
-	`
+INSERT INTO metal_sheets (tool_id, tile_height, value, type)
+VALUES (:tool_id, :tile_height, :value, 'upper');`
 
 	sqlAddUpperMetalSheetWithID string = `
-		INSERT INTO metal_sheets (id, tool_id, tile_height, value, type)
-		VALUES (:id, :tool_id, :tile_height, :value, 'upper');
-	`
+INSERT INTO metal_sheets (id, tool_id, tile_height, value, type)
+VALUES (:id, :tool_id, :tile_height, :value, 'upper');`
 
 	sqlUpdateUpperMetalSheet string = `
-		UPDATE metal_sheets
-		SET
-			tool_id 	= :tool_id,
-			tile_height = :tile_height,
-			value 		= :value
-		WHERE id = :id AND type = 'upper';
-	`
+UPDATE metal_sheets
+SET
+	tool_id = :tool_id,
+	tile_height = :tile_height,
+	value = :value
+WHERE id = :id AND type = 'upper';`
 
 	sqlGetUpperMetalSheet string = `
-		SELECT id, tool_id, tile_height, value
-		FROM metal_sheets
-		WHERE id = :id AND type = 'upper'
-		ORDER BY tile_height ASC, value ASC;
-	`
+SELECT id, tool_id, tile_height, value
+FROM metal_sheets
+WHERE id = :id AND type = 'upper'
+ORDER BY tile_height ASC, value ASC;`
 
 	sqlListUpperMetalSheetsByTool string = `
-		SELECT id, tool_id, tile_height, value
-		FROM metal_sheets
-		WHERE tool_id = :tool_id AND type = 'upper'
-		ORDER BY tile_height ASC, value ASC;
-	`
+SELECT id, tool_id, tile_height, value
+FROM metal_sheets
+WHERE tool_id = :tool_id AND type = 'upper'
+ORDER BY tile_height ASC, value ASC;`
 
 	// -----------------------------------------------------------------------------
 	// Lower Metal Sheets Queries
 	// -----------------------------------------------------------------------------
 
 	sqlAddLowerMetalSheet string = `
-		INSERT INTO metal_sheets (tool_id, tile_height, value, type, marke_height, stf, stf_max, identifier)
-		VALUES (:tool_id, :tile_height, :value, 'lower', :marke_height, :stf, :stf_max, :identifier);
-	`
+INSERT INTO metal_sheets (tool_id, tile_height, value, type, marke_height, stf, stf_max, identifier)
+VALUES (:tool_id, :tile_height, :value, 'lower', :marke_height, :stf, :stf_max, :identifier);`
 	sqlAddLowerMetalSheetWithID string = `
-		INSERT INTO metal_sheets (id, tool_id, tile_height, value, type, marke_height, stf, stf_max, identifier)
-		VALUES (:id, :tool_id, :tile_height, :value, 'lower', :marke_height, :stf, :stf_max, :identifier);
-	`
+INSERT INTO metal_sheets (id, tool_id, tile_height, value, type, marke_height, stf, stf_max, identifier)
+VALUES (:id, :tool_id, :tile_height, :value, 'lower', :marke_height, :stf, :stf_max, :identifier);`
 
 	sqlUpdateLowerMetalSheet string = `
-		UPDATE metal_sheets
-		SET
-			tool_id 		= :tool_id,
-			tile_height 	= :tile_height,
-			value 			= :value,
-			marke_height 	= :marke_height,
-			stf 			= :stf,
-			stf_max 		= :stf_max,
-			identifier 		= :identifier
-		WHERE id = :id AND type = 'lower';
-	`
+UPDATE metal_sheets
+SET
+	tool_id = :tool_id,
+	tile_height = :tile_height,
+	value = :value,
+	marke_height = :marke_height,
+	stf = :stf,
+	stf_max = :stf_max,
+	identifier = :identifier
+WHERE id = :id AND type = 'lower';`
 
 	sqlGetLowerMetalSheet string = `
-		SELECT id, tool_id, tile_height, value, marke_height, stf, stf_max, identifier
-		FROM metal_sheets
-		WHERE id = :id AND type = 'lower'
-		ORDER BY tile_height ASC, value ASC;
-	`
+SELECT id, tool_id, tile_height, value, marke_height, stf, stf_max, identifier
+FROM metal_sheets
+WHERE id = :id AND type = 'lower'
+ORDER BY tile_height ASC, value ASC;`
 
 	sqlListLowerMetalSheetsByTool string = `
-		SELECT id, tool_id, tile_height, value, marke_height, stf, stf_max, identifier
-		FROM metal_sheets
-		WHERE tool_id = :tool_id AND type = 'lower'
-		ORDER BY tile_height ASC, value ASC;
-	`
+SELECT id, tool_id, tile_height, value, marke_height, stf, stf_max, identifier
+FROM metal_sheets
+WHERE tool_id = :tool_id AND type = 'lower'
+ORDER BY tile_height ASC, value ASC;`
 )
 
 // -----------------------------------------------------------------------------

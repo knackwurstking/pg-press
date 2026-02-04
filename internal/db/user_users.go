@@ -13,49 +13,42 @@ import (
 
 const (
 	sqlCreateUsersTable string = `
-		CREATE TABLE IF NOT EXISTS users (
-			id 			INTEGER NOT NULL,
-			name 		TEXT NOT NULL,
-			api_key 	TEXT NOT NULL UNIQUE,
+CREATE TABLE IF NOT EXISTS users (
+	id INTEGER NOT NULL,
+	name TEXT NOT NULL,
+	api_key TEXT NOT NULL UNIQUE,
 
-			PRIMARY KEY("id" AUTOINCREMENT)
-		);
-	`
+	PRIMARY KEY("id" AUTOINCREMENT)
+);`
 
 	sqlGetUser string = `
-		SELECT id, name, api_key
-		FROM users
-		WHERE id = :id;
-	`
+SELECT id, name, api_key
+FROM users
+WHERE id = :id;`
 
 	sqlGetUserByApiKey string = `
-		SELECT id, name, api_key
-		FROM users
-		WHERE api_key = :api_key;
-	`
+SELECT id, name, api_key
+FROM users
+WHERE api_key = :api_key;`
 
 	sqlAddUser string = `
-		INSERT INTO users (id, name, api_key)
-		VALUES (:id, :name, :api_key);
-	`
+INSERT INTO users (id, name, api_key)
+VALUES (:id, :name, :api_key);`
 
 	sqlUpdateUser string = `
-		UPDATE users
-		SET name = :name,
-			api_key = :api_key
-		WHERE id = :id;
-	`
+UPDATE users
+SET name = :name,
+	api_key = :api_key
+WHERE id = :id;`
 
 	sqlListUsers string = `
-		SELECT id, name, api_key
-		FROM users
-		ORDER BY id ASC;
-	`
+SELECT id, name, api_key
+FROM users
+ORDER BY id ASC;`
 
 	sqlDeleteUser string = `
-		DELETE FROM users
-		WHERE id = :id;
-	`
+DELETE FROM users
+WHERE id = :id;`
 )
 
 // -----------------------------------------------------------------------------

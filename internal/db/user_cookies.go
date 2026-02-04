@@ -13,69 +13,60 @@ import (
 
 const (
 	sqlCreateCookiesTable string = `
-		CREATE TABLE IF NOT EXISTS cookies (
-			user_agent 	TEXT NOT NULL,
-			value 		TEXT NOT NULL,
-			user_id 	INTEGER NOT NULL,
-			last_login 	INTEGER NOT NULL,
+CREATE TABLE IF NOT EXISTS cookies (
+	user_agent TEXT NOT NULL,
+	value TEXT NOT NULL,
+	user_id INTEGER NOT NULL,
+	last_login INTEGER NOT NULL,
 
-			PRIMARY KEY("value")
-		);
+	PRIMARY KEY("value")
+);
 
-		-- Index to quickly find cookies by user_id
+-- Index to quickly find cookies by user_id
 
-		CREATE INDEX IF NOT EXISTS idx_cookies_user_id
-		ON cookies(user_id);
-	`
+CREATE INDEX IF NOT EXISTS idx_cookies_user_id
+ON cookies(user_id);`
 
 	sqlListCookies string = `
-		SELECT user_agent, value, user_id, last_login
-		FROM cookies;
-	`
+SELECT user_agent, value, user_id, last_login
+FROM cookies;`
 
 	sqlListCookiesByUserID string = `
-		SELECT user_agent, value, user_id, last_login
-		FROM cookies
-		WHERE user_id = :user_id
-		ORDER BY last_login DESC;
-	`
+SELECT user_agent, value, user_id, last_login
+FROM cookies
+WHERE user_id = :user_id
+ORDER BY last_login DESC;`
 
 	sqlListCookiesByApiKey string = `
-		SELECT user_agent, value, user_id, last_login
-		FROM cookies
-		WHERE user_id = :user_id
-		ORDER BY last_login DESC;
-	`
+SELECT user_agent, value, user_id, last_login
+FROM cookies
+WHERE user_id = :user_id
+ORDER BY last_login DESC;`
 
 	sqlGetCookie string = `
-		SELECT user_agent, value, user_id, last_login
-		FROM cookies
-		WHERE value = :value;
-	`
+SELECT user_agent, value, user_id, last_login
+FROM cookies
+WHERE value = :value;`
 
 	sqlAddCookie string = `
-		INSERT INTO cookies (user_agent, value, user_id, last_login)
-		VALUES (:user_agent, :value, :user_id, :last_login);
-	`
+INSERT INTO cookies (user_agent, value, user_id, last_login)
+VALUES (:user_agent, :value, :user_id, :last_login);`
 
 	sqlUpdateCookie string = `
-		UPDATE cookies
-		SET
-			user_agent = :user_agent,
-			user_id = :user_id,
-			last_login = :last_login
-		WHERE value = :value;
-	`
+UPDATE cookies
+SET
+	user_agent = :user_agent,
+	user_id = :user_id,
+	last_login = :last_login
+WHERE value = :value;`
 
 	sqlDeleteCookie string = `
-		DELETE FROM cookies
-		WHERE value = :value;
-	`
+DELETE FROM cookies
+WHERE value = :value;`
 
 	sqlDeleteCookiesByUserID string = `
-		DELETE FROM cookies
-		WHERE user_id = :user_id;
-	`
+DELETE FROM cookies
+WHERE user_id = :user_id;`
 )
 
 // -----------------------------------------------------------------------------
