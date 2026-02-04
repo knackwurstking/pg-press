@@ -40,7 +40,7 @@ templ SectionPress(p SectionPressProps) {
 }
 
 templ listPressItem(p *shared.PressUtilization) {
-	{{ title := fmt.Sprintf("Presse %d", p.PressID) }}
+	{{ title := p.Press().German() }}
 	<li title={ title }>
 		<a
 			role="button"
