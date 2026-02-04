@@ -198,21 +198,6 @@ func CreateToolData(oldCycles []m.Cycle, oldTools []m.Tool) error {
 }
 
 func CreatePressData(cycles []m.Cycle, tools []m.Tool) error {
-	{ // Cycles
-		for _, c := range cycles {
-			cycle := &shared.Cycle{
-				ID:          shared.EntityID(c.ID),
-				ToolID:      shared.EntityID(c.ToolID),
-				PressNumber: shared.PressNumber(c.PressNumber),
-				PressCycles: c.TotalCycles,
-				Stop:        shared.NewUnixMilli(c.Date),
-			}
-			if err := db.AddCycle(cycle); err != nil {
-				return err
-			}
-		}
-	}
-
 	{ // Create presses from cycles and tools (`Press` & `PressNumber`)
 		pressNumbers := []shared.PressNumber{}
 		for _, c := range cycles {
@@ -260,13 +245,44 @@ func CreatePressData(cycles []m.Cycle, tools []m.Tool) error {
 			}
 
 			press := &shared.Press{
-				ID:           p,
+				Number:       p,
 				SlotUp:       slotUp,
 				SlotDown:     slotDown,
 				CyclesOffset: 0,
 				Type:         pressType,
 			}
 			if err := db.AddPress(press); err != nil {
+				return err
+			}
+		}
+	}
+
+	{ // Cycles
+		presses, herr := db.ListPress()
+		if herr != nil {
+			return herr
+		}
+
+		for _, c := range cycles {
+			var pressID shared.EntityID
+			for _, p := range presses {
+				if p.Number == shared.PressNumber(c.PressNumber) {
+					pressID = p.ID
+				}
+			}
+
+			if pressID == 0 {
+				return fmt.Errorf("press not found for cycle: %#v", c)
+			}
+
+			cycle := &shared.Cycle{
+				ID:          shared.EntityID(c.ID),
+				ToolID:      shared.EntityID(c.ToolID),
+				PressID:     pressID,
+				PressCycles: c.TotalCycles,
+				Stop:        shared.NewUnixMilli(c.Date),
+			}
+			if err := db.AddCycle(cycle); err != nil {
 				return err
 			}
 		}
