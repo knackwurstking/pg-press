@@ -253,7 +253,7 @@ func CreatePressData(cycles []m.Cycle, tools []m.Tool) error {
 				CyclesOffset: 0,
 			}
 			if err := db.AddPress(press); err != nil {
-				return err
+				return fmt.Errorf("failed to add press %#v: %w", press, err)
 			}
 		}
 	}
@@ -261,7 +261,7 @@ func CreatePressData(cycles []m.Cycle, tools []m.Tool) error {
 	{ // Cycles
 		presses, herr := db.ListPress()
 		if herr != nil {
-			return herr
+			return herr.Wrap("listing presses failed")
 		}
 
 		for _, c := range cycles {
@@ -284,7 +284,7 @@ func CreatePressData(cycles []m.Cycle, tools []m.Tool) error {
 				Stop:        shared.NewUnixMilli(c.Date),
 			}
 			if err := db.AddCycle(cycle); err != nil {
-				return err
+				return fmt.Errorf("failed to add cycle %#v: %w", cycle, err)
 			}
 		}
 	}
