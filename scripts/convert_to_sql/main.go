@@ -246,10 +246,11 @@ func CreatePressData(cycles []m.Cycle, tools []m.Tool) error {
 
 			press := &shared.Press{
 				Number:       p,
+				Type:         pressType,
+				Code:         "",
 				SlotUp:       slotUp,
 				SlotDown:     slotDown,
 				CyclesOffset: 0,
-				Type:         pressType,
 			}
 			if err := db.AddPress(press); err != nil {
 				return err

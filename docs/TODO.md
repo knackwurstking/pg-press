@@ -20,9 +20,9 @@ Code: PH4000
 # Key: 5SITIPH4000
 ```
 
-- [-] Add to presses table: "code"
-- [-] Make presses table columns unique (union) `<press-number>, <press-type>, <press-code>`
-- [ ] Need to fix all conversion scripts after this
+- [x] Add to presses table: "code"
+- [x] ~Make presses table columns unique (union) `<press-number>, <press-type>, <press-code>`~
+- [x] Need to fix all conversion scripts after this
 
 ## Press Page
 
