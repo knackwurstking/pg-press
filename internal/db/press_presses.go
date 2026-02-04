@@ -85,7 +85,7 @@ const (
 		SELECT
 			id,
 			number,
-			type
+			type,
 			code,
 			slot_up,
 			slot_down,
