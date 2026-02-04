@@ -16,16 +16,13 @@ const (
 	// sqlCreatePressesTable creates the presses table with all required columns.
 	sqlCreatePressesTable string = `
 		CREATE TABLE IF NOT EXISTS presses (
-			id 					INTEGER NOT NULL,
+			id 					INTEGER PRIMARY KEY AUTOINCREMENT,
 			number 				INTEGER NOT NULL,
 			type 				TEXT NOT NULL,
 			code 				TEXT NOT NULL,
 			slot_up 			INTEGER NOT NULL,
 			slot_down 			INTEGER NOT NULL,
-			cycles_offset 		INTEGER NOT NULL,
-
-			PRIMARY KEY (id, type, code),
-			UNIQUE (id, type, code)
+			cycles_offset 		INTEGER NOT NULL
 		);
 	`
 
