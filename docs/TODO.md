@@ -2,6 +2,10 @@
 
 - [ ] Make sure the tool cycles offset is used properly in total cycle calculations
 
+## Tools Page: Press Content
+
+- [ ] Show info "type" and "code"
+
 ## Press Page
 
 - [ ] Add: Action button for adding MetalSheet
