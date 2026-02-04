@@ -20,7 +20,7 @@ const (
 			cycles       INTEGER NOT NULL, -- Cycles at stop time
 			stop         INTEGER NOT NULL,
 
-			PRIMARY KEY("id")
+			PRIMARY KEY("id" AUTOINCREMENT)
 		);
 	`
 
