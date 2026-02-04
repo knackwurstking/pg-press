@@ -67,7 +67,7 @@ templ toolStatus(p *CyclesSectionContentProps) {
 					title="Zur Pressenübersicht"
 				>
 					<i class="bi bi-arrow-right"></i>
-					Presse { fmt.Sprintf("%d", p.ActivePress.German()) }
+					{ p.ActivePress.German() }
 				</a>
 			}
 		</span>

@@ -14,7 +14,7 @@ type PressUtilization struct {
 func (pu *PressUtilization) Press() *Press {
 	return &Press{
 		ID:           pu.PressID,
-		PressNumber:  pu.PressNumber,
+		Number:       pu.PressNumber,
 		Type:         pu.PressType,
 		Code:         pu.PressCode,
 		SlotUp:       pu.SlotUpper.ID,

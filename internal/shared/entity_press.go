@@ -81,5 +81,5 @@ func (p *Press) String() string {
 }
 
 func (p *Press) German() string {
-	return fmt.Sprintf("Press %s (Type: %s, Code: %s)", p.Number.String(), p.Type, p.Code)
+	return fmt.Sprintf("Presse %s (Type: %s, Code: %s)", p.Number.String(), p.Type, p.Code)
 }

@@ -33,7 +33,7 @@ templ regenerationEditShowcase(p RegenerationEditProps) {
 		if p.Tool.IsCassette() {
 			@components.CassetteStateBadge(p.Tool, nil, p.IsRegenerating)
 		} else {
-			@components.ToolStateBadge(p.Tool, -1, p.IsRegenerating)
+			@components.ToolStateBadge(p.Tool, nil, p.IsRegenerating)
 		}
 		{{
 			hxTarget := fmt.Sprintf("#regeneration-edit-%d", p.Tool.ID)
@@ -60,7 +60,7 @@ templ regenerationEditForm(p RegenerationEditProps) {
 			if p.Tool.IsCassette() {
 				@components.CassetteStateBadge(p.Tool, nil, p.IsRegenerating)
 			} else {
-				@components.ToolStateBadge(p.Tool, -1, p.IsRegenerating)
+				@components.ToolStateBadge(p.Tool, nil, p.IsRegenerating)
 			}
 			<span class="text-sm text-muted">Regenerierung steuern</span>
 		</div>
