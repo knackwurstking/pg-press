@@ -13,7 +13,7 @@ import (
 type ToolAnchorProps struct {
 	Tool               *shared.Tool // Required
 	BindingCassette    *shared.Tool // Optional
-	PressNumber        shared.PressNumber
+	Press              *shared.Press
 	IsRegenerating     bool
 	RegenerationsCount int
 	NotesCount         int
@@ -49,7 +49,7 @@ templ ToolAnchor(p ToolAnchorProps) {
 					@SmallBadge("primary", "text-bold") {
 						{ p.Tool.Position.German() }
 					}
-					@ToolStateBadge(p.Tool, p.PressNumber, p.IsRegenerating)
+					@ToolStateBadge(p.Tool, p.Press, p.IsRegenerating)
 					<span
 						class="total-cycles-container flex justify-end items-center w-full pr text-sm"
 						hx-get={ urlb.ToolTotalCycles(p.Tool.ID) }

@@ -13,14 +13,14 @@ templ SmallBadge(classNames ...string) {
 	</small>
 }
 
-templ ToolStateBadge(tool *shared.Tool, pressNumber shared.PressNumber, isRegenerating bool) {
+templ ToolStateBadge(tool *shared.Tool, press *shared.Press, isRegenerating bool) {
 	{{
 		if tool.IsCassette() {
 			panic(fmt.Sprintf("tool expected, got %s", tool.Position.German()))
 		}
 
 		var color string
-		if pressNumber.IsValid() {
+		if press != nil {
 			color = "secondary"
 		} else if isRegenerating {
 			color = "warning"
@@ -31,10 +31,10 @@ templ ToolStateBadge(tool *shared.Tool, pressNumber shared.PressNumber, isRegene
 		}
 	}}
 	@SmallBadge(color) {
-		if pressNumber.IsValid() {
+		if press != nil {
 			<span class="flex flex-col gap-0 justify-center items-center">
 				<span class="text-bold">Eingebaut</span>
-				<span>Presse { pressNumber }</span>
+				<span>{ press.German() }</span>
 			</span>
 		} else {
 			if isRegenerating {

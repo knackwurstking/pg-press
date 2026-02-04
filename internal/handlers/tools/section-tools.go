@@ -53,25 +53,20 @@ func renderToolsSection(c echo.Context) *echo.HTTPError {
 	})
 
 	// Active Tools
-	activeTools := make(map[shared.EntityID]shared.PressNumber)
+	activeTools := make(map[shared.EntityID]*shared.Press)
 	wg.Go(func() {
-		pressNumbers, herr := db.ListPressNumbers()
+		presses, herr := db.ListPress()
 		if herr != nil {
 			errCh <- herr.Echo()
 			return
 		}
 
-		for _, press := range pressNumbers {
-			p, herr := db.GetPress(press)
-			if herr != nil {
-				errCh <- herr.Echo()
-				return
-			}
+		for _, p := range presses {
 			if p.SlotUp > 0 {
-				activeTools[p.SlotUp] = press
+				activeTools[p.SlotUp] = p
 			}
 			if p.SlotDown > 0 {
-				activeTools[p.SlotDown] = press
+				activeTools[p.SlotDown] = p
 			}
 		}
 
@@ -153,9 +148,8 @@ func renderToolsSection(c echo.Context) *echo.HTTPError {
 		RegenerationsCount: regenerationsCount,
 		NotesCount:         notesCount,
 	})
-	err := t.Render(c.Request().Context(), c.Response())
-	if err != nil {
-		return errors.NewRenderError(err, "SectionTools")
+	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
+		return errors.NewRenderError(err, "Tools Section")
 	}
 
 	return nil
