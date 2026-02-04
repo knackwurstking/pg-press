@@ -4,7 +4,7 @@
 
 ## Tools Page: Press Content
 
-- [ ] Show info "type" and "code"
+- [x] Show info "type" and "code"
 
 ## Press Page
 
