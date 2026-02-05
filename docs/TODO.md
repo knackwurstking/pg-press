@@ -5,6 +5,7 @@
 ## Tools Page: Press Content
 
 - [x] Show info "type" and "code"
+- [ ] Fix press number in edit press dialog, it shows the ID not the press number
 
 ## Press Page
 
