@@ -85,7 +85,7 @@ func (p *Press) German() string {
 	if p.Code != "" {
 		info += fmt.Sprintf(" %s", p.Code)
 	}
-	info += fmt.Sprintf(" (Type: %s)", p.Type)
+	info += fmt.Sprintf(" (%s)", p.Type)
 
 	return fmt.Sprintf("Presse %s %s", p.Number.String(), info)
 }
