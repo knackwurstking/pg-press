@@ -3,16 +3,22 @@ package templates
 import (
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"net/http"
 
 	"github.com/knackwurstking/ui"
 )
 
 templ NewCassetteDialog() {
-	@ui.Dialog(ui.DialogOptions{
-		Method:           "POST",
-		Href:             urlb.DialogEditCassette(0),
-		ID:               "cassette-dialog",
-		SubmitButtonText: "Erstellen",
+	@ui.Dialog(&ui.DialogProps{
+		ID:           "cassette-dialog",
+		Fullscreen:   true,
+		Clean:        true,
+		FormEnabled:  true,
+		HxEnabled:    true,
+		Href:         urlb.DialogEditCassette(0),
+		Method:       http.MethodPost,
+		ActionSubmit: "Erstellen",
+		ActionCancel: "Abbrechen",
 	}) {
 		{{ cassette := &shared.Tool{} }}
 		@toolFormat(cassette.Width, cassette.Height)
@@ -23,11 +29,16 @@ templ NewCassetteDialog() {
 }
 
 templ EditCassetteDialog(cassette *shared.Tool) {
-	@ui.Dialog(ui.DialogOptions{
-		Method:           "PUT",
-		Href:             urlb.DialogEditCassette(cassette.ID),
-		ID:               "cassette-edit-dialog",
-		SubmitButtonText: "Aktualisieren",
+	@ui.Dialog(&ui.DialogProps{
+		ID:           "cassette-edit-dialog",
+		Fullscreen:   true,
+		Clean:        true,
+		FormEnabled:  true,
+		HxEnabled:    true,
+		Href:         urlb.DialogEditCassette(cassette.ID),
+		Method:       http.MethodPut,
+		ActionSubmit: "Aktualisieren",
+		ActionCancel: "Abbrechen",
 	}) {
 		@toolFormat(cassette.Width, cassette.Height)
 		@toolType(cassette.Type)
