@@ -11,26 +11,42 @@ import (
 )
 
 templ NewPressDialog() {
-	@ui.Dialog(ui.DialogOptions{
-		Method:           http.MethodPost,
-		Href:             urlb.DialogEditPressPost(-1),
-		ID:               "notes-dialog",
-		SubmitButtonText: "Erstellen",
-		FormClasses:      templ.CSSClasses{"container"},
-	}) {
+	{{
+		props := &ui.DialogProps{
+			ID:           "notes-dialog",
+			Fullscreen:   true,
+			Clean:        true,
+			FormEnabled:  true,
+			FormCSS:      templ.CSSClasses{"container"},
+			HxEnabled:    true,
+			Href:         urlb.DialogEditPressPost(-1),
+			Method:       http.MethodPost,
+			ActionSubmit: "Erstellen",
+			ActionCancel: "Abbrechen",
+		}
+	}}
+	@ui.Dialog(props) {
 		@PressContent(nil)
 	}
 }
 
 templ EditPressDialog(press *shared.Press) {
-	@ui.Dialog(ui.DialogOptions{
-		Method:            http.MethodPut,
-		Href:              urlb.DialogEditPressPut(press.ID),
-		ID:                "notes-edit-dialog",
-		SubmitButtonText:  "Aktualisieren",
-		FormClasses:       templ.CSSClasses{"container"},
-		AdditionalActions: editPressActions(press),
-	}) {
+	{{
+		props := &ui.DialogProps{
+			ID:                "notes-edit-dialog",
+			Fullscreen:        true,
+			Clean:             true,
+			FormEnabled:       true,
+			FormCSS:           templ.CSSClasses{"container"},
+			HxEnabled:         true,
+			Href:              urlb.DialogEditPressPut(press.ID),
+			Method:            http.MethodPut,
+			AdditionalActions: editPressActions(press),
+			ActionSubmit:      "Aktualisieren",
+			ActionCancel:      "Abbrechen",
+		}
+	}}
+	@ui.Dialog(props) {
 		<input type="hidden" name="press_id" value={ press.ID }/>
 		@PressContent(press)
 	}
