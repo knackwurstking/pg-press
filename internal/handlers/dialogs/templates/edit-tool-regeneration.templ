@@ -9,22 +9,32 @@ import (
 )
 
 templ NewToolRegenerationDialog(toolID shared.EntityID) {
-	@ui.Dialog(ui.DialogOptions{
-		Method:           http.MethodPost,
-		Href:             urlb.DialogEditToolRegenerationPost(toolID),
-		ID:               "tool-regeneration-dialog",
-		SubmitButtonText: "Erstellen",
+	@ui.Dialog(&ui.DialogProps{
+		ID:           "tool-regeneration-dialog",
+		Fullscreen:   true,
+		Clean:        true,
+		FormEnabled:  true,
+		HxEnabled:    true,
+		Href:         urlb.DialogEditToolRegenerationPost(toolID),
+		Method:       http.MethodPost,
+		ActionSubmit: "Erstellen",
+		ActionCancel: "Abbrechen",
 	}) {
 		@toolRegenerationContent(0, 0)
 	}
 }
 
 templ EditToolRegenerationDialog(tr *shared.ToolRegeneration) {
-	@ui.Dialog(ui.DialogOptions{
-		Method:           http.MethodPut,
-		Href:             urlb.DialogEditToolRegenerationPut(tr.ID),
-		ID:               "tool-regeneration-dialog",
-		SubmitButtonText: "Bearbeiten",
+	@ui.Dialog(&ui.DialogProps{
+		ID:           "tool-regeneration-dialog",
+		Fullscreen:   true,
+		Clean:        true,
+		FormEnabled:  true,
+		HxEnabled:    true,
+		Href:         urlb.DialogEditToolRegenerationPut(tr.ID),
+		Method:       http.MethodPut,
+		ActionSubmit: "Aktualisieren",
+		ActionCancel: "Abbrechen",
 	}) {
 		@toolRegenerationContent(tr.Start, tr.Stop)
 	}
