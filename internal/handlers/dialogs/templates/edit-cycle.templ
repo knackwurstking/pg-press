@@ -17,11 +17,16 @@ templ NewCycleDialog(
 	currentPress *shared.Press,
 	presses []*shared.Press,
 ) {
-	@ui.Dialog(ui.DialogOptions{
-		Method:           http.MethodPost,
-		Href:             urlb.DialogEditCyclePost(),
-		ID:               "cycle-dialog",
-		SubmitButtonText: "Erstellen",
+	@ui.Dialog(&ui.DialogProps{
+		ID:           "cycle-dialog",
+		Fullscreen:   true,
+		Clean:        true,
+		FormEnabled:  true,
+		HxEnabled:    true,
+		Href:         urlb.DialogEditCyclePost(),
+		Method:       http.MethodPost,
+		ActionSubmit: "Erstellen",
+		ActionCancel: "Abbrechen",
 	}) {
 		<input
 			type="hidden"
@@ -54,11 +59,16 @@ templ EditCycleDialog(
 	presses []*shared.Press,
 ) {
 	{{ toolChangeMode := len(availableTools) > 0 }}
-	@ui.Dialog(ui.DialogOptions{
-		Method:           http.MethodPut,
-		Href:             urlb.DialogEditCyclePut(),
-		ID:               "cycle-edit-dialog",
-		SubmitButtonText: "Aktualisieren",
+	@ui.Dialog(&ui.DialogProps{
+		ID:           "cycle-edit-dialog",
+		Fullscreen:   true,
+		Clean:        true,
+		FormEnabled:  true,
+		HxEnabled:    true,
+		Href:         urlb.DialogEditCyclePut(),
+		Method:       http.MethodPut,
+		ActionSubmit: "Aktualisieren",
+		ActionCancel: "Abbrechen",
 	}) {
 		<input
 			type="hidden"
