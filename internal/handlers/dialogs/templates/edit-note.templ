@@ -10,11 +10,16 @@ import (
 )
 
 templ NewNoteDialog(linked string, user *shared.User) {
-	@ui.Dialog(ui.DialogOptions{
-		Method:           http.MethodPost,
-		Href:             urlb.DialogEditNote(0, linked),
-		ID:               "notes-dialog",
-		SubmitButtonText: "Erstellen",
+	@ui.Dialog(&ui.DialogProps{
+		ID:           "notes-dialog",
+		Fullscreen:   true,
+		Clean:        true,
+		FormEnabled:  true,
+		HxEnabled:    true,
+		Href:         urlb.DialogEditNote(0, linked),
+		Method:       http.MethodPost,
+		ActionSubmit: "Erstellen",
+		ActionCancel: "Abbrechen",
 	}) {
 		@noteLevelSelect(0)
 		@noteContent("")
@@ -23,11 +28,16 @@ templ NewNoteDialog(linked string, user *shared.User) {
 }
 
 templ EditNoteDialog(note *shared.Note, linked string, user *shared.User) {
-	@ui.Dialog(ui.DialogOptions{
-		Method:           http.MethodPut,
-		Href:             urlb.DialogEditNote(note.ID, linked),
-		ID:               "notes-edit-dialog",
-		SubmitButtonText: "Aktualisieren",
+	@ui.Dialog(&ui.DialogProps{
+		ID:           "notes-edit-dialog",
+		Fullscreen:   true,
+		Clean:        true,
+		FormEnabled:  true,
+		HxEnabled:    true,
+		Href:         urlb.DialogEditNote(note.ID, linked),
+		Method:       http.MethodPut,
+		ActionSubmit: "Aktualisieren",
+		ActionCancel: "Abbrechen",
 	}) {
 		@noteLevelSelect(note.Level)
 		@noteContent(note.Content)
