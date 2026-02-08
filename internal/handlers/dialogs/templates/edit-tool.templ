@@ -3,16 +3,22 @@ package templates
 import (
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"net/http"
 
 	"github.com/knackwurstking/ui"
 )
 
 templ NewToolDialog() {
-	@ui.Dialog(ui.DialogOptions{
-		Method:           "POST",
-		Href:             urlb.DialogEditTool(0),
-		ID:               "tool-dialog",
-		SubmitButtonText: "Erstellen",
+	@ui.Dialog(&ui.DialogProps{
+		ID:           "tool-dialog",
+		Fullscreen:   true,
+		Clean:        true,
+		FormEnabled:  true,
+		HxEnabled:    true,
+		Href:         urlb.DialogEditTool(0),
+		Method:       http.MethodPost,
+		ActionSubmit: "Erstellen",
+		ActionCancel: "Abbrechen",
 	}) {
 		{{ tool := &shared.Tool{} }}
 		@toolPosition(tool.Position)
@@ -23,11 +29,16 @@ templ NewToolDialog() {
 }
 
 templ EditToolDialog(tool *shared.Tool) {
-	@ui.Dialog(ui.DialogOptions{
-		Method:           "PUT",
-		Href:             urlb.DialogEditTool(tool.ID),
-		ID:               "tool-edit-dialog",
-		SubmitButtonText: "Aktualisieren",
+	@ui.Dialog(&ui.DialogProps{
+		ID:           "tool-edit-dialog",
+		Fullscreen:   true,
+		Clean:        true,
+		FormEnabled:  true,
+		HxEnabled:    true,
+		Href:         urlb.DialogEditTool(tool.ID),
+		Method:       http.MethodPut,
+		ActionSubmit: "Aktualisieren",
+		ActionCancel: "Abbrechen",
 	}) {
 		@toolPosition(tool.Position)
 		@toolFormat(tool.Width, tool.Height)
