@@ -12,13 +12,23 @@ type PressUtilization struct {
 }
 
 func (pu *PressUtilization) Press() *Press {
+	upperSlotID := EntityID(0)
+	if pu.SlotUpper != nil {
+		upperSlotID = pu.SlotUpper.ID
+	}
+
+	lowerSlotID := EntityID(0)
+	if pu.SlotLower != nil {
+		lowerSlotID = pu.SlotLower.ID
+	}
+
 	return &Press{
 		ID:           pu.PressID,
 		Number:       pu.PressNumber,
 		Type:         pu.PressType,
 		Code:         pu.PressCode,
-		SlotUp:       pu.SlotUpper.ID,
-		SlotDown:     pu.SlotLower.ID,
+		SlotUp:       upperSlotID,
+		SlotDown:     lowerSlotID,
 		CyclesOffset: pu.CyclesOffset,
 	}
 }
