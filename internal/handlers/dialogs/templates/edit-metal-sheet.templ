@@ -13,13 +13,21 @@ import (
 templ NewUpperMetalSheetDialog(
 	tool *shared.Tool,
 ) {
-	@ui.Dialog(ui.DialogOptions{
-		Method:           http.MethodPost,
-		Href:             urlb.DialogEditMetalSheet(0, tool.ID, tool.Position),
-		ID:               "metal-sheet-dialog",
-		SubmitButtonText: "Erstellen",
-		FormClasses:      templ.CSSClasses{"container"},
-	}) {
+	{{
+		props := &ui.DialogProps{
+			ID:           "metal-sheet-dialog",
+			Fullscreen:   true,
+			Clean:        true,
+			FormEnabled:  true,
+			FormCSS:      templ.CSSClasses{"container"},
+			HxEnabled:    true,
+			Href:         urlb.DialogEditMetalSheet(0, tool.ID, tool.Position),
+			Method:       http.MethodPost,
+			ActionSubmit: "Erstellen",
+			ActionCancel: "Abbrechen",
+		}
+	}}
+	@ui.Dialog(props) {
 		@metalSheetContentPositionTop(nil)
 	}
 }
@@ -27,13 +35,21 @@ templ NewUpperMetalSheetDialog(
 templ NewLowerMetalSheetDialog(
 	tool *shared.Tool,
 ) {
-	@ui.Dialog(ui.DialogOptions{
-		Method:           http.MethodPost,
-		Href:             urlb.DialogEditMetalSheet(0, tool.ID, tool.Position),
-		ID:               "metal-sheet-dialog",
-		SubmitButtonText: "Erstellen",
-		FormClasses:      templ.CSSClasses{"container"},
-	}) {
+	{{
+		props := &ui.DialogProps{
+			ID:           "metal-sheet-dialog",
+			Fullscreen:   true,
+			Clean:        true,
+			FormEnabled:  true,
+			FormCSS:      templ.CSSClasses{"container"},
+			HxEnabled:    true,
+			Href:         urlb.DialogEditMetalSheet(0, tool.ID, tool.Position),
+			Method:       http.MethodPost,
+			ActionSubmit: "Erstellen",
+			ActionCancel: "Abbrechen",
+		}
+	}}
+	@ui.Dialog(props) {
 		@metalSheetContentPositionBottom(nil)
 	}
 }
@@ -42,12 +58,21 @@ templ EditUpperMetalSheetDialog(
 	metalSheet *shared.UpperMetalSheet,
 	tool *shared.Tool,
 ) {
-	@ui.Dialog(ui.DialogOptions{
-		Method:           http.MethodPut,
-		Href:             urlb.DialogEditMetalSheet(metalSheet.ID, 0, tool.Position),
-		ID:               "metal-sheet-edit-dialog",
-		SubmitButtonText: "Aktualisieren",
-	}) {
+	{{
+		props := &ui.DialogProps{
+			ID:           "metal-sheet-edit-dialog",
+			Fullscreen:   true,
+			Clean:        true,
+			FormEnabled:  true,
+			FormCSS:      templ.CSSClasses{"container"},
+			HxEnabled:    true,
+			Href:         urlb.DialogEditMetalSheet(metalSheet.ID, 0, tool.Position),
+			Method:       http.MethodPut,
+			ActionSubmit: "Aktualisieren",
+			ActionCancel: "Abbrechen",
+		}
+	}}
+	@ui.Dialog(props) {
 		@metalSheetContentPositionTop(metalSheet)
 	}
 }
@@ -56,12 +81,21 @@ templ EditLowerMetalSheetDialog(
 	metalSheet *shared.LowerMetalSheet,
 	tool *shared.Tool,
 ) {
-	@ui.Dialog(ui.DialogOptions{
-		Method:           http.MethodPut,
-		Href:             urlb.DialogEditMetalSheet(metalSheet.ID, 0, tool.Position),
-		ID:               "metal-sheet-edit-dialog",
-		SubmitButtonText: "Aktualisieren",
-	}) {
+	{{
+		props := &ui.DialogProps{
+			ID:           "metal-sheet-edit-dialog",
+			Fullscreen:   true,
+			Clean:        true,
+			FormEnabled:  true,
+			FormCSS:      templ.CSSClasses{"container"},
+			HxEnabled:    true,
+			Href:         urlb.DialogEditMetalSheet(metalSheet.ID, 0, tool.Position),
+			Method:       http.MethodPut,
+			ActionSubmit: "Aktualisieren",
+			ActionCancel: "Abbrechen",
+		}
+	}}
+	@ui.Dialog(props) {
 		@metalSheetContentPositionBottom(metalSheet)
 	}
 }
