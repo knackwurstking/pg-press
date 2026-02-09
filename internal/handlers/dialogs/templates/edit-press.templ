@@ -14,7 +14,7 @@ templ NewPressDialog() {
 	@components.FormDialog("notes-dialog", http.MethodPost, urlb.DialogEditPressPost(-1)) {
 		@PressContent(nil)
 		<div class={ css.Flex, css.FlexRow, css.Gap, css.JustifyEnd }>
-			<button type="button" class="secondary" hx-on:click="dialog.close()">
+			<button type="button" class="secondary" hx-on:click="this.closest('dialog').close()">
 				Abbrechen
 			</button>
 			<button type="submit" class="primary">
@@ -37,7 +37,7 @@ templ EditPressDialog(press *shared.Press) {
 			>
 				Entfernen
 			</button>
-			<button type="button" class="secondary" hx-on:click="dialog.close()">
+			<button type="button" class="secondary" hx-on:click="this.closest('dialog').close()">
 				Abbrechen
 			</button>
 			<button type="submit" class="primary">
