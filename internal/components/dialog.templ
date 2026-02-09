@@ -34,4 +34,7 @@ templ FormDialog(id, method string, href templ.SafeURL) {
 			{ children... }
 		</form>
 	}
+	<script defer>
+		document.querySelector('#{{ id }}').showModal();
+	</script>
 }
