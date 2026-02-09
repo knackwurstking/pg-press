@@ -72,7 +72,7 @@ func PutPress(c echo.Context) *echo.HTTPError {
 
 	merr := db.UpdatePress(&shared.Press{
 		ID:           press.ID,
-		Number:       press.Number,
+		Number:       data.PressNumber,
 		Type:         data.MachineType,
 		Code:         data.Code,
 		CyclesOffset: data.CyclesOffset,
