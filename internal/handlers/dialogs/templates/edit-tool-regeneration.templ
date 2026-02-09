@@ -3,46 +3,29 @@ package templates
 import (
 	"net/http"
 
+	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"github.com/knackwurstking/ui"
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 templ NewToolRegenerationDialog(toolID shared.EntityID) {
-	@ui.Dialog(&ui.DialogProps{
-		ID:           "tool-regeneration-dialog",
-		Fullscreen:   true,
-		Clean:        true,
-		FormEnabled:  true,
-		HxEnabled:    true,
-		Href:         urlb.DialogEditToolRegenerationPost(toolID),
-		Method:       http.MethodPost,
-		ActionSubmit: "Erstellen",
-		ActionCancel: "Abbrechen",
-	}) {
+	@components.FormDialog("tool-regeneration-dialog", http.MethodPost, urlb.DialogEditToolRegenerationPost(toolID)) {
 		@toolRegenerationContent(0, 0)
 	}
 }
 
 templ EditToolRegenerationDialog(tr *shared.ToolRegeneration) {
-	@ui.Dialog(&ui.DialogProps{
-		ID:           "tool-regeneration-dialog",
-		Fullscreen:   true,
-		Clean:        true,
-		FormEnabled:  true,
-		HxEnabled:    true,
-		Href:         urlb.DialogEditToolRegenerationPut(tr.ID),
-		Method:       http.MethodPut,
-		ActionSubmit: "Aktualisieren",
-		ActionCancel: "Abbrechen",
-	}) {
+	@components.FormDialog("tool-regeneration-dialog", http.MethodPut, urlb.DialogEditToolRegenerationPut(tr.ID)) {
 		@toolRegenerationContent(tr.Start, tr.Stop)
 	}
 }
 
 templ toolRegenerationContent(start, stop shared.UnixMilli) {
-	<span class="flex flex-row gap justify-evenly items-start">
-		<span class="flex flex-col gap-0">
+	<span
+		class={ css.Flex, css.FlexRow, css.Gap, css.JustifyEvenly, css.ItemsStart }
+	>
+		<span class={ css.Flex, css.FlexCol }>
 			<label for="start">Start</label>
 			<input
 				id="start"
@@ -53,7 +36,7 @@ templ toolRegenerationContent(start, stop shared.UnixMilli) {
 				required
 			/>
 		</span>
-		<span class="flex flex-col gap-0">
+		<span class={ css.Flex, css.FlexCol }>
 			<label for="start">Stop</label>
 			<input
 				id="start"
