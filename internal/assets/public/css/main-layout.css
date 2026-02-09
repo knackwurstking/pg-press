@@ -7,7 +7,7 @@ body:has(dialog[open]) {
 	z-index: 1000;
 }
 
-.app-bar ~ * {
+.app-bar~* {
 	padding-top: calc(var(--ui-app-bar-height) + 1rem);
 }
 
