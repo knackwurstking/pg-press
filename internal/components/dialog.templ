@@ -1,0 +1,37 @@
+package components
+
+import (
+	"github.com/knackwurstking/ui/components/dialog"
+	"net/http"
+)
+
+templ FormDialog(id, method string, href templ.SafeURL) {
+	@dialog.Dialog(dialog.DialogProps{
+		ID:         id,
+		Fullscreen: true,
+		Clean:      true,
+		Attributes: templ.Attributes{
+			"onclose":  `this.remove()`,
+			"oncancel": `event.preventDefault()`,
+			"onclick":  `if (event.target === this) event.preventDefault()`,
+		},
+	}) {
+		<form
+			class="container flex flex-col gap p"
+			if method == http.MethodPost {
+				hx-post={ href }
+			}
+			if method == http.MethodPut {
+				hx-put={ href }
+			}
+			hx-target="body"
+			hx-swap="beforeend"
+			hx-on::response-error="alert(event.detail.xhr.responseText)"
+			hx-on::after-request="if (event.detail.successful) this.closest('dialog').close();"
+			enctype="multipart/form-data"
+			onclick="event.stopPropagation()"
+		>
+			{ children... }
+		</form>
+	}
+}

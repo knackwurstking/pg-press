@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"slices"
 
+	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 
@@ -11,22 +12,16 @@ import (
 )
 
 templ NewPressDialog() {
-	{{
-		props := &ui.DialogProps{
-			ID:           "notes-dialog",
-			Fullscreen:   true,
-			Clean:        true,
-			FormEnabled:  true,
-			FormCSS:      templ.CSSClasses{"container"},
-			HxEnabled:    true,
-			Href:         urlb.DialogEditPressPost(-1),
-			Method:       http.MethodPost,
-			ActionSubmit: "Erstellen",
-			ActionCancel: "Abbrechen",
-		}
-	}}
-	@ui.Dialog(props) {
+	@components.FormDialog("notes-dialog", http.MethodPost, urlb.DialogEditPressPost(-1)) {
 		@PressContent(nil)
+		<div class="flex flex-row gap justify-end">
+			<button type="button" class="secondary" hx-on:click="dialog.close()">
+				Abbrechen
+			</button>
+			<button type="submit" class="primary">
+				Erstellen
+			</button>
+		</div>
 	}
 }
 
