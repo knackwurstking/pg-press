@@ -34,7 +34,7 @@ templ SectionTools(p SectionToolsProps) {
 			hx-get={ urlb.DialogEditCassette(0) }
 			hx-trigger="click"
 			hx-swap="beforeend"
-			class="flex gap secondary small"
+			class="flex gap secondary"
 			disabled?={ !p.User.IsAdmin() }
 		>
 			<i class="bi bi-plus-lg"></i>
@@ -44,7 +44,7 @@ templ SectionTools(p SectionToolsProps) {
 			hx-get={ urlb.DialogEditTool(0) }
 			hx-trigger="click"
 			hx-swap="beforeend"
-			class="flex gap primary small"
+			class="flex gap primary"
 			disabled?={ !p.User.IsAdmin() }
 		>
 			<i class="bi bi-plus-lg"></i>
