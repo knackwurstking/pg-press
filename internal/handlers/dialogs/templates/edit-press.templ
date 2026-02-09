@@ -54,7 +54,7 @@ templ EditPressDialog(press *shared.Press) {
 
 templ editPressActions(press *shared.Press) {
 	<button
-		class="destructive small"
+		class="destructive"
 		hx-delete={ urlb.PressDelete(press.ID) }
 		hx-trigger="click"
 		hx-confirm="Möchten Sie diese Presse wirklich entfernen? Diese Aktion kann nicht rückgängig gemacht werden."
