@@ -1,8 +1,10 @@
 package components
 
 import (
-	"github.com/knackwurstking/ui/components/dialog"
 	"net/http"
+
+	"github.com/knackwurstking/ui/templ/components/dialog"
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 templ FormDialog(id, method string, href templ.SafeURL) {
@@ -10,6 +12,13 @@ templ FormDialog(id, method string, href templ.SafeURL) {
 		ID:         id,
 		Fullscreen: true,
 		Clean:      true,
+		Class: templ.CSSClasses{
+			css.Flex,
+			css.FlexCol,
+			css.Gap,
+			css.JustifyCenter,
+			css.ItemsCenter,
+		},
 		Attributes: templ.Attributes{
 			"onclose":  `this.remove()`,
 			"oncancel": `event.preventDefault()`,
