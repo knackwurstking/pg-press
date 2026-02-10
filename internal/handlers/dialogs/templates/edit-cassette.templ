@@ -1,56 +1,40 @@
 package templates
 
 import (
-	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/pg-press/internal/urlb"
 	"net/http"
 
-	"github.com/knackwurstking/ui"
+	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
+
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 templ NewCassetteDialog() {
-	@ui.Dialog(&ui.DialogProps{
-		ID:           "cassette-dialog",
-		Fullscreen:   true,
-		Clean:        true,
-		FormEnabled:  true,
-		HxEnabled:    true,
-		Href:         urlb.DialogEditCassette(0),
-		Method:       http.MethodPost,
-		ActionSubmit: "Erstellen",
-		ActionCancel: "Abbrechen",
-	}) {
+	@components.FormDialog("cassette-dialog", http.MethodPost, urlb.DialogEditCassette(0)) {
 		{{ cassette := &shared.Tool{} }}
 		@toolFormat(cassette.Width, cassette.Height)
 		@toolType(cassette.Type)
 		@toolCode(cassette.Code)
 		@cassetteThickness(cassette.MinThickness, cassette.MaxThickness)
+		@components.FormDialogFooter("Abbrechen", "Erstellen")
 	}
 }
 
 templ EditCassetteDialog(cassette *shared.Tool) {
-	@ui.Dialog(&ui.DialogProps{
-		ID:           "cassette-edit-dialog",
-		Fullscreen:   true,
-		Clean:        true,
-		FormEnabled:  true,
-		HxEnabled:    true,
-		Href:         urlb.DialogEditCassette(cassette.ID),
-		Method:       http.MethodPut,
-		ActionSubmit: "Aktualisieren",
-		ActionCancel: "Abbrechen",
-	}) {
+	@components.FormDialog("cassette-edit-dialog", http.MethodPut, urlb.DialogEditCassette(cassette.ID)) {
 		@toolFormat(cassette.Width, cassette.Height)
 		@toolType(cassette.Type)
 		@toolCode(cassette.Code)
 		@cassetteThickness(cassette.MinThickness, cassette.MaxThickness)
+		@components.FormDialogFooter("Abbrechen", "Aktualisieren")
 	}
 }
 
 templ cassetteThickness(inputMinThickness float32, inputMaxThickness float32) {
-	<div class="flex flex-col gap-0 items-start w-full">
+	<div class={ css.Flex, css.FlexCol, css.ItemsStart, "w-full" }>
 		<label>Dicke (mm)</label>
-		<div class="flex gap-sm">
+		<div class={ css.Flex, css.GapSm }>
 			<input
 				type="number"
 				step="0.1"

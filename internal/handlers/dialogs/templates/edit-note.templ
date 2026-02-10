@@ -6,6 +6,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 templ NewNoteDialog(linked string, user *shared.User) {
@@ -27,7 +28,10 @@ templ EditNoteDialog(note *shared.Note, linked string, user *shared.User) {
 }
 
 templ noteLevelSelect(level shared.NoteLevel) {
-	<label for="level" class="flex flex-col">
+	<label
+		for="level"
+		class={ css.Flex, css.FlexCol }
+	>
 		Priorität
 		<select id="level" name="level" required>
 			<option value="0" selected?={ level == 0 }>
@@ -47,7 +51,10 @@ templ noteLevelSelect(level shared.NoteLevel) {
 }
 
 templ noteContent(content string) {
-	<label for="content" class="flex flex-col">
+	<label
+		for="content"
+		class={ css.Flex, css.FlexCol }
+	>
 		Inhalt
 		<textarea
 			name="content"
@@ -62,14 +69,19 @@ templ noteContent(content string) {
 templ displayLinkedTables(linked string, user *shared.User) {
 	if linked != "" {
 		<div
-			class="flex flex-col gap"
+			class={ css.Flex, css.FlexCol, css.Gap }
 			if !user.IsAdmin() {
 				style="display: none;"
 			}
 		>
 			<h3>Verknüpfte Tabellen</h3>
-			<div class="flex flex-col gap-sm">
-				<label class="flex flex-row gap items-center" disabled>
+			<div
+				class={ css.Flex, css.FlexCol, css.GapSm }
+			>
+				<label
+					class={ css.Flex, css.Gap, css.ItemsCenter }
+					disabled
+				>
 					<input
 						type="checkbox"
 						name="linked"

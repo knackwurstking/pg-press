@@ -8,8 +8,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-
-	"github.com/knackwurstking/ui"
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 templ NewCycleDialog(
@@ -17,27 +16,17 @@ templ NewCycleDialog(
 	currentPress *shared.Press,
 	presses []*shared.Press,
 ) {
-	@ui.Dialog(&ui.DialogProps{
-		ID:           "cycle-dialog",
-		Fullscreen:   true,
-		Clean:        true,
-		FormEnabled:  true,
-		HxEnabled:    true,
-		Href:         urlb.DialogEditCyclePost(),
-		Method:       http.MethodPost,
-		ActionSubmit: "Erstellen",
-		ActionCancel: "Abbrechen",
-	}) {
+	@components.FormDialog("cycle-dialog", http.MethodPost, urlb.DialogEditCyclePost()) {
 		<input
 			type="hidden"
 			name="original_tool_id"
 			value={ fmt.Sprintf("%d", tool.ID) }
 		/>
 		@components.Section(templ.Attributes{
-			"class": "tool-info flex flex-col gap-sm",
+			"class": templ.CSSClasses{"tool-info", css.Flex, css.FlexCol, css.GapSm}.String(),
 		}) {
 			<label>Aktives Werkzeug</label>
-			<div class="flex flex-col gap-xs">
+			<div class={ css.Flex, css.FlexCol, css.GapSm }>
 				<div class="text-sm">
 					<strong>Werkzeug:</strong> { tool.German() }
 				</div>
@@ -49,6 +38,7 @@ templ NewCycleDialog(
 		@cyclePressNumber(currentPress, presses)
 		@cycleStop(0)
 		@cycleTotalCycles(0)
+		@components.FormDialogFooter("Abbrechen", "Erstellen")
 	}
 }
 
@@ -59,17 +49,7 @@ templ EditCycleDialog(
 	presses []*shared.Press,
 ) {
 	{{ toolChangeMode := len(availableTools) > 0 }}
-	@ui.Dialog(&ui.DialogProps{
-		ID:           "cycle-edit-dialog",
-		Fullscreen:   true,
-		Clean:        true,
-		FormEnabled:  true,
-		HxEnabled:    true,
-		Href:         urlb.DialogEditCyclePut(),
-		Method:       http.MethodPut,
-		ActionSubmit: "Aktualisieren",
-		ActionCancel: "Abbrechen",
-	}) {
+	@components.FormDialog("cycle-edit-dialog", http.MethodPut, urlb.DialogEditCyclePut()) {
 		<input
 			type="hidden"
 			name="original_tool_id"
@@ -77,14 +57,23 @@ templ EditCycleDialog(
 		/>
 		if toolChangeMode {
 			@components.Section(templ.Attributes{
-				"class": "tool-selection flex flex-col gap-sm min-w-0",
+				"class": templ.CSSClasses{
+					"tool-selection",
+					css.Flex, css.FlexCol, css.GapSm,
+					"min-w-0",
+				}.String(),
 			}) {
 				<label for="tool_id">Werkzeug auswählen</label>
 				<select
 					id="tool_id"
 					name="tool_id"
 					required
-					class="w-full max-w-full min-w-0 text-sm overflow-hidden text-ellipsis"
+					class={
+						"w-full", "max-w-full", "min-w-0",
+						"text-sm",
+						"overflow-hidden",
+						"text-ellipsis",
+					}
 				>
 					for _, t := range availableTools {
 						<option
@@ -112,12 +101,18 @@ templ EditCycleDialog(
 		@cyclePressNumber(currentPress, presses)
 		@cycleStop(cycle.Stop)
 		@cycleTotalCycles(cycle.PressCycles)
+		@components.FormDialogFooter("Abbrechen", "Aktualisieren")
 	}
 }
 
 templ cyclePressNumber(current *shared.Press, presses []*shared.Press) {
 	@components.Section(templ.Attributes{
-		"class": "press flex flex-col gap-sm",
+		"class": templ.CSSClasses{
+			"press",
+			css.Flex,
+			css.FlexCol,
+			css.GapSm,
+		}.String(),
 	}) {
 		<label for="press_id">Presse</label>
 		<select id="press_id" name="press_id" required>
@@ -149,7 +144,7 @@ templ cycleStop(date shared.UnixMilli) {
 	@components.Section(templ.Attributes{
 		"class": "original-date flex gap",
 	}) {
-		<span class="flex flex-col gap-0">
+		<span class={ css.Flex, css.FlexCol }>
 			<label for="stop">Ablesedatum</label>
 			<input
 				id="stop"
@@ -164,7 +159,12 @@ templ cycleStop(date shared.UnixMilli) {
 
 templ cycleTotalCycles(value int64) {
 	@components.Section(templ.Attributes{
-		"class": "total-cycles flex flex-col gap-sm",
+		"class": templ.CSSClasses{
+			"total-cycles",
+			css.Flex,
+			css.FlexCol,
+			css.GapSm,
+		}.String(),
 	}) {
 		<label for="press_cycles">Press Zyklen</label>
 		<input

@@ -1,10 +1,13 @@
 package templates
 
 import (
+	"net/http"
+
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"net/http"
+
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 templ NewToolDialog() {
@@ -29,8 +32,12 @@ templ EditToolDialog(tool *shared.Tool) {
 }
 
 templ toolPosition(inputPosition shared.Slot) {
-	<div class="flex flex-row gap">
-		<span class="flex flex-col gap-0 items-start">
+	<div
+		class={ css.Flex, css.FlexRow, css.Gap }
+	>
+		<span
+			class={ css.Flex, css.FlexCol, css.ItemsStart }
+		>
 			<label for="position">Position</label>
 			<select id="position" name="position" required>
 				<option
@@ -63,9 +70,13 @@ templ toolPosition(inputPosition shared.Slot) {
 }
 
 templ toolFormat(inputWidth int, inputHeight int) {
-	<div class="flex flex-col gap-0 items-start w-full">
+	<div
+		class={ css.Flex, css.FlexCol, css.ItemsStart, "w-full" }
+	>
 		<label>Format</label>
-		<div class="flex gap-sm">
+		<div
+			class={ css.Flex, css.GapSm }
+		>
 			<input
 				type="number"
 				id="width"
@@ -94,7 +105,9 @@ templ toolFormat(inputWidth int, inputHeight int) {
 }
 
 templ toolType(inputType string) {
-	<div class="flex flex-col gap-0 items-start w-full">
+	<div
+		class={ css.Flex, css.FlexCol, css.ItemsStart, "w-full" }
+	>
 		<label for="type">Typ</label>
 		<input
 			type="text"
@@ -109,7 +122,9 @@ templ toolType(inputType string) {
 }
 
 templ toolCode(inputCode string) {
-	<div class="flex flex-col gap-0 items-start w-full">
+	<div
+		class={ css.Flex, css.FlexCol, css.ItemsStart, "w-full" }
+	>
 		<label for="code">Code</label>
 		<input
 			type="text"

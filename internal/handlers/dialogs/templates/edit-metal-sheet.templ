@@ -4,30 +4,16 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-
-	"github.com/knackwurstking/ui"
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 templ NewUpperMetalSheetDialog(
 	tool *shared.Tool,
 ) {
-	{{
-		props := &ui.DialogProps{
-			ID:           "metal-sheet-dialog",
-			Fullscreen:   true,
-			Clean:        true,
-			FormEnabled:  true,
-			FormCSS:      templ.CSSClasses{"container"},
-			HxEnabled:    true,
-			Href:         urlb.DialogEditMetalSheet(0, tool.ID, tool.Position),
-			Method:       http.MethodPost,
-			ActionSubmit: "Erstellen",
-			ActionCancel: "Abbrechen",
-		}
-	}}
-	@ui.Dialog(props) {
+	@components.FormDialog("upper-metal-sheet-dialog", http.MethodPost, urlb.DialogEditMetalSheet(0, tool.ID, tool.Position)) {
 		@metalSheetContentPositionTop(nil)
 	}
 }
@@ -35,21 +21,7 @@ templ NewUpperMetalSheetDialog(
 templ NewLowerMetalSheetDialog(
 	tool *shared.Tool,
 ) {
-	{{
-		props := &ui.DialogProps{
-			ID:           "metal-sheet-dialog",
-			Fullscreen:   true,
-			Clean:        true,
-			FormEnabled:  true,
-			FormCSS:      templ.CSSClasses{"container"},
-			HxEnabled:    true,
-			Href:         urlb.DialogEditMetalSheet(0, tool.ID, tool.Position),
-			Method:       http.MethodPost,
-			ActionSubmit: "Erstellen",
-			ActionCancel: "Abbrechen",
-		}
-	}}
-	@ui.Dialog(props) {
+	@components.FormDialog("lower-metal-sheet-dialog", http.MethodPost, urlb.DialogEditMetalSheet(0, tool.ID, tool.Position)) {
 		@metalSheetContentPositionBottom(nil)
 	}
 }
@@ -58,21 +30,7 @@ templ EditUpperMetalSheetDialog(
 	metalSheet *shared.UpperMetalSheet,
 	tool *shared.Tool,
 ) {
-	{{
-		props := &ui.DialogProps{
-			ID:           "metal-sheet-edit-dialog",
-			Fullscreen:   true,
-			Clean:        true,
-			FormEnabled:  true,
-			FormCSS:      templ.CSSClasses{"container"},
-			HxEnabled:    true,
-			Href:         urlb.DialogEditMetalSheet(metalSheet.ID, 0, tool.Position),
-			Method:       http.MethodPut,
-			ActionSubmit: "Aktualisieren",
-			ActionCancel: "Abbrechen",
-		}
-	}}
-	@ui.Dialog(props) {
+	@components.FormDialog("upper-metal-sheet-edit-dialog", http.MethodPut, urlb.DialogEditMetalSheet(metalSheet.ID, 0, tool.Position)) {
 		@metalSheetContentPositionTop(metalSheet)
 	}
 }
@@ -81,28 +39,18 @@ templ EditLowerMetalSheetDialog(
 	metalSheet *shared.LowerMetalSheet,
 	tool *shared.Tool,
 ) {
-	{{
-		props := &ui.DialogProps{
-			ID:           "metal-sheet-edit-dialog",
-			Fullscreen:   true,
-			Clean:        true,
-			FormEnabled:  true,
-			FormCSS:      templ.CSSClasses{"container"},
-			HxEnabled:    true,
-			Href:         urlb.DialogEditMetalSheet(metalSheet.ID, 0, tool.Position),
-			Method:       http.MethodPut,
-			ActionSubmit: "Aktualisieren",
-			ActionCancel: "Abbrechen",
-		}
-	}}
-	@ui.Dialog(props) {
+	@components.FormDialog("lower-metal-sheet-edit-dialog", http.MethodPut, urlb.DialogEditMetalSheet(metalSheet.ID, 0, tool.Position)) {
 		@metalSheetContentPositionBottom(metalSheet)
 	}
 }
 
 templ metalSheetContentPositionTop(metalSheet *shared.UpperMetalSheet) {
-	<div class="flex gap w-full">
-		<div class="flex flex-col w-full">
+	<div
+		class={ css.Flex, css.Gap, "w-full" }
+	>
+		<div
+			class={ css.Flex, css.FlexCol, "w-full" }
+		>
 			<label for="tile-height">Stärke (mm)</label>
 			<input
 				class="w-full"
@@ -116,7 +64,9 @@ templ metalSheetContentPositionTop(metalSheet *shared.UpperMetalSheet) {
 				}
 			/>
 		</div>
-		<div class="flex flex-col w-full">
+		<div
+			class={ css.Flex, css.FlexCol, "w-full" }
+		>
 			<label for="value">Blech (mm)</label>
 			<input
 				class="w-full"
@@ -134,7 +84,9 @@ templ metalSheetContentPositionTop(metalSheet *shared.UpperMetalSheet) {
 }
 
 templ metalSheetContentPositionBottom(metalSheet *shared.LowerMetalSheet) {
-	<div class="flex flex-col">
+	<div
+		class={ css.Flex, css.FlexCol }
+	>
 		<label for="identifier">Maschinentyp</label>
 		<select
 			id="identifier"
@@ -158,8 +110,12 @@ templ metalSheetContentPositionBottom(metalSheet *shared.LowerMetalSheet) {
 			>SITI</option>
 		</select>
 	</div>
-	<span class="flex gap w-full">
-		<div class="flex flex-col w-full">
+	<span
+		class={ css.Flex, css.Gap, "w-full" }
+	>
+		<div
+			class={ css.Flex, css.FlexCol, "w-full" }
+		>
 			<label for="tile-height">Stärke (mm)</label>
 			<input
 				class="w-full"
@@ -173,7 +129,9 @@ templ metalSheetContentPositionBottom(metalSheet *shared.LowerMetalSheet) {
 				}
 			/>
 		</div>
-		<div class="flex flex-col w-full">
+		<div
+			class={ css.Flex, css.FlexCol, "w-full" }
+		>
 			<label for="stf">Stf.</label>
 			<input
 				class="w-full"
@@ -187,7 +145,9 @@ templ metalSheetContentPositionBottom(metalSheet *shared.LowerMetalSheet) {
 				}
 			/>
 		</div>
-		<div class="flex flex-col w-full">
+		<div
+			class={ css.Flex, css.FlexCol, "w-full" }
+		>
 			<label for="stf-max">Hubende</label>
 			<input
 				class="w-full"
@@ -202,8 +162,12 @@ templ metalSheetContentPositionBottom(metalSheet *shared.LowerMetalSheet) {
 			/>
 		</div>
 	</span>
-	<span class="flex gap w-full">
-		<div class="flex flex-col w-full">
+	<span
+		class={ css.Flex, css.Gap, "w-full" }
+	>
+		<div
+			class={ css.Flex, css.FlexCol, "w-full" }
+		>
 			<label for="marke-height">Marke (mm)</label>
 			<input
 				class="w-full"
@@ -216,7 +180,9 @@ templ metalSheetContentPositionBottom(metalSheet *shared.LowerMetalSheet) {
 				}
 			/>
 		</div>
-		<div class="flex flex-col w-full">
+		<div
+			class={ css.Flex, css.FlexCol, "w-full" }
+		>
 			<label for="value">Blech (mm)</label>
 			<input
 				class="w-full"
