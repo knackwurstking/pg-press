@@ -3,45 +3,26 @@ package templates
 import (
 	"net/http"
 
+	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-
-	"github.com/knackwurstking/ui"
 )
 
 templ NewNoteDialog(linked string, user *shared.User) {
-	@ui.Dialog(&ui.DialogProps{
-		ID:           "notes-dialog",
-		Fullscreen:   true,
-		Clean:        true,
-		FormEnabled:  true,
-		HxEnabled:    true,
-		Href:         urlb.DialogEditNote(0, linked),
-		Method:       http.MethodPost,
-		ActionSubmit: "Erstellen",
-		ActionCancel: "Abbrechen",
-	}) {
+	@components.FormDialog("notes-dialog", http.MethodPost, urlb.DialogEditNote(0, linked)) {
 		@noteLevelSelect(0)
 		@noteContent("")
 		@displayLinkedTables(linked, user)
+		@components.FormDialogFooter("Abbrechen", "Erstellen")
 	}
 }
 
 templ EditNoteDialog(note *shared.Note, linked string, user *shared.User) {
-	@ui.Dialog(&ui.DialogProps{
-		ID:           "notes-edit-dialog",
-		Fullscreen:   true,
-		Clean:        true,
-		FormEnabled:  true,
-		HxEnabled:    true,
-		Href:         urlb.DialogEditNote(note.ID, linked),
-		Method:       http.MethodPut,
-		ActionSubmit: "Aktualisieren",
-		ActionCancel: "Abbrechen",
-	}) {
+	@components.FormDialog("notes-edit-dialog", http.MethodPut, urlb.DialogEditNote(note.ID, linked)) {
 		@noteLevelSelect(note.Level)
 		@noteContent(note.Content)
 		@displayLinkedTables(linked, user)
+		@components.FormDialogFooter("Abbrechen", "Aktualisieren")
 	}
 }
 
