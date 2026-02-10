@@ -38,7 +38,7 @@ type CyclesSectionContentProps struct {
 
 templ CyclesSectionContent(p *CyclesSectionContentProps) {
 	@components.SectionTitle(components.MainTitle, "Werkzeugnutzung & Zyklen")
-	<div class="flex flex-col gap">
+	<div class={ css.Flex, css.FlexCol, css.Gap }>
 		@components.Section(templ.Attributes{
 			"id": "tool-status-section",
 		}) {
@@ -52,8 +52,8 @@ templ CyclesSectionContent(p *CyclesSectionContentProps) {
 }
 
 templ toolStatus(p *CyclesSectionContentProps) {
-	<div class="flex flex-col gap">
-		<span class="flex gap-lg">
+	<div class={ css.Flex, css.FlexCol, css.Gap }>
+		<span class={ css.Flex, css.GapLg }>
 			@RegenerationEdit(RegenerationEditProps{
 				Tool:              p.Tool,
 				ToolIsActive:      p.ActivePress != nil,
@@ -63,7 +63,7 @@ templ toolStatus(p *CyclesSectionContentProps) {
 			if p.ActivePress != nil {
 				<a
 					role="button"
-					class="small ghost flex gap"
+					class={ css.ButtonSmall, css.Ghost, css.Flex, css.Gap }
 					href={ urlb.Press(p.ActivePress.ID) }
 					title="Zur Pressenübersicht"
 				>
@@ -95,11 +95,11 @@ templ regenerations(p *CyclesSectionContentProps) {
 			})
 		}
 		if len(p.Regenerations) == 0 {
-			<span class="flex justify-center items-center">
+			<span class={ css.Flex, css.JustifyBetween, css.ItemsCenter }>
 				<i><small>Keine Regenerationen verzeichnet für dieses Werkzeug</small></i>
 			</span>
 		} else {
-			<figure class="w-full overflow-x-scroll">
+			<figure class={ css.WFull, css.OverflowXScroll }>
 				<table title="Regenerationen">
 					<thead>
 						<tr>
@@ -155,7 +155,7 @@ templ cyclesTable(p *CyclesSectionContentProps) {
 			})
 		}
 		@components.Section(nil) {
-			<h6 class="mb">
+			<h6 class={ css.MB }>
 				Gesamtzyklen:
 			</h6>
 			<span>
@@ -165,10 +165,10 @@ templ cyclesTable(p *CyclesSectionContentProps) {
 		if len(p.ToolCycles) == 0 {
 			@components.NotFoundText("Kein Pressenverlauf verfügbar")
 		} else {
-			<figure class="w-full overflow-x-scroll">
+			<figure class={ css.WFull, css.OverflowXScroll }>
 				<table
 					name="tool-cycles-table"
-					class="table borderless compact"
+					class={ css.TableBorderless, css.TableCompact }
 					title="Zyklusverlauf"
 				>
 					<thead>
@@ -202,10 +202,10 @@ templ cycleTableRow(cycle *shared.Cycle, press *shared.Press, lastRegeneration *
 			<span>{ press.German() }</span>
 		</td>
 		<td>
-			<span class="text-sm">{ cycle.Start.FormatDate() }</span>
+			<span class={ css.TextSM }>{ cycle.Start.FormatDate() }</span>
 		</td>
 		<td>
-			<span class="text-sm">{ cycle.Stop.FormatDate() }</span>
+			<span class={ css.TextSM }>{ cycle.Stop.FormatDate() }</span>
 		</td>
 		<td>
 			{ fmt.Sprintf("%d", cycle.PressCycles) }

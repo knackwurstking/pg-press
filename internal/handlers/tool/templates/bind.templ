@@ -4,6 +4,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 type BindingSectionProps struct {
@@ -13,17 +14,17 @@ type BindingSectionProps struct {
 }
 
 templ BindingSection(props BindingSectionProps) {
-	<span id="binding-section" class="flex flex-col gap">
+	<span id="binding-section" class={ css.Flex, css.FlexCol, css.Gap }>
 		@components.SectionTitle(components.SubTitle, "Werkzeuge Binden")
 		<span
-			class="flex gap flex-wrap"
+			class={ css.Flex, css.Gap, css.FlexWrap }
 			if !props.IsAdmin {
 				disabled
 			}
 		>
 			<select
 				id="tool-binding-select"
-				class="max-w-full"
+				class={ css.MaxWFull }
 				hx-patch={ urlb.ToolBind(props.Tool.ID) }
 				hx-vals="js:{target_id: event.target.value}"
 				hx-trigger="change"
@@ -53,7 +54,7 @@ templ BindingSection(props BindingSectionProps) {
 				}
 			</select>
 			<button
-				class="small ghost destructive"
+				class={ css.ButtonSmall, css.Destructive, css.Ghost }
 				hx-patch={ urlb.ToolUnbind(props.Tool.ID) }
 				hx-trigger="click"
 				hx-target="#binding-section"
@@ -86,7 +87,7 @@ templ BindingSection(props BindingSectionProps) {
 					)
 				} else {
 					<!-- Binding tool not available -->
-					<span class="text-sm italic info ghost">
+					<span class={ css.TextSM, css.Italic, css.Info, css.Ghost }>
 						<i>Binding tool not available</i>
 					</span>
 				}

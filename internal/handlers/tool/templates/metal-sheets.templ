@@ -7,6 +7,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 templ UppperMetalSheets(metalSheets []*shared.UpperMetalSheet, tool *shared.Tool, user *shared.User) {
@@ -28,7 +29,7 @@ templ UppperMetalSheets(metalSheets []*shared.UpperMetalSheet, tool *shared.Tool
 			Title: "Neues Blech hinzufügen",
 		})
 	}
-	<div class="table-container">
+	<div>
 		@metalSheetTableForUpperSlot(tool.Position, metalSheets, user)
 	</div>
 }
@@ -52,7 +53,7 @@ templ LowerMetalSheets(metalSheets []*shared.LowerMetalSheet, tool *shared.Tool,
 			Title: "Neues Blech hinzufügen",
 		})
 	}
-	<div class="table-container">
+	<div>
 		@metalSheetTableForLowerSlot(tool.Position, metalSheets, user)
 	</div>
 }
@@ -62,8 +63,8 @@ templ metalSheetTableForUpperSlot(position shared.Slot, metalSheets []*shared.Up
 		@components.NotFoundText("Keine Bleche für dieses Werkzeug gefunden")
 		{{ return }}
 	}
-	<figure class="w-full overflow-x-scroll">
-		<table class="table borderless compact">
+	<figure class={ css.WFull, css.OverflowXScroll }>
+		<table class={ css.TableBorderless, css.TableCompact }>
 			<thead>
 				<tr>
 					<th>Stärke (mm)</th>
@@ -76,7 +77,7 @@ templ metalSheetTableForUpperSlot(position shared.Slot, metalSheets []*shared.Up
 					<tr>
 						<td>{ fmt.Sprintf("%.1f", sheet.TileHeight) }</td>
 						<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
-						<td class="button-group flex justify-end items-center">
+						<td class={ css.ButtonGroup, css.Flex, css.JustifyEnd, css.ItemsCenter }>
 							@components.TableActions(components.TableActionsOptions{
 								EditHref:        urlb.DialogEditMetalSheet(sheet.ID, 0, position),
 								EditAdminOnly:   false,
@@ -97,8 +98,8 @@ templ metalSheetTableForLowerSlot(position shared.Slot, metalSheets []*shared.Lo
 		@components.NotFoundText("Keine Blech für dieses Werkzeug gefunden")
 		{{ return }}
 	}
-	<figure class="w-full overflow-x-scroll">
-		<table class="table borderless compact">
+	<figure class={ css.WFull, css.OverflowXScroll }>
+		<table class={ css.TableBorderless, css.TableCompact }>
 			<thead>
 				<tr>
 					<th>Stärke (mm)</th>
@@ -119,9 +120,9 @@ templ metalSheetTableForLowerSlot(position shared.Slot, metalSheets []*shared.Lo
 						<td>{ fmt.Sprintf("%.1f", sheet.STF) }</td>
 						<td>{ fmt.Sprintf("%.1f", sheet.STFMax) }</td>
 						<td>
-							<span class="badge small">{ sheet.Identifier }</span>
+							<span class={ css.Badge, css.BadgeSM }>{ sheet.Identifier }</span>
 						</td>
-						<td class="button-group flex justify-end items-center">
+						<td class={ css.ButtonGroup, css.Flex, css.JustifyEnd, css.ItemsCenter }>
 							@components.TableActions(components.TableActionsOptions{
 								EditHref:        urlb.DialogEditMetalSheet(sheet.ID, 0, position),
 								EditAdminOnly:   false,
