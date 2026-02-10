@@ -3,11 +3,12 @@ package templates
 import (
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 templ NotesGrid(notes []*shared.Note, tools []*shared.Tool) {
 	if len(notes) > 0 {
-		<div class="flex flex-wrap gap grow">
+		<div class={ css.Flex, css.FlexWrap, css.Gap, css.Grow }>
 			for _, note := range notes {
 				{{
 					skip := false
@@ -27,10 +28,13 @@ templ NotesGrid(notes []*shared.Note, tools []*shared.Tool) {
 			}
 		</div>
 	} else {
-		<div class="empty-state text-center" style="padding: 3rem 1rem;">
-			<i class="bi bi-clipboard-x display-4 text-muted"></i>
+		<div
+			class={ "empty-state", css.TextCenter }
+			style="padding: 3rem 1rem;"
+		>
+			<i class="bi bi-clipboard-x"></i>
 			<h3>Keine Notizen vorhanden</h3>
-			<p class="text-muted">Notizen können über die jeweiligen Werkzeug- oder Pressenseiten erstellt werden.</p>
+			<p>Notizen können über die jeweiligen Werkzeug- oder Pressenseiten erstellt werden.</p>
 		</div>
 	}
 }

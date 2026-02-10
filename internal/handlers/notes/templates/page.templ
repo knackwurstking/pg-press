@@ -4,6 +4,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 templ Page(notes []*shared.Note, tools []*shared.Tool) {
@@ -15,9 +16,9 @@ templ Page(notes []*shared.Note, tools []*shared.Tool) {
 			AdditionalHead: pageScript(),
 		},
 	) {
-		<main class="container fluid">
+		<main class={ css.Container, css.ContainerFluid }>
 			@components.Section(templ.Attributes{
-				"class":                "notes-grid max-w-full",
+				"class":                templ.CSSClasses{"noted-grid", css.MaxWFull},
 				"style":                "margin: 0 auto;",
 				"hx-get":               string(urlb.NotesGrid()),
 				"hx-trigger":           "reload-notes from:body",
