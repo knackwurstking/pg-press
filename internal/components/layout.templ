@@ -3,6 +3,7 @@ package components
 import (
 	"github.com/knackwurstking/pg-press/internal/env"
 
+	"github.com/knackwurstking/ui/templ/css"
 	"github.com/knackwurstking/ui/templ/ui"
 )
 
@@ -61,11 +62,13 @@ templ scripts() {
 }
 
 templ appBar(title string, navContent templ.Component) {
-	<header class="app-bar top fixed shadow-sm">
-		<div class="app-bar-left">
+	<header
+		class={ css.AppBar, css.AppBarTop, css.AppBarFixed, css.ShadowSm }
+	>
+		<div class={ css.AppBarLeft }>
 			<h5 id="app-bar-title">{ title }</h5>
 		</div>
-		<div class="app-bar-right">
+		<div class={ css.AppBarRight }>
 			if navContent != nil {
 				@navContent
 			}
