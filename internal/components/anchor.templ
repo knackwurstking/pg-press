@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 // -----------------------------------------------------------------------------
@@ -32,26 +33,33 @@ templ ToolAnchor(p ToolAnchorProps) {
 	}}
 	<a
 		role="button"
-		class="muted flex justify-between items-center p"
+		class={ css.Muted, css.Flex, css.JustifyBetween, css.ItemsCenter, css.P }
 		href={ urlb.Tool(p.Tool.ID) }
 	>
 		<div
 			class={
-				templ.KV("flex flex-col gap-sm w-full", true),
-				templ.KV("justify-between", p.BindingCassette != nil),
+				css.Flex, css.FlexCol, css.GapSm, css.WFull,
+				templ.KV(css.JustifyBetween, p.BindingCassette != nil),
 			}
 		>
-			<span class="text-semibold">
+			<span class={ css.TextSemibold }>
 				{ p.Tool.German() }
 			</span>
 			if p.EnableBadges {
-				<div class="flex gap justify-start items-center w-full">
+				<div
+					class={ css.Flex, css.Gap, css.JustifyStart, css.ItemsCenter, css.WFull }
+				>
 					@SmallBadge("primary", "text-bold") {
 						{ p.Tool.Position.German() }
 					}
 					@ToolStateBadge(p.Tool, p.Press, p.IsRegenerating)
 					<span
-						class="total-cycles-container flex justify-end items-center w-full pr text-sm"
+						class={
+							"total-cycles-container",
+							css.Flex, css.JustifyEnd, css.ItemsCenter,
+							css.WFull, css.PR,
+							css.TextSM,
+						}
 						hx-get={ urlb.ToolTotalCycles(p.Tool.ID) }
 						hx-trigger="load"
 						hx-swap="innerHTML"
@@ -59,8 +67,8 @@ templ ToolAnchor(p ToolAnchorProps) {
 				</div>
 			}
 			if p.BindingCassette != nil {
-				<div class="text-sm italic info ghost">
-					<i class="text-xs">
+				<div class={ css.TextSM, css.Italic, css.Info, css.Ghost }>
+					<i class={ css.TextXS }>
 						if p.BindingCassette.MinThickness == 0 {
 							Kassette: { p.BindingCassette.MaxThickness }mm
 						} else {
@@ -70,7 +78,7 @@ templ ToolAnchor(p ToolAnchorProps) {
 				</div>
 			}
 		</div>
-		<div class="flex flex-col gap justify-between items-center">
+		<div class={ css.Flex, css.FlexCol, css.Gap, css.JustifyBetween, css.ItemsCenter }>
 			<i class="bi bi-chevron-right"></i>
 		</div>
 		if p.EnableCounts {
@@ -81,11 +89,11 @@ templ ToolAnchor(p ToolAnchorProps) {
 
 templ ToolAnchorCounts(notesCount, regenerationsCount int) {
 	<span
-		class="flex justify-end items-center gap-sm text-xs"
+		class={ css.Flex, css.JustifyEnd, css.ItemsCenter, css.GapSm, css.TextXS }
 		style="position: absolute; top: 0.15rem; right: 0.25rem;"
 	>
 		if notesCount > 0 {
-			<span class="info ghost">
+			<span class={ css.Info, css.Ghost }>
 				<i class="bi bi-info-circle"></i>
 				<span>
 					{ notesCount }
@@ -93,7 +101,7 @@ templ ToolAnchorCounts(notesCount, regenerationsCount int) {
 			</span>
 		}
 		if regenerationsCount > 0 {
-			<span class="warning ghost">
+			<span class={ css.Warning, css.Ghost }>
 				<i class="bi bi-arrow-repeat"></i>
 				<span>
 					{ regenerationsCount }
@@ -130,22 +138,29 @@ templ CassetteAnchor(p CassetteAnchorProps) {
 	}}
 	<a
 		role="button"
-		class="muted flex justify-between items-center p"
+		class={ css.Muted, css.Flex, css.JustifyBetween, css.ItemsCenter, css.P }
 		href={ urlb.Tool(p.Cassette.ID) }
 	>
-		<div class="flex flex-col gap-sm justify-between w-full">
-			<span class="text-semibold">
+		<div
+			class={ css.Flex, css.FlexCol, css.GapSm, css.JustifyBetween, css.WFull }
+		>
+			<span class={ css.TextSemibold }>
 				{ p.Cassette.German() }
 			</span>
 			if p.EnableBadges {
-				<div class="flex gap justify-start items-center w-full">
-					@SmallBadge("primary", "text-bold") {
+				<div class={ css.Flex, css.Gap, css.JustifyStart, css.ItemsCenter, css.WFull }>
+					@SmallBadge(css.Primary, css.TextBold) {
 						{ p.Cassette.Position.German() }
 					}
 					@CassetteStateBadge(p.Cassette, p.BindingTool, p.IsRegenerating)
 					if p.Cassette.Code != "" {
 						<span
-							class="total-cycles-container flex justify-end items-center w-full pr text-sm"
+							class={
+								"total-cycles-container",
+								css.Flex, css.JustifyEnd, css.ItemsCenter,
+								css.WFull, css.PR,
+								css.TextSM,
+							}
 							hx-get={ urlb.ToolTotalCycles(p.Cassette.ID) }
 							hx-trigger="load"
 							hx-swap="innerHTML"
@@ -154,7 +169,9 @@ templ CassetteAnchor(p CassetteAnchorProps) {
 				</div>
 			}
 		</div>
-		<div class="flex flex-col gap justify-between items-center">
+		<div
+			class={ css.Flex, css.FlexCol, css.Gap, css.JustifyBetween, css.ItemsCenter }
+		>
 			<i class="bi bi-chevron-right"></i>
 		</div>
 		if p.EnableCounts {
@@ -165,11 +182,11 @@ templ CassetteAnchor(p CassetteAnchorProps) {
 
 templ CassetteAnchorCounts(notesCount, regenerationsCount int) {
 	<span
-		class="flex justify-end items-center gap-sm text-xs"
+		class={ css.Flex, css.JustifyEnd, css.ItemsCenter, css.GapSm, css.TextXS }
 		style="position: absolute; top: 0.15rem; right: 0.25rem;"
 	>
 		if notesCount > 0 {
-			<span class="info ghost">
+			<span class={ css.Info, css.Ghost }>
 				<i class="bi bi-info-circle"></i>
 				<span>
 					{ notesCount }
@@ -177,7 +194,7 @@ templ CassetteAnchorCounts(notesCount, regenerationsCount int) {
 			</span>
 		}
 		if regenerationsCount > 0 {
-			<span class="warning ghost">
+			<span class={ css.Warning, css.Ghost }>
 				<i class="bi bi-arrow-repeat"></i>
 				<span>
 					{ regenerationsCount }
