@@ -15,7 +15,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/knackwurstking/pg-press/internal/utils"
 
-	"github.com/knackwurstking/ui"
+	"github.com/knackwurstking/ui/templ/ui"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )

@@ -16,6 +16,12 @@ github.com/knackwurstking/ui v1.1.2-0.20260209213025-eb2b94c281dd h1:P/UHQIA7lVE
 github.com/knackwurstking/ui v1.1.2-0.20260209213025-eb2b94c281dd/go.mod h1:3BhNRbXTNI459c7h32wYBxfsimtekTHMt3ZYkUeo1dM=
 github.com/knackwurstking/ui v1.1.2-0.20260209214143-98419dff1d11 h1:PKDWfZ/kaEMZ/c2DxnrU9IWOqq3j5nzArSSWK/P1tHg=
 github.com/knackwurstking/ui v1.1.2-0.20260209214143-98419dff1d11/go.mod h1:3BhNRbXTNI459c7h32wYBxfsimtekTHMt3ZYkUeo1dM=
+github.com/knackwurstking/ui v1.1.2-0.20260210092936-d85cf69685fe h1:3BbbtaPP8IVV/kw5tErezdNLcd8vMYr0ELfVXmzeYxY=
+github.com/knackwurstking/ui v1.1.2-0.20260210092936-d85cf69685fe/go.mod h1:3BhNRbXTNI459c7h32wYBxfsimtekTHMt3ZYkUeo1dM=
+github.com/knackwurstking/ui v1.1.2-0.20260210093247-c1f890b655e7 h1:jDY0z2FIadefjY8hii87zq4l3IrSLvif5czn+7uQYqM=
+github.com/knackwurstking/ui v1.1.2-0.20260210093247-c1f890b655e7/go.mod h1:3BhNRbXTNI459c7h32wYBxfsimtekTHMt3ZYkUeo1dM=
+github.com/knackwurstking/ui v1.1.2-0.20260210094028-b96d3ac6f080 h1:uT6IfWvGoJPa3k4g7h584V/2BGPlvrLGzpaI0jgrFDc=
+github.com/knackwurstking/ui v1.1.2-0.20260210094028-b96d3ac6f080/go.mod h1:3BhNRbXTNI459c7h32wYBxfsimtekTHMt3ZYkUeo1dM=
 github.com/labstack/echo/v4 v4.13.4 h1:oTZZW+T3s9gAu5L8vmzihV7/lkXGZuITzTQkTEhcXEA=
 github.com/labstack/echo/v4 v4.13.4/go.mod h1:g63b33BZ5vZzcIUF8AtRH40DrTlXnx4UMC8rBdndmjQ=
 github.com/labstack/gommon v0.4.2 h1:F8qTUNXgG1+6WQmqoUWnz8WiEU60mXVVw0P4ht1WRA0=
