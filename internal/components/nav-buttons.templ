@@ -1,11 +1,14 @@
 package components
 
-import "github.com/knackwurstking/pg-press/internal/urlb"
+import (
+	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/ui/templ/css"
+)
 
 templ NavProfileButton() {
 	<a
 		role="button"
-		class="ghost contrast icon"
+		class={ css.Ghost, css.Contrast, css.ButtonIcon }
 		href={ urlb.Profile() }
 		title="Profil"
 	>
@@ -16,7 +19,7 @@ templ NavProfileButton() {
 templ NavHomeButton() {
 	<a
 		role="button"
-		class="ghost contrast icon"
+		class={ css.Ghost, css.Contrast, css.ButtonIcon }
 		href={ urlb.Home() }
 		title="Startseite"
 	>
