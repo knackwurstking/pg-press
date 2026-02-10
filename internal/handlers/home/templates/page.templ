@@ -20,8 +20,8 @@ templ HomePage() {
 }
 
 templ homePageContent() {
-	<main class="container fluid">
-		<nav class="flex flex-col gap-lg justify-center">
+	<main class={ css.Container , css.ContainerFluid }>
+		<nav class={ css.Flex, css.FlexCol, css.GapLg, css.JustifyCenter }>
 			@homeNavigationItem(
 				urlb.TroubleReports(),
 				"exclamation-triangle",
@@ -47,15 +47,18 @@ templ homePageContent() {
 templ homeNavigationItem(href templ.SafeURL, icon, title, description string) {
 	<a
 		role="button"
-		class="ghost contrast flex flex-row gap justify-between items-center p-lg"
+		class={ css.Ghost, css.Contrast, css.Flex, css.Gap, css.JustifyBetween, css.ItemsCenter, css.PLg }
 		style="width: 90%; margin: 0 auto;"
 		href={ href }
 	>
-		<span class="flex flex-row gap items-center" style="width: 100%;">
+		<span
+			class={ css.Flex, css.Gap, css.ItemsCenter }
+			style="width: 100%;"
+		>
 			if icon != "" {
 				<i class={ fmt.Sprintf("bi bi-%s", icon) } style={ fmt.Sprintf("margin: %s", css.VarSpacing) }></i>
 			}
-			<span class="flex flex-col">
+			<span class={ css.Flex, css.FlexCol }>
 				<strong>{ title }</strong>
 				<small style="text-wrap: auto; text-transform: none;">{ description }</small>
 			</span>
