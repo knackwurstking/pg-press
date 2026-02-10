@@ -1,5 +1,7 @@
 package components
 
+import "github.com/knackwurstking/ui/templ/css"
+
 templ ActionBar(attr templ.Attributes) {
 	{{
 		if attr == nil {
@@ -7,9 +9,20 @@ templ ActionBar(attr templ.Attributes) {
 		}
 
 		if c, ok := attr["class"]; ok {
-			attr["class"] = "flex flex-row gap justify-end p " + c.(string)
+			attr["class"] = templ.CSSClasses{
+				css.Flex,
+				css.Gap,
+				css.JustifyEnd,
+				css.P,
+				c,
+			}
 		} else {
-			attr["class"] = "flex flex-row gap justify-end p"
+			attr["class"] = templ.CSSClasses{
+				css.Flex,
+				css.Gap,
+				css.JustifyEnd,
+				css.P,
+			}
 		}
 	}}
 	<div { attr... }>
