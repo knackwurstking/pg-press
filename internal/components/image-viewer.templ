@@ -1,12 +1,17 @@
 package components
 
+import "github.com/knackwurstking/ui/templ/css"
+
 templ ImageViewerTemplate() {
 	<template name="image-viewer">
-		<dialog name="image-viewer" class="image-viewer fullscreen clean flex justify-center items-center">
+		<dialog
+			name="image-viewer"
+			class={ "image-viewer", css.DialogFullscreen, css.DialogClean, css.Flex, css.JustifyCenter, css.ItemsCenter }
+		>
 			<img alt="Attachment" class="attachment"/>
 			<button
 				type="button"
-				class="close icon secondary ghost"
+				class={ "close", css.ButtonIcon, css.Secondary, css.Ghost }
 				onclick="this.closest('dialog').close()"
 				title="Schließen"
 			>
