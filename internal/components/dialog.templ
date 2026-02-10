@@ -26,7 +26,7 @@ templ FormDialog(id, method string, href templ.SafeURL) {
 		},
 	}) {
 		<form
-			class="container flex flex-col gap p"
+			class={ "container", css.Flex, css.FlexCol, css.Gap, css.P }
 			if method == http.MethodPost {
 				hx-post={ href }
 			}

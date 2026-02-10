@@ -60,7 +60,7 @@ templ EditCycleDialog(
 				"class": templ.CSSClasses{
 					"tool-selection",
 					css.Flex, css.FlexCol, css.GapSm,
-					"min-w-0",
+					css.MinW0,
 				}.String(),
 			}) {
 				<label for="tool_id">Werkzeug auswählen</label>
@@ -69,7 +69,7 @@ templ EditCycleDialog(
 					name="tool_id"
 					required
 					class={
-						"w-full", "max-w-full", "min-w-0",
+						css.WFull, css.MaxWFull, css.MinW0,
 						"text-sm",
 						"overflow-hidden",
 						"text-ellipsis",
@@ -142,14 +142,16 @@ templ cycleStop(date shared.UnixMilli) {
 		}
 	}}
 	@components.Section(templ.Attributes{
-		"class": "original-date flex gap",
+		"class": templ.CSSClasses{
+			"original-date", css.Flex, css.Gap,
+		}.String(),
 	}) {
 		<span class={ css.Flex, css.FlexCol }>
 			<label for="stop">Ablesedatum</label>
 			<input
 				id="stop"
 				name="stop"
-				class="w-fit"
+				class={ css.WFit }
 				type="date"
 				value={ date }
 			/>
@@ -160,10 +162,7 @@ templ cycleStop(date shared.UnixMilli) {
 templ cycleTotalCycles(value int64) {
 	@components.Section(templ.Attributes{
 		"class": templ.CSSClasses{
-			"total-cycles",
-			css.Flex,
-			css.FlexCol,
-			css.GapSm,
+			"total-cycles", css.Flex, css.FlexCol, css.GapSm,
 		}.String(),
 	}) {
 		<label for="press_cycles">Press Zyklen</label>
