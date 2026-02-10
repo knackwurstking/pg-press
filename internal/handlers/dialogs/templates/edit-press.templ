@@ -23,7 +23,7 @@ templ EditPressDialog(press *shared.Press) {
 		@PressContent(press)
 		@components.FormDialogFooter("Abbrechen", "Aktualisieren") {
 			<button
-				class="destructive"
+				class={ css.Destructive }
 				hx-delete={ urlb.PressDelete(press.ID) }
 				hx-trigger="click"
 				hx-confirm="Möchten Sie diese Presse wirklich entfernen? Diese Aktion kann nicht rückgängig gemacht werden."

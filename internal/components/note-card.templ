@@ -5,6 +5,7 @@ import (
 
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 templ NoteCard(note *shared.Note, tools []*shared.Tool) {
@@ -13,32 +14,36 @@ templ NoteCard(note *shared.Note, tools []*shared.Tool) {
 		icon := ""
 		switch note.Level {
 		case shared.LevelNormal:
-			filterClass = "outline"
+			filterClass = css.Outline
 			icon = "bi-sticky"
 		case shared.LevelInfo:
-			filterClass = "info outline"
+			filterClass = css.Info + " " + css.Outline
 			icon = "bi-info-circle"
 		case shared.LevelAttention:
-			filterClass = "warning outline"
+			filterClass = css.Warning + " " + css.Outline
 			icon = "bi-exclamation-triangle"
 		case shared.LevelBroken:
-			filterClass = "destructive outline"
+			filterClass = css.Destructive + " " + css.Outline
 			icon = "bi-x-circle"
 		}
 	}}
-	<div class={ "card compact elevation-2 flex-1 min-w-fit h-fit " + filterClass }>
+	<div
+		class={ css.Card, css.CardCompact, css.Elevation2, css.Flex1, css.MinWFit, css.HFit, filterClass }
+	>
 		<div
-			class="card-header flex gap-sm justify-between items-center"
+			class={ css.CardHeader, css.Flex, css.GapSm, css.JustifyBetween, css.ItemsCenter }
 		>
-			<span class="note-importance flex gap">
+			<span
+				class={ "note-importance", css.Flex, css.Gap }
+			>
 				<i class={ "bi " + icon }></i>
 				<span class="note-date">
 					{ note.CreatedAt.FormatDateTime() }
 				</span>
 			</span>
-			<span class="flex gap">
+			<span class={ css.Flex, css.Gap }>
 				<button
-					class="icon secondary small"
+					class={ css.ButtonIcon, css.Secondary, css.ButtonSmall }
 					hx-get={ urlb.DialogEditNote(note.ID, note.Linked) }
 					hx-trigger="click"
 					hx-target="body"
@@ -48,7 +53,7 @@ templ NoteCard(note *shared.Note, tools []*shared.Tool) {
 					<i class="bi bi-pencil"></i>
 				</button>
 				<button
-					class="icon small destructive"
+					class={ css.ButtonIcon, css.ButtonSmall, css.Destructive }
 					hx-delete={ urlb.NotesDelete(note.ID) }
 					hx-trigger="click"
 					hx-confirm="Sind Sie sicher, dass Sie diese Notiz löschen möchten?"
@@ -58,13 +63,15 @@ templ NoteCard(note *shared.Note, tools []*shared.Tool) {
 				</button>
 			</span>
 		</div>
-		<div class="card-body whitespace-pre-wrap">
+		<div
+			class={ css.CardBody, css.WhitespacePreWrap }
+		>
 			{ note.Content }
 		</div>
 		if len(tools) > 0 && note.Linked != "" {
-			<div class="card-footer">
-				<small class="text-muted">
-					<span class="mr">Verknüpft mit:</span>
+			<div class={ css.CardFooter }>
+				<small class={ css.Muted, css.Ghost }>
+					<span class={ css.MR }>Verknüpft mit:</span>
 					{{ linked := note.GetLinked() }}
 					switch linked.Name {
 						case "tool":

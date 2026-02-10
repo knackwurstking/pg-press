@@ -1,7 +1,10 @@
 package templates
 
-import "github.com/knackwurstking/pg-press/internal/components"
-import "github.com/knackwurstking/pg-press/internal/urlb"
+import (
+	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/ui/templ/css"
+)
 
 templ MarkdownPage() {
 	@components.Layout(components.LayoutProps{
@@ -10,18 +13,20 @@ templ MarkdownPage() {
 		AdditionalHead: helpMarkdownPageAdditionalHead(),
 		NavContent:     helpMarkdownPageNavContent(),
 	}) {
-		<main class="container py-lg">
-			<div class="max-w-4xl mx-auto">
+		<main class={ css.Container, css.PYLg }>
+			<div class={ css.MaxW4Xl, css.MXAuto }>
 				<header>
-					<h1 class="text-2xl text-bold flex items-center gap">
-						<i class="bi bi-markdown ghost primary"></i>
+					<h1
+						class={ css.Text2XL, css.TextBold, css.Flex, css.ItemsCenter, css.Gap }
+					>
+						<i class={ "bi", "bi-markdown", css.Ghost, css.Primary }></i>
 						Markdown Hilfe
 					</h1>
-					<p class="text-lg muted border">
+					<p class={ css.TextLG, css.Muted, css.Border }>
 						Eine vollständige Übersicht aller unterstützten Markdown-Funktionen mit Beispielen und Live-Vorschau.
 					</p>
 				</header>
-				<div class="my-lg flex flex-col gap-lg">
+				<div class={ css.MYLg, css.Flex, css.FlexCol, css.GapLg }>
 					@quickReferenceSection()
 					@interactiveDemoSection()
 					@textFormattingSection()
@@ -34,9 +39,12 @@ templ MarkdownPage() {
 }
 
 templ helpMarkdownPageNavContent() {
-	<a href={ urlb.Home() } class="flex items-center gap-xs muted hover:contrast transition-colors">
+	<a
+		href={ urlb.Home() }
+		class={ css.Flex, css.ItemsCenter, css.GapSm, css.Muted }
+	>
 		<i class="bi bi-house"></i>
-		<span class="hidden sm:inline">Startseite</span>
+		<span class={ css.Hidden }>Startseite</span>
 	</a>
 }
 
@@ -100,13 +108,17 @@ templ helpMarkdownPageAdditionalHead() {
 
 templ quickReferenceSection() {
 	@components.Section(templ.Attributes{
-		"class": "card p-lg",
+		"class": templ.CSSClasses{
+			css.Card, css.PLg,
+		},
 	}) {
-		<h2 class="text-xl text-bold flex items-center ghost primary gap">
+		<h2
+			class={ css.TextXL, css.TextBold, css.Flex, css.ItemsCenter, css.Ghost, css.Primary, css.Gap }
+		>
 			<i class="bi bi-lightning"></i>
 			Schnellreferenz
 		</h2>
-		<div class="grid gap-sm">
+		<div class={ css.Grid, css.GapSm }>
 			@quickReferenceItem("**Fett**", "Fett", "strong")
 			@quickReferenceItem("*Kursiv*", "Kursiv", "em")
 			@quickReferenceItem("__Unterstrichen__", "Unterstrichen", "u")
@@ -117,9 +129,11 @@ templ quickReferenceSection() {
 }
 
 templ quickReferenceItem(syntax, result, tagType string) {
-	<div class="flex items-center justify-between p-sm border rounded gap">
-		<code class="contrast px-sm py-xs rounded text-sm">{ syntax }</code>
-		<span class="flex gap justify-between items-center w-50">
+	<div
+		class={ css.Flex, css.ItemsCenter, css.JustifyBetween, css.PSm, css.Border, css.Gap }
+	>
+		<code class={ css.Contrast, css.PXSm, css.PYSm, css.TextSM }>{ syntax }</code>
+		<span class={ css.Flex, css.Gap, css.JustifyBetween, css.ItemsCenter, css.W50 }>
 			→
 			switch tagType {
 				case "strong":
@@ -129,9 +143,9 @@ templ quickReferenceItem(syntax, result, tagType string) {
 				case "u":
 					<u>{ result }</u>
 				case "code":
-					<code class="muted px-xs rounded">{ result }</code>
+					<code class={ css.Muted, css.PXSm }>{ result }</code>
 				case "h1":
-					<strong class="text-xl">{ result }</strong>
+					<strong class={ css.TextXL }>{ result }</strong>
 			}
 		</span>
 	</div>
@@ -139,21 +153,23 @@ templ quickReferenceItem(syntax, result, tagType string) {
 
 templ interactiveDemoSection() {
 	@components.Section(templ.Attributes{
-		"class": "card p-lg",
+		"class": templ.CSSClasses{
+			css.Card, css.PLg,
+		},
 	}) {
-		<h2 class="text-xl text-bold flex items-center ghost success gap">
+		<h2 class={ css.TextXL, css.TextBold, css.Flex, css.ItemsCenter, css.Ghost, css.Success, css.Gap }>
 			<i class="bi bi-play-circle"></i>
 			Interaktive Vorschau
 		</h2>
-		<p class="muted border">
+		<p class={ css.Muted, css.Border }>
 			Probieren Sie verschiedene Markdown-Syntaxen aus und sehen Sie das Ergebnis in Echtzeit:
 		</p>
-		<div class="demo-grid gap-lg">
-			<div class="flex flex-col">
-				<label for="demo-textarea" class="text-sm text-medium">Markdown eingeben:</label>
+		<div class={ "demo-grid", css.GapLg }>
+			<div class={ css.Flex, css.FlexCol }>
+				<label for="demo-textarea" class={ css.TextSM, css.TextMedium }>Markdown eingeben:</label>
 				<textarea
 					id="demo-textarea"
-					class="w-full h-full border rounded p-sm text-sm resize-y"
+					class={ css.WFull, css.HFull, css.Border, css.PSm, css.TextSM, css.ResizeY }
 					placeholder="Hier können Sie Markdown ausprobieren..."
 					style="min-height: 200px;"
 				>
@@ -168,8 +184,12 @@ templ interactiveDemoSection() {
 				</textarea>
 			</div>
 			<div>
-				<label class="text-sm text-medium block">Vorschau:</label>
-				<div id="demo-preview" class="border rounded p-sm overflow-y-auto" style="min-height: 200px; max-height: 300px;"></div>
+				<label class={ css.TextSM, css.TextMedium, css.Block }>Vorschau:</label>
+				<div
+					id="demo-preview"
+					class={ css.Border, css.PSm, css.OverflowYAuto }
+					style="min-height: 200px; max-height: 300px;"
+				></div>
 			</div>
 		</div>
 	}
@@ -177,13 +197,17 @@ templ interactiveDemoSection() {
 
 templ textFormattingSection() {
 	@components.Section(templ.Attributes{
-		"class": "card p-lg flex flex-col gap",
+		"class": templ.CSSClasses{
+			css.Card, css.PLg, css.Flex, css.FlexCol, css.Gap,
+		},
 	}) {
-		<h2 class="text-xl text-bold flex items-center ghost info gap">
+		<h2
+			class={ css.TextXL, css.TextBold, css.Flex, css.ItemsCenter, css.Ghost, css.Info, css.Gap }
+		>
 			<i class="bi bi-type"></i>
 			Textformatierung
 		</h2>
-		<div class="py-lg flex flex-col gap">
+		<div class={ css.PYLg, css.Flex, css.FlexCol, css.Gap }>
 			@formattingExample("Fetter Text", "**Dies ist fetter Text**", "strong", "Verwenden Sie doppelte Sterne (**) um Text fett zu formatieren.")
 			<hr/>
 			@formattingExample("Kursiver Text", "*Dies ist kursiver Text*", "em", "Verwenden Sie einzelne Sterne (*) um Text kursiv zu formatieren.")
@@ -198,13 +222,13 @@ templ textFormattingSection() {
 }
 
 templ formattingExample(title, syntax, tagType, description string) {
-	<div class="flex flex-col gap">
-		<h3 class="text-lg text-medium">{ title }</h3>
-		<div class="example-grid gap">
-			<div class="muted outline rounded p-sm">
-				<code class="text-sm">{ syntax }</code>
+	<div class={ css.Flex, css.FlexCol, css.Gap }>
+		<h3 class={ css.TextLG, css.TextMedium }>{ title }</h3>
+		<div class={ "example-grid", css.Gap }>
+			<div class={ css.Muted, css.Outline, css.PSm }>
+				<code class={ css.TextSM }>{ syntax }</code>
 			</div>
-			<div class="border rounded p-sm">
+			<div class={ css.Border, css.PSm }>
 				<p>
 					switch tagType {
 						case "strong":
@@ -219,18 +243,18 @@ templ formattingExample(title, syntax, tagType, description string) {
 				</p>
 			</div>
 		</div>
-		<p class="text-sm muted border">{ description }</p>
+		<p class={ css.TextSM, css.Muted, css.Border }>{ description }</p>
 	</div>
 }
 
 templ listExample() {
-	<div class="flex flex-col gap">
-		<h3 class="text-lg text-medium">Listen</h3>
-		<div class="example-grid gap">
-			<div class="muted outline rounded p-sm">
-				<code class="text-sm">- Erstes Element<br/>- Zweites Element<br/>- Drittes Element</code>
+	<div class={ css.Flex, css.FlexCol, css.Gap }>
+		<h3 class={ css.TextLG, css.TextMedium }>Listen</h3>
+		<div class={ "example-grid", css.Gap }>
+			<div class={ css.Muted, css.Outline, css.PSm }>
+				<code class={ css.TextSM }>- Erstes Element<br/>- Zweites Element<br/>- Drittes Element</code>
 			</div>
-			<div class="border rounded p-sm">
+			<div class={ css.Border, css.PSm }>
 				<ul>
 					<li>Erstes Element</li>
 					<li>Zweites Element</li>
@@ -238,7 +262,7 @@ templ listExample() {
 				</ul>
 			</div>
 		</div>
-		<p class="text-sm muted border">
+		<p class={ css.TextSM, css.Muted, css.Border }>
 			Verwenden Sie Bindestriche (-) für ungeordnete Listen.
 		</p>
 	</div>
@@ -246,23 +270,27 @@ templ listExample() {
 
 templ blockquoteSection() {
 	@components.Section(templ.Attributes{
-		"class": "card p-lg flex flex-col gap",
+		"class": templ.CSSClasses{
+			css.Card, css.PLg, css.Flex, css.FlexCol, css.Gap,
+		},
 	}) {
-		<h2 class="text-xl text-bold flex items-center ghost secondary gap">
+		<h2
+			class={ css.TextXL, css.TextBold, css.Flex, css.ItemsCenter, css.Ghost, css.Secondary, css.Gap }
+		>
 			<i class="bi bi-quote"></i>
 			Zitate
 		</h2>
-		<div class="example-grid gap">
-			<div class="muted outline rounded p-sm">
-				<code class="text-sm">> Dies ist ein wichtiges Zitat<br/>> mit mehreren Zeilen</code>
+		<div class={ "example-grid", css.Gap }>
+			<div class={ css.Muted, css.Outline, css.PSm }>
+				<code class={ css.TextSM }>> Dies ist ein wichtiges Zitat<br/>> mit mehreren Zeilen</code>
 			</div>
-			<div class="border rounded p-sm">
+			<div class={ css.Border, css.PSm }>
 				<blockquote>
 					<p>Dies ist ein wichtiges Zitat<br/>mit mehreren Zeilen</p>
 				</blockquote>
 			</div>
 		</div>
-		<p class="text-sm muted border">
+		<p class={ css.TextSM, css.Muted, css.Border }>
 			Verwenden Sie das Größer-als-Zeichen (>) am Zeilenanfang für Zitate.
 		</p>
 	}
@@ -270,13 +298,17 @@ templ blockquoteSection() {
 
 templ tipsSection() {
 	@components.Section(templ.Attributes{
-		"class": "card success outline p-lg",
+		"class": templ.CSSClasses{
+			css.Card, css.Success, css.Outline, css.PLg,
+		},
 	}) {
-		<h2 class="text-xl text-bold mb flex items-center ghost success gap">
+		<h2
+			class={ css.TextXL, css.TextBold, css.MB, css.Flex, css.ItemsCenter, css.Ghost, css.Success, css.Gap }
+		>
 			<i class="bi bi-lightbulb"></i>
 			Tipps & Häufige Fehler
 		</h2>
-		<div class="my-lg">
+		<div class={ css.MYLg }>
 			@tipItem("Leerzeichen beachten:", "Achten Sie auf Leerzeichen vor und nach Formatierungszeichen.")
 			@tipItem("Zeilen trennen:", "Verwenden Sie Leerzeilen zwischen verschiedenen Elementen.")
 		</div>
@@ -284,11 +316,13 @@ templ tipsSection() {
 }
 
 templ tipItem(title, description string) {
-	<div class="flex items-start gap pb">
-		<i class="bi bi-check-circle-fill success ghost text-lg mt"></i>
+	<div class={ css.Flex, css.ItemsStart, css.Gap, css.PB }>
+		<i
+			class={ "bi", "bi-check-circle-fill", css.Success, css.Ghost, css.TextLG, css.MT }
+		></i>
 		<div>
-			<strong class="text-medium">{ title }</strong>
-			<span class="text-sm muted block">{ description }</span>
+			<strong class={ css.TextMedium }>{ title }</strong>
+			<span class={ css.TextSM, css.Muted, css.Block }>{ description }</span>
 		</div>
 	</div>
 }

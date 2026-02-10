@@ -1,6 +1,9 @@
 package components
 
-import "github.com/knackwurstking/pg-press/internal/shared"
+import (
+	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/ui/templ/css"
+)
 
 type TableActionsOptions struct {
 	EditHref        templ.SafeURL
@@ -11,10 +14,10 @@ type TableActionsOptions struct {
 }
 
 templ TableActions(options TableActionsOptions) {
-	<span class="button-group flex justify-end items-center">
+	<span class={ css.ButtonGroup, css.Flex, css.JustifyEnd, css.ItemsCenter }>
 		if options.EditHref != "" {
 			<button
-				class="icon small ghost"
+				class={ css.ButtonIcon, css.ButtonSmall, css.Ghost }
 				hx-get={ options.EditHref }
 				hx-trigger="click"
 				hx-target="body"
@@ -29,7 +32,7 @@ templ TableActions(options TableActionsOptions) {
 		}
 		if options.DeleteHref != "" {
 			<button
-				class="icon destructive small ghost"
+				class={ css.ButtonIcon, css.ButtonSmall, css.Destructive, css.Ghost }
 				hx-delete={ options.DeleteHref }
 				hx-trigger="click"
 				hx-confirm="Diesen Eintrag löschen?"

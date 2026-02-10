@@ -16,7 +16,7 @@ templ Page(p PageProps) {
 		AppBarTitle: "Login",
 		NavContent:  components.StandardNavContent(),
 	}) {
-		<main class="container">
+		<main class={ css.Container }>
 			@apiKeyDialog(p.FormData["api-key"], p.FormData["invalid-api-key"])
 			<script>
 				document.querySelector("#login-dialog").showModal();
@@ -26,7 +26,7 @@ templ Page(p PageProps) {
 }
 
 templ apiKeyDialog(apiKey, invalidApiKey string) {
-	<dialog id="login-dialog" class="clean" oncancel="event.preventDefault();">
+	<dialog id="login-dialog" class={ css.DialogClean } oncancel="event.preventDefault();">
 		<form
 			action={ urlb.Login("", nil) }
 			method="post"

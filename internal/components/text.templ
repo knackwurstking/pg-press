@@ -1,7 +1,13 @@
 package components
 
+import "github.com/knackwurstking/ui/templ/css"
+
 templ NotFoundText(text string) {
-	{{ class := "muted ghost w-full text-center italic text-sm" }}
+	{{
+		class := templ.CSSClasses{
+			css.Muted, css.Ghost, css.WFull, css.TextCenter, css.Italic, css.TextSm,
+		}
+	}}
 	if text != "" {
 		<p class={ class }>{ text }</p>
 		{{ return }}

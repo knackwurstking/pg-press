@@ -1,5 +1,7 @@
 package components
 
+import "github.com/knackwurstking/ui/templ/css"
+
 const (
 	MainTitle SectionTitleLevel = iota
 	SubTitle
@@ -8,7 +10,9 @@ const (
 type SectionTitleLevel int8
 
 templ SectionTitle(level SectionTitleLevel, text string) {
-	<div class="flex justify-between items-center my">
+	<div
+		class={ css.Flex, css.JustifyBetween, css.ItemsCenter, css.MY }
+	>
 		switch level {
 			case MainTitle:
 				<h4>{ text }</h4>
@@ -31,7 +35,7 @@ type SectionDialogActionProps struct {
 
 templ SectionDialogAction(p SectionDialogActionProps) {
 	<button
-		class="icon secondary"
+		class={ css.ButtonIcon, css.Secondary }
 		hx-get={ p.Url }
 		hx-trigger="click"
 		hx-target="body"

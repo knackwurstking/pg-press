@@ -27,10 +27,10 @@ templ NewCycleDialog(
 		}) {
 			<label>Aktives Werkzeug</label>
 			<div class={ css.Flex, css.FlexCol, css.GapSm }>
-				<div class="text-sm">
+				<div class={ css.TextSM }>
 					<strong>Werkzeug:</strong> { tool.German() }
 				</div>
-				<div class="text-sm">
+				<div class={ css.TextSM }>
 					<strong>Position:</strong> { tool.Position.German() }
 				</div>
 			</div>
@@ -70,9 +70,9 @@ templ EditCycleDialog(
 					required
 					class={
 						css.WFull, css.MaxWFull, css.MinW0,
-						"text-sm",
-						"overflow-hidden",
-						"text-ellipsis",
+						css.TextSM,
+						css.OverflowHidden,
+						css.Ellipsis,
 					}
 				>
 					for _, t := range availableTools {

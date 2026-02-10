@@ -38,10 +38,10 @@ templ Page(props *PageProps) {
 		AdditionalHead: pageAdditionalHead(),
 		NavContent:     pageNavContent(props),
 	}) {
-		<main class="container fluid">
+		<main class={ css.Container, css.ContainerFluid }>
 			<div class="editor-container">
 				<form
-					class="editor-form flex flex-col gap px"
+					class={ "editor-form", css.Flex, css.FlexCol, css.Gap, css.PX }
 					method="POST"
 					action={ urlb.EditorSave() }
 					enctype="multipart/form-data"
@@ -66,7 +66,7 @@ templ Page(props *PageProps) {
 
 templ pageNavContent(props *PageProps) {
 	if props.ReturnURL != "" {
-		<a href={ props.ReturnURL } class="secondary flex gap">
+		<a href={ props.ReturnURL } class={ css.Secondary, css.Flex, css.Gap }>
 			<i class="bi bi-arrow-left"></i>
 			Zurück
 		</a>
