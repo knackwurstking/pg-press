@@ -22,7 +22,7 @@ templ Page(p PageProps) {
 			NavContent:     components.StandardNavContent(),
 		},
 	) {
-		<main class="container fluid" style="max-width: 42rem; margin: 0 auto;">
+		<main class={ css.Container, css.ContainerFluid } style="max-width: 42rem; margin: 0 auto;">
 			@profileHeader(p.User)
 			@sectionCookies()
 			@editUserDialog(p.User)
@@ -31,18 +31,20 @@ templ Page(p PageProps) {
 }
 
 templ profileHeader(user *shared.User) {
-	<div class="profile-header border">
-		<div class="flex justify-between items-center mb">
+	<div class={ "profile-header", css.Border }>
+		<div class={ css.Flex, css.JustifyBetween, css.ItemsCenter, css.MB }>
 			<h1>{ user.Name }</h1>
 			<button
-				class="secondary icon"
+				class={ css.ButtonIcon, css.Secondary }
 				onclick='document.querySelector("#edit-user-name-dialog").showModal();'
 				title="Benutzername bearbeiten"
 			>
 				<i class="bi bi-pen"></i>
 			</button>
 		</div>
-		<div class="flex gap flex-wrap justify-between items-center">
+		<div
+			class={ css.Flex, css.FlexWrap, css.Gap, css.JustifyBetween, css.ItemsCenter }
+		>
 			<div class="telegram-id">
 				<i class="bi bi-telegram"></i>
 				Telegram ID: { user.ID }
@@ -50,7 +52,7 @@ templ profileHeader(user *shared.User) {
 			<a
 				role="button"
 				href={ templ.SafeURL(env.ServerPathPrefix + "/logout") }
-				class="ghost destructive flex gap"
+				class={ css.Ghost, css.Destructive, css.Flex, css.Gap }
 			>
 				<i class="bi bi-box-arrow-right"></i>
 				Abmelden
@@ -60,7 +62,7 @@ templ profileHeader(user *shared.User) {
 }
 
 templ sectionCookies() {
-	<div class="border" style={ fmt.Sprintf("overflow: hidden; background: %s", css.VarColor50) }>
+	<div class={ css.Border } style={ fmt.Sprintf("overflow: hidden; background: %s", css.VarColor50) }>
 		<span
 			id="cookies"
 			hx-get={ urlb.ProfileCookies("") }
@@ -73,11 +75,11 @@ templ sectionCookies() {
 templ editUserDialog(user *shared.User) {
 	<dialog
 		id="edit-user-name-dialog"
-		class="profile-dialog border clean"
+		class={ "profile-dialog", css.Border, css.DialogClean }
 		oncancel="event.preventDefault()"
 	>
 		<form action={ urlb.Profile() }>
-			<label class="flex flex-col">
+			<label class={ css.Flex, css.FlexCol }>
 				<strong>Benutzername ändern</strong>
 				<input
 					name="user-name"
@@ -87,16 +89,16 @@ templ editUserDialog(user *shared.User) {
 					required
 				/>
 			</label>
-			<footer class="flex gap justify-end mt-lg">
+			<footer class={ css.Flex, css.Gap, css.JustifyEnd, css.MT }>
 				<a
 					role="button"
 					href={ urlb.Profile() }
-					class="secondary flex gap"
+					class={ css.Secondary, css.Flex, css.Gap }
 				>
 					<i class="bi bi-x-circle"></i>
 					Schließen
 				</a>
-				<button type="submit" class="primary flex gap">
+				<button type="submit" class={ css.Primary, css.Flex, css.Gap }>
 					<i class="bi bi-check-circle"></i>
 					Ändern
 				</button>
