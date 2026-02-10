@@ -6,6 +6,7 @@ import (
 
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 type NotesProps struct {
@@ -24,7 +25,13 @@ templ Notes(p NotesProps) {
 templ pressNotes(notes []*shared.Note) {
 	// Press Notes
 	@components.Section(templ.Attributes{
-		"class": "notes-list flex flex-col gap-lg p",
+		"class": templ.CSSClasses{
+			"notes-list",
+			css.Flex,
+			css.FlexCol,
+			css.GapLg,
+			css.P,
+		},
 	}) {
 		for _, note := range notes {
 			@components.NoteCard(note, nil)
@@ -34,7 +41,13 @@ templ pressNotes(notes []*shared.Note) {
 
 templ toolNotes(notes []*shared.Note, tools map[shared.EntityID]*shared.Tool) {
 	@components.Section(templ.Attributes{
-		"class": "notes-list flex flex-col gap-lg p",
+		"class": templ.CSSClasses{
+			"notes-list",
+			css.Flex,
+			css.FlexCol,
+			css.GapLg,
+			css.P,
+		},
 	}) {
 		{{
 			// Organize tool notes by position

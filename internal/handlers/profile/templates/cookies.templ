@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 type CookiesProps struct {
@@ -26,7 +27,7 @@ templ Cookies(p CookiesProps) {
 				Aktive Sitzungen { fmt.Sprintf("%d", len(p.Cookies)) }
 			</summary>
 			@cookiesTable(p.Cookies)
-			<figure class="overflow-auto"></figure>
+			<figure class={ css.OverflowAuto }></figure>
 		</details>
 	} else {
 		<div id="cookies" class="no-cookies">
@@ -37,11 +38,11 @@ templ Cookies(p CookiesProps) {
 }
 
 templ cookiesTable(cookies []*shared.Cookie) {
-	<table class="cookies-table borderless">
+	<table class={ "cookies-table", css.TableBorderless }>
 		<thead>
 			<tr>
 				<th style="width: fit-content;">Letzte Anmeldung</th>
-				<th style="width: 100%;" class="left">Benutzeragent</th>
+				<th style="width: 100%;" class={ css.TableLeft }>Benutzeragent</th>
 				<th style="width: fit-content;"></th>
 			</tr>
 		</thead>
@@ -56,14 +57,14 @@ templ cookiesTable(cookies []*shared.Cookie) {
 templ cookieRow(cookie *shared.Cookie) {
 	<tr>
 		<td class="time-cell">{ cookie.LastLogin.FormatDateTime() }</td>
-		<td class="left user-agent-cell">{ cookie.UserAgent }</td>
-		<td class="right select-none">
+		<td class={ "user-agent-cell", css.TableLeft }>{ cookie.UserAgent }</td>
+		<td class={ css.TableRight, css.UserSelectNone }>
 			<a
 				hx-delete={ urlb.ProfileCookies(cookie.Value) }
 				hx-trigger="click"
 				hx-confirm="Sind Sie sicher, dass Sie dieses Cookie löschen möchten?"
 				role="button"
-				class="ghost destructive icon"
+				class={ css.ButtonIcon, css.Destructive, css.Ghost }
 				title="Sitzung beenden"
 			>
 				<i class="bi bi-trash"></i>

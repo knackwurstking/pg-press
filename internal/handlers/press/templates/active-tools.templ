@@ -4,11 +4,12 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 // Active tools section component
 templ ActiveToolsSection(pu *shared.PressUtilization, toolsForSelection map[shared.Slot][]*shared.Tool, user *shared.User) {
-	<div class="flex flex-col gap">
+	<div class={ css.Flex, css.FlexCol, css.Gap }>
 		// Upper Tool Selection
 		{{
 			currentToolID := shared.EntityID(0)
@@ -51,10 +52,7 @@ templ toolSelection(
 		hx-trigger="change"
 		disabled?={ !user.IsAdmin() }
 	>
-		<select
-			class="select"
-			name="tool_id"
-		>
+		<select name="tool_id">
 			<option value="" disabled>
 				Wählen Sie
 				switch position {

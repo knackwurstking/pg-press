@@ -6,6 +6,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 type CyclesProps struct {
@@ -15,8 +16,8 @@ type CyclesProps struct {
 }
 
 templ Cycles(p CyclesProps) {
-	<figure class="w-full overflow-x-scroll">
-		<table name="additional-cycles-table" class="table borderless compact">
+	<figure class={ css.WFull, css.OverflowXScroll }>
+		<table name="additional-cycles-table" class={ css.TableBorderless, css.TableCompact }>
 			<thead>
 				<tr>
 					<th>Start</th>
@@ -38,7 +39,7 @@ templ Cycles(p CyclesProps) {
 templ renderPressCyclesRows(p CyclesProps) {
 	if len(p.Cycles) == 0 {
 		<tr>
-			<td colspan="7" class="text-center">
+			<td colspan="7" class={ css.TextCenter }>
 				@components.NotFoundText("Kein Pressenverlauf verfügbar")
 			</td>
 		</tr>
@@ -57,26 +58,26 @@ templ renderPressCycleRow(cycle *shared.Cycle, tool *shared.Tool, user *shared.U
 	<tr>
 		// Cycle Start
 		<td>
-			<span class="text-sm">{ cycle.Start.FormatDate() }</span>
+			<span class={ css.TextSM }>{ cycle.Start.FormatDate() }</span>
 		</td>
 		// Cycle Stop
 		<td>
-			<span class="text-sm">{ cycle.Stop.FormatDate() }</span>
+			<span class={ css.TextSM }>{ cycle.Stop.FormatDate() }</span>
 		</td>
 		// Cycle Tool
 		<td>
 			if tool != nil {
-				<span class="text-xs">{ tool.German() }</span>
+				<span class={ css.TextXS }>{ tool.German() }</span>
 			} else {
-				<span class="text-xs">{ cycle.ToolID }</span>
+				<span class={ css.TextXS }>{ cycle.ToolID }</span>
 			}
 		</td>
 		// Cycle Position
 		<td>
 			if tool != nil {
-				<span class="text-xs">{ tool.Position.German() }</span>
+				<span class={ css.TextXS }>{ tool.Position.German() }</span>
 			} else {
-				<span class="text-xs">?</span>
+				<span class={ css.TextXS }>?</span>
 			}
 		</td>
 		// Total Cycles
@@ -91,7 +92,7 @@ templ renderPressCycleRow(cycle *shared.Cycle, tool *shared.Tool, user *shared.U
 		</td>
 		// Actions
 		<td>
-			<span class="button-group flex justify-end items-center">
+			<span class={ css.ButtonGroup, css.Flex, css.JustifyEnd, css.ItemsCenter }>
 				{{ toolChangeMode := true }}
 				@components.TableActions(components.TableActionsOptions{
 					EditHref:        urlb.DialogEditCycleGet(cycle.ID, cycle.ToolID, toolChangeMode),

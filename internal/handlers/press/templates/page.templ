@@ -5,6 +5,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 type PageProps struct {
@@ -22,7 +23,7 @@ templ Page(p PageProps) {
 			AdditionalHead: additionalHead(),
 		},
 	) {
-		<main class="container fluid flex flex-col gap-lg py">
+		<main class={ css.Container, css.ContainerFluid, css.Flex, css.FlexCol, css.GapLg, css.PY }>
 			@sectionActions(p)
 			@sectionNotes(p)
 			@sectionActiveTools(p)
@@ -52,7 +53,7 @@ templ sectionActions(p PageProps) {
 	}
 	@components.ActionBar(nil) {
 		<button
-			class="secondary"
+			class={ css.Secondary }
 			hx-get={ urlb.DialogEditPressGet(p.Press.ID) }
 			hx-trigger="click"
 			hx-target="body"
@@ -62,7 +63,7 @@ templ sectionActions(p PageProps) {
 		</button>
 		<a
 			role="button"
-			class="primary"
+			class={ css.Primary }
 			href={ urlb.Umbau(p.Press.ID) }
 		>
 			Umbau
@@ -74,7 +75,7 @@ templ sectionActions(p PageProps) {
 templ sectionNotes(p PageProps) {
 	@components.Section(templ.Attributes{
 		"id":    "notes-section",
-		"class": "mt",
+		"class": css.MT,
 	}) {
 		@components.SectionTitle(components.SubTitle, "Notizen") {
 			@components.SectionDialogAction(components.SectionDialogActionProps{
@@ -98,9 +99,9 @@ templ sectionNotes(p PageProps) {
 templ sectionActiveTools(p PageProps) {
 	@components.Section(templ.Attributes{
 		"id":    "tool-state-section",
-		"class": "mt",
+		"class": css.MT,
 	}) {
-		<div class="flex justify-between items-center mb">
+		<div class={ css.Flex, css.JustifyBetween, css.ItemsCenter, css.MB }>
 			<h5>Aktive Werkzeuge</h5>
 		</div>
 		<div
@@ -119,7 +120,7 @@ templ sectionMetalSheets(p PageProps) {
 	@components.Section(templ.Attributes{
 		"id": "metal-sheets-section",
 	}) {
-		<div class="flex justify-between items-center mb">
+		<div class={ css.Flex, css.JustifyBetween, css.ItemsCenter, css.MB }>
 			<h5>Blech Listen</h5>
 		</div>
 		<div
@@ -137,11 +138,11 @@ templ sectionMetalSheets(p PageProps) {
 templ sectionCycles(p PageProps) {
 	@components.Section(templ.Attributes{
 		"id":    "cycle-table-section",
-		"class": "mt",
+		"class": css.MT,
 	}) {
 	}
 	<section>
-		<div class="flex justify-between items-center mb">
+		<div class={ css.Flex, css.JustifyBetween, css.ItemsCenter, css.MB }>
 			<h5>Pressennutzungsverlauf</h5>
 		</div>
 		// TODO: PDF Stuff disabled for now
@@ -155,7 +156,7 @@ templ sectionCycles(p PageProps) {
 		//</div>
 		<div
 			id="cycles-content"
-			class="mt"
+			class={ css.MT }
 			hx-get={ urlb.PressCycles(p.Press.ID) }
 			hx-trigger="load, reload-cycles from:body"
 			hx-on:htmx:response-error="alert('Fehler beim Laden des Pressennutzungsverlaufs: ' + event.detail.xhr.responseText)"
