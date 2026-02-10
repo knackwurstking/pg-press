@@ -47,3 +47,19 @@ templ FormDialog(id, method string, href templ.SafeURL) {
 		document.querySelector('#{{ id }}').showModal();
 	</script>
 }
+
+templ FormDialogFooter(cancel, submit string) {
+	<footer class={ css.Flex, css.FlexRow, css.Gap, css.JustifyEnd }>
+		{ children... }
+		if cancel != "" {
+			<button type="button" class="secondary" hx-on:click="this.closest('dialog').close()">
+				{ cancel }
+			</button>
+		}
+		if submit != "" {
+			<button type="submit" class="primary">
+				{ submit }
+			</button>
+		}
+	</footer>
+}

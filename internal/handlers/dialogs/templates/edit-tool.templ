@@ -1,49 +1,30 @@
 package templates
 
 import (
+	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	"net/http"
-
-	"github.com/knackwurstking/ui"
 )
 
 templ NewToolDialog() {
-	@ui.Dialog(&ui.DialogProps{
-		ID:           "tool-dialog",
-		Fullscreen:   true,
-		Clean:        true,
-		FormEnabled:  true,
-		HxEnabled:    true,
-		Href:         urlb.DialogEditTool(0),
-		Method:       http.MethodPost,
-		ActionSubmit: "Erstellen",
-		ActionCancel: "Abbrechen",
-	}) {
+	@components.FormDialog("tool-dialog", http.MethodPost, urlb.DialogEditTool(0)) {
 		{{ tool := &shared.Tool{} }}
 		@toolPosition(tool.Position)
 		@toolFormat(tool.Width, tool.Height)
 		@toolType(tool.Type)
 		@toolCode(tool.Code)
+		@components.FormDialogFooter("Abbrechen", "Erstellen")
 	}
 }
 
 templ EditToolDialog(tool *shared.Tool) {
-	@ui.Dialog(&ui.DialogProps{
-		ID:           "tool-edit-dialog",
-		Fullscreen:   true,
-		Clean:        true,
-		FormEnabled:  true,
-		HxEnabled:    true,
-		Href:         urlb.DialogEditTool(tool.ID),
-		Method:       http.MethodPut,
-		ActionSubmit: "Aktualisieren",
-		ActionCancel: "Abbrechen",
-	}) {
+	@components.FormDialog("tool-edit-dialog", http.MethodPut, urlb.DialogEditTool(tool.ID)) {
 		@toolPosition(tool.Position)
 		@toolFormat(tool.Width, tool.Height)
 		@toolType(tool.Type)
 		@toolCode(tool.Code)
+		@components.FormDialogFooter("Abbrechen", "Aktualisieren")
 	}
 }
 

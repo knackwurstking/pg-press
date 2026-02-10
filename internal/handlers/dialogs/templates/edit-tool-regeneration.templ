@@ -12,12 +12,14 @@ import (
 templ NewToolRegenerationDialog(toolID shared.EntityID) {
 	@components.FormDialog("tool-regeneration-dialog", http.MethodPost, urlb.DialogEditToolRegenerationPost(toolID)) {
 		@toolRegenerationContent(0, 0)
+		@components.FormDialogFooter("Abbrechen", "Erstellen")
 	}
 }
 
 templ EditToolRegenerationDialog(tr *shared.ToolRegeneration) {
 	@components.FormDialog("tool-regeneration-dialog", http.MethodPut, urlb.DialogEditToolRegenerationPut(tr.ID)) {
 		@toolRegenerationContent(tr.Start, tr.Stop)
+		@components.FormDialogFooter("Abbrechen", "Aktualisieren")
 	}
 }
 

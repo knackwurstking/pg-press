@@ -13,14 +13,7 @@ import (
 templ NewPressDialog() {
 	@components.FormDialog("notes-dialog", http.MethodPost, urlb.DialogEditPressPost(-1)) {
 		@PressContent(nil)
-		<div class={ css.Flex, css.FlexRow, css.Gap, css.JustifyEnd }>
-			<button type="button" class="secondary" hx-on:click="this.closest('dialog').close()">
-				Abbrechen
-			</button>
-			<button type="submit" class="primary">
-				Erstellen
-			</button>
-		</div>
+		@components.FormDialogFooter("Abbrechen", "Erstellen")
 	}
 }
 
@@ -28,7 +21,7 @@ templ EditPressDialog(press *shared.Press) {
 	@components.FormDialog("notes-edit-dialog", http.MethodPut, urlb.DialogEditPressPut(press.ID)) {
 		<input type="hidden" name="press_id" value={ press.ID }/>
 		@PressContent(press)
-		<div class={ css.Flex, css.FlexRow, css.Gap, css.JustifyEnd }>
+		@components.FormDialogFooter("Abbrechen", "Aktualisieren") {
 			<button
 				class="destructive"
 				hx-delete={ urlb.PressDelete(press.ID) }
@@ -37,13 +30,7 @@ templ EditPressDialog(press *shared.Press) {
 			>
 				Entfernen
 			</button>
-			<button type="button" class="secondary" hx-on:click="this.closest('dialog').close()">
-				Abbrechen
-			</button>
-			<button type="submit" class="primary">
-				Aktualisieren
-			</button>
-		</div>
+		}
 	}
 }
 
