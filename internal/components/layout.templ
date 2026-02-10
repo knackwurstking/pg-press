@@ -21,6 +21,7 @@ templ Layout(options LayoutProps) {
 			@metaTags()
 			@links()
 			@scripts()
+			@styles()
 			<title id="page-title">{ options.PageTitle }</title>
 			if options.AdditionalHead != nil {
 				@options.AdditionalHead
@@ -52,13 +53,55 @@ templ links() {
 	<link rel="mask-icon" href={ ui.AssetURL(env.ServerPathPrefix, "/maskable-icon-512x512.png") } color="#b8bb26"/>
 	<link rel="manifest" href={ ui.AssetURL(env.ServerPathPrefix, "/manifest.json") }/>
 	<link rel="stylesheet" href={ ui.AssetURL(env.ServerPathPrefix, "/css/bootstrap-icons.min.css") }/>
-	<link rel="stylesheet" href={ ui.AssetURL(env.ServerPathPrefix, "/css/ui.min.css") }/>
-	<link rel="stylesheet" href={ ui.AssetURL(env.ServerPathPrefix, "/css/main-layout.css") }/>
 }
 
 templ scripts() {
 	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/htmx-v2.0.7.min.js") }></script>
 	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/layout.js") }></script>
+}
+
+templ styles() {
+	@css.StylesThemeTemplUI()
+	@css.StylesReset()
+	@css.StylesGlobal()
+	@css.StylesComponents()
+	@css.StylesUtils()
+	<style>
+		html:has(dialog[open]),
+		body:has(dialog[open]) {
+			overflow: hidden;
+		}
+
+		.app-bar {
+			z-index: 1000;
+		}
+
+		.app-bar~* {
+			padding-top: calc(var(--ui-app-bar-height) + 1rem);
+		}
+
+		details summary::after {
+			font-family: "bootstrap-icons";
+			content: "\f285";
+		}
+
+		details[open] summary::after {
+			content: "\f282";
+		}
+
+		/* Image viewer styles */
+
+		.image-viewer button.close {
+			position: fixed;
+			top: var(--ui-spacing);
+			right: var(--ui-spacing);
+		}
+
+		.image-viewer img {
+			max-width: 100%;
+			max-height: 100%;
+		}
+	</style>
 }
 
 templ appBar(title string, navContent templ.Component) {
