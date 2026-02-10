@@ -26,7 +26,7 @@ templ FormDialog(id, method string, href templ.SafeURL) {
 		},
 	}) {
 		<form
-			class={ "container", css.Flex, css.FlexCol, css.Gap, css.P }
+			class={ css.Container, css.Flex, css.FlexCol, css.Gap, css.P }
 			if method == http.MethodPost {
 				hx-post={ href }
 			}
@@ -52,12 +52,12 @@ templ FormDialogFooter(cancel, submit string) {
 	<footer class={ css.Flex, css.FlexRow, css.Gap, css.JustifyEnd }>
 		{ children... }
 		if cancel != "" {
-			<button type="button" class="secondary" hx-on:click="this.closest('dialog').close()">
+			<button type="button" class={ css.Secondary } hx-on:click="this.closest('dialog').close()">
 				{ cancel }
 			</button>
 		}
 		if submit != "" {
-			<button type="submit" class="primary">
+			<button type="submit" class={ css.Primary }>
 				{ submit }
 			</button>
 		}

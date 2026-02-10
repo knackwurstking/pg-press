@@ -33,8 +33,10 @@ templ ToolStateBadge(tool *shared.Tool, press *shared.Press, isRegenerating bool
 	}}
 	@SmallBadge(color) {
 		if press != nil {
-			<span class="flex flex-col gap-0 justify-center items-center">
-				<span class="text-bold">Eingebaut</span>
+			<span
+				class={ css.Flex, css.FlexCol, css.Gap0, css.JustifyCenter, css.ItemsCenter }
+			>
+				<span class={ css.TextBold }>Eingebaut</span>
 				<span>{ press.German() }</span>
 			</span>
 		} else {
@@ -68,8 +70,10 @@ templ CassetteStateBadge(cassette *shared.Tool, boundToTool *shared.Tool, isRege
 	}}
 	@SmallBadge(color) {
 		if boundToTool != nil {
-			<span class="flex flex-col gap-0 justify-center items-center">
-				<span class="text-bold">Gebunden</span>
+			<span
+				class={ css.Flex, css.FlexCol, css.Gap0, css.JustifyCenter, css.ItemsCenter }
+			>
+				<span class={ css.TextBold }>Gebunden</span>
 				<span>{ boundToTool.German() }</span>
 			</span>
 		} else {
