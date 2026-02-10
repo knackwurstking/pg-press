@@ -1,10 +1,12 @@
 package templates
 
 import (
+	"fmt"
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 type PageProps struct {
@@ -58,7 +60,7 @@ templ profileHeader(user *shared.User) {
 }
 
 templ sectionCookies() {
-	<div class="border" style="overflow: hidden; background: var(--ui-color-50);">
+	<div class="border" style={ fmt.Sprintf("overflow: hidden; background: %s", css.VarColor50) }>
 		<span
 			id="cookies"
 			hx-get={ urlb.ProfileCookies("") }

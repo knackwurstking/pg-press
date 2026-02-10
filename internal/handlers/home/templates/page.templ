@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 templ HomePage() {
@@ -52,7 +53,7 @@ templ homeNavigationItem(href templ.SafeURL, icon, title, description string) {
 	>
 		<span class="flex flex-row gap items-center" style="width: 100%;">
 			if icon != "" {
-				<i class={ fmt.Sprintf("bi bi-%s", icon) } style="margin: var(--ui-spacing);"></i>
+				<i class={ fmt.Sprintf("bi bi-%s", icon) } style={ fmt.Sprintf("margin: %s", css.VarSpacing) }></i>
 			}
 			<span class="flex flex-col">
 				<strong>{ title }</strong>

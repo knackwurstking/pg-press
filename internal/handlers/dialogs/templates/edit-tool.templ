@@ -71,7 +71,7 @@ templ toolPosition(inputPosition shared.Slot) {
 
 templ toolFormat(inputWidth int, inputHeight int) {
 	<div
-		class={ css.Flex, css.FlexCol, css.ItemsStart, "w-full" }
+		class={ css.Flex, css.FlexCol, css.ItemsStart, css.WFull }
 	>
 		<label>Format</label>
 		<div
@@ -80,7 +80,7 @@ templ toolFormat(inputWidth int, inputHeight int) {
 			<input
 				type="number"
 				id="width"
-				class="w-full"
+				class={ css.WFull }
 				name="width"
 				placeholder="z.B. 120"
 				if inputWidth != 0 {
@@ -92,7 +92,7 @@ templ toolFormat(inputWidth int, inputHeight int) {
 			<input
 				type="number"
 				id="height"
-				class="w-full"
+				class={ css.WFull }
 				name="height"
 				placeholder="z.B. 60"
 				if inputHeight != 0 {
@@ -106,13 +106,13 @@ templ toolFormat(inputWidth int, inputHeight int) {
 
 templ toolType(inputType string) {
 	<div
-		class={ css.Flex, css.FlexCol, css.ItemsStart, "w-full" }
+		class={ css.Flex, css.FlexCol, css.ItemsStart, css.WFull }
 	>
 		<label for="type">Typ</label>
 		<input
 			type="text"
 			id="type"
-			class="w-full"
+			class={ css.WFull }
 			name="type"
 			placeholder="z.B. MASS, FC, GTC"
 			value={ inputType }
@@ -123,13 +123,13 @@ templ toolType(inputType string) {
 
 templ toolCode(inputCode string) {
 	<div
-		class={ css.Flex, css.FlexCol, css.ItemsStart, "w-full" }
+		class={ css.Flex, css.FlexCol, css.ItemsStart, css.WFull }
 	>
 		<label for="code">Code</label>
 		<input
 			type="text"
 			id="code"
-			class="w-full"
+			class={ css.WFull }
 			name="code"
 			placeholder="z.B. 3573"
 			value={ inputCode }

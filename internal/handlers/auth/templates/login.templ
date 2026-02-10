@@ -3,6 +3,7 @@ package templates
 import (
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 type PageProps struct {
@@ -30,7 +31,7 @@ templ apiKeyDialog(apiKey, invalidApiKey string) {
 			action={ urlb.Login("", nil) }
 			method="post"
 		>
-			<label class="flex flex-col">
+			<label class={ css.Flex, css.FlexCol }>
 				API-Schlüssel
 				<input
 					name="api-key"
@@ -41,8 +42,8 @@ templ apiKeyDialog(apiKey, invalidApiKey string) {
 					required
 				/>
 			</label>
-			<footer class="flex">
-				<button class="flex-1" type="submit">Anmelden</button>
+			<footer class={ css.Flex }>
+				<button class={ css.Flex1 } type="submit">Anmelden</button>
 			</footer>
 		</form>
 	</dialog>

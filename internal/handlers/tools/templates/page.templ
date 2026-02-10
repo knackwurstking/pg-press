@@ -1,9 +1,11 @@
 package templates
 
 import (
+	"fmt"
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 // HX Triggers:
@@ -26,12 +28,12 @@ templ Page(p PageProps) {
 		<main class="container fluid">
 			<div
 				class="tabs backdrop"
-				style="
-					position: fixed;
-					top: calc(var(--ui-app-bar-height) + var(--ui-spacing));
-					z-index: 1500;
-					width: calc(100% - var(--ui-spacing) * 2);
-				"
+				style={
+					"position: fixed;",
+					fmt.Sprintf("top: calc(%s + %s)", css.VarAppBarHeight, css.VarSpacing),
+					"z-index: 1500",
+					fmt.Sprintf("width: calc(100%% - %s * 2)", css.VarSpacing),
+				}
 			>
 				// Press Section Tab - `SectionPress`
 				<div

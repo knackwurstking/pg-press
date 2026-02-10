@@ -46,14 +46,14 @@ templ EditLowerMetalSheetDialog(
 
 templ metalSheetContentPositionTop(metalSheet *shared.UpperMetalSheet) {
 	<div
-		class={ css.Flex, css.Gap, "w-full" }
+		class={ css.Flex, css.Gap, css.WFull }
 	>
 		<div
-			class={ css.Flex, css.FlexCol, "w-full" }
+			class={ css.Flex, css.FlexCol, css.WFull }
 		>
 			<label for="tile-height">Stärke (mm)</label>
 			<input
-				class="w-full"
+				class={ css.WFull }
 				type="number"
 				id="tile-height"
 				name="tile_height"
@@ -65,11 +65,11 @@ templ metalSheetContentPositionTop(metalSheet *shared.UpperMetalSheet) {
 			/>
 		</div>
 		<div
-			class={ css.Flex, css.FlexCol, "w-full" }
+			class={ css.Flex, css.FlexCol, css.WFull }
 		>
 			<label for="value">Blech (mm)</label>
 			<input
-				class="w-full"
+				class={ css.WFull }
 				type="number"
 				id="value"
 				name="value"
@@ -111,14 +111,14 @@ templ metalSheetContentPositionBottom(metalSheet *shared.LowerMetalSheet) {
 		</select>
 	</div>
 	<span
-		class={ css.Flex, css.Gap, "w-full" }
+		class={ css.Flex, css.Gap, css.WFull }
 	>
 		<div
-			class={ css.Flex, css.FlexCol, "w-full" }
+			class={ css.Flex, css.FlexCol, css.WFull }
 		>
 			<label for="tile-height">Stärke (mm)</label>
 			<input
-				class="w-full"
+				class={ css.WFull }
 				id="tile-height"
 				name="tile_height"
 				type="number"
@@ -130,11 +130,11 @@ templ metalSheetContentPositionBottom(metalSheet *shared.LowerMetalSheet) {
 			/>
 		</div>
 		<div
-			class={ css.Flex, css.FlexCol, "w-full" }
+			class={ css.Flex, css.FlexCol, css.WFull }
 		>
 			<label for="stf">Stf.</label>
 			<input
-				class="w-full"
+				class={ css.WFull }
 				id="stf"
 				name="stf"
 				type="number"
@@ -146,11 +146,11 @@ templ metalSheetContentPositionBottom(metalSheet *shared.LowerMetalSheet) {
 			/>
 		</div>
 		<div
-			class={ css.Flex, css.FlexCol, "w-full" }
+			class={ css.Flex, css.FlexCol, css.WFull }
 		>
 			<label for="stf-max">Hubende</label>
 			<input
-				class="w-full"
+				class={ css.WFull }
 				id="stf-max"
 				name="stf_max"
 				type="number"
@@ -163,14 +163,14 @@ templ metalSheetContentPositionBottom(metalSheet *shared.LowerMetalSheet) {
 		</div>
 	</span>
 	<span
-		class={ css.Flex, css.Gap, "w-full" }
+		class={ css.Flex, css.Gap, css.WFull }
 	>
 		<div
-			class={ css.Flex, css.FlexCol, "w-full" }
+			class={ css.Flex, css.FlexCol, css.WFull }
 		>
 			<label for="marke-height">Marke (mm)</label>
 			<input
-				class="w-full"
+				class={ css.WFull }
 				id="marke-height"
 				name="marke_height"
 				type="number"
@@ -181,11 +181,11 @@ templ metalSheetContentPositionBottom(metalSheet *shared.LowerMetalSheet) {
 			/>
 		</div>
 		<div
-			class={ css.Flex, css.FlexCol, "w-full" }
+			class={ css.Flex, css.FlexCol, css.WFull }
 		>
 			<label for="value">Blech (mm)</label>
 			<input
-				class="w-full"
+				class={ css.WFull }
 				id="value"
 				name="value"
 				type="number"

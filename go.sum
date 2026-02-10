@@ -22,6 +22,8 @@ github.com/knackwurstking/ui v1.1.2-0.20260210093247-c1f890b655e7 h1:jDY0z2FIade
 github.com/knackwurstking/ui v1.1.2-0.20260210093247-c1f890b655e7/go.mod h1:3BhNRbXTNI459c7h32wYBxfsimtekTHMt3ZYkUeo1dM=
 github.com/knackwurstking/ui v1.1.2-0.20260210094028-b96d3ac6f080 h1:uT6IfWvGoJPa3k4g7h584V/2BGPlvrLGzpaI0jgrFDc=
 github.com/knackwurstking/ui v1.1.2-0.20260210094028-b96d3ac6f080/go.mod h1:3BhNRbXTNI459c7h32wYBxfsimtekTHMt3ZYkUeo1dM=
+github.com/knackwurstking/ui v1.1.2-0.20260210101252-3f6102cae86d h1:DvqamJlSyUh7psnvWJ5eqmoDVcCxclYsStvAf6o1WGU=
+github.com/knackwurstking/ui v1.1.2-0.20260210101252-3f6102cae86d/go.mod h1:3BhNRbXTNI459c7h32wYBxfsimtekTHMt3ZYkUeo1dM=
 github.com/labstack/echo/v4 v4.13.4 h1:oTZZW+T3s9gAu5L8vmzihV7/lkXGZuITzTQkTEhcXEA=
 github.com/labstack/echo/v4 v4.13.4/go.mod h1:g63b33BZ5vZzcIUF8AtRH40DrTlXnx4UMC8rBdndmjQ=
 github.com/labstack/gommon v0.4.2 h1:F8qTUNXgG1+6WQmqoUWnz8WiEU60mXVVw0P4ht1WRA0=

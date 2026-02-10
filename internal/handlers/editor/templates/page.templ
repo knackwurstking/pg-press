@@ -6,6 +6,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 type PageProps struct {
@@ -349,7 +350,7 @@ templ titleInput(title string) {
 
 templ markdownToggle(useMarkdown bool) {
 	<div class="my">
-		<div class="p border muted cursor-pointer transition-all" style="border-radius: var(--ui-radius);">
+		<div class="p border muted cursor-pointer transition-all" style={ fmt.Sprintf("border-radius: %s", css.VarRadius) }>
 			<label for="use_markdown" class="flex gap items-center cursor-pointer">
 				<input
 					type="checkbox"
@@ -379,7 +380,11 @@ templ markdownToggle(useMarkdown bool) {
 }
 
 templ markdownTools() {
-	<div id="markdown-tools" class="border p my transition-all" style="display: none; border-radius: var(--ui-radius);">
+	<div
+		id="markdown-tools"
+		class="border p my transition-all"
+		style={ fmt.Sprintf("display: none; border-radius: %s", css.VarRadius) }
+	>
 		<div class="mb text-sm text-semibold flex items-center">
 			<span>Markdown-Werkzeuge</span>
 		</div>
@@ -425,7 +430,11 @@ templ contentTextarea(content string) {
 
 templ markdownPreview() {
 	<div id="markdown-preview-container" class="my transition-all" style="display: none;">
-		<div id="markdown-preview" class="border flex flex-col overflow-hidden" style="height: 400px; border-radius: var(--ui-radius);">
+		<div
+			id="markdown-preview"
+			class="border flex flex-col overflow-hidden"
+			style={ fmt.Sprintf("height: 400px; border-radius: %s;", css.VarRadius) }
+		>
 			<div class="px py-sm border-bottom muted flex justify-between items-center text-semibold text-sm">
 				<span>Live-Vorschau</span>
 				<button type="button" class="secondary small flex gap-sm items-center" onclick="togglePreviewMode()">
@@ -441,12 +450,15 @@ templ markdownPreview() {
 templ attachmentsSeparator() {
 	<div class="my-lg relative flex items-center justify-center">
 		<hr class="w-full"/>
-		<div class="absolute px text-lg" style="background: var(--ui-bg);">📎</div>
+		<div class="absolute px text-lg" style={ fmt.Sprintf("background: %s;", css.VarBg) }>📎</div>
 	</div>
 }
 
 templ attachmentsSection(attachments []string) {
-	<div class="border-2 p-lg muted mt transition-all" style="border-radius: var(--ui-radius);">
+	<div
+		class="border-2 p-lg muted mt transition-all"
+		style={ fmt.Sprintf("border-radius: %s;", css.VarRadius) }
+	>
 		@attachmentsSectionHeader()
 		if len(attachments) > 0 {
 			@existingAttachments(attachments)
@@ -469,7 +481,7 @@ templ attachmentsSectionHeader() {
 }
 
 templ existingAttachments(attachments []string) {
-	<details class="border mb" style="border-radius: var(--ui-radius);">
+	<details class="border mb" style={ fmt.Sprintf("border-radius: %s;", css.VarRadius) }>
 		<summary class="p cursor-pointer text-medium flex gap items-center">
 			<i class="bi bi-images"></i>
 			Vorhandene Bilder ({ len(attachments) })
@@ -486,7 +498,7 @@ templ existingAttachmentItem(attachment string, index int) {
 	<div
 		class="p border flex gap justify-between items-center"
 		data-attachment-path={ attachment }
-		style="border-radius: var(--ui-radius);"
+		style={ fmt.Sprintf("border-radius: %s", css.VarRadius) }
 	>
 		<div class="flex gap items-center">
 			<span class="text-medium">Anhang { index }</span>
@@ -520,7 +532,7 @@ templ fileUploadArea() {
 		ondrop="handleFileDrop(event)"
 		ondragover="handleDragOver(event)"
 		ondragleave="handleDragLeave(event)"
-		style="border-radius: var(--ui-radius);"
+		style={ fmt.Sprintf("border-radius: %s;", css.VarRadius) }
 	>
 		<i class="bi bi-cloud-upload text-2xl mb-sm"></i>
 		<div class="text-medium mb-sm">Bilder hochladen</div>
@@ -538,13 +550,20 @@ templ fileUploadArea() {
 }
 
 templ filePreviewArea() {
-	<div id="file-preview" class="border p" style="display: none; border-radius: var(--ui-radius);">
+	<div
+		id="file-preview"
+		class="border p"
+		style={ fmt.Sprintf("display: none; border-radius: %s", css.VarRadius) }
+	>
 		<div class="mb text-medium">
 			<span>Neue Bilder:</span>
 		</div>
 		<div id="new-attachments" class="flex flex-col gap"></div>
 		<template name="attachment-item">
-			<div class="p border flex gap justify-between items-center" style="border-radius: var(--ui-radius);">
+			<div
+				class="p border flex gap justify-between items-center"
+				style={ fmt.Sprintf("border-radius: %s", css.VarRadius) }
+			>
 				<div class="flex gap items-center">
 					<span class="attachment-name name text-medium"></span>
 					<span class="attachment-size size-text text-sm muted"></span>

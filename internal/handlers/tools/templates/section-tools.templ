@@ -7,6 +7,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 type SectionToolsProps struct {
@@ -34,7 +35,7 @@ templ SectionTools(p SectionToolsProps) {
 			hx-get={ urlb.DialogEditCassette(0) }
 			hx-trigger="click"
 			hx-swap="beforeend"
-			class="flex gap secondary"
+			class={ css.Flex, css.Gap, "secondary" }
 			disabled?={ !p.User.IsAdmin() }
 		>
 			<i class="bi bi-plus-lg"></i>
@@ -85,15 +86,18 @@ templ SectionTools(p SectionToolsProps) {
 
 templ inputFilterTools(tools []*shared.Tool) {
 	<div
-		class="flex gap-sm flex-wrap justify-evenly backdrop"
-		style="
-			position: fixed;
-			top: calc(var(--ui-app-bar-height) + var(--ui-spacing) + 2.5rem);
-			z-index: 1000;
-			width: calc(100% - var(--ui-spacing) * 4);
-		"
+		class={ css.Flex, css.FlexWrap, css.GapSm, css.JustifyEvenly, "backdrop" }
+		style={
+			"position: fixed",
+			fmt.Sprintf("top: calc(%s + %s + 2.5rem)", css.VarAppBarHeight, css.VarSpacing),
+			"z-index: 1000",
+			fmt.Sprintf("width: calc(100%% - %s * 4)", css.VarSpacing),
+		}
 	>
-		<label class="flex flex-1 flex-col gap-0" style="width: 100%;">
+		<label
+			class={ css.Flex, css.Flex1, css.FlexCol }
+			style="width: 100%;"
+		>
 			Suche (Lazy)
 			<input
 				id="tools-filter"
@@ -114,7 +118,11 @@ templ ToolsList(p SectionToolsProps) {
 				{ fmt.Sprintf("%d Werkzeuge", len(p.Tools)) }
 			}
 		</summary>
-		<ul id="tools-list" class="flex flex-col gap p-0" style="list-style: none;">
+		<ul
+			id="tools-list"
+			class={ css.Flex, css.FlexCol, css.Gap, css.P0 }
+			style="list-style: none;"
+		>
 			for _, t := range p.Tools {
 				if !p.User.IsAdmin() && t.IsDead {
 					{{ continue }}
@@ -166,7 +174,11 @@ templ ToolsList(p SectionToolsProps) {
 				{ fmt.Sprintf("%d Kassetten", len(p.Cassettes)) }
 			}
 		</summary>
-		<ul id="cassettes-list" class="flex flex-col gap p-0" style="list-style: none;">
+		<ul
+			id="cassettes-list"
+			class={ css.Flex, css.FlexCol, css.Gap, css.P0 }
+			style="list-style: none;"
+		>
 			for _, c := range p.Cassettes {
 				<li id={ fmt.Sprintf("cassette-%d", c.ID) } class="tool-item" style="display: none;">
 					{{
