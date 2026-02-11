@@ -4,19 +4,20 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 // TotalCycles renders an input field displaying the total cycles since last regeneration
 templ TotalCycles(totalCycles int64, input bool) {
 	{{
-		var colorClass = "contrast ghost"
+		var colorClass = css.Contrast + " " + css.Ghost
 
 		if totalCycles > shared.ToolCyclesWarning {
-			colorClass = "warning ghost"
+			colorClass = css.Warning + " " + css.Ghost
 		}
 
 		if totalCycles > shared.ToolCyclesError {
-			colorClass = "destructive ghost"
+			colorClass = css.Destructive + " " + css.Ghost
 		}
 	}}
 	if input {
@@ -28,8 +29,8 @@ templ TotalCycles(totalCycles int64, input bool) {
 			title="Gesamtzyklen seit der letzten Regenerierung"
 		/>
 	} else {
-		<span class={ fmt.Sprintf("card compact flat %s", colorClass) }>
-			<span class="card-body">
+		<span class={ css.Card, css.CardCompact, css.CardFlat, colorClass }>
+			<span class={ css.CardBody }>
 				{ totalCycles }
 			</span>
 		</span>

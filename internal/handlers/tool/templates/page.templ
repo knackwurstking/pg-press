@@ -6,6 +6,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 type PageProps struct {
@@ -22,7 +23,7 @@ templ Page(p *PageProps) {
 			AdditionalHead: additionalHead(),
 		},
 	) {
-		<main class="container fluid flex flex-col gap">
+		<main class={ css.Container, css.ContainerFluid, css.Flex, css.FlexCol, css.Gap }>
 			@actionBarContent(p)
 			@components.Section(templ.Attributes{
 				"id":                    "notes-section",
@@ -73,7 +74,7 @@ templ actionBarContent(p *PageProps) {
 			// TODO: Revive tool/cassette button here
 		} else {
 			<button
-				class="destructive flex gap"
+				class={ css.Destructive, css.Flex, css.Gap }
 				hx-patch={ urlb.ToolsMarkDead(p.Tool.ID) }
 				hx-trigger="click"
 				hx-confirm="Sind Sie sicher, dass Sie dieses Werkzeug löschen möchten?"
@@ -83,7 +84,7 @@ templ actionBarContent(p *PageProps) {
 			</button>
 		}
 		<button
-			class="primary flex gap"
+			class={ css.Primary, css.Flex, css.Gap }
 			if p.Tool.IsCassette() {
 				hx-get={ urlb.DialogEditCassette(p.Tool.ID) }
 			} else {

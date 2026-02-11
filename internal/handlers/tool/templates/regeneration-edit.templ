@@ -5,6 +5,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 type RegenerationEditProps struct {
@@ -18,7 +19,7 @@ type RegenerationEditProps struct {
 templ RegenerationEdit(p RegenerationEditProps) {
 	<div
 		id={ fmt.Sprintf("regeneration-edit-%d", p.Tool.ID) }
-		class="flex flex-col gap-sm"
+		class={ css.Flex, css.FlexCol, css.GapSm }
 	>
 		if p.Editable {
 			@regenerationEditForm(p)
@@ -29,7 +30,7 @@ templ RegenerationEdit(p RegenerationEditProps) {
 }
 
 templ regenerationEditShowcase(p RegenerationEditProps) {
-	<div class="flex items-center gap-lg">
+	<div class={ css.Flex, css.ItemsCenter, css.GapLg }>
 		if p.Tool.IsCassette() {
 			@components.CassetteStateBadge(p.Tool, nil, p.IsRegenerating)
 		} else {
@@ -41,30 +42,30 @@ templ regenerationEditShowcase(p RegenerationEditProps) {
 		}}
 		<button
 			type="button"
-			class="small ghost flex gap"
+			class={ css.ButtonSmall, css.Ghost, css.Flex, css.Gap }
 			hx-get={ hxGet }
 			hx-target={ hxTarget }
 			hx-swap="outerHTML"
 			title="Status bearbeiten"
 			disabled?={ p.ToolIsActive }
 		>
-			<i class="bi bi-pencil-square text-sm"></i>
+			<i class={ "bi", "bi-pencil-square", css.TextSM }></i>
 			Regenerierung
 		</button>
 	</div>
 }
 
 templ regenerationEditForm(p RegenerationEditProps) {
-	<div class="card p-sm flex flex-col gap-sm">
-		<div class="flex items-center gap-sm mb-sm">
+	<div class={ css.Card, css.PSm, css.Flex, css.FlexCol, css.GapSm }>
+		<div class={ css.Flex, css.ItemsCenter, css.GapSm, css.MB }>
 			if p.Tool.IsCassette() {
 				@components.CassetteStateBadge(p.Tool, nil, p.IsRegenerating)
 			} else {
 				@components.ToolStateBadge(p.Tool, nil, p.IsRegenerating)
 			}
-			<span class="text-sm text-muted">Regenerierung steuern</span>
+			<span class={ css.TextSM, css.Muted, css.Ghost }>Regenerierung steuern</span>
 		</div>
-		<div class="flex flex-col gap-sm">
+		<div class={ css.Flex, css.FlexCol, css.GapSm }>
 			{{
 				hxTarget := fmt.Sprintf("#regeneration-edit-%d", p.Tool.ID)
 				hxPut := urlb.ToolRegeneration(p.Tool.ID)
@@ -82,9 +83,9 @@ templ regenerationEditForm(p RegenerationEditProps) {
 				<button
 					type="submit"
 					if p.IsRegenerating {
-						class="small success w-full m-0 flex gap"
+						class={ css.ButtonSmall, css.Success, css.WFull, css.M0, css.Flex, css.Gap }
 					} else {
-						class="small warning w-full m-0 flex gap"
+						class={ css.ButtonSmall, css.Warning, css.WFull, css.M0, css.Flex, css.Gap }
 					}
 					if !p.UserHasPermission {
 						disabled
@@ -108,7 +109,7 @@ templ regenerationEditForm(p RegenerationEditProps) {
 					<input type="hidden" name="status" value="abort"/>
 					<button
 						type="submit"
-						class="small destructive w-full m-0 flex gap"
+						class={ css.ButtonSmall, css.Destructive, css.WFull, css.M0, css.Flex, css.Gap }
 						if !p.UserHasPermission {
 							disabled
 						}
@@ -120,7 +121,7 @@ templ regenerationEditForm(p RegenerationEditProps) {
 			}
 			<button
 				type="button"
-				class="small secondary flex gap"
+				class={ css.ButtonSmall, css.Secondary, css.Flex, css.Gap }
 				hx-get={ urlb.ToolRegenerationDisplay(p.Tool.ID) }
 				hx-target={ hxTarget }
 				hx-swap="outerHTML"

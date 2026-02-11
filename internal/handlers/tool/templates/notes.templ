@@ -5,6 +5,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 templ Notes(toolID shared.EntityID, notes []*shared.Note) {
@@ -16,14 +17,14 @@ templ Notes(toolID shared.EntityID, notes []*shared.Note) {
 		})
 	}
 	if len(notes) > 0 {
-		<div class="notes-list flex flex-col gap">
+		<div class={ "notes-list", css.Flex, css.FlexCol, css.Gap }>
 			for _, n := range notes {
 				@components.NoteCard(n, nil)
 			}
 		</div>
 	} else {
 		<div class="empty-state">
-			<p class="text-muted">Keine Notizen für dieses Werkzeug vorhanden.</p>
+			<p class={ css.Muted, css.Ghost }>Keine Notizen für dieses Werkzeug vorhanden.</p>
 		</div>
 	}
 }
