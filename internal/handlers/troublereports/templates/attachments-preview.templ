@@ -5,16 +5,17 @@ import (
 
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 templ AttachmentsPreview(attachments []string) {
 	if len(attachments) > 0 {
 		<div class="attachments-preview-container">
-			<div class="attachments-preview-label flex gap items-center select-none">
+			<div class={ "attachments-preview-label", css.Flex, css.Gap, css.ItemsCenter, css.UserSelectNone }>
 				<i class="bi bi-paperclip"></i>
 				Bilder ({ len(attachments) })
 			</div>
-			<div class="attachments-preview-scroll flex gap">
+			<div class={ "attachments-preview-scroll", css.Flex, css.Gap }>
 				for _, a := range attachments {
 					@attachmentPreviewItem(a)
 				}
@@ -26,7 +27,12 @@ templ AttachmentsPreview(attachments []string) {
 templ attachmentPreviewItem(attachment string) {
 	{{ src := urlb.Attachment(attachment) }}
 	<div
-		class="attachment-preview-item flex flex-col gap items-center select-none ghost"
+		class={
+			"attachment-preview-item",
+			css.Flex, css.FlexCol, css.Gap, css.ItemsCenter,
+			css.UserSelectNone,
+			css.Ghost,
+		}
 		onclick={ components.OpenImageViewer(src) }
 		tabindex="0"
 		role="button"
@@ -37,7 +43,10 @@ templ attachmentPreviewItem(attachment string) {
 				loading="lazy"
 				src={ src }
 				alt={ fmt.Sprintf("Anhang \"%s\"", attachment) }
-				class="preview-thumbnail select-none"
+				class={
+					"preview-thumbnail",
+					css.UserSelectNone,
+				}
 			/>
 		</div>
 	</div>

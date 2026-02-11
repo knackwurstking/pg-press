@@ -6,6 +6,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 type PageProps struct {
@@ -25,7 +26,7 @@ templ Page(props *PageProps) {
 			NavContent:  components.StandardNavContent(),
 		},
 	) {
-		<main class="container fluid">
+		<main class={ css.Container, css.ContainerFluid }>
 			<h2>Werkzeugumbau an Presse { fmt.Sprintf("%d", props.Press.Number) }</h2>
 			<form
 				hx-post={ urlb.Umbau(props.Press.ID) }
@@ -43,7 +44,7 @@ templ Page(props *PageProps) {
 
 templ cyclesSection() {
 	@components.Section(nil) {
-		<span class="flex flex-col">
+		<span class={ css.Flex, css.FlexCol }>
 			<label for="press-total-cycles">Gesamtzyklen:</label>
 			<input
 				type="number"
@@ -73,7 +74,7 @@ templ toolSelection(position shared.Slot, current *shared.Tool, tools []*shared.
 				id = "bottom"
 			}
 		}}
-		<label for={ id } class="flex flex-col">
+		<label for={ id } class={ css.Flex, css.FlexCol }>
 			<span>Neues Werkzeug:</span>
 			<select
 				id={ id }
@@ -92,7 +93,7 @@ templ toolSelection(position shared.Slot, current *shared.Tool, tools []*shared.
 }
 
 templ formActions(user *shared.User) {
-	<footer class="flex justify-end items-center">
+	<footer class={ css.Flex, css.JustifyEnd, css.ItemsCenter }>
 		<button
 			type="submit"
 			disabled?={ !user.IsAdmin() }

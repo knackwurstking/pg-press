@@ -6,6 +6,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 templ ListReports(user *shared.User, troubleReports []*shared.TroubleReport) {
@@ -35,11 +36,11 @@ templ ListReports(user *shared.User, troubleReports []*shared.TroubleReport) {
 					</div>
 				}
 			</details>
-			<div class="actions flex gap justify-end items-center">
+			<div class={ "actions", css.Flex, css.Gap, css.JustifyEnd, css.ItemsCenter }>
 				// Edit Report
 				<a
 					href={ urlb.Editor("troublereport", tr.ID, urlb.TroubleReports()) }
-					class="ghost icon"
+					class={ css.ButtonIcon, css.Ghost }
 					role="button"
 				>
 					<i class="bi bi-pen"></i>
@@ -47,7 +48,7 @@ templ ListReports(user *shared.User, troubleReports []*shared.TroubleReport) {
 				// Share Report (PDF)
 				<button
 					role="button"
-					class="info ghost icon"
+					class={ css.ButtonIcon, css.Info, css.Ghost }
 					title="Als PDF teilen"
 					onclick={ components.DownloadTroubleReportPDF(tr.ID) }
 				>
@@ -60,7 +61,7 @@ templ ListReports(user *shared.User, troubleReports []*shared.TroubleReport) {
 					hx-target="#data"
 					hx-confirm="Sind Sie sicher, dass Sie diesen Fehlerbericht löschen möchten?"
 					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-					class="ghost destructive icon"
+					class={ css.ButtonIcon, css.Destructive, css.Ghost }
 					if !user.IsAdmin() {
 						disabled
 					}

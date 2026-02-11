@@ -5,6 +5,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 
+	"github.com/knackwurstking/ui/templ/css"
 	"github.com/knackwurstking/ui/templ/ui"
 )
 
@@ -17,11 +18,13 @@ templ Page() {
 			NavContent:     components.StandardNavContent(),
 		},
 	) {
-		<main class="container fluid">
+		<main class={ css.Container, css.ContainerFluid }>
 			<!-- Search Bar -->
 			@components.Section(templ.Attributes{
 				"style": "margin-top: 0",
-				"class": "flex flex-row gap justify-between",
+				"class": templ.CSSClasses{
+					css.Flex, css.Gap, css.JustifyBetween,
+				},
 			}) {
 				<input
 					style="margin: auto 0; width: 100%"
@@ -36,7 +39,7 @@ templ Page() {
 			@components.ActionBar(nil) {
 				<a
 					href={ urlb.Editor("troublereport", 0, urlb.TroubleReports()) }
-					class="flex flex-row gap justify-between items-center"
+					class={ css.Flex, css.Gap, css.JustifyBetween, css.ItemsCenter }
 					role="button"
 				>
 					<i class="bi bi-plus-lg"></i>
