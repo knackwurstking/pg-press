@@ -2,6 +2,7 @@ package templates
 
 import (
 	"fmt"
+	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/knackwurstking/ui/templ/css"
@@ -30,10 +31,7 @@ templ Cookies(p CookiesProps) {
 			<figure class={ css.OverflowAuto }></figure>
 		</details>
 	} else {
-		<div id="cookies" class="no-cookies">
-			<i class="bi bi-info-circle"></i>
-			Keine aktiven Sitzungen gefunden
-		</div>
+		@components.NotFoundText("Keine aktiven Sitzungen gefunden")
 	}
 }
 

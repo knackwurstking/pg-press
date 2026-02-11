@@ -28,13 +28,6 @@ templ NotesGrid(notes []*shared.Note, tools []*shared.Tool) {
 			}
 		</div>
 	} else {
-		<div
-			class={ "empty-state", css.TextCenter }
-			style="padding: 3rem 1rem;"
-		>
-			<i class="bi bi-clipboard-x"></i>
-			<h3>Keine Notizen vorhanden</h3>
-			<p>Notizen können über die jeweiligen Werkzeug- oder Pressenseiten erstellt werden.</p>
-		</div>
+		@components.NotFoundText("Keine Notizen vorhanden")
 	}
 }
