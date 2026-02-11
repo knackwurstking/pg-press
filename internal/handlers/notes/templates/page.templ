@@ -18,7 +18,7 @@ templ Page(notes []*shared.Note, tools []*shared.Tool) {
 	) {
 		<main class={ css.Container, css.ContainerFluid }>
 			@components.Section(templ.Attributes{
-				"class":                templ.CSSClasses{"noted-grid", css.MaxWFull},
+				"class":                templ.CSSClasses{"noted-grid", css.MaxWFull}.String(),
 				"style":                "margin: 0 auto;",
 				"hx-get":               string(urlb.NotesGrid()),
 				"hx-trigger":           "reload-notes from:body",

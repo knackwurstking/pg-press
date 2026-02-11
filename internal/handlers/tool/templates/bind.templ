@@ -86,10 +86,7 @@ templ BindingSection(props BindingSectionProps) {
 						},
 					)
 				} else {
-					<!-- Binding tool not available -->
-					<span class={ css.TextSM, css.Italic, css.Info, css.Ghost }>
-						<i>Binding tool not available</i>
-					</span>
+					@components.NotFoundText("Binding tool not available")
 				}
 			</span>
 		}

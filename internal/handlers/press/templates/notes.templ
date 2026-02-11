@@ -31,7 +31,7 @@ templ pressNotes(notes []*shared.Note) {
 			css.FlexCol,
 			css.GapLg,
 			css.P,
-		},
+		}.String(),
 	}) {
 		for _, note := range notes {
 			@components.NoteCard(note, nil)
@@ -47,7 +47,7 @@ templ toolNotes(notes []*shared.Note, tools map[shared.EntityID]*shared.Tool) {
 			css.FlexCol,
 			css.GapLg,
 			css.P,
-		},
+		}.String(),
 	}) {
 		{{
 			// Organize tool notes by position

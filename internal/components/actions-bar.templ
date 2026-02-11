@@ -15,14 +15,14 @@ templ ActionBar(attr templ.Attributes) {
 				css.JustifyEnd,
 				css.P,
 				c,
-			}
+			}.String()
 		} else {
 			attr["class"] = templ.CSSClasses{
 				css.Flex,
 				css.Gap,
 				css.JustifyEnd,
 				css.P,
-			}
+			}.String()
 		}
 	}}
 	<div { attr... }>

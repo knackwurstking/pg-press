@@ -23,8 +23,6 @@ templ Notes(toolID shared.EntityID, notes []*shared.Note) {
 			}
 		</div>
 	} else {
-		<div class="empty-state">
-			<p class={ css.Muted, css.Ghost }>Keine Notizen für dieses Werkzeug vorhanden.</p>
-		</div>
+		@components.NotFoundText("Keine Notizen für dieses Werkzeug vorhanden.")
 	}
 }

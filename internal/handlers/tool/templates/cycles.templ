@@ -95,9 +95,7 @@ templ regenerations(p *CyclesSectionContentProps) {
 			})
 		}
 		if len(p.Regenerations) == 0 {
-			<span class={ css.Flex, css.JustifyBetween, css.ItemsCenter }>
-				<i><small>Keine Regenerationen verzeichnet für dieses Werkzeug</small></i>
-			</span>
+			@components.NotFoundText("Keine Regenerationen verzeichnet für dieses Werkzeug")
 		} else {
 			<figure class={ css.WFull, css.OverflowXScroll }>
 				<table title="Regenerationen">

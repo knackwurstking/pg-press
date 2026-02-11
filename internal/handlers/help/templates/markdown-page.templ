@@ -110,7 +110,7 @@ templ quickReferenceSection() {
 	@components.Section(templ.Attributes{
 		"class": templ.CSSClasses{
 			css.Card, css.PLg,
-		},
+		}.String(),
 	}) {
 		<h2
 			class={ css.TextXL, css.TextBold, css.Flex, css.ItemsCenter, css.Ghost, css.Primary, css.Gap }
@@ -155,7 +155,7 @@ templ interactiveDemoSection() {
 	@components.Section(templ.Attributes{
 		"class": templ.CSSClasses{
 			css.Card, css.PLg,
-		},
+		}.String(),
 	}) {
 		<h2 class={ css.TextXL, css.TextBold, css.Flex, css.ItemsCenter, css.Ghost, css.Success, css.Gap }>
 			<i class="bi bi-play-circle"></i>
@@ -199,7 +199,7 @@ templ textFormattingSection() {
 	@components.Section(templ.Attributes{
 		"class": templ.CSSClasses{
 			css.Card, css.PLg, css.Flex, css.FlexCol, css.Gap,
-		},
+		}.String(),
 	}) {
 		<h2
 			class={ css.TextXL, css.TextBold, css.Flex, css.ItemsCenter, css.Ghost, css.Info, css.Gap }
@@ -272,7 +272,7 @@ templ blockquoteSection() {
 	@components.Section(templ.Attributes{
 		"class": templ.CSSClasses{
 			css.Card, css.PLg, css.Flex, css.FlexCol, css.Gap,
-		},
+		}.String(),
 	}) {
 		<h2
 			class={ css.TextXL, css.TextBold, css.Flex, css.ItemsCenter, css.Ghost, css.Secondary, css.Gap }
@@ -300,7 +300,7 @@ templ tipsSection() {
 	@components.Section(templ.Attributes{
 		"class": templ.CSSClasses{
 			css.Card, css.Success, css.Outline, css.PLg,
-		},
+		}.String(),
 	}) {
 		<h2
 			class={ css.TextXL, css.TextBold, css.MB, css.Flex, css.ItemsCenter, css.Ghost, css.Success, css.Gap }
