@@ -95,7 +95,7 @@ templ metalSheetTableForUpperSlot(position shared.Slot, metalSheets []*shared.Up
 
 templ metalSheetTableForLowerSlot(position shared.Slot, metalSheets []*shared.LowerMetalSheet, user *shared.User) {
 	if len(metalSheets) == 0 {
-		@components.NotFoundText("Keine Blech für dieses Werkzeug gefunden")
+		@components.NotFoundText("Keine Bleche für dieses Werkzeug gefunden")
 		{{ return }}
 	}
 	<figure class={ css.WFull, css.OverflowXScroll }>
