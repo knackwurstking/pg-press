@@ -334,13 +334,13 @@ templ hiddenFields(options *PageProps) {
 }
 
 templ titleInput(title string) {
-	<div class="flex flex-col gap-sm w-full">
-		<label for="title" class="text-sm text-medium">Titel</label>
+	<div class={ css.Flex, css.FlexCol, css.GapSm, css.WFull }>
+		<label for="title" class={ css.TextSM, css.TextMedium }>Titel</label>
 		<input
 			type="text"
 			name="title"
 			id="title"
-			class="w-full"
+			class={ css.WFull }
 			placeholder="Titel eingeben..."
 			value={ title }
 			required
@@ -349,9 +349,15 @@ templ titleInput(title string) {
 }
 
 templ markdownToggle(useMarkdown bool) {
-	<div class="my">
-		<div class="p border muted cursor-pointer transition-all" style={ fmt.Sprintf("border-radius: %s", css.VarRadius) }>
-			<label for="use_markdown" class="flex gap items-center cursor-pointer">
+	<div class={ css.MY }>
+		<div
+			class={ css.P, css.Border, css.Muted, css.CursorPointer, css.TransitionAll }
+			style={ fmt.Sprintf("border-radius: %s", css.VarRadius) }
+		>
+			<label
+				for="use_markdown"
+				class={ css.Flex, css.Gap, css.ItemsCenter, css.CursorPointer }
+			>
 				<input
 					type="checkbox"
 					name="use_markdown"
@@ -361,13 +367,13 @@ templ markdownToggle(useMarkdown bool) {
 						checked
 					}
 				/>
-				<span class="text-medium w-full">Markdown-Formatierung verwenden</span>
-				<div class="ml-auto flex justify-end items-center gap-xs">
+				<span class={ css.TextMedium, css.WFull }>Markdown-Formatierung verwenden</span>
+				<div class={ css.MLAuto, css.Flex, css.JustifyEnd, css.ItemsCenter, css.GapSm }>
 					<a
 						role="button"
 						href={ urlb.HelpMarkdown() }
 						target="_blank"
-						class="small primary ghost"
+						class={ css.ButtonSmall, css.Primary, css.Ghost }
 						style="text-wrap: nowrap;"
 						title="Vollständige Markdown Hilfe"
 					>
@@ -382,13 +388,13 @@ templ markdownToggle(useMarkdown bool) {
 templ markdownTools() {
 	<div
 		id="markdown-tools"
-		class="border p my transition-all"
+		class={ css.Border, css.P, css.MY, css.TransitionAll }
 		style={ fmt.Sprintf("display: none; border-radius: %s", css.VarRadius) }
 	>
-		<div class="mb text-sm text-semibold flex items-center">
+		<div class={ css.MB, css.TextSM, css.TextSemibold, css.Flex, css.ItemsCenter }>
 			<span>Markdown-Werkzeuge</span>
 		</div>
-		<div class="flex gap-sm flex-wrap">
+		<div class={ css.Flex, css.GapSm, css.FlexWrap }>
 			@markdownToolButton("**", "**", "Fett", "bi-type-bold")
 			@markdownToolButton("*", "*", "Kursiv", "bi-type-italic")
 			@markdownToolButton("__", "__", "Unterstrichen", "bi-type-underline")
@@ -403,7 +409,7 @@ templ markdownTools() {
 templ markdownToolButton(before, after, title, iconClass string) {
 	<button
 		type="button"
-		class="icon secondary small"
+		class={ css.ButtonIcon, css.Secondary, css.ButtonSmall }
 		onclick={ templ.ComponentScript{
 			Call: fmt.Sprintf("insertMarkdown('%s', '%s')", before, after),
 		} }
@@ -414,12 +420,12 @@ templ markdownToolButton(before, after, title, iconClass string) {
 }
 
 templ contentTextarea(content string) {
-	<div class="flex flex-col gap-sm">
-		<label for="content" class="text-sm text-medium">Inhalt</label>
+	<div class={ css.Flex, css.FlexCol, css.GapSm }>
+		<label for="content" class={ css.TextSM, css.TextMedium }>Inhalt</label>
 		<textarea
 			name="content"
 			id="content"
-			class="w-full resize-y"
+			class={ css.WFull, css.ResizeY }
 			placeholder="Inhalt eingeben..."
 			required
 			rows="15"
@@ -429,34 +435,44 @@ templ contentTextarea(content string) {
 }
 
 templ markdownPreview() {
-	<div id="markdown-preview-container" class="my transition-all" style="display: none;">
+	<div id="markdown-preview-container" class={ css.MY, css.TransitionAll } style="display: none;">
 		<div
 			id="markdown-preview"
-			class="border flex flex-col overflow-hidden"
+			class={ css.Border, css.Flex, css.FlexCol, css.OverflowHidden }
 			style={ fmt.Sprintf("height: 400px; border-radius: %s;", css.VarRadius) }
 		>
-			<div class="px py-sm border-bottom muted flex justify-between items-center text-semibold text-sm">
+			<div
+				class={ css.PX, css.PYSm, 
+					css.BorderBottom, 
+					css.Muted, 
+					css.Flex, css.JustifyBetween, css.ItemsCenter, 
+					css.TextSemibold, css.TextSM }
+			>
 				<span>Live-Vorschau</span>
-				<button type="button" class="secondary small flex gap-sm items-center" onclick="togglePreviewMode()">
+				<button
+					type="button"
+					class={ css.Secondary, css.ButtonSmall, css.Flex, css.GapSm, css.ItemsCenter }
+					onclick="togglePreviewMode()"
+				>
 					<i class="bi bi-arrows-angle-expand"></i>
 					<span id="preview-toggle-text">Vollbild</span>
 				</button>
 			</div>
-			<div id="preview-content" class="p flex-1 overflow-y-auto markdown-content"></div>
+			<div id="preview-content" class={ "markdown-content", css.P, css.Flex1, css.OverflowYAuto }></div>
 		</div>
 	</div>
 }
 
 templ attachmentsSeparator() {
-	<div class="my-lg relative flex items-center justify-center">
-		<hr class="w-full"/>
-		<div class="absolute px text-lg" style={ fmt.Sprintf("background: %s;", css.VarBg) }>📎</div>
+	<div class={ css.MYLg, css.Relative, css.Flex, css.ItemsCenter, css.JustifyCenter }>
+		<hr class={ css.WFull }/>
+		<div class={ css.Absolute, css.PX, css.TextLG } style={ fmt.Sprintf("background: %s;", css.VarBg) }>📎</div>
 	</div>
 }
 
 templ attachmentsSection(attachments []string) {
 	<div
-		class="border-2 p-lg muted mt transition-all"
+		class={ css.Border, css.PLg, css.Muted, css.MT, css.TransitionAll }
 		style={ fmt.Sprintf("border-radius: %s;", css.VarRadius) }
 	>
 		@attachmentsSectionHeader()
@@ -469,24 +485,29 @@ templ attachmentsSection(attachments []string) {
 }
 
 templ attachmentsSectionHeader() {
-	<div class="mb">
-		<h3 class="text-lg text-semibold primary ghost flex gap-sm items-center mb">
+	<div class={ css.MB }>
+		<h3
+			class={ css.TextLG, css.TextSemibold, css.Primary, css.Ghost, css.Flex, css.GapSm, css.ItemsCenter, css.MB }
+		>
 			<i class="bi bi-paperclip"></i>
 			Dateien & Anhänge
 		</h3>
-		<div class="p border-left primary text-sm text-medium muted" style="border-left-width: 4px;">
+		<div
+			class={ css.P, css.BorderLeft, css.Primary, css.TextSM, css.TextMedium, css.Muted }
+			style="border-left-width: 4px;"
+		>
 			Bilder (max. 10MB pro Datei, max. 10 Dateien)
 		</div>
 	</div>
 }
 
 templ existingAttachments(attachments []string) {
-	<details class="border mb" style={ fmt.Sprintf("border-radius: %s;", css.VarRadius) }>
-		<summary class="p cursor-pointer text-medium flex gap items-center">
+	<details class={ css.Border, css.MB } style={ fmt.Sprintf("border-radius: %s;", css.VarRadius) }>
+		<summary class={ css.P, css.CursorPointer, css.TextMedium, css.Flex, css.Gap, css.ItemsCenter }>
 			<i class="bi bi-images"></i>
 			Vorhandene Bilder ({ len(attachments) })
 		</summary>
-		<div id="existing-attachments" class="flex flex-col gap mt">
+		<div id="existing-attachments" class={ css.Flex, css.FlexCol, css.Gap, css.MT }>
 			for attachmentIndex, attachment := range attachments {
 				@existingAttachmentItem(attachment, attachmentIndex+1)
 			}
@@ -496,18 +517,18 @@ templ existingAttachments(attachments []string) {
 
 templ existingAttachmentItem(attachment string, index int) {
 	<div
-		class="p border flex gap justify-between items-center"
+		class={ css.P, css.Border, css.Flex, css.Gap, css.JustifyBetween, css.ItemsCenter }
 		data-attachment-path={ attachment }
 		style={ fmt.Sprintf("border-radius: %s", css.VarRadius) }
 	>
-		<div class="flex gap items-center">
-			<span class="text-medium">Anhang { index }</span>
-			<span class="muted text-sm">({ attachment })</span>
+		<div class={ css.Flex, css.Gap, css.ItemsCenter }>
+			<span class={ css.TextMedium }>Anhang { index }</span>
+			<span class={ css.Muted, css.TextSM }>({ attachment })</span>
 		</div>
-		<div class="flex gap-sm">
+		<div class={ css.Flex, css.GapSm }>
 			<button
 				type="button"
-				class="secondary small"
+				class={ css.Secondary, css.ButtonSmall }
 				onclick={ components.OpenImageViewer(urlb.Attachment(attachment)) }
 			>
 				<i class="bi bi-eye"></i>
@@ -515,7 +536,7 @@ templ existingAttachmentItem(attachment string, index int) {
 			</button>
 			<button
 				type="button"
-				class="destructive small"
+				class={ css.Destructive, css.ButtonSmall }
 				onclick={ deleteAttachment(attachment) }
 			>
 				<i class="bi bi-trash"></i>
@@ -527,16 +548,16 @@ templ existingAttachmentItem(attachment string, index int) {
 
 templ fileUploadArea() {
 	<div
-		class="border-2 border-dashed p-xl text-center cursor-pointer transition-all mb"
+		class={ css.Border, css.PXl, css.TextCenter, css.CursorPointer, css.TransitionAll, css.MB }
 		onclick='document.getElementById("attachments").click();'
 		ondrop="handleFileDrop(event)"
 		ondragover="handleDragOver(event)"
 		ondragleave="handleDragLeave(event)"
 		style={ fmt.Sprintf("border-radius: %s;", css.VarRadius) }
 	>
-		<i class="bi bi-cloud-upload text-2xl mb-sm"></i>
-		<div class="text-medium mb-sm">Bilder hochladen</div>
-		<div class="text-sm opacity-75">Klicken oder Dateien hierher ziehen</div>
+		<i class={ "bi", "bi-cloud-upload", css.Text2XL, css.MB }></i>
+		<div class={ css.TextMedium, css.MB }>Bilder hochladen</div>
+		<div class={ css.TextSM, css.Opacity75 }>Klicken oder Dateien hierher ziehen</div>
 		<input
 			type="file"
 			name="attachments"
@@ -544,7 +565,7 @@ templ fileUploadArea() {
 			multiple
 			accept="image/*"
 			onchange="onAttachments(event)"
-			class="hidden"
+			class={ css.Hidden }
 		/>
 	</div>
 }
@@ -552,24 +573,24 @@ templ fileUploadArea() {
 templ filePreviewArea() {
 	<div
 		id="file-preview"
-		class="border p"
+		class={ css.Border, css.P }
 		style={ fmt.Sprintf("display: none; border-radius: %s", css.VarRadius) }
 	>
-		<div class="mb text-medium">
+		<div class={ css.MB, css.TextMedium }>
 			<span>Neue Bilder:</span>
 		</div>
-		<div id="new-attachments" class="flex flex-col gap"></div>
+		<div id="new-attachments" class={ css.Flex, css.FlexCol, css.Gap }></div>
 		<template name="attachment-item">
 			<div
-				class="p border flex gap justify-between items-center"
+				class={ css.P, css.Border, css.Flex, css.Gap, css.JustifyBetween, css.ItemsCenter }
 				style={ fmt.Sprintf("border-radius: %s", css.VarRadius) }
 			>
-				<div class="flex gap items-center">
-					<span class="attachment-name name text-medium"></span>
-					<span class="attachment-size size-text text-sm muted"></span>
+				<div class={ css.Flex, css.Gap, css.ItemsCenter }>
+					<span class={ "attachment-name", "name", css.TextMedium }></span>
+					<span class={ "attachment-size", "size-text", css.TextSM, css.Muted }></span>
 				</div>
 				<div>
-					<button type="button" class="delete destructive small">
+					<button type="button" class={ css.Delete, css.Destructive, css.ButtonSmall }>
 						<i class="bi bi-trash"></i>
 						Entfernen
 					</button>
@@ -580,18 +601,18 @@ templ filePreviewArea() {
 }
 
 templ formActions(options *PageProps) {
-	<div class="mt-lg pt border-top flex gap justify-end">
+	<div class={ css.MT, css.PT, css.BorderTop, css.Flex, css.Gap, css.JustifyEnd }>
 		if options.ReturnURL != "" {
 			<a
 				role="button"
 				href={ options.ReturnURL }
-				class="secondary flex gap-sm items-center"
+				class={ css.Secondary, css.Flex, css.GapSm, css.ItemsCenter }
 			>
 				<i class="bi bi-x-circle"></i>
 				Abbrechen
 			</a>
 		}
-		<button type="submit" class="primary flex gap-sm items-center">
+		<button type="submit" class={ css.Primary, css.Flex, css.GapSm, css.ItemsCenter }>
 			if options.ID > 0 {
 				<i class="bi bi-check-circle"></i>
 				Aktualisieren
