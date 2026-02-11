@@ -25,9 +25,9 @@ templ Page(p PageProps) {
 			AdditionalHead: additionalHead(),
 		},
 	) {
-		<main class="container fluid">
+		<main class={ css.Container, css.ContainerFluid }>
 			<div
-				class="tabs backdrop"
+				class={ css.Tabs, css.Backdrop }
 				style={
 					"position: fixed;",
 					fmt.Sprintf("top: calc(%s + %s)", css.VarAppBarHeight, css.VarSpacing),
@@ -38,7 +38,7 @@ templ Page(p PageProps) {
 				// Press Section Tab - `SectionPress`
 				<div
 					data-index="0"
-					class="tab secondary ghost"
+					class={ css.TabsTab, css.Secondary, css.Ghost }
 					hx-get={ urlb.ToolsSectionPress() }
 					hx-trigger="load-tab-content"
 					hx-target="#tab-content"
@@ -49,7 +49,7 @@ templ Page(p PageProps) {
 				// Tools Section Tab - `SectionTools`
 				<div
 					data-index="1"
-					class="tab secondary ghost"
+					class={ css.TabsTab, css.Secondary, css.Ghost }
 					hx-get={ urlb.ToolsSectionTools() }
 					hx-trigger="load-tab-content"
 					hx-target="#tab-content"
@@ -61,7 +61,7 @@ templ Page(p PageProps) {
 			// Tab Content, where the content goes '#tab-content'
 			<div
 				id="tab-content"
-				class="p w-full h-fit"
+				class={ css.P, css.WFull, css.HFit }
 				style="margin-top: 50px;"
 				hx-on::after-request={ filterToolsList(templ.JSExpression("null"), true) }
 			></div>
@@ -78,11 +78,11 @@ templ additionalHead() {
 		// @param {Event & { currentTarget: HTMLElement }} event
 		function toggleTab(event) {
 			document
-				.querySelectorAll(".tabs .tab")
-				.forEach((tab) => tab.classList.remove("active"));
+				.querySelectorAll(".{{ css.Tabs }} .{{ css.TabsTab }}")
+				.forEach((tab) => tab.classList.remove("{{ css.TabsTabActive }}"));
 
 			currentTab = event.currentTarget;
-			currentTab.classList.add("active");
+			currentTab.classList.add("{{ css.TabsTabActive }}");
 			currentTab.dispatchEvent(new Event("load-tab-content"));
 
 			localStorage.setItem("last-active-tab", currentTab.dataset.index);
@@ -97,7 +97,7 @@ templ additionalHead() {
 			}
 			toggleTab({
 				currentTarget: document.querySelector(
-					`.tabs > .tab[data-index="${lastActiveTab}"]`,
+					`.{{ css.Tabs }} > .{{ css.TabsTab }}[data-index="${lastActiveTab}"]`,
 				),
 			});
 		});

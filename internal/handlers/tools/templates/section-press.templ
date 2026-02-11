@@ -5,6 +5,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/ui/templ/css"
 )
 
 type SectionPressProps struct {
@@ -25,13 +26,13 @@ templ SectionPress(p SectionPressProps) {
 			hx-trigger="click"
 			hx-target="body"
 			hx-swap="beforeend"
-			class="flex gap"
+			class={ css.Flex, css.Gap }
 			disabled?={ !p.User.IsAdmin() }
 		>
 			<i class="bi bi-plus-lg"></i> Presse hinzufügen
 		</button>
 	}
-	<div id="press-container" class="flex flex-col gap">
+	<div id="press-container" class={ css.Flex, css.FlexCol, css.Gap }>
 		for _, e := range p.PressUtilizationsOrder {
 			{{ u := p.PressUtilizations[e] }}
 			@listPressItem(u)
@@ -45,14 +46,14 @@ templ listPressItem(p *shared.PressUtilization) {
 		<a
 			role="button"
 			href={ urlb.Press(p.PressID) }
-			class="outline contrast flex justify-between items-center"
+			class={ css.Outline, css.Contrast, css.Flex, css.JustifyBetween, css.ItemsCenter }
 		>
-			<span class="flex flex-col gap-lg w-full">
+			<span class={ css.Flex, css.FlexCol, css.GapLg, css.WFull }>
 				<h5>{ title }</h5>
-				<span class="flex flex-wrap gap-lg justify-between items-center w-full">
+				<span class={ css.Flex, css.FlexWrap, css.GapLg, css.JustifyBetween, css.ItemsCenter, css.WFull }>
 					if p.SlotUpper != nil || p.SlotUpperCassette != nil {
 						<!-- Upper Tool -->
-						<span class="flex flex-col gap-sm">
+						<span class={ css.Flex, css.FlexCol, css.GapSm }>
 							if p.SlotUpper != nil {
 								{{
 									text := fmt.Sprintf("%dx%d %s %s",
@@ -61,11 +62,11 @@ templ listPressItem(p *shared.PressUtilization) {
 										p.SlotUpper.Type,
 									)
 								}}
-								<span class="flex flex-col gap-0 justify-center items-start gap-sm">
+								<span class={ css.Flex, css.FlexCol, css.JustifyCenter, css.ItemsStart, css.GapSm }>
 									@components.SmallBadge("primary", "text-bold") {
 										{ shared.SlotUpper.German() }
 									}
-									<small class="text-sm">{ text }</small>
+									<small class={ css.TextSM }>{ text }</small>
 								</span>
 							}
 							if p.SlotUpperCassette != nil {
@@ -78,11 +79,11 @@ templ listPressItem(p *shared.PressUtilization) {
 										p.SlotUpperCassette.MaxThickness,
 									)
 								}}
-								<span class="flex flex-col gap-0 justify-center items-start gap-sm">
+								<span class={ css.Flex, css.FlexCol, css.JustifyCenter, css.ItemsStart, css.GapSm }>
 									@components.SmallBadge("primary", "text-bold") {
 										{ shared.SlotUpperCassette.German() }
 									}
-									<small class="text-sm">{ text }</small>
+									<small class={ css.TextSM }>{ text }</small>
 								</span>
 							}
 						</span>
@@ -96,11 +97,11 @@ templ listPressItem(p *shared.PressUtilization) {
 							)
 						}}
 						<!-- Lower Tool -->
-						<span class="flex flex-col justify-center items-start gap-sm">
+						<span class={ css.Flex, css.FlexCol, css.JustifyCenter, css.ItemsStart, css.GapSm }>
 							@components.SmallBadge("primary", "text-bold") {
 								{ shared.SlotLower.German() }
 							}
-							<small class="text-sm">{ text }</small>
+							<small class={ css.TextSM }>{ text }</small>
 						</span>
 					}
 				</span>
