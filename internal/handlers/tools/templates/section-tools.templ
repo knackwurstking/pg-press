@@ -86,11 +86,10 @@ templ SectionTools(p SectionToolsProps) {
 
 templ inputFilterTools(tools []*shared.Tool) {
 	<div
-		class={ css.Flex, css.FlexWrap, css.GapSm, css.JustifyEvenly, css.Backdrop }
+		class={ css.Flex, css.FlexWrap, css.GapSm, css.JustifyEvenly, css.Backdrop, css.Z10 }
 		style={
 			"position: fixed",
 			fmt.Sprintf("top: calc(%s + %s + 2.5rem)", css.VarAppBarHeight, css.VarSpacing),
-			"z-index: 1000",
 			fmt.Sprintf("width: calc(100%% - %s * 4)", css.VarSpacing),
 		}
 	>

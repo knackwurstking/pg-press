@@ -27,11 +27,10 @@ templ Page(p PageProps) {
 	) {
 		<main class={ css.Container, css.ContainerFluid }>
 			<div
-				class={ css.Tabs, css.Backdrop }
+				class={ css.Tabs, css.Backdrop, css.Z20 }
 				style={
 					"position: fixed;",
 					fmt.Sprintf("top: calc(%s + %s)", css.VarAppBarHeight, css.VarSpacing),
-					"z-index: 1500",
 					fmt.Sprintf("width: calc(100%% - %s * 2)", css.VarSpacing),
 				}
 			>
