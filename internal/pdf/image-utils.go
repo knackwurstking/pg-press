@@ -1,7 +1,10 @@
 package pdf
 
 import (
+	"bytes"
 	"fmt"
+	"image"
+	_ "image/jpeg"
 	"os"
 	"path/filepath"
 	"strings"
@@ -95,11 +98,10 @@ func calculateSingleImageHeight(
 	defer os.Remove(tmpFile)
 
 	info := o.PDF.RegisterImageOptions(tmpFile, gofpdf.ImageOptions{})
-	if info != nil {
-		return (imageWidth * info.Height()) / info.Width()
+	if info == nil {
+		return 60.0
 	}
-
-	return 60.0
+	return (imageWidth * info.Height()) / info.Width()
 }
 
 func addImageCaptions(
@@ -167,6 +169,10 @@ func addSingleImage(
 }
 
 func createTempImageFile(image *shared.Image) (string, error) {
+	if !isValidImage(image.Data) {
+		return "", fmt.Errorf("invalid image data: %s", image.Name)
+	}
+
 	tmpFile, err := os.CreateTemp("", fmt.Sprintf("attachment_%s_*.jpg", image.Name))
 	if err != nil {
 		return "", err
@@ -180,6 +186,11 @@ func createTempImageFile(image *shared.Image) (string, error) {
 	}
 
 	return tmpFile.Name(), nil
+}
+
+func isValidImage(data []byte) bool {
+	_, _, err := image.DecodeConfig(bytes.NewReader(data))
+	return err == nil
 }
 
 func getImageType(filename string) string {
