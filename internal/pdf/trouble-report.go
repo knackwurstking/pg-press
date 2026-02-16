@@ -36,13 +36,13 @@ func GenerateTroubleReportPDF(tr *shared.TroubleReport) (*bytes.Buffer, error) {
 	addTroubleReportContentSection(o)
 	err := addTroubleReportImagesSection(o)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to add images to PDF: %w", err)
 	}
 
 	var buf bytes.Buffer
 	err = pdf.Output(&buf)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to generate PDF output: %w", err)
 	}
 
 	return &buf, nil
