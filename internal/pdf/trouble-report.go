@@ -121,7 +121,7 @@ func renderMarkdownContentToPDF(o *troubleReportOptions) {
 		// Handle lists
 		if strings.HasPrefix(line, "- ") || strings.HasPrefix(line, "* ") {
 			o.PDF.SetFont("Arial", "", 10)
-			o.PDF.Cell(10, 6, "•")
+			o.PDF.Cell(10, 6, o.Translator("•"))
 			o.PDF.MultiCell(0, 6, o.Translator(strings.TrimSpace(line[2:])), "", "", false)
 			continue
 		}

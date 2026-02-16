@@ -1,6 +1,6 @@
 ## General
 
-- [ ] The PDF generation needs to be rewritten by myself
+- [-] The PDF generation needs to be rewritten by myself
 - [ ] Make sure the tool cycles offset is used properly in total cycle calculations
 
 ## Tools Page: Press Content
