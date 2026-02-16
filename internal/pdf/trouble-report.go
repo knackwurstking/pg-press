@@ -158,13 +158,33 @@ func renderMarkdownContentToPDF(o *troubleReportOptions) {
 // renderBasicMarkdownFormatting processes markdown formatting for PDF rendering
 // Note: gofpdf has limited styling support, so we render styled elements where possible
 func renderBasicMarkdownFormatting(text string) string {
-	// Handle bold: **text** or __text__ (must have content between)
+	// Handle bold: **text** or __text__ first (complete pairs)
 	text = regexp.MustCompile(`\*\*(.+?)\*\*`).ReplaceAllString(text, "$1")
 	text = regexp.MustCompile(`__(.+?)__`).ReplaceAllString(text, "$1")
 
-	// Handle italic: *text* - use word boundary to avoid matching single asterisks
-	text = regexp.MustCompile(`\*([^*]+)\*`).ReplaceAllString(text, "$1")
-	text = regexp.MustCompile(`_([^_]+)_`).ReplaceAllString(text, "$1")
+	// Handle incomplete bold like **Info: (trailing ** stripped)
+	text = regexp.MustCompile(`\*\*(.+?)(\*|$)`).ReplaceAllString(text, "$1")
+	text = regexp.MustCompile(`__(.+?)(_|$)`).ReplaceAllString(text, "$1")
+
+	// Handle italic: *text* - strip outer parens if present
+	text = regexp.MustCompile(`\*(.+?)\*`).ReplaceAllStringFunc(text, func(s string) string {
+		matches := regexp.MustCompile(`\*(.+?)\*`).FindStringSubmatch(s)
+		if len(matches) > 1 {
+			content := matches[1]
+			content = regexp.MustCompile(`^\s*\((.+)\)\s*$`).ReplaceAllString(content, "$1")
+			return content
+		}
+		return s
+	})
+	text = regexp.MustCompile(`_(.+?)_`).ReplaceAllStringFunc(text, func(s string) string {
+		matches := regexp.MustCompile(`_(.+?)_`).FindStringSubmatch(s)
+		if len(matches) > 1 {
+			content := matches[1]
+			content = regexp.MustCompile(`^\s*\((.+)\)\s*$`).ReplaceAllString(content, "$1")
+			return content
+		}
+		return s
+	})
 
 	// Remove strikethrough
 	text = regexp.MustCompile(`~~(.+?)~~`).ReplaceAllString(text, "$1")
