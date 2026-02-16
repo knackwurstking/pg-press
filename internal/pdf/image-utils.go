@@ -3,6 +3,8 @@ package pdf
 import (
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/jung-kurt/gofpdf/v2"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -160,7 +162,7 @@ func addSingleImage(
 	}
 	defer os.Remove(tmpFile)
 
-	imageType := "JPG" // Default to JPG since we don't have MIME type info
+	imageType := getImageType(image.Name)
 	o.PDF.Image(tmpFile, x, y, width, 0, false, imageType, 0, "")
 }
 
@@ -178,4 +180,24 @@ func createTempImageFile(image *shared.Image) (string, error) {
 	}
 
 	return tmpFile.Name(), nil
+}
+
+func getImageType(filename string) string {
+	ext := filepath.Ext(filename)
+	switch strings.ToLower(ext) {
+	case ".jpg", ".jpeg":
+		return "JPG"
+	case ".png":
+		return "PNG"
+	case ".gif":
+		return "GIF"
+	case ".bmp":
+		return "BMP"
+	case ".tiff", ".tif":
+		return "TIFF"
+	case ".wmf":
+		return "WMF"
+	default:
+		return "JPG"
+	}
 }
