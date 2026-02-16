@@ -3,7 +3,7 @@ package logger
 import (
 	"github.com/knackwurstking/pg-press/internal/env"
 
-	"github.com/knackwurstking/ui/templ/ui"
+	"github.com/knackwurstking/ui/pkg/ui"
 )
 
 func New(group string) *ui.Logger {

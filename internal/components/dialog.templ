@@ -3,27 +3,29 @@ package components
 import (
 	"net/http"
 
-	"github.com/knackwurstking/ui/templ/components/dialog"
-	"github.com/knackwurstking/ui/templ/css"
+	"github.com/knackwurstking/ui/pkg/components"
+	"github.com/knackwurstking/ui/pkg/css"
 )
 
 templ FormDialog(id, method string, href templ.SafeURL) {
-	@dialog.Dialog(dialog.DialogProps{
-		ID:         id,
+	@components.Dialog(&components.DialogProps{
+		BaseProps: components.BaseProps{
+			ID: id,
+			Class: []string{
+				css.Flex,
+				css.FlexCol,
+				css.Gap,
+				css.JustifyCenter,
+				css.ItemsCenter,
+			},
+			Attributes: templ.Attributes{
+				"onclose":  `this.remove()`,
+				"oncancel": `event.preventDefault()`,
+				"onclick":  `if (event.target === this) event.preventDefault()`,
+			},
+		},
 		Fullscreen: true,
 		Clean:      true,
-		Class: templ.CSSClasses{
-			css.Flex,
-			css.FlexCol,
-			css.Gap,
-			css.JustifyCenter,
-			css.ItemsCenter,
-		},
-		Attributes: templ.Attributes{
-			"onclose":  `this.remove()`,
-			"oncancel": `event.preventDefault()`,
-			"onclick":  `if (event.target === this) event.preventDefault()`,
-		},
 	}) {
 		<form
 			class={ css.Container, css.Flex, css.FlexCol, css.Gap, css.P }

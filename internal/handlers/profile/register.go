@@ -6,7 +6,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/logger"
 
-	"github.com/knackwurstking/ui/templ/ui"
+	"github.com/knackwurstking/ui/pkg/ui"
 	"github.com/labstack/echo/v4"
 )
 

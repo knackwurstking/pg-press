@@ -15,7 +15,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/handlers"
 
 	"github.com/SuperPaintman/nice/cli"
-	"github.com/knackwurstking/ui/templ/ui"
+	"github.com/knackwurstking/ui/pkg/ui"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )

@@ -3,9 +3,9 @@ package components
 import (
 	"github.com/knackwurstking/pg-press/internal/env"
 
-	"github.com/knackwurstking/ui/templ/components/appbar"
-	"github.com/knackwurstking/ui/templ/css"
-	"github.com/knackwurstking/ui/templ/ui"
+	"github.com/knackwurstking/ui/pkg/components"
+	"github.com/knackwurstking/ui/pkg/css"
+	"github.com/knackwurstking/ui/pkg/ui"
 )
 
 type LayoutProps struct {
@@ -102,15 +102,17 @@ templ styles() {
 }
 
 templ appBar(title string, navContent templ.Component) {
-	@appbar.AppBar(appbar.AppBarProps{
-		Class:    templ.CSSClasses{css.ShadowSm, css.Z50},
-		Position: appbar.AppBarPositionTop,
-		Type:     appbar.AppBarTypeFixed,
+	@components.AppBar(&components.AppBarProps{
+		BaseProps: components.BaseProps{
+			Class: []string{css.ShadowSm, css.Z50},
+		},
+		Position: components.AppBarPositionTop,
+		Type:     components.AppBarTypeFixed,
 	}) {
-		@appbar.AppBarLeft(appbar.AppBarLeftProps{}) {
+		@components.AppBarLeft(nil) {
 			<h5 id="app-bar-title">{ title }</h5>
 		}
-		@appbar.AppBarRight(appbar.AppBarRightProps{}) {
+		@components.AppBarRight(nil) {
 			if navContent != nil {
 				@navContent
 			}

@@ -7,7 +7,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"github.com/knackwurstking/ui/templ/css"
+	"github.com/knackwurstking/ui/pkg/css"
 )
 
 type SectionToolsProps struct {
@@ -94,8 +94,7 @@ templ inputFilterTools(tools []*shared.Tool) {
 		}
 	>
 		<label
-			class={ css.Flex, css.Flex1, css.FlexCol }
-			style="width: 100%;"
+			class={ css.Flex, css.Flex1, css.FlexCol, css.WFull }
 		>
 			Suche (Lazy)
 			<input

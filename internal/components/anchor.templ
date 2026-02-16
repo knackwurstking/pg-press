@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"github.com/knackwurstking/ui/templ/css"
+	"github.com/knackwurstking/ui/pkg/css"
 )
 
 // -----------------------------------------------------------------------------
@@ -182,8 +182,8 @@ templ CassetteAnchor(p CassetteAnchorProps) {
 
 templ CassetteAnchorCounts(notesCount, regenerationsCount int) {
 	<span
-		class={ css.Flex, css.JustifyEnd, css.ItemsCenter, css.GapSm, css.TextXS }
-		style="position: absolute; top: 0.15rem; right: 0.25rem;"
+		class={ css.Flex, css.JustifyEnd, css.ItemsCenter, css.GapSm, css.TextXS, css.Absolute }
+		style="top: 0.15rem; right: 0.25rem;"
 	>
 		if notesCount > 0 {
 			<span class={ css.Info, css.Ghost }>
