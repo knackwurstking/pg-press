@@ -158,19 +158,19 @@ func renderMarkdownContentToPDF(o *troubleReportOptions) {
 // renderBasicMarkdownFormatting processes markdown formatting for PDF rendering
 // Note: gofpdf has limited styling support, so we render styled elements where possible
 func renderBasicMarkdownFormatting(text string) string {
-	// Remove bold formatting
-	text = regexp.MustCompile(`\*\*(.*?)\*\*`).ReplaceAllString(text, "$1")
-	text = regexp.MustCompile(`__(.*?)__`).ReplaceAllString(text, "$1")
+	// Handle bold: **text** or __text__ (must have content between)
+	text = regexp.MustCompile(`\*\*(.+?)\*\*`).ReplaceAllString(text, "$1")
+	text = regexp.MustCompile(`__(.+?)__`).ReplaceAllString(text, "$1")
 
-	// Remove italic formatting
-	text = regexp.MustCompile(`\*(.*?)\*`).ReplaceAllString(text, "$1")
-	text = regexp.MustCompile(`_(.*?)_`).ReplaceAllString(text, "$1")
+	// Handle italic: *text* - use word boundary to avoid matching single asterisks
+	text = regexp.MustCompile(`\*([^*]+)\*`).ReplaceAllString(text, "$1")
+	text = regexp.MustCompile(`_([^_]+)_`).ReplaceAllString(text, "$1")
 
 	// Remove strikethrough
-	text = regexp.MustCompile(`~~(.*?)~~`).ReplaceAllString(text, "$1")
+	text = regexp.MustCompile(`~~(.+?)~~`).ReplaceAllString(text, "$1")
 
 	// Remove inline code formatting - keep the code content
-	text = regexp.MustCompile("`([^`]*)`").ReplaceAllString(text, "$1")
+	text = regexp.MustCompile("`([^`]+)`").ReplaceAllString(text, "$1")
 
 	// Remove link formatting, keep text
 	text = regexp.MustCompile(`\[([^\]]+)\]\([^\)]+\)`).ReplaceAllString(text, "$1")
