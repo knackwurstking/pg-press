@@ -137,6 +137,16 @@ func renderMarkdownContentToPDF(o *troubleReportOptions) {
 			continue
 		}
 
+		// Handle blockquotes
+		if strings.HasPrefix(line, "> ") {
+			o.PDF.SetFont("Arial", "I", 10)
+			o.PDF.SetTextColor(100, 100, 100)
+			o.PDF.Cell(5, 6, o.Translator("│"))
+			o.PDF.MultiCell(0, 6, o.Translator(strings.TrimSpace(line[2:])), "", "", false)
+			o.PDF.SetTextColor(0, 0, 0)
+			continue
+		}
+
 		// Handle regular paragraphs with basic formatting
 		o.PDF.SetFont("Arial", "", 10)
 		formattedLine := renderBasicMarkdownFormatting(line)
@@ -145,7 +155,8 @@ func renderMarkdownContentToPDF(o *troubleReportOptions) {
 	}
 }
 
-// renderBasicMarkdownFormatting removes markdown syntax for PDF rendering
+// renderBasicMarkdownFormatting processes markdown formatting for PDF rendering
+// Note: gofpdf has limited styling support, so we render styled elements where possible
 func renderBasicMarkdownFormatting(text string) string {
 	// Remove bold formatting
 	text = regexp.MustCompile(`\*\*(.*?)\*\*`).ReplaceAllString(text, "$1")
@@ -158,7 +169,7 @@ func renderBasicMarkdownFormatting(text string) string {
 	// Remove strikethrough
 	text = regexp.MustCompile(`~~(.*?)~~`).ReplaceAllString(text, "$1")
 
-	// Remove code formatting
+	// Remove inline code formatting - keep the code content
 	text = regexp.MustCompile("`([^`]*)`").ReplaceAllString(text, "$1")
 
 	// Remove link formatting, keep text
