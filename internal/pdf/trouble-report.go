@@ -101,19 +101,19 @@ func renderMarkdownContentToPDF(o *troubleReportOptions) {
 		// Handle headers
 		if strings.HasPrefix(line, "### ") {
 			o.PDF.SetFont("Arial", "B", 11)
-			o.PDF.MultiCell(0, 6, o.Translator(strings.TrimSpace(line[4:])), "", "", false)
+			renderFormattedLine(o, strings.TrimSpace(line[4:]))
 			o.PDF.Ln(2)
 			continue
 		}
 		if strings.HasPrefix(line, "## ") {
 			o.PDF.SetFont("Arial", "B", 12)
-			o.PDF.MultiCell(0, 7, o.Translator(strings.TrimSpace(line[3:])), "", "", false)
+			renderFormattedLine(o, strings.TrimSpace(line[3:]))
 			o.PDF.Ln(2)
 			continue
 		}
 		if strings.HasPrefix(line, "# ") {
 			o.PDF.SetFont("Arial", "B", 13)
-			o.PDF.MultiCell(0, 8, o.Translator(strings.TrimSpace(line[2:])), "", "", false)
+			renderFormattedLine(o, strings.TrimSpace(line[2:]))
 			o.PDF.Ln(3)
 			continue
 		}
@@ -122,7 +122,8 @@ func renderMarkdownContentToPDF(o *troubleReportOptions) {
 		if strings.HasPrefix(line, "- ") || strings.HasPrefix(line, "* ") {
 			o.PDF.SetFont("Arial", "", 10)
 			o.PDF.Cell(10, 6, o.Translator("•"))
-			o.PDF.MultiCell(0, 6, o.Translator(strings.TrimSpace(line[2:])), "", "", false)
+			renderFormattedLine(o, strings.TrimSpace(line[2:]))
+			o.PDF.Ln(6)
 			continue
 		}
 
@@ -132,8 +133,9 @@ func renderMarkdownContentToPDF(o *troubleReportOptions) {
 			parts := regexp.MustCompile(`^(\d+\.\s)(.*)`).FindStringSubmatch(line)
 			if len(parts) == 3 {
 				o.PDF.Cell(10, 6, parts[1])
-				o.PDF.MultiCell(0, 6, o.Translator(parts[2]), "", "", false)
+				renderFormattedLine(o, parts[2])
 			}
+			o.PDF.Ln(6)
 			continue
 		}
 
@@ -142,18 +144,148 @@ func renderMarkdownContentToPDF(o *troubleReportOptions) {
 			o.PDF.SetFont("Arial", "I", 10)
 			o.PDF.SetTextColor(100, 100, 100)
 			o.PDF.Cell(5, 6, o.Translator("│"))
-			o.PDF.MultiCell(0, 6, o.Translator(strings.TrimSpace(line[2:])), "", "", false)
+			renderFormattedLine(o, strings.TrimSpace(line[2:]))
 			o.PDF.SetTextColor(0, 0, 0)
+			o.PDF.Ln(6)
 			continue
 		}
 
-		// TODO: `**Bold**`, `*Italic*`, `~~Strikethrough~~`
-
-		// Handle regular paragraphs with basic formatting
+		// Handle regular paragraphs with inline formatting
 		o.PDF.SetFont("Arial", "", 10)
-		o.PDF.MultiCell(0, 6, o.Translator(line), "", "", false)
+		renderFormattedLine(o, line)
 		o.PDF.Ln(1)
 	}
+}
+
+// renderFormattedLine processes inline markdown formatting (bold, italic, strikethrough)
+func renderFormattedLine(o *troubleReportOptions, line string) {
+	segments := parseMarkdownSegments(line)
+
+	for _, seg := range segments {
+		style := ""
+		if seg.Bold {
+			style += "B"
+		}
+		if seg.Italic {
+			style += "I"
+		}
+		if seg.Strikethrough {
+			style += "S"
+		}
+		if style == "" {
+			style = ""
+		}
+
+		fontSize := 10.0
+		if seg.Header == 3 {
+			fontSize = 11
+		} else if seg.Header == 2 {
+			fontSize = 12
+		} else if seg.Header == 1 {
+			fontSize = 13
+		}
+
+		o.PDF.SetFont("Arial", style, fontSize)
+		o.PDF.Write(fixedLineHeight(fontSize), o.Translator(seg.Text))
+	}
+}
+
+// markdownSegment represents a text segment with formatting
+type markdownSegment struct {
+	Text          string
+	Bold          bool
+	Italic        bool
+	Strikethrough bool
+	Header        int
+}
+
+// parseMarkdownSegments parses a line into formatted segments
+func parseMarkdownSegments(line string) []markdownSegment {
+	var segments []markdownSegment
+
+	// Regex patterns for inline formatting
+	boldPattern := regexp.MustCompile(`\*\*(.+?)\*\*`)
+	italicPattern := regexp.MustCompile(`\*(.+?)\*`)
+
+	// Keep track of what has been replaced
+	processed := line
+
+	// Find all matches with their positions
+	type match struct {
+		start   int
+		end     int
+		text    string
+		matched string
+		format  string
+	}
+
+	var matches []match
+
+	// Find bold matches
+	for _, m := range boldPattern.FindAllStringSubmatchIndex(processed, -1) {
+		matches = append(matches, match{
+			start:   m[0],
+			end:     m[1],
+			text:    processed[m[2]:m[3]],
+			matched: processed[m[0]:m[1]],
+			format:  "bold",
+		})
+	}
+
+	// Find italic matches
+	for _, m := range italicPattern.FindAllStringSubmatchIndex(processed, -1) {
+		matches = append(matches, match{
+			start:   m[0],
+			end:     m[1],
+			text:    processed[m[2]:m[3]],
+			matched: processed[m[0]:m[1]],
+			format:  "italic",
+		})
+	}
+
+	// Sort matches by position
+	for i := 0; i < len(matches); i++ {
+		for j := i + 1; j < len(matches); j++ {
+			if matches[j].start < matches[i].start {
+				matches[i], matches[j] = matches[j], matches[i]
+			}
+		}
+	}
+
+	// Build segments
+	lastPos := 0
+	for _, m := range matches {
+		// Add text before this match
+		if m.start > lastPos {
+			segments = append(segments, markdownSegment{Text: processed[lastPos:m.start]})
+		}
+
+		// Add the formatted text
+		seg := markdownSegment{Text: m.text}
+		switch m.format {
+		case "bold":
+			seg.Bold = true
+		case "italic":
+			seg.Italic = true
+		segments = append(segments, seg)
+
+		lastPos = m.end
+	}
+
+	// Add remaining text
+	if lastPos < len(processed) {
+		segments = append(segments, markdownSegment{Text: processed[lastPos:]})
+	}
+
+	if len(segments) == 0 {
+		segments = append(segments, markdownSegment{Text: line})
+	}
+
+	return segments
+}
+
+func fixedLineHeight(fontSize float64) float64 {
+	return fontSize * 0.4
 }
 
 func addTroubleReportImagesSection(o *troubleReportOptions) error {
