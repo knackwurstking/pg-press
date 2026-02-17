@@ -6,6 +6,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	uicomponents "github.com/knackwurstking/ui/pkg/components"
 	"github.com/knackwurstking/ui/pkg/css"
 )
 
@@ -59,7 +60,7 @@ templ Page(props *PageProps) {
 				</form>
 			</div>
 		</main>
-		@components.MarkdownScript()
+		@uicomponents.MarkdownScript()
 	}
 }
 
@@ -73,7 +74,7 @@ templ pageNavContent(props *PageProps) {
 }
 
 templ pageAdditionalHead() {
-	@components.MarkdownStyles()
+	@uicomponents.MarkdownStyles()
 	<style>
 		.markdown-content h1,
 		.markdown-content h2,

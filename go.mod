@@ -9,7 +9,7 @@ require (
 	github.com/chromedp/chromedp v0.14.2
 	github.com/google/uuid v1.6.0
 	github.com/jung-kurt/gofpdf/v2 v2.17.3
-	github.com/knackwurstking/ui v1.1.2-0.20260216141759-dd887d273394
+	github.com/knackwurstking/ui v1.1.2-0.20260217195531-e8ee675c6551
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/mattn/go-sqlite3 v1.14.32
 	github.com/williepotgieter/keymaker v1.0.0

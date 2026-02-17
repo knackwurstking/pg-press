@@ -6,6 +6,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	uicomponents "github.com/knackwurstking/ui/pkg/components"
 	"github.com/knackwurstking/ui/pkg/css"
 )
 
@@ -17,7 +18,7 @@ templ ListReports(user *shared.User, troubleReports []*shared.TroubleReport) {
 				ontoggle="updateURLHash(event)"
 			>
 				<summary>{ tr.Title }</summary>
-				@components.MarkdownContent(tr.Content, tr.UseMarkdown)
+				@uicomponents.MarkdownContent(tr.Content, tr.UseMarkdown)
 				<!-- Attachments Preview Container -->
 				if len(tr.LinkedAttachments) > 0 {
 					<br/>
@@ -72,8 +73,8 @@ templ ListReports(user *shared.User, troubleReports []*shared.TroubleReport) {
 			<hr/>
 		</span>
 	}
-	@components.MarkdownScript()
-	@components.MarkdownStyles()
+	@uicomponents.MarkdownScript()
+	@uicomponents.MarkdownStyles()
 	<script>
 		if (location.hash !== "") {
 			var details = document.querySelector(location.hash);
