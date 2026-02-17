@@ -204,13 +204,10 @@ func parseMarkdownSegments(line string) []markdownSegment {
 	var segments []markdownSegment
 
 	// Regex patterns for inline formatting
+	boldItalicPattern := regexp.MustCompile(`\*\*\*(.+?)\*\*\*`)
 	boldPattern := regexp.MustCompile(`\*\*(.+?)\*\*`)
 	italicPattern := regexp.MustCompile(`\*(.+?)\*`)
 
-	// Keep track of what has been replaced
-	processed := line
-
-	// Find all matches with their positions
 	type match struct {
 		start   int
 		end     int
@@ -221,26 +218,55 @@ func parseMarkdownSegments(line string) []markdownSegment {
 
 	var matches []match
 
-	// Find bold matches
-	for _, m := range boldPattern.FindAllStringSubmatchIndex(processed, -1) {
+	// Find bold+italic matches first (***text***)
+	for _, m := range boldItalicPattern.FindAllStringSubmatchIndex(line, -1) {
 		matches = append(matches, match{
 			start:   m[0],
 			end:     m[1],
-			text:    processed[m[2]:m[3]],
-			matched: processed[m[0]:m[1]],
-			format:  "bold",
+			text:    line[m[2]:m[3]],
+			matched: line[m[0]:m[1]],
+			format:  "bolditalic",
 		})
 	}
 
-	// Find italic matches
-	for _, m := range italicPattern.FindAllStringSubmatchIndex(processed, -1) {
-		matches = append(matches, match{
-			start:   m[0],
-			end:     m[1],
-			text:    processed[m[2]:m[3]],
-			matched: processed[m[0]:m[1]],
-			format:  "italic",
-		})
+	// Find bold matches (**text**), excluding positions within bolditalic
+	for _, m := range boldPattern.FindAllStringSubmatchIndex(line, -1) {
+		overlaps := false
+		for _, bm := range matches {
+			if m[0] >= bm.start && m[0] < bm.end {
+				overlaps = true
+				break
+			}
+		}
+		if !overlaps {
+			matches = append(matches, match{
+				start:   m[0],
+				end:     m[1],
+				text:    line[m[2]:m[3]],
+				matched: line[m[0]:m[1]],
+				format:  "bold",
+			})
+		}
+	}
+
+	// Find italic matches (*text*), excluding positions within bold or bolditalic
+	for _, m := range italicPattern.FindAllStringSubmatchIndex(line, -1) {
+		overlaps := false
+		for _, bm := range matches {
+			if m[0] >= bm.start && m[0] < bm.end {
+				overlaps = true
+				break
+			}
+		}
+		if !overlaps {
+			matches = append(matches, match{
+				start:   m[0],
+				end:     m[1],
+				text:    line[m[2]:m[3]],
+				matched: line[m[0]:m[1]],
+				format:  "italic",
+			})
+		}
 	}
 
 	// Sort matches by position
@@ -257,7 +283,7 @@ func parseMarkdownSegments(line string) []markdownSegment {
 	for _, m := range matches {
 		// Add text before this match
 		if m.start > lastPos {
-			segments = append(segments, markdownSegment{Text: processed[lastPos:m.start]})
+			segments = append(segments, markdownSegment{Text: line[lastPos:m.start]})
 		}
 
 		// Add the formatted text
@@ -267,14 +293,18 @@ func parseMarkdownSegments(line string) []markdownSegment {
 			seg.Bold = true
 		case "italic":
 			seg.Italic = true
+		case "bolditalic":
+			seg.Bold = true
+			seg.Italic = true
+		}
 		segments = append(segments, seg)
 
 		lastPos = m.end
 	}
 
 	// Add remaining text
-	if lastPos < len(processed) {
-		segments = append(segments, markdownSegment{Text: processed[lastPos:]})
+	if lastPos < len(line) {
+		segments = append(segments, markdownSegment{Text: line[lastPos:]})
 	}
 
 	if len(segments) == 0 {
