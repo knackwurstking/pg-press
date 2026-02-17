@@ -147,55 +147,13 @@ func renderMarkdownContentToPDF(o *troubleReportOptions) {
 			continue
 		}
 
+		// TODO: `**Bold**`, `*Italic*`, `~~Strikethrough~~`
+
 		// Handle regular paragraphs with basic formatting
 		o.PDF.SetFont("Arial", "", 10)
-		formattedLine := renderBasicMarkdownFormatting(line)
-		o.PDF.MultiCell(0, 6, o.Translator(formattedLine), "", "", false)
+		o.PDF.MultiCell(0, 6, o.Translator(line), "", "", false)
 		o.PDF.Ln(1)
 	}
-}
-
-// renderBasicMarkdownFormatting processes markdown formatting for PDF rendering
-// Note: gofpdf has limited styling support, so we render styled elements where possible
-func renderBasicMarkdownFormatting(text string) string {
-	// Handle bold: **text** or __text__ first (complete pairs)
-	text = regexp.MustCompile(`\*\*(.+?)\*\*`).ReplaceAllString(text, "$1")
-	text = regexp.MustCompile(`__(.+?)__`).ReplaceAllString(text, "$1")
-
-	// Handle incomplete bold like **Info: (trailing ** stripped)
-	text = regexp.MustCompile(`\*\*(.+?)(\*|$)`).ReplaceAllString(text, "$1")
-	text = regexp.MustCompile(`__(.+?)(_|$)`).ReplaceAllString(text, "$1")
-
-	// Handle italic: *text* - strip outer parens if present
-	text = regexp.MustCompile(`\*(.+?)\*`).ReplaceAllStringFunc(text, func(s string) string {
-		matches := regexp.MustCompile(`\*(.+?)\*`).FindStringSubmatch(s)
-		if len(matches) > 1 {
-			content := matches[1]
-			content = regexp.MustCompile(`^\s*\((.+)\)\s*$`).ReplaceAllString(content, "$1")
-			return content
-		}
-		return s
-	})
-	text = regexp.MustCompile(`_(.+?)_`).ReplaceAllStringFunc(text, func(s string) string {
-		matches := regexp.MustCompile(`_(.+?)_`).FindStringSubmatch(s)
-		if len(matches) > 1 {
-			content := matches[1]
-			content = regexp.MustCompile(`^\s*\((.+)\)\s*$`).ReplaceAllString(content, "$1")
-			return content
-		}
-		return s
-	})
-
-	// Remove strikethrough
-	text = regexp.MustCompile(`~~(.+?)~~`).ReplaceAllString(text, "$1")
-
-	// Remove inline code formatting - keep the code content
-	text = regexp.MustCompile("`([^`]+)`").ReplaceAllString(text, "$1")
-
-	// Remove link formatting, keep text
-	text = regexp.MustCompile(`\[([^\]]+)\]\([^\)]+\)`).ReplaceAllString(text, "$1")
-
-	return text
 }
 
 func addTroubleReportImagesSection(o *troubleReportOptions) error {
