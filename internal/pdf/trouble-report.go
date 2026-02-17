@@ -172,8 +172,8 @@ func renderFormattedLine(o *troubleReportOptions, line string) {
 		if seg.Strikethrough {
 			style += "S"
 		}
-		if style == "" {
-			style = ""
+		if seg.Underline {
+			style += "U"
 		}
 
 		fontSize := 10.0
@@ -196,6 +196,7 @@ type markdownSegment struct {
 	Bold          bool
 	Italic        bool
 	Strikethrough bool
+	Underline     bool
 	Header        int
 }
 
@@ -207,6 +208,7 @@ func parseMarkdownSegments(line string) []markdownSegment {
 	boldItalicPattern := regexp.MustCompile(`\*\*\*(.+?)\*\*\*`)
 	boldPattern := regexp.MustCompile(`\*\*(.+?)\*\*`)
 	italicPattern := regexp.MustCompile(`\*(.+?)\*`)
+	undercorePattern := regexp.MustCompile(`__(.+?)__`)
 
 	type match struct {
 		start   int
@@ -269,6 +271,17 @@ func parseMarkdownSegments(line string) []markdownSegment {
 		}
 	}
 
+	// Find underline matches (__text__)
+	for _, m := range undercorePattern.FindAllStringSubmatchIndex(line, -1) {
+		matches = append(matches, match{
+			start:   m[0],
+			end:     m[1],
+			text:    line[m[2]:m[3]],
+			matched: line[m[0]:m[1]],
+			format:  "underline",
+		})
+	}
+
 	// Sort matches by position
 	for i := 0; i < len(matches); i++ {
 		for j := i + 1; j < len(matches); j++ {
@@ -296,6 +309,8 @@ func parseMarkdownSegments(line string) []markdownSegment {
 		case "bolditalic":
 			seg.Bold = true
 			seg.Italic = true
+		case "underline":
+			seg.Underline = true
 		}
 		segments = append(segments, seg)
 
