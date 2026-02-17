@@ -84,38 +84,126 @@ templ MarkdownStyles() {
 		.markdown-content blockquote {
 			margin: 1em 0;
 			padding: 0.5em 1em;
+			border-left: 3px solid var(--ui-border);
+			background: var(--ui-bg-subtle);
+		}
+
+		.markdown-content pre code {
+			display: block;
+			padding: 1em;
+			background: var(--ui-bg-subtle);
+			border-radius: 4px;
+			overflow-x: auto;
+		}
+
+		.markdown-content del {
+			text-decoration: line-through;
+			color: var(--ui-text-subtle);
+		}
+
+		.markdown-content table {
+			width: 100%;
+			border-collapse: collapse;
+			margin: 1em 0;
+		}
+
+		.markdown-content th,
+		.markdown-content td {
+			padding: 0.5em;
+			border: 1px solid var(--ui-border);
+			text-align: left;
+		}
+
+		.markdown-content th {
+			background: var(--ui-bg-subtle);
+			font-weight: 600;
+		}
+
+		.markdown-content ul.task-list {
+			list-style: none;
+			padding-left: 0;
+		}
+
+		.markdown-content ul.task-list li {
+			display: flex;
+			align-items: flex-start;
+			gap: 0.5em;
+		}
+
+		.markdown-content ul.task-list input[type="checkbox"] {
+			margin-top: 0.25em;
 		}
 	</style>
 }
 
 script MarkdownScript() {
+	function escapeHTML(text) {
+		return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+	}
+
 	function renderMarkdownToHTML(content) {
 		if (!content || content.trim() === '') {
 			return '';
 		}
 
-		// Apply markdown transformations
-		var processed = content
-			.replace(/### (.*$)/gm, '<h3>$1</h3>')
-			.replace(/## (.*$)/gm, '<h2>$1</h2>')
-			.replace(/# (.*$)/gm, '<h1>$1</h1>')
-			.replace(/__(.*?)__/g, '<u>$1</u>')
-			.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-			.replace(/\*(.*?)\*/g, '<em>$1</em>')
-			.replace(/`(.*?)`/g, '<code>$1</code>')
-			.replace(/^- (.*$)/gm, '<li class="ul-item">$1</li>')
-			.replace(/^\d+\. (.*$)/gm, '<li class="ol-item">$1</li>')
-			.replace(/^> (.*$)/gm, '<bq-line>$1</bq-line>');
+		var processed = content;
 
-		// Group list items and blockquotes
+		// Process code blocks first (before other transformations)
+		processed = processed.replace(/```(\w*)\n([\s\S]*?)```/g, function(match, lang, code) {
+			return '<pre><code class="language-' + lang + '">' + escapeHTML(code.trim()) + '</code></pre>';
+		});
+
+		// Inline code
+		processed = processed.replace(/`(.*?)`/g, '<code>$1</code>');
+
+		// Strikethrough
+		processed = processed.replace(/~~(.*?)~~/g, '<del>$1</del>');
+
+		// Headers
+		processed = processed.replace(/^### (.*$)/gm, '<h3>$1</h3>');
+		processed = processed.replace(/^## (.*$)/gm, '<h2>$1</h2>');
+		processed = processed.replace(/^# (.*$)/gm, '<h1>$1</h1>');
+
+		// Emphasis
+		processed = processed.replace(/__(.*?)__/g, '<u>$1</u>');
+		processed = processed.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+		processed = processed.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+		// Task lists
+		processed = processed.replace(/^- \[ \] (.*$)/gm, '<li class="task-item"><input type="checkbox" disabled> $1</li>');
+		processed = processed.replace(/^- \[x\] (.*$)/gm, '<li class="task-item"><input type="checkbox" checked disabled> $1</li>');
+
+		// Lists (unordered and ordered)
+		processed = processed.replace(/^- (.*$)/gm, '<li class="ul-item">$1</li>');
+		processed = processed.replace(/^\d+\. (.*$)/gm, '<li class="ol-item">$1</li>');
+
+		// Blockquotes
+		processed = processed.replace(/^> (.*$)/gm, '<bq-line>$1</bq-line>');
+
+		// Tables
+		processed = processed.replace(/^\|(.+)\|$/gm, function(match, cols) {
+			var cells = cols.split('|').map(function(c) { return c.trim(); });
+			if (cells.some(function(c) { return /^[-:]+$/.test(c); })) {
+				return null; // Skip separator row
+			}
+			var isHeader = !processed.match(/^\|.+\|\s*$/m) || match.index < 100;
+			var tag = isHeader ? 'th' : 'td';
+			var row = cells.map(function(c) { return '<' + tag + '>' + c + '</' + tag + '>'; }).join('');
+			return '<tr>' + row + '</tr>';
+		});
+		processed = processed.replace(/(<tr>[\s\S]*?<\/tr>(?:\s*<tr>[\s\S]*?<\/tr>)*)/g, '<table>$1</table>');
+
+		// Group list items
 		processed = processed
 			.replace(/(<li class="ul-item">[\s\S]*?<\/li>(?:\s*<li class="ul-item">[\s\S]*?<\/li>)*)/gm, '<ul>$1</ul>')
 			.replace(/(<li class="ol-item">[\s\S]*?<\/li>(?:\s*<li class="ol-item">[\s\S]*?<\/li>)*)/gm, '<ol>$1</ol>')
+			.replace(/(<li class="task-item">[\s\S]*?<\/li>(?:\s*<li class="task-item">[\s\S]*?<\/li>)*)/gm, '<ul class="task-list">$1</ul>')
 			.replace(/(<bq-line>[\s\S]*?<\/bq-line>(?:\s*<bq-line>[\s\S]*?<\/bq-line>)*)/gm, '<blockquote>$1</blockquote>');
 
 		// Clean up temporary classes and tags
 		processed = processed
 			.replace(/class="[uo]l-item"/g, '')
+			.replace(/class="task-item"/g, '')
 			.replace(/<bq-line>/g, '')
 			.replace(/<\/bq-line>/g, '\n');
 
@@ -125,8 +213,7 @@ script MarkdownScript() {
 			paragraph = paragraph.trim();
 			if (!paragraph) return '';
 
-			// Don't wrap block elements in paragraphs
-			if (paragraph.match(/^<(h[1-6]|ul|ol|li|div|blockquote|pre)/)) {
+			if (paragraph.match(/^<(h[1-6]|ul|ol|li|table|blockquote|pre|div)/)) {
 				return paragraph;
 			}
 
