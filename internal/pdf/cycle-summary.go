@@ -12,11 +12,12 @@ import (
 
 // cycleSummaryOptions contains options for cycle summary PDF generation
 type cycleSummaryOptions struct {
-	*imageOptions
-	Press    shared.PressNumber
-	Cycles   []*shared.Cycle
-	ToolsMap map[shared.EntityID]*shared.Tool
-	UsersMap map[shared.TelegramID]*shared.User
+	PDF        *gofpdf.Fpdf
+	Translator func(string) string
+	Press      shared.PressNumber
+	Cycles     []*shared.Cycle
+	ToolsMap   map[shared.EntityID]*shared.Tool
+	UsersMap   map[shared.TelegramID]*shared.User
 }
 
 // ToolSummary holds summary information for a tool in the cycle report
@@ -44,14 +45,12 @@ func GenerateCycleSummaryPDF(
 	pdf.SetMargins(20, 20, 20)
 
 	o := &cycleSummaryOptions{
-		imageOptions: &imageOptions{
-			PDF:        pdf,
-			Translator: pdf.UnicodeTranslatorFromDescriptor(""),
-		},
-		Press:    press,
-		Cycles:   cycles,
-		ToolsMap: toolsMap,
-		UsersMap: usersMap,
+		PDF:        pdf,
+		Translator: pdf.UnicodeTranslatorFromDescriptor(""),
+		Press:      press,
+		Cycles:     cycles,
+		ToolsMap:   toolsMap,
+		UsersMap:   usersMap,
 	}
 
 	addCycleSummaryHeader(o)

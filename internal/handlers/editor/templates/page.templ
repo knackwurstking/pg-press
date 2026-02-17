@@ -49,7 +49,6 @@ templ Page(props *PageProps) {
 					@hiddenFields(props)
 					@titleInput(props.Title)
 					@markdownToggle(props.UseMarkdown)
-					@markdownTools()
 					@contentTextarea(props.Content)
 					@markdownPreview()
 					if supportsAttachments(props.Type) {
@@ -152,18 +151,15 @@ templ pageAdditionalHead() {
 
 		function toggleMarkdownFeatures() {
 			var checkbox = document.getElementById('use_markdown');
-			var tools = document.getElementById('markdown-tools');
 			var previewContainer = document.getElementById('markdown-preview-container');
 			var textarea = document.getElementById('content');
 
 			if (checkbox.checked) {
-				tools.style.display = 'block';
 				previewContainer.style.display = 'block';
 				textarea.setAttribute('placeholder', 'Inhalt (Markdown-Formatierung aktiviert)');
 				updatePreview();
 				textarea.addEventListener('input', updatePreview);
 			} else {
-				tools.style.display = 'none';
 				previewContainer.style.display = 'none';
 				textarea.removeEventListener('input', updatePreview);
 				textarea.setAttribute('placeholder', 'Inhalt');
@@ -371,40 +367,6 @@ templ markdownToggle(useMarkdown bool) {
 			</label>
 		</div>
 	</div>
-}
-
-templ markdownTools() {
-	<div
-		id="markdown-tools"
-		class={ css.Border, css.P, css.MY, css.TransitionAll }
-		style={ fmt.Sprintf("display: none; border-radius: %s", css.VarRadius) }
-	>
-		<div class={ css.MB, css.TextSM, css.TextSemibold, css.Flex, css.ItemsCenter }>
-			<span>Markdown-Werkzeuge</span>
-		</div>
-		<div class={ css.Flex, css.GapSm, css.FlexWrap }>
-			@markdownToolButton("**", "**", "Fett", "bi-type-bold")
-			@markdownToolButton("*", "*", "Kursiv", "bi-type-italic")
-			@markdownToolButton("__", "__", "Unterstrichen", "bi-type-underline")
-			@markdownToolButton("# ", "", "Überschrift", "bi-type-h1")
-			@markdownToolButton("> ", "", "Zitat", "bi-quote")
-			@markdownToolButton("`", "`", "Code", "bi-code")
-			@markdownToolButton("- ", "", "Liste", "bi-list-ul")
-		</div>
-	</div>
-}
-
-templ markdownToolButton(before, after, title, iconClass string) {
-	<button
-		type="button"
-		class={ css.ButtonIcon, css.Secondary, css.ButtonSmall }
-		onclick={ templ.ComponentScript{
-			Call: fmt.Sprintf("insertMarkdown('%s', '%s')", before, after),
-		} }
-		title={ title }
-	>
-		<i class={ fmt.Sprintf("bi %s", iconClass) }></i>
-	</button>
 }
 
 templ contentTextarea(content string) {
