@@ -35,7 +35,6 @@ func init() {
 		env.ServerPathPrefix + "/profile",
 		env.ServerPathPrefix + "/feed",
 		env.ServerPathPrefix + "/editor",
-		env.ServerPathPrefix + "/help",
 		env.ServerPathPrefix + "/trouble-reports",
 		env.ServerPathPrefix + "/notes",
 		env.ServerPathPrefix + "/tools",
