@@ -2,406 +2,351 @@ package pdf
 
 import (
 	"bytes"
+	"context"
+	"encoding/base64"
 	"fmt"
-	"regexp"
+	"html/template"
+	"os"
+	"path/filepath"
 	"strings"
+	"time"
 
+	"github.com/chromedp/cdproto/page"
+	"github.com/chromedp/chromedp"
 	"github.com/knackwurstking/pg-press/internal/shared"
-
-	"github.com/jung-kurt/gofpdf/v2"
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/extension"
 )
 
-// Options contains common options for PDF generation
-type troubleReportOptions struct {
-	*imageOptions
-	Report *shared.TroubleReport
-}
-
 func GenerateTroubleReportPDF(tr *shared.TroubleReport) (*bytes.Buffer, error) {
-	pdf := gofpdf.New("P", "mm", "A4", "")
-	pdf.SetAutoPageBreak(true, 25)
-	pdf.AddPage()
-	pdf.SetMargins(20, 20, 20)
-
-	o := &troubleReportOptions{
-		imageOptions: &imageOptions{
-			PDF:        pdf,
-			Translator: pdf.UnicodeTranslatorFromDescriptor(""),
-		},
-		Report: tr,
+	htmlContent, err := generateTroubleReportHTML(tr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate HTML: %w", err)
 	}
 
-	addTroubleReportHeader(o)
-	addTroubleReportTitleSection(o)
-	addTroubleReportContentSection(o)
-	err := addTroubleReportImagesSection(o)
+	pdfBuf, err := generatePDFFromHTML(htmlContent)
 	if err != nil {
-		return nil, fmt.Errorf("failed to add images to PDF: %w", err)
+		return nil, fmt.Errorf("failed to generate PDF: %w", err)
+	}
+
+	return pdfBuf, nil
+}
+
+func generateTroubleReportHTML(tr *shared.TroubleReport) (template.HTML, error) {
+	var contentHTML string
+
+	if tr.UseMarkdown {
+		markdown := goldmark.New(
+			goldmark.WithExtensions(extension.GFM),
+		)
+		var buf bytes.Buffer
+		err := markdown.Convert([]byte(tr.Content), &buf)
+		if err != nil {
+			return "", fmt.Errorf("failed to convert markdown: %w", err)
+		}
+		contentHTML = buf.String()
+	} else {
+		contentHTML = fmt.Sprintf("<pre>%s</pre>", escapeHTML(tr.Content))
+	}
+
+	imagesHTML, err := generateImagesHTML(tr.LinkedAttachments)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate images HTML: %w", err)
+	}
+
+	htmlTemplate := `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-size: 12px;
+            line-height: 1.6;
+            color: #1a1a1a;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            margin-bottom: 20px;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            color: #003366;
+            margin-bottom: 5px;
+        }
+        
+        .header .report-id {
+            font-size: 12px;
+            color: #808080;
+        }
+        
+        .section {
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            font-size: 14px;
+            font-weight: bold;
+            background-color: #f0f8ff;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+        }
+        
+        .content {
+            padding: 0 5px;
+        }
+        
+        .content h1, .content h2, .content h3 {
+            margin: 0.8em 0 0.4em 0;
+            font-weight: bold;
+            line-height: 1.3;
+        }
+        
+        .content h1 { font-size: 1.4em; }
+        .content h2 { font-size: 1.2em; }
+        .content h3 { font-size: 1.1em; }
+        
+        .content p {
+            margin: 0.5em 0 1em 0;
+        }
+        
+        .content ul, .content ol {
+            margin: 0.5em 0;
+            padding-left: 1.5em;
+            list-style: inherit;
+        }
+        
+        .content ul { list-style-type: disc; }
+        .content ol { list-style-type: decimal; }
+        
+        .content li {
+            margin: 0.25em 0;
+        }
+        
+        .content code {
+            font-size: 0.9em;
+            padding: 0.125em 0.25em;
+            background-color: #f5f5f5;
+            border-radius: 2px;
+        }
+        
+        .content pre {
+            margin: 1em 0;
+            padding: 1em;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        
+        .content strong {
+            font-weight: 600;
+        }
+        
+        .content em {
+            font-style: italic;
+        }
+        
+        .content u {
+            text-decoration: underline;
+        }
+        
+        .content blockquote {
+            margin: 1em 0;
+            padding: 0.5em 1em;
+            border-left: 3px solid #ccc;
+            background-color: #f9f9f9;
+        }
+        
+        .images-section {
+            margin-top: 30px;
+            page-break-before: always;
+        }
+        
+        .images-section .section-title {
+            background-color: #f0f8ff;
+        }
+        
+        .images-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .image-container {
+            break-inside: avoid;
+        }
+        
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .image-container .image-caption {
+            font-size: 10px;
+            color: #666;
+            margin-top: 5px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Fehlerbericht</h1>
+        <div class="report-id">Report-ID: #{{ .ReportID }}</div>
+    </div>
+    
+    <div class="section">
+        <div class="section-title">TITEL</div>
+        <div class="content">
+            <p>{{ .Title }}</p>
+        </div>
+    </div>
+    
+    <div class="section">
+        <div class="section-title">INHALT</div>
+        <div class="content">
+            {{ .ContentHTML }}
+        </div>
+    </div>
+    
+    {{ if .ImagesHTML }}
+    <div class="section images-section">
+        <div class="section-title">BILDER ({{ .ImageCount }})</div>
+        <div class="images-grid">
+            {{ .ImagesHTML }}
+        </div>
+    </div>
+    {{ end }}
+</body>
+</html>`
+
+	data := struct {
+		ReportID    int
+		Title       string
+		ContentHTML template.HTML
+		ImagesHTML  template.HTML
+		ImageCount  int
+	}{
+		ReportID:    int(tr.ID),
+		Title:       tr.Title,
+		ContentHTML: template.HTML(contentHTML),
+		ImagesHTML:  template.HTML(imagesHTML),
+		ImageCount:  len(tr.LinkedAttachments),
+	}
+
+	tmpl, err := template.New("trouble-report").Parse(htmlTemplate)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse template: %w", err)
 	}
 
 	var buf bytes.Buffer
-	err = pdf.Output(&buf)
+	err = tmpl.Execute(&buf, data)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate PDF output: %w", err)
+		return "", fmt.Errorf("failed to execute template: %w", err)
 	}
 
-	return &buf, nil
+	return template.HTML(buf.String()), nil
 }
 
-func addTroubleReportHeader(o *troubleReportOptions) {
-	o.PDF.SetFont("Arial", "B", 20)
-	o.PDF.SetTextColor(0, 51, 102)
-	o.PDF.Cell(0, 15, o.Translator("Fehlerbericht"))
-	o.PDF.Ln(10)
-
-	o.PDF.SetFont("Arial", "", 12)
-	o.PDF.SetTextColor(128, 128, 128)
-	o.PDF.Cell(0, 8, fmt.Sprintf("Report-ID: #%d", o.Report.ID))
-	o.PDF.Ln(15)
-
-	o.PDF.SetTextColor(0, 0, 0)
-}
-
-func addTroubleReportTitleSection(o *troubleReportOptions) {
-	o.PDF.SetFont("Arial", "B", 14)
-	o.PDF.SetFillColor(240, 248, 255)
-	o.PDF.CellFormat(0, 10, "TITEL", "1", 1, "L", true, 0, "")
-	o.PDF.Ln(5)
-	o.PDF.SetFont("Arial", "", 12)
-	o.PDF.MultiCell(0, 8, o.Translator(o.Report.Title), "", "", false)
-	o.PDF.Ln(8)
-}
-
-func addTroubleReportContentSection(o *troubleReportOptions) {
-	o.PDF.SetFont("Arial", "B", 14)
-	o.PDF.SetFillColor(240, 248, 255)
-	o.PDF.CellFormat(0, 10, "INHALT", "1", 1, "L", true, 0, "")
-	o.PDF.Ln(5)
-
-	if o.Report.UseMarkdown {
-		renderMarkdownContentToPDF(o)
-	} else {
-		o.PDF.SetFont("Arial", "", 11)
-		o.PDF.MultiCell(0, 6, o.Translator(o.Report.Content), "", "", false)
-	}
-	o.PDF.Ln(8)
-}
-
-// renderMarkdownContentToPDF renders markdown content with basic formatting in PDF
-func renderMarkdownContentToPDF(o *troubleReportOptions) {
-	content := o.Report.Content
-
-	for line := range strings.SplitSeq(content, "\n") {
-		line = strings.TrimSpace(line)
-		if line == "" {
-			o.PDF.Ln(3)
-			continue
-		}
-
-		// Handle headers
-		if strings.HasPrefix(line, "### ") {
-			o.PDF.SetFont("Arial", "B", 11)
-			renderFormattedLine(o, strings.TrimSpace(line[4:]))
-			o.PDF.Ln(2)
-			continue
-		}
-		if strings.HasPrefix(line, "## ") {
-			o.PDF.SetFont("Arial", "B", 12)
-			renderFormattedLine(o, strings.TrimSpace(line[3:]))
-			o.PDF.Ln(2)
-			continue
-		}
-		if strings.HasPrefix(line, "# ") {
-			o.PDF.SetFont("Arial", "B", 13)
-			renderFormattedLine(o, strings.TrimSpace(line[2:]))
-			o.PDF.Ln(3)
-			continue
-		}
-
-		// Handle lists
-		if strings.HasPrefix(line, "- ") || strings.HasPrefix(line, "* ") {
-			o.PDF.SetFont("Arial", "", 10)
-			o.PDF.Cell(10, 6, o.Translator("•"))
-			renderFormattedLine(o, strings.TrimSpace(line[2:]))
-			o.PDF.Ln(6)
-			continue
-		}
-
-		// Handle numbered lists
-		if matched, _ := regexp.MatchString(`^\d+\.\s`, line); matched {
-			o.PDF.SetFont("Arial", "", 10)
-			parts := regexp.MustCompile(`^(\d+\.\s)(.*)`).FindStringSubmatch(line)
-			if len(parts) == 3 {
-				o.PDF.Cell(10, 6, parts[1])
-				renderFormattedLine(o, parts[2])
-			}
-			o.PDF.Ln(6)
-			continue
-		}
-
-		// Handle blockquotes
-		if strings.HasPrefix(line, "> ") {
-			o.PDF.SetFont("Arial", "I", 10)
-			o.PDF.SetTextColor(100, 100, 100)
-			o.PDF.Cell(5, 6, o.Translator("│"))
-			renderFormattedLine(o, strings.TrimSpace(line[2:]))
-			o.PDF.SetTextColor(0, 0, 0)
-			o.PDF.Ln(6)
-			continue
-		}
-
-		// Handle regular paragraphs with inline formatting
-		o.PDF.SetFont("Arial", "", 10)
-		renderFormattedLine(o, line)
-		o.PDF.Ln(1)
-	}
-}
-
-// renderFormattedLine processes inline markdown formatting (bold, italic, strikethrough)
-func renderFormattedLine(o *troubleReportOptions, line string) {
-	segments := parseMarkdownSegments(line)
-
-	for _, seg := range segments {
-		style := ""
-		if seg.Bold {
-			style += "B"
-		}
-		if seg.Italic {
-			style += "I"
-		}
-		if seg.Strikethrough {
-			style += "S"
-		}
-		if seg.Underline {
-			style += "U"
-		}
-
-		fontSize := 10.0
-		if seg.Header == 3 {
-			fontSize = 11
-		} else if seg.Header == 2 {
-			fontSize = 12
-		} else if seg.Header == 1 {
-			fontSize = 13
-		}
-
-		o.PDF.SetFont("Arial", style, fontSize)
-		o.PDF.Write(fixedLineHeight(fontSize), o.Translator(seg.Text))
-	}
-}
-
-// markdownSegment represents a text segment with formatting
-type markdownSegment struct {
-	Text          string
-	Bold          bool
-	Italic        bool
-	Strikethrough bool
-	Underline     bool
-	Header        int
-}
-
-type match struct {
-	start   int
-	end     int
-	text    string
-	matched string
-	format  string
-}
-
-// parseMarkdownSegments parses a line into formatted segments
-func parseMarkdownSegments(line string) []markdownSegment {
-	var segments []markdownSegment
-
-	// Regex patterns for inline formatting
-	boldItalicPattern := regexp.MustCompile(`\*\*\*(.+?)\*\*\*`)
-	boldPattern := regexp.MustCompile(`\*\*(.+?)\*\*`)
-	italicPattern := regexp.MustCompile(`\*(.+?)\*`)
-	underscorePattern := regexp.MustCompile(`__(.+?)__`)
-
-	var matches []match
-
-	// Find bold+italic matches first (***text***)
-	for _, m := range boldItalicPattern.FindAllStringSubmatchIndex(line, -1) {
-		matches = append(matches, match{
-			start:   m[0],
-			end:     m[1],
-			text:    line[m[2]:m[3]],
-			matched: line[m[0]:m[1]],
-			format:  "bolditalic",
-		})
+func generateImagesHTML(attachments []string) (string, error) {
+	if len(attachments) == 0 {
+		return "", nil
 	}
 
-	// Find bold matches (**text**), excluding positions within bolditalic
-	for _, m := range boldPattern.FindAllStringSubmatchIndex(line, -1) {
-		if !isOverlapping(m, matches) {
-			matches = append(matches, match{
-				start:   m[0],
-				end:     m[1],
-				text:    line[m[2]:m[3]],
-				matched: line[m[0]:m[1]],
-				format:  "bold",
-			})
-		}
-	}
-
-	// Find italic matches (*text*), excluding positions within bold or bolditalic
-	for _, m := range italicPattern.FindAllStringSubmatchIndex(line, -1) {
-		if !isOverlapping(m, matches) {
-			matches = append(matches, match{
-				start:   m[0],
-				end:     m[1],
-				text:    line[m[2]:m[3]],
-				matched: line[m[0]:m[1]],
-				format:  "italic",
-			})
-		}
-	}
-
-	// Find underline matches (__text__), excluding positions within bold, italic, or bolditalic
-	for _, m := range underscorePattern.FindAllStringSubmatchIndex(line, -1) {
-		if !isOverlapping(m, matches) {
-			seg := match{
-				start:   m[0],
-				end:     m[1],
-				text:    line[m[2]:m[3]],
-				matched: line[m[0]:m[1]],
-				format:  "underline",
-			}
-			matches = append(matches, seg)
-		}
-	}
-
-	// Sort matches by position
-	for i := 0; i < len(matches); i++ {
-		for j := i + 1; j < len(matches); j++ {
-			if matches[j].start < matches[i].start {
-				matches[i], matches[j] = matches[j], matches[i]
-			}
-		}
-	}
-
-	// Build segments
-	lastPos := 0
-	for _, m := range matches {
-		// Add text before this match
-		if m.start > lastPos {
-			segments = append(segments, markdownSegment{Text: line[lastPos:m.start]})
-		}
-
-		// Add the formatted text
-		seg := markdownSegment{Text: m.text}
-		switch m.format {
-		case "bold":
-			seg.Bold = true
-		case "italic":
-			seg.Italic = true
-		case "bolditalic":
-			seg.Bold = true
-			seg.Italic = true
-		case "underline":
-			seg.Underline = true
-		}
-		segments = append(segments, seg)
-
-		lastPos = m.end
-	}
-
-	// Add remaining text
-	if lastPos < len(line) {
-		segments = append(segments, markdownSegment{Text: line[lastPos:]})
-	}
-
-	if len(segments) == 0 {
-		segments = append(segments, markdownSegment{Text: line})
-	}
-
-	return segments
-}
-
-func isOverlapping(m []int, matches []match) bool {
-	overlaps := false
-	for _, bm := range matches {
-		if m[0] >= bm.start && m[0] < bm.end {
-			overlaps = true
-			break
-		}
-	}
-	return overlaps
-}
-
-func fixedLineHeight(fontSize float64) float64 {
-	return fontSize * 0.4
-}
-
-func addTroubleReportImagesSection(o *troubleReportOptions) error {
-	if len(o.Report.LinkedAttachments) == 0 {
-		return nil
-	}
-
-	images, err := getTroubleReportImages(o.Report.LinkedAttachments)
-	if err != nil {
-		return err
-	}
-	if len(images) == 0 {
-		return nil
-	}
-
-	o.PDF.AddPage()
-	o.PDF.SetFont("Arial", "B", 14)
-	o.PDF.SetFillColor(240, 248, 255)
-	o.PDF.CellFormat(0, 10,
-		o.Translator(fmt.Sprintf("BILDER (%d)", len(images))),
-		"1", 1, "L", true, 0, "")
-
-	renderTroubleReportImagesInGrid(o, images)
-
-	return nil
-}
-
-func getTroubleReportImages(attachments []string) ([]*shared.Image, error) {
-	var images []*shared.Image
+	var imageTags []string
 	for _, a := range attachments {
-		i := shared.NewImage(a, nil)
-		if err := i.ReadFile(); err != nil {
-			return images, err
+		img := shared.NewImage(a, nil)
+		if err := img.ReadFile(); err != nil {
+			continue
 		}
-		images = append(images, i)
+
+		base64Data := base64.StdEncoding.EncodeToString(img.Data)
+		dataURI := fmt.Sprintf("data:%s;base64,%s", img.MimeType(), base64Data)
+
+		imageTag := fmt.Sprintf(
+			`<div class="image-container"><img src="%s" alt="%s"><div class="image-caption">%s</div></div>`,
+			dataURI,
+			escapeHTML(a),
+			escapeHTML(a),
+		)
+		imageTags = append(imageTags, imageTag)
 	}
-	return images, nil
+
+	return strings.Join(imageTags, "\n"), nil
 }
 
-func renderTroubleReportImagesInGrid(o *troubleReportOptions, images []*shared.Image) {
-	pageWidth, _ := o.PDF.GetPageSize()
-	leftMargin, _, rightMargin, _ := o.PDF.GetMargins()
-	usableWidth := pageWidth - leftMargin - rightMargin
-	imageWidth := (usableWidth - 10) / 2 // 10mm spacing between images
+func generatePDFFromHTML(htmlContent template.HTML) (*bytes.Buffer, error) {
+	tmpDir := os.TempDir()
+	tmpFile := filepath.Join(tmpDir, "trouble-report-pdf.html")
 
-	layout := &imageLayoutProps{
-		PageWidth:   pageWidth,
-		LeftMargin:  leftMargin,
-		RightMargin: rightMargin,
-		UsableWidth: usableWidth,
-		ImageWidth:  imageWidth,
+	err := os.WriteFile(tmpFile, []byte(htmlContent), 0644)
+	if err != nil {
+		return nil, fmt.Errorf("failed to write temp HTML file: %w", err)
+	}
+	defer os.Remove(tmpFile)
+
+	fileURL := "file://" + tmpFile
+
+	opts := append(
+		chromedp.DefaultExecAllocatorOptions[:],
+		chromedp.Flag("headless", true),
+		chromedp.Flag("disable-gpu", true),
+		chromedp.Flag("no-sandbox", true),
+		chromedp.Flag("allow-file-access-from-files", true),
+	)
+
+	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
+	defer cancel()
+
+	taskCtx, cancel := chromedp.NewContext(allocCtx)
+	defer cancel()
+
+	var pdfBuf []byte
+
+	err = chromedp.Run(taskCtx,
+		chromedp.Navigate(fileURL),
+		chromedp.Sleep(500*time.Millisecond),
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			var err error
+			pdfBuf, _, err = page.PrintToPDF().
+				WithPrintBackground(true).
+				WithPaperWidth(8.27).
+				WithPaperHeight(11.69).
+				WithMarginTop(0).
+				WithMarginBottom(0).
+				WithMarginLeft(0).
+				WithMarginRight(0).
+				Do(ctx)
+			return err
+		}),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate PDF: %w", err)
 	}
 
-	o.PDF.Ln(10)
+	return bytes.NewBuffer(pdfBuf), nil
+}
 
-	var currentY float64
-	_, currentY = o.PDF.GetXY()
-
-	// Process images in pairs (2 per row)
-	for i := 0; i < len(images); i += 2 {
-		position := &imagePositionOptions{
-			StartIndex:  i,
-			TotalImages: len(images),
-			ImageWidth:  imageWidth,
-			LeftMargin:  leftMargin,
-			RightX:      leftMargin + imageWidth + 10,
-			CurrentY:    &currentY,
-		}
-
-		processImageRow(o.imageOptions, layout, position, images)
-		currentY += 15 // Add spacing between rows
-		o.PDF.SetXY(leftMargin, currentY)
-	}
+func escapeHTML(s string) string {
+	s = strings.ReplaceAll(s, "&", "&amp;")
+	s = strings.ReplaceAll(s, "<", "&lt;")
+	s = strings.ReplaceAll(s, ">", "&gt;")
+	s = strings.ReplaceAll(s, `"`, "&quot;")
+	s = strings.ReplaceAll(s, `'`, "&#39;")
+	return s
 }
