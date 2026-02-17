@@ -167,7 +167,13 @@ templ pageAdditionalHead() {
 		}
 
 		function updatePreview() {
-			window.updateMarkdownPreview('content', 'preview-content');
+			var textarea = document.getElementById('content');
+			var previewContent = document.getElementById('preview-content');
+
+			if (!textarea || !previewContent) return;
+
+			var html = textarea.value ? renderMarkdownToHTML(textarea.value) : '';
+			previewContent.innerHTML = '<div class="markdown-content">' + html + '</div>';
 		}
 
 		function togglePreviewMode() {
