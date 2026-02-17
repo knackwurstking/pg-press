@@ -200,6 +200,14 @@ type markdownSegment struct {
 	Header        int
 }
 
+type match struct {
+	start   int
+	end     int
+	text    string
+	matched string
+	format  string
+}
+
 // parseMarkdownSegments parses a line into formatted segments
 func parseMarkdownSegments(line string) []markdownSegment {
 	var segments []markdownSegment
@@ -209,14 +217,6 @@ func parseMarkdownSegments(line string) []markdownSegment {
 	boldPattern := regexp.MustCompile(`\*\*(.+?)\*\*`)
 	italicPattern := regexp.MustCompile(`\*(.+?)\*`)
 	underscorePattern := regexp.MustCompile(`__(.+?)__`)
-
-	type match struct {
-		start   int
-		end     int
-		text    string
-		matched string
-		format  string
-	}
 
 	var matches []match
 
@@ -233,14 +233,7 @@ func parseMarkdownSegments(line string) []markdownSegment {
 
 	// Find bold matches (**text**), excluding positions within bolditalic
 	for _, m := range boldPattern.FindAllStringSubmatchIndex(line, -1) {
-		overlaps := false
-		for _, bm := range matches {
-			if m[0] >= bm.start && m[0] < bm.end {
-				overlaps = true
-				break
-			}
-		}
-		if !overlaps {
+		if !isOverlapping(m, matches) {
 			matches = append(matches, match{
 				start:   m[0],
 				end:     m[1],
@@ -253,14 +246,7 @@ func parseMarkdownSegments(line string) []markdownSegment {
 
 	// Find italic matches (*text*), excluding positions within bold or bolditalic
 	for _, m := range italicPattern.FindAllStringSubmatchIndex(line, -1) {
-		overlaps := false
-		for _, bm := range matches {
-			if m[0] >= bm.start && m[0] < bm.end {
-				overlaps = true
-				break
-			}
-		}
-		if !overlaps {
+		if !isOverlapping(m, matches) {
 			matches = append(matches, match{
 				start:   m[0],
 				end:     m[1],
@@ -271,15 +257,18 @@ func parseMarkdownSegments(line string) []markdownSegment {
 		}
 	}
 
-	// Find underline matches (__text__)
+	// Find underline matches (__text__), excluding positions within bold, italic, or bolditalic
 	for _, m := range underscorePattern.FindAllStringSubmatchIndex(line, -1) {
-		matches = append(matches, match{
-			start:   m[0],
-			end:     m[1],
-			text:    line[m[2]:m[3]],
-			matched: line[m[0]:m[1]],
-			format:  "underline",
-		})
+		if !isOverlapping(m, matches) {
+			seg := match{
+				start:   m[0],
+				end:     m[1],
+				text:    line[m[2]:m[3]],
+				matched: line[m[0]:m[1]],
+				format:  "underline",
+			}
+			matches = append(matches, seg)
+		}
 	}
 
 	// Sort matches by position
@@ -327,6 +316,17 @@ func parseMarkdownSegments(line string) []markdownSegment {
 	}
 
 	return segments
+}
+
+func isOverlapping(m []int, matches []match) bool {
+	overlaps := false
+	for _, bm := range matches {
+		if m[0] >= bm.start && m[0] < bm.end {
+			overlaps = true
+			break
+		}
+	}
+	return overlaps
 }
 
 func fixedLineHeight(fontSize float64) float64 {
