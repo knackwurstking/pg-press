@@ -208,7 +208,7 @@ func parseMarkdownSegments(line string) []markdownSegment {
 	boldItalicPattern := regexp.MustCompile(`\*\*\*(.+?)\*\*\*`)
 	boldPattern := regexp.MustCompile(`\*\*(.+?)\*\*`)
 	italicPattern := regexp.MustCompile(`\*(.+?)\*`)
-	undercorePattern := regexp.MustCompile(`__(.+?)__`)
+	underscorePattern := regexp.MustCompile(`__(.+?)__`)
 
 	type match struct {
 		start   int
@@ -272,7 +272,7 @@ func parseMarkdownSegments(line string) []markdownSegment {
 	}
 
 	// Find underline matches (__text__)
-	for _, m := range undercorePattern.FindAllStringSubmatchIndex(line, -1) {
+	for _, m := range underscorePattern.FindAllStringSubmatchIndex(line, -1) {
 		matches = append(matches, match{
 			start:   m[0],
 			end:     m[1],
