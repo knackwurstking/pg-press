@@ -143,7 +143,13 @@ templ MarkdownStyles() {
 
 script MarkdownScript() {
 	function escapeHTML(text) {
-		return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+		return text
+			.replaceAll('&', '&amp;')
+			.replaceAll('<', '&lt;')
+			.replaceAll('>', '&gt;')
+			.replaceAll('"', '&quot;')
+			.replaceAll("'", '&#39;')
+			.replaceAll("/", '&#x2F;');
 	}
 
 	function renderMarkdownToHTML(content) {
