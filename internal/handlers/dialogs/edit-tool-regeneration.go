@@ -72,17 +72,19 @@ func PutToolRegeneration(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
+	tr, merr := db.GetToolRegeneration(shared.EntityID(id))
+	if merr != nil {
+		return merr.Echo()
+	}
+
 	formData, verr := parseEditToolRegenerationForm(c)
 	if verr != nil {
 		return verr.HTTPError().Echo()
 	}
 
-	merr = db.UpdateToolRegeneration(&shared.ToolRegeneration{
-		ID:     shared.EntityID(id),
-		ToolID: shared.EntityID(id),
-		Start:  formData.Start,
-		Stop:   formData.Stop,
-	})
+	tr.Start = formData.Start
+	tr.Stop = formData.Stop
+	merr = db.UpdateToolRegeneration(tr)
 	if merr != nil {
 		return merr.Echo()
 	}
