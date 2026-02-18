@@ -1,224 +1,166 @@
-# PG Press Project Documentation
+# AGENTS.md
 
-## Overview
+This document provides coding conventions and guidance for agentic coding agents working on the pg-press codebase.
 
-PG Press is a modern web application built with Go, featuring a comprehensive UI library and various backend services. This document serves as technical documentation for the project.
-
-## Technology Stack
-
-### Core Technologies
-
-- **Language**: Go (1.25.3)
-- **Web Framework**: Echo v4.13.4
-- **Templating Engine**: A-H Templ v0.3.960
-- **Database**: SQLite (via mattn/go-sqlite3 v1.14.32)
-- **Authentication**: Keymaker v1.0.0
-- **UI Library**: Custom UI library (Recursive font-based design)
-- **Dynamic Content**: HTMX
-
-### Key Dependencies
-
-```go
-github.com/a-h/templ v0.3.960
-github.com/labstack/echo/v4 v4.13.4
-github.com/mattn/go-sqlite3 v1.14.32
-github.com/williepotgieter/keymaker v1.0.0
-```
-
-## Project Structure
-
-### Root Directory
-
-```
-/pg-press/
-├── bin/              # Compiled binaries
-├── cmd/              # Main application entry points
-├── data/             # Data files and assets
-├── docs/             # Documentation
-├── internal/         # Main application code
-│   ├── assets/       # UI assets (CSS, JS, fonts)
-│   │   └── css/ui.min.css  # Main UI stylesheet
-│   ├── components/   # Shared UI components
-│   ├── db/           # Database operations
-│   ├── env/          # Environment configuration
-│   ├── errors/       # Error handling
-│   ├── handlers/     # HTTP request handlers
-│   │   ├── auth/     # Authentication routes
-│   │   ├── dashboard/# Dashboard functionality
-│   │   └── ...       # Other route handlers
-│   ├── logger/       # Logging infrastructure
-│   ├── shared/       # Shared utilities
-│   ├── urlb/         # URL building
-│   └── utils/        # Utility functions
-├── scripts/          # Development scripts
-└── ...
-```
-
-### UI Architecture
-
-- **CSS Framework**: Custom minified CSS (`ui.min.css`) with:
-  - Recursive font family (Google Fonts)
-  - CSS variables for theming
-  - Responsive design patterns
-  - Component-based styling
-
-## Development Workflow
-
-### Setup
-
-1. Install Go 1.25.3+
-2. Run `go mod download` to fetch dependencies
-3. Generate templ files: `templ generate` or `make generate`
-
-### Key Commands
+## Build/Lint/Test Commands
 
 ```bash
-# Build the application
+# Initialize dependencies and generate templ templates
+make init
+
+# Build the binary
 make build
 
-# Run development server
+# Run all tests with verbose output
+go test -v ./...
+
+# Run linter
+make lint
+
+# Run development server with auto-reload (requires gow)
 make dev
 
-# Generate templ files
+# Generate templ template code
 make generate
-
-# Run tests
-go test ./...
 ```
 
-### Environment Variables
+To run a single test file: `go test -v ./path/to/file_test.go`
+To run a single test function: `go test -v -run TestFunctionName ./path/to/`
 
-```env
-# Database configuration
-DB_PATH=data/pg_press.db
+## Code Style Guidelines
 
-# Server settings
-SERVER_ADDR=:8080
-SERVER_PATH_PREFIX=/
-VERBOSE=true
+### General Structure
+- Use lowercase package names matching directory structure
+- Separate code into logical packages: `cmd/`, `internal/`, `scripts/`
+- Keep files focused: entity definitions, handlers, database access, URL builders
+- Use `internal/` for private packages that shouldn't be imported externally
 
-# Authentication
-ADMINS=admin@example.com
+### Imports
+Group imports in order:
+1. Standard library
+2. Third-party dependencies (github.com/...)
+3. Internal packages (alphabetically by module: `db`, `errors`, `env`, `logger`, `shared`, `urlb`, `utils`)
 
-SERVER_PATH_IMAGES=${HOME}/.pg-press/images
+Example:
+```go
+import (
+    "fmt"
+    
+   "github.com/labstack/echo/v4"
+    
+    "github.com/knackwurstking/pg-press/internal/shared"
+)
 ```
 
-## Database Schema
+### Naming Conventions
+- **Types (structs, interfaces)**: PascalCase (`User`, `Cycle`, `Tool`)
+- **Variables/Functions**: camelCase (`userId`, `getToolByID`)
+- **Constants**: PascalCase with prefixes for categories (`UserNameMinLength`, `ToolCyclesWarning`)
+- **File names**: kebab-case for templates (`tool-page.templ`), snake_case for Go files
+- **Package names**: single word, lowercase (`shared`, `utils`, `db`)
 
-The application uses SQLite with the following key tables:
+### Error Handling
+- Custom error types in `internal/errors/`: `ValidationError`, `NotFoundError`, `AuthorizationError`, `ExistsError`
+- Wrap errors with context using `errors.Wrap(err, "context")`
+- HTTP errors: `*errors.HTTPError` with `.Echo()` conversion
+- Always check for nil before accessing error values
+- Use specific error types for database operations (sql.ErrNoRows, etc.)
 
-- `users` - User accounts and profiles (see [internal/db/user_users.go](file:///Users/knackwurstking/Git/pg-press/internal/db/user_users.go))
-- `cookies` - Authentication cookies (see [internal/db/user_cookies.go](file:///Users/knackwurstking/Git/pg-press/internal/db/user_cookies.go))
-- `presses` - Press machines (see [internal/db/press_presses.go](file:///Users/knackwurstking/Git/pg-press/internal/db/press_presses.go))
-- `tools` - Tools and equipment (see [internal/db/tool_tools.go](file:///Users/knackwurstking/Git/pg-press/internal/db/tool_tools.go))
-
-## API Endpoints
-
-The application uses Echo framework with handlers organized in [internal/handlers/](file:///Users/knackwurstking/Git/pg-press/internal/handlers). The endpoints are registered in [handlers.go](file:///Users/knackwurstking/Git/pg-press/internal/handlers/handlers.go) and include:
-
+### Entity Pattern
+All entities implement the `Entity[T]` interface:
+```go
+type Entity[T any] interface {
+    Validate() *errors.ValidationError
+    Clone() T
+    String() string
+}
 ```
-GET    /               # Home page (see [home/](file:///Users/knackwurstking/Git/pg-press/internal/handlers/home))
-GET    /auth/*          # Authentication routes (see [auth/](file:///Users/knackwurstking/Git/pg-press/internal/handlers/auth))
-GET    /profile/*       # Profile management (see [profile/](file:///Users/knackwurstking/Git/pg-press/internal/handlers/profile))
-GET    /tools/*         # Tools management (see [tools/](file:///Users/knackwurstking/Git/pg-press/internal/handlers/tools))
-GET    /tool/*          # Individual tool operations (see [tool/](file:///Users/knackwurstking/Git/pg-press/internal/handlers/tool))
-GET    /notes/*         # Notes management (see [notes/](file:///Users/knackwurstking/Git/pg-press/internal/handlers/notes))
-GET    /press/*         # Press operations (see [press/](file:///Users/knackwurstking/Git/pg-press/internal/handlers/press))
-GET    /umbau/*         # Umbau operations (see [umbau/](file:///Users/knackwurstking/Git/pg-press/internal/handlers/umbau))
-GET    /metal-sheets/*  # Metal sheets management (see [metalsheets/](file:///Users/knackwurstking/Git/pg-press/internal/handlers/metalsheets))
-GET    /trouble-reports/* # Trouble reports (see [troublereports/](file:///Users/knackwurstking/Git/pg-press/internal/handlers/troublereports))
-GET    /dialog/*        # Dialog operations (see [dialogs/](file:///Users/knackwurstking/Git/pg-press/internal/handlers/dialogs))
-GET    /editor/*        # Editor operations (see [editor/](file:///Users/knackwurstking/Git/pg-press/internal/handlers/editor))
+- Add validation logic in `Validate()` method
+- Implement `Clone()` for deep copies
+- Format `String()` for debugging (include all fields)
+
+### Type Safety
+- Use custom types instead of primitives: `EntityID`, `UnixMilli`, `TelegramID`, `MachineType`
+- Define type constants: `SlotUpper`, `SlotLower`, `MachineTypeSACMI`
+- Add methods on custom types for formatting: `German() string`
+
+### Templ Templates
+- Use `templ` package for HTML generation
+- Template files: `/internal/handlers/*/templates/*.templ`
+- Auto-generate Go code with `make generate`
+
+### Logging
+- Use structured logging via `logger.New("module-name")`
+- Log in development with verbose mode: `export VERBOSE=true`
+- Use placeholders for dynamic values: `log.Debug("message %s", value)`
+
+### Database
+- Multiple SQLite databases: tools, presses, notes, users, reports
+- Open databases in `internal/db/db.go`
+- Enable WAL mode: `journal=WAL&synchronous=1`
+- Configure connection pooling for concurrent access
+
+### Error Messages
+- Validation errors: "field must be [requirement]"
+- Not found: "resource [name] with id [id] not found"
+- Authorization: "you must be logged in to access this resource"
+
+### File Organization
+```
+cmd/pg-press/     # CLI entry points (main.go, commands-*.go)
+internal/
+  components/     # Reusable UI components
+  db/             # Database access layer
+  errors/         # Custom error types
+  env/            # Environment variables
+  handlers/*/     # HTTP request handlers
+    templates/    # templ files
+  logger/         # Logging infrastructure
+  pdf/            # PDF generation logic
+  shared/         # Shared types, entities, utilities
+    type_*.go     # Custom type definitions
+  urlb/           # URL building functions
+  utils/          # Generic utilities
+scripts/          # Helper scripts
 ```
 
-## UI Components
+### SQL Conventions
+- Use named databases: `tool`, `press`, `note`, `user`, `reports`
+- Table names pluralized: `tools`, `cycles`, `users`
+- Use WAL mode for SQLite connections
+- Set connection limits: `SetMaxOpenConns(10)`, `SetMaxIdleConns(5)`
+- Close connections properly
 
-The project uses a component-based architecture with:
+### Date/Time
+- Use `UnixMilli` type for timestamps (int64 milliseconds)
+- Format constants: `DateFormat = "02.01.2006"`, `TimeFormat = "15:04"`
+- German date format: day.month.year
+- Convert with `UnixMilli.FormatDate()`, `FormatDateTime()`
 
-- Shared components in `internal/components/`
-- Page-specific templates in `internal/handlers/{handler}/templates/`
-- HTMX for dynamic content loading
+### Testing
+- No tests currently exist; add tests when implementing new features
+- Test files named `*_test.go`
+- Use standard Go testing package
 
-## Styling System
+## Special Considerations
 
-The UI library provides:
+### Error Types Hierarchy
+```go
+ValidationError → HTTP 400
+NotFoundError   → HTTP 404
+AuthorizationError → HTTP 401
+ExistsError     → HTTP 409
+```
 
-- Color themes (light/dark mode)
-- Responsive grid system
-- Component styles (cards, buttons, forms)
-- Utility classes for spacing, alignment, etc.
+### Template Rendering
+- Render templates in handlers: `t.Render(c.Request().Context(), c.Response())`
+- Wrap render errors: `errors.NewRenderError(err, "Template Name")`
 
-## Best Practices
+### API Key Authentication
+- Required length: 32 characters minimum (`MinAPIKeyLength`)
+- Validated from header, query param, or cookie
+- Skipper list in `middleware.go` for public assets
 
-1. **Templating**: Use `.templ` files for HTML templates with Go logic
-2. **Error Handling**: Centralized error handling in `internal/errors/`
-3. **Database**: Use prepared statements and transactions
-4. **Security**: Input validation, CSRF protection, JWT authentication
-5. **Logging**: Structured logging with context
-
-## Deployment
-
-1. Build the application: `make build`
-2. Configure environment variables
-3. Run the binary or use Docker
-
-## Troubleshooting
-
-- Check `go.mod` for dependency issues
-- Verify database migrations
-- Review logs in `internal/logger/`
-
-## Project Agents
-
-### Agent Types
-
-PG Press implements various agent patterns to handle different aspects of the application:
-
-#### 1. User Management Agent
-
-- Handles user authentication and session management
-- Manages user profiles and permissions
-- Integrates with Keymaker for secure authentication
-
-#### 2. Database Agent
-
-- Manages all database operations using SQLite
-- Handles transactions and prepared statements
-- Provides centralized access to database tables
-
-#### 3. UI Agent
-
-- Renders HTML templates using A-H Templ engine
-- Manages component rendering and state
-- Handles dynamic content via HTMX
-
-#### 4. Logging Agent
-
-- Provides structured logging capabilities
-- Manages log levels and output formats
-- Supports contextual logging
-
-#### 5. Configuration Agent
-
-- Handles environment variable parsing and validation
-- Manages application configuration loading
-- Provides centralized config access
-
-### Agent Architecture
-
-Agents are designed with the following principles:
-
-1. **Single Responsibility**: Each agent handles a specific domain
-2. **Loose Coupling**: Agents communicate through well-defined interfaces
-3. **Reusability**: Agents can be reused across different parts of the application
-4. **Testability**: Each agent is designed to be easily unit tested
-
-### Agent Integration
-
-Agents integrate through:
-
-- Shared interfaces for consistent communication
-- Context propagation for request-scoped data
-- Error handling middleware for centralized error management
-
-This document provides an overview of the PG Press project architecture and development workflow.
+### German Localization
+- Use `German()` method on entities for display names
+- Translate PDF output with translator function
