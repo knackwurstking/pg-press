@@ -104,7 +104,7 @@ func parseEditPressForm(c echo.Context) (*editPressForm, *errors.ValidationError
 	}
 
 	// Press Number
-	vPressNumber, err := utils.SanitizeInt8(c.FormValue("press_id"))
+	vPressNumber, err := utils.SanitizeInt8(c.FormValue("press_number"))
 	if err != nil {
 		return nil, errors.NewValidationError("invalid press number: %v", err)
 	}
