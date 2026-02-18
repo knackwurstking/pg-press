@@ -4,12 +4,12 @@ go 1.25.3
 
 require (
 	github.com/SuperPaintman/nice v0.0.0-20211001214957-a29cd3367b17
-	github.com/a-h/templ v0.3.960
+	github.com/a-h/templ v0.3.977
 	github.com/chromedp/cdproto v0.0.0-20250724212937-08a3db8b4327
 	github.com/chromedp/chromedp v0.14.2
 	github.com/google/uuid v1.6.0
 	github.com/jung-kurt/gofpdf/v2 v2.17.3
-	github.com/knackwurstking/ui v1.1.2-0.20260217195531-e8ee675c6551
+	github.com/knackwurstking/ui v1.1.2-0.20260218211421-05f5114503e1
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/mattn/go-sqlite3 v1.14.32
 	github.com/williepotgieter/keymaker v1.0.0
@@ -27,9 +27,9 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
-	golang.org/x/crypto v0.40.0 // indirect
-	golang.org/x/net v0.42.0 // indirect
-	golang.org/x/sys v0.34.0 // indirect
-	golang.org/x/text v0.27.0 // indirect
+	golang.org/x/crypto v0.41.0 // indirect
+	golang.org/x/net v0.43.0 // indirect
+	golang.org/x/sys v0.35.0 // indirect
+	golang.org/x/text v0.28.0 // indirect
 	golang.org/x/time v0.11.0 // indirect
 )
