@@ -2,6 +2,7 @@ package components
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/knackwurstking/ui/pkg/components"
 	"github.com/knackwurstking/ui/pkg/css"
@@ -9,21 +10,19 @@ import (
 
 templ FormDialog(id, method string, href templ.SafeURL) {
 	@components.Dialog(&components.DialogProps{
-		BaseProps: components.BaseProps{
-			ID: id,
-			Class: []string{
+		Props: components.NewProps(
+			templ.KV("id", id),
+			templ.KV("class", strings.Join([]string{
 				css.Flex,
 				css.FlexCol,
 				css.Gap,
 				css.JustifyCenter,
 				css.ItemsCenter,
-			},
-			Attributes: templ.Attributes{
-				"onclose":  `this.remove()`,
-				"oncancel": `event.preventDefault()`,
-				"onclick":  `if (event.target === this) event.preventDefault()`,
-			},
-		},
+			}, ", ")),
+			templ.KV("onclose", `this.remove()`),
+			templ.KV("oncancel", `event.preventDefault()`),
+			templ.KV("onclick", `if (event.target === this) event.preventDefault()`),
+		),
 		Fullscreen: true,
 		Clean:      true,
 	}) {

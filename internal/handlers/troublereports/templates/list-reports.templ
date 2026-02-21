@@ -18,7 +18,12 @@ templ ListReports(user *shared.User, troubleReports []*shared.TroubleReport) {
 				ontoggle="updateURLHash(event)"
 			>
 				<summary>{ tr.Title }</summary>
-				@uicomponents.MarkdownContent(tr.Content, tr.UseMarkdown)
+				@uicomponents.MarkdownContent(
+					tr.Content,
+					&uicomponents.MarkdownContentProps{
+						UseMarkdown: tr.UseMarkdown,
+					},
+				)
 				<!-- Attachments Preview Container -->
 				if len(tr.LinkedAttachments) > 0 {
 					<br/>
