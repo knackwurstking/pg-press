@@ -1,8 +1,10 @@
 package components
 
 import (
+	"github.com/knackwurstking/pg-press/internal/components/label"
 	"github.com/knackwurstking/pg-press/internal/env"
 
+	"github.com/knackwurstking/pg-press/internal/components/tabs"
 	"github.com/knackwurstking/ui/pkg/ui"
 )
 
@@ -58,6 +60,8 @@ templ links() {
 templ scripts() {
 	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/htmx-v2.0.7.min.js") }></script>
 	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/layout.js") }></script>
+	@label.Script()
+	@tabs.Script()
 }
 
 templ styles() {

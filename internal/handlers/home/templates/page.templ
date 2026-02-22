@@ -23,19 +23,19 @@ templ homePageContent() {
 	<main>
 		<div class="flex flex-col gap-4 justify-center mt-8 p-8">
 			@homeNavigationItem(
-				urlb.TroubleReports(),
+				string(urlb.TroubleReports()),
 				icon.Triangle(),
 				"Problemberichte",
 				"Verwalten Sie Problemberichte und Lösungen",
 			)
 			@homeNavigationItem(
-				urlb.Tools(),
+				string(urlb.Tools()),
 				icon.ToolCase(),
 				"Werkzeuglisten",
 				"Verwalten Sie Blechlisten, Notizen, Probleme und Zyklen",
 			)
 			@homeNavigationItem(
-				urlb.Notes(),
+				string(urlb.Notes()),
 				icon.StickyNote(),
 				"Notizen Verwaltung",
 				"Verwalten Sie Notizen für Werkzeuge und Pressen",
@@ -44,11 +44,11 @@ templ homePageContent() {
 	</main>
 }
 
-templ homeNavigationItem(href templ.SafeURL, navIcon templ.Component, title, description string) {
+templ homeNavigationItem(href string, navIcon templ.Component, title, description string) {
 	@button.Button(button.Props{
 		Class:   "w-full p-8",
 		Variant: button.VariantOutline,
-		Href:    string(href),
+		Href:    href,
 	}) {
 		<span
 			class="flex gap-4 items-center w-full"
