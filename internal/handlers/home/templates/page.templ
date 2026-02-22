@@ -20,27 +20,25 @@ templ HomePage() {
 }
 
 templ homePageContent() {
-	<main>
-		<div class="flex flex-col gap-4 justify-center mt-8 p-8">
-			@homeNavigationItem(
-				string(urlb.TroubleReports()),
-				icon.Triangle(),
-				"Problemberichte",
-				"Verwalten Sie Problemberichte und Lösungen",
-			)
-			@homeNavigationItem(
-				string(urlb.Tools()),
-				icon.ToolCase(),
-				"Werkzeuglisten",
-				"Verwalten Sie Blechlisten, Notizen, Probleme und Zyklen",
-			)
-			@homeNavigationItem(
-				string(urlb.Notes()),
-				icon.StickyNote(),
-				"Notizen Verwaltung",
-				"Verwalten Sie Notizen für Werkzeuge und Pressen",
-			)
-		</div>
+	<main class="flex flex-col gap-4 justify-center mt-8 p-8">
+		@homeNavigationItem(
+			string(urlb.TroubleReports()),
+			icon.Triangle(),
+			"Problemberichte",
+			"Verwalten Sie Problemberichte und Lösungen",
+		)
+		@homeNavigationItem(
+			string(urlb.Tools()),
+			icon.ToolCase(),
+			"Werkzeuglisten",
+			"Verwalten Sie Blechlisten, Notizen, Probleme und Zyklen",
+		)
+		@homeNavigationItem(
+			string(urlb.Notes()),
+			icon.StickyNote(),
+			"Notizen Verwaltung",
+			"Verwalten Sie Notizen für Werkzeuge und Pressen",
+		)
 	</main>
 }
 

@@ -16,7 +16,7 @@ templ Page(notes []*shared.Note, tools []*shared.Tool) {
 			AdditionalHead: pageScript(),
 		},
 	) {
-		<main class={ css.Container, css.ContainerFluid }>
+		<main class="mt-8 p-8">
 			@components.Section(templ.Attributes{
 				"class":                templ.CSSClasses{"noted-grid", css.MaxWFull}.String(),
 				"style":                "margin: 0 auto;",
