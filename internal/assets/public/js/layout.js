@@ -1,12 +1,11 @@
-// For the ui.min.css i need to set the data-theme to light/dark
 function updateDataTheme() {
 	const themeColorMeta = document.getElementById("theme-color-meta");
 	if (matchMedia("(prefers-color-scheme: dark)").matches) {
-		document.querySelector("html").setAttribute("data-theme", "dark");
+		document.querySelector("html").classList.add("dark");
 		// Dark theme background color
 		if (themeColorMeta) themeColorMeta.setAttribute("content", "#1d2021");
 	} else {
-		document.querySelector("html").setAttribute("data-theme", "light");
+		document.querySelector("html").classList.add("dark");
 		// Light theme background color
 		if (themeColorMeta) themeColorMeta.setAttribute("content", "#f9f5d7");
 	}

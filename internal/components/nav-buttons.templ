@@ -1,30 +1,33 @@
 package components
 
 import (
+	"github.com/knackwurstking/pg-press/internal/components/button"
+	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"github.com/knackwurstking/ui/pkg/css"
 )
 
 templ NavProfileButton() {
-	<a
-		role="button"
-		class={ css.Ghost, css.Contrast, css.ButtonIcon }
-		href={ urlb.Profile() }
-		title="Profil"
-	>
-		<i class="bi bi-person-circle"></i>
-	</a>
+	@button.Button(button.Props{
+		Href:    string(urlb.Profile()),
+		Variant: button.VariantGhost,
+		Attributes: templ.Attributes{
+			"title": "Profil",
+		},
+	}) {
+		@icon.User()
+	}
 }
 
 templ NavHomeButton() {
-	<a
-		role="button"
-		class={ css.Ghost, css.Contrast, css.ButtonIcon }
-		href={ urlb.Home() }
-		title="Startseite"
-	>
-		<i class="bi bi-house"></i>
-	</a>
+	@button.Button(button.Props{
+		Href:    string(urlb.Profile()),
+		Variant: button.VariantGhost,
+		Attributes: templ.Attributes{
+			"title": "Profil",
+		},
+	}) {
+		@icon.House()
+	}
 }
 
 // Common navigation patterns to reduce duplication

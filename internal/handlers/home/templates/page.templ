@@ -1,10 +1,10 @@
 package templates
 
 import (
-	"fmt"
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/button"
+	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"github.com/knackwurstking/ui/pkg/css"
 )
 
 templ HomePage() {
@@ -20,49 +20,45 @@ templ HomePage() {
 }
 
 templ homePageContent() {
-	<main class={ css.Container , css.ContainerFluid }>
-		<nav class={ css.Flex, css.FlexCol, css.GapLg, css.JustifyCenter }>
+	<main>
+		<div class="flex flex-col gap-4 justify-center mt-8 p-8">
 			@homeNavigationItem(
 				urlb.TroubleReports(),
-				"exclamation-triangle",
+				icon.Triangle(),
 				"Problemberichte",
 				"Verwalten Sie Problemberichte und Lösungen",
 			)
 			@homeNavigationItem(
 				urlb.Tools(),
-				"tools",
+				icon.ToolCase(),
 				"Werkzeuglisten",
 				"Verwalten Sie Blechlisten, Notizen, Probleme und Zyklen",
 			)
 			@homeNavigationItem(
 				urlb.Notes(),
-				"journal-text",
+				icon.StickyNote(),
 				"Notizen Verwaltung",
 				"Verwalten Sie Notizen für Werkzeuge und Pressen",
 			)
-		</nav>
+		</div>
 	</main>
 }
 
-templ homeNavigationItem(href templ.SafeURL, icon, title, description string) {
-	<a
-		role="button"
-		class={ css.Ghost, css.Contrast, css.Flex, css.Gap, css.JustifyBetween, css.ItemsCenter, css.PLg }
-		style="width: 90%; margin: 0 auto;"
-		href={ href }
-	>
+templ homeNavigationItem(href templ.SafeURL, navIcon templ.Component, title, description string) {
+	@button.Button(button.Props{
+		Class:   "w-full p-8",
+		Variant: button.VariantOutline,
+		Href:    string(href),
+	}) {
 		<span
-			class={ css.Flex, css.Gap, css.ItemsCenter }
-			style="width: 100%;"
+			class="flex gap-4 items-center w-full"
 		>
-			if icon != "" {
-				<i class={ fmt.Sprintf("bi bi-%s", icon) } style={ fmt.Sprintf("margin: %s", css.VarSpacing) }></i>
-			}
-			<span class={ css.Flex, css.FlexCol }>
+			@navIcon
+			<span class="flex flex-col">
 				<strong>{ title }</strong>
 				<small style="text-wrap: auto; text-transform: none;">{ description }</small>
 			</span>
 		</span>
-		<i class="bi bi-chevron-right"></i>
-	</a>
+		@icon.ChevronRight()
+	}
 }

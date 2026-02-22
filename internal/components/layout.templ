@@ -2,10 +2,7 @@ package components
 
 import (
 	"github.com/knackwurstking/pg-press/internal/env"
-	"strings"
 
-	"github.com/knackwurstking/ui/pkg/components"
-	"github.com/knackwurstking/ui/pkg/css"
 	"github.com/knackwurstking/ui/pkg/ui"
 )
 
@@ -55,6 +52,7 @@ templ links() {
 	<link rel="mask-icon" href={ ui.AssetURL(env.ServerPathPrefix, "/maskable-icon-512x512.png") } color="#b8bb26"/>
 	<link rel="manifest" href={ ui.AssetURL(env.ServerPathPrefix, "/manifest.json") }/>
 	<link rel="stylesheet" href={ ui.AssetURL(env.ServerPathPrefix, "/css/bootstrap-icons.min.css") }/>
+	<link rel="stylesheet" href={ ui.AssetURL(env.ServerPathPrefix, "/css/output.css") }/>
 }
 
 templ scripts() {
@@ -63,11 +61,11 @@ templ scripts() {
 }
 
 templ styles() {
-	@css.StylesThemeTemplUI()
-	@css.StylesReset()
-	@css.StylesGlobal()
-	@css.StylesComponents()
-	@css.StylesUtils()
+	//@css.StylesThemeTemplUI()
+	//@css.StylesReset()
+	//@css.StylesGlobal()
+	//@css.StylesComponents()
+	//@css.StylesUtils()
 	<style>
 		html:has(dialog[open]),
 		body:has(dialog[open]) {
@@ -103,20 +101,14 @@ templ styles() {
 }
 
 templ appBar(title string, navContent templ.Component) {
-	@components.AppBar(&components.AppBarProps{
-		Props: components.NewProps(
-			templ.KV("class", strings.Join([]string{css.ShadowSm, css.Z50}, " ")),
-		),
-		Position: components.AppBarPositionTop,
-		Type:     components.AppBarTypeFixed,
-	}) {
-		@components.AppBarLeft(nil) {
-			<h5 id="app-bar-title">{ title }</h5>
-		}
-		@components.AppBarRight(nil) {
+	<span class="fixed top-0 left-0 w-full z-50 shadow-sm flex items-center justify-between">
+		<span class="px-4 py-2">
+			<h5 id="app-bar-title" class="text-lg font-medium">{ title }</h5>
+		</span>
+		<span class="px-4 py-2 flex gap-1">
 			if navContent != nil {
 				@navContent
 			}
-		}
-	}
+		</span>
+	</span>
 }
