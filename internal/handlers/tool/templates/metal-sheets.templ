@@ -5,6 +5,7 @@ import (
 	"slices"
 
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/knackwurstking/ui/pkg/css"
@@ -23,9 +24,9 @@ templ UppperMetalSheets(metalSheets []*shared.UpperMetalSheet, tool *shared.Tool
 		})
 	}}
 	@components.SectionTitle(components.MainTitle, "Bleche") {
-		@components.SectionDialogAction(components.SectionDialogActionProps{
+		@components.SectionTitleAction(components.SectionTitleActionProps{
 			Url:   urlb.DialogEditMetalSheet(0, tool.ID, shared.SlotUnknown),
-			Icon:  "plus-lg",
+			Icon:  icon.Plus(),
 			Title: "Neues Blech hinzufügen",
 		})
 	}
@@ -47,9 +48,9 @@ templ LowerMetalSheets(metalSheets []*shared.LowerMetalSheet, tool *shared.Tool,
 		})
 	}}
 	@components.SectionTitle(components.MainTitle, "Bleche") {
-		@components.SectionDialogAction(components.SectionDialogActionProps{
+		@components.SectionTitleAction(components.SectionTitleActionProps{
 			Url:   urlb.DialogEditMetalSheet(0, tool.ID, shared.SlotUnknown),
-			Icon:  "plus-lg",
+			Icon:  icon.Plus(),
 			Title: "Neues Blech hinzufügen",
 		})
 	}

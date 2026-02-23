@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/knackwurstking/ui/pkg/css"
@@ -88,8 +89,8 @@ templ regenerations(p *CyclesSectionContentProps) {
 		"id": "regenerations-section",
 	}) {
 		@components.SectionTitle(components.SubTitle, "Regenerationen") {
-			@components.SectionDialogAction(components.SectionDialogActionProps{
-				Icon:  "plus-lg",
+			@components.SectionTitleAction(components.SectionTitleActionProps{
+				Icon:  icon.Plus(),
 				Url:   urlb.DialogEditToolRegenerationGet(p.Tool.ID),
 				Title: "Neue Regeneration",
 			})
@@ -146,8 +147,8 @@ templ cyclesTable(p *CyclesSectionContentProps) {
 		"id": "cycles-section",
 	}) {
 		@components.SectionTitle(components.SubTitle, "Pressennutzungsverlauf") {
-			@components.SectionDialogAction(components.SectionDialogActionProps{
-				Icon:  "plus-lg",
+			@components.SectionTitleAction(components.SectionTitleActionProps{
+				Icon:  icon.Plus(),
 				Url:   urlb.DialogEditCycleGet(0, p.Tool.ID, false),
 				Title: "Neuen Eintrag hinzufügen",
 			})
