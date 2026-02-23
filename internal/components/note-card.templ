@@ -11,55 +11,40 @@ import (
 )
 
 templ NoteCard(note *shared.Note, tools []*shared.Tool) {
-	{{
-		// TODO: Get the card color/variant per note level and maybe a fitting icon as well
-		var color string
-		var iconComp templ.Component
-		switch note.Level {
-		case shared.LevelNormal:
-			iconComp = icon.StickyNote()
-		case shared.LevelInfo:
-			color = "divide-blue-500"
-			iconComp = icon.Info()
-		case shared.LevelAttention:
-			color = "divide-orange-500"
-			iconComp = icon.MessageCircleWarning()
-		case shared.LevelBroken:
-			color = "divide-red-500"
-			iconComp = icon.CircleAlert()
-		default:
-			panic(fmt.Sprintf("unknown note level: %d", note.Level))
-		}
-	}}
 	@card.Card(card.Props{}) {
-		@card.Header(card.HeaderProps{}) {
-			// TODO: Contains and icon and the CreatedAt date, as well as edit and delete buttons
-		}
-		@card.Content(card.ContentProps{}) {
-			// TODO: The note content, with whitespace preserved
-		}
-		if len(tools) > 0 && note.Linked != "" {
-			@card.Footer(card.FooterProps{}) {
-				// TODO: If the note is linked to a tool or press, show the linked entity with a link to it
-			}
-		}
-	}
-	// TODO: Remove the following code once the above is implemented
-	<div
-		class={ color, "outline", css.Card, css.CardCompact, css.Elevation2, css.Flex1, css.MinWFit, css.HFit }
-	>
-		<div
-			class={ css.CardHeader, css.Flex, css.GapSm, css.JustifyBetween, css.ItemsCenter }
-		>
-			<span
-				class={ "note-importance", css.Flex, css.Gap }
-			>
-				@iconComp
-				<span class="note-date">
+		@card.Header(card.HeaderProps{
+			Class: "flex justify-between items-center gap-4",
+		}) {
+			<span class="flex gap-4">
+				// Note Level Icon
+				switch note.Level {
+					case shared.LevelNormal:
+						@icon.StickyNote(icon.Props{
+							Color: "divide-gray-500",
+						})
+					case shared.LevelInfo:
+						@icon.Info(icon.Props{
+							Color: "divide-blue-500",
+						})
+					case shared.LevelAttention:
+						@icon.MessageCircleWarning(icon.Props{
+							Color: "divide-orange-500",
+						})
+					case shared.LevelBroken:
+						@icon.CircleAlert(icon.Props{
+							Color: "divide-red-500",
+						})
+					default:
+						{{ panic(fmt.Sprintf("unknown note level: %d", note.Level)) }}
+				}
+				// Note Created At
+				@card.Title(card.TitleProps{}) {
 					{ note.CreatedAt.FormatDateTime() }
-				</span>
+				}
 			</span>
-			<span class={ css.Flex, css.Gap }>
+			// Actions
+			<span class="flex gap-2">
+				// TODO: Icon Buttons: Edit (pencil), Delete (trash)
 				<button
 					class={ css.ButtonIcon, css.Secondary, css.ButtonSmall }
 					hx-get={ urlb.DialogEditNote(note.ID, note.Linked) }
@@ -80,14 +65,15 @@ templ NoteCard(note *shared.Note, tools []*shared.Tool) {
 					<i class="bi bi-trash"></i>
 				</button>
 			</span>
-		</div>
-		<div
-			class={ css.CardBody, css.WhitespacePreWrap }
-		>
+		}
+		@card.Content(card.ContentProps{
+			Class: "whitespace-pre-wrap",
+		}) {
 			{ note.Content }
-		</div>
+		}
 		if len(tools) > 0 && note.Linked != "" {
-			<div class={ css.CardFooter }>
+			@card.Footer() {
+				// TODO: If the note is linked to a tool or press, show the linked entity with a link to it
 				<small class={ css.Muted, css.Ghost }>
 					<span class={ css.MR }>Verknüpft mit:</span>
 					{{ linked := note.GetLinked() }}
@@ -120,7 +106,7 @@ templ NoteCard(note *shared.Note, tools []*shared.Tool) {
 							<span>{ note.Linked }</span>
 					}
 				</small>
-			</div>
+			}
 		}
-	</div>
+	}
 }
