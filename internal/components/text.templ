@@ -1,16 +1,11 @@
 package components
 
-import "github.com/knackwurstking/ui/pkg/css"
-
 templ NotFoundText(text string) {
-	{{
-		class := templ.CSSClasses{
-			css.Muted, css.Ghost, css.WFull, css.TextCenter, css.Italic, css.TextSM,
+	<p class="text-muted-foreground w-full text-center italic text-sm">
+		if text != "" {
+			{ text }
+		} else {
+			Der angeforderte Inhalt wurde nicht gefunden.
 		}
-	}}
-	if text != "" {
-		<p class={ class }>{ text }</p>
-		{{ return }}
-	}
-	<p class={ class }>Der angeforderte Inhalt wurde nicht gefunden.</p>
+	</p>
 }
