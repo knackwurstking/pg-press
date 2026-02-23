@@ -3,6 +3,8 @@ package components
 import (
 	"fmt"
 
+	"github.com/knackwurstking/pg-press/internal/components/card"
+	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/knackwurstking/ui/pkg/css"
@@ -10,25 +12,41 @@ import (
 
 templ NoteCard(note *shared.Note, tools []*shared.Tool) {
 	{{
-		filterClass := ""
-		icon := ""
+		// TODO: Get the card color/variant per note level and maybe a fitting icon as well
+		var color string
+		var iconComp templ.Component
 		switch note.Level {
 		case shared.LevelNormal:
-			filterClass = css.Outline
-			icon = "bi-sticky"
+			iconComp = icon.StickyNote()
 		case shared.LevelInfo:
-			filterClass = css.Info + " " + css.Outline
-			icon = "bi-info-circle"
+			color = "divide-blue-500"
+			iconComp = icon.Info()
 		case shared.LevelAttention:
-			filterClass = css.Warning + " " + css.Outline
-			icon = "bi-exclamation-triangle"
+			color = "divide-orange-500"
+			iconComp = icon.MessageCircleWarning()
 		case shared.LevelBroken:
-			filterClass = css.Destructive + " " + css.Outline
-			icon = "bi-x-circle"
+			color = "divide-red-500"
+			iconComp = icon.CircleAlert()
+		default:
+			panic(fmt.Sprintf("unknown note level: %d", note.Level))
 		}
 	}}
+	@card.Card(card.Props{}) {
+		@card.Header(card.HeaderProps{}) {
+			// TODO: Contains and icon and the CreatedAt date, as well as edit and delete buttons
+		}
+		@card.Content(card.ContentProps{}) {
+			// TODO: The note content, with whitespace preserved
+		}
+		if len(tools) > 0 && note.Linked != "" {
+			@card.Footer(card.FooterProps{}) {
+				// TODO: If the note is linked to a tool or press, show the linked entity with a link to it
+			}
+		}
+	}
+	// TODO: Remove the following code once the above is implemented
 	<div
-		class={ css.Card, css.CardCompact, css.Elevation2, css.Flex1, css.MinWFit, css.HFit, filterClass }
+		class={ color, "outline", css.Card, css.CardCompact, css.Elevation2, css.Flex1, css.MinWFit, css.HFit }
 	>
 		<div
 			class={ css.CardHeader, css.Flex, css.GapSm, css.JustifyBetween, css.ItemsCenter }
@@ -36,7 +54,7 @@ templ NoteCard(note *shared.Note, tools []*shared.Tool) {
 			<span
 				class={ "note-importance", css.Flex, css.Gap }
 			>
-				<i class={ "bi " + icon }></i>
+				@iconComp
 				<span class="note-date">
 					{ note.CreatedAt.FormatDateTime() }
 				</span>
