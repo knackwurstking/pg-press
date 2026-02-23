@@ -32,10 +32,9 @@ templ SectionTitle(level SectionTitleLevel, text string) {
 }
 
 type SectionTitleActionProps struct {
-	Url        templ.SafeURL
-	IconString string // TODO: Remove this field
-	Icon       templ.Component
-	Title      string
+	Url   templ.SafeURL
+	Icon  templ.Component
+	Title string
 }
 
 templ SectionTitleAction(p SectionTitleActionProps) {
@@ -50,10 +49,6 @@ templ SectionTitleAction(p SectionTitleActionProps) {
 			"title":                 p.Title,
 		},
 	}) {
-		if p.IconString != "" {
-			<i class={ "bi bi-" + p.IconString }></i>
-		} else {
-			@p.Icon
-		}
+		@p.Icon
 	}
 }
