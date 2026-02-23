@@ -4,7 +4,6 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"github.com/knackwurstking/ui/pkg/css"
 )
 
 templ Page(notes []*shared.Note, tools []*shared.Tool) {
@@ -18,8 +17,7 @@ templ Page(notes []*shared.Note, tools []*shared.Tool) {
 	) {
 		<main class="mt-8 p-8">
 			@components.Section(templ.Attributes{
-				"class":                templ.CSSClasses{"noted-grid", css.MaxWFull}.String(),
-				"style":                "margin: 0 auto;",
+				"class":                "noted-grid max-w-full my-0 mx-auto",
 				"hx-get":               string(urlb.NotesGrid()),
 				"hx-trigger":           "reload-notes from:body",
 				"hx-on::after-request": "document.querySelector('button.active')?.click()",
