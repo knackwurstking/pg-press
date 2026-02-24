@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/components/icon"
+	"github.com/knackwurstking/pg-press/internal/components/table"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/knackwurstking/ui/pkg/css"
@@ -36,24 +37,34 @@ templ Cookies(p CookiesProps) {
 	}
 }
 
-// TODO: Migrate to templui with tailwindcss
 templ cookiesTable(cookies []*shared.Cookie) {
-	<table class={ "cookies-table", css.TableBorderless }>
-		<thead>
-			<tr>
-				<th style="width: fit-content;">Letzte Anmeldung</th>
-				<th style="width: 100%;" class={ css.TableLeft }>Benutzeragent</th>
-				<th style="width: fit-content;"></th>
-			</tr>
-		</thead>
-		<tbody>
+	@table.Table() {
+		@table.Header() {
+			@table.Row() {
+				@table.Head(table.HeadProps{
+					Class: "w-fit",
+				}) {
+					Letzte Anmeldung
+				}
+				@table.Head(table.HeadProps{
+					Class: "w-full",
+				}) {
+					Benutzeragent
+				}
+				@table.Head(table.HeadProps{
+					Class: "w-fit",
+				})
+			}
+		}
+		@table.Body() {
 			for _, cookie := range cookies {
 				@cookieRow(cookie)
 			}
-		</tbody>
-	</table>
+		}
+	}
 }
 
+// TODO: Migrate to templui and tailwindcss
 templ cookieRow(cookie *shared.Cookie) {
 	<tr>
 		<td class="time-cell">{ cookie.LastLogin.FormatDateTime() }</td>
