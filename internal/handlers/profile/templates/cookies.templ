@@ -3,11 +3,11 @@ package templates
 import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/button"
 	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/components/table"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"github.com/knackwurstking/ui/pkg/css"
 )
 
 type CookiesProps struct {
@@ -42,12 +42,12 @@ templ cookiesTable(cookies []*shared.Cookie) {
 		@table.Header() {
 			@table.Row() {
 				@table.Head(table.HeadProps{
-					Class: "w-fit",
+					Class: "w-fit text-left",
 				}) {
 					Letzte Anmeldung
 				}
 				@table.Head(table.HeadProps{
-					Class: "w-full",
+					Class: "w-full text-left",
 				}) {
 					Benutzeragent
 				}
@@ -64,22 +64,28 @@ templ cookiesTable(cookies []*shared.Cookie) {
 	}
 }
 
-// TODO: Migrate to templui and tailwindcss
 templ cookieRow(cookie *shared.Cookie) {
-	<tr>
-		<td class="time-cell">{ cookie.LastLogin.FormatDateTime() }</td>
-		<td class={ "user-agent-cell", css.TableLeft }>{ cookie.UserAgent }</td>
-		<td class={ css.TableRight, css.UserSelectNone }>
-			<a
-				hx-delete={ urlb.ProfileCookies(cookie.Value) }
-				hx-trigger="click"
-				hx-confirm="Sind Sie sicher, dass Sie dieses Cookie löschen möchten?"
-				role="button"
-				class={ css.ButtonIcon, css.Destructive, css.Ghost }
-				title="Sitzung beenden"
-			>
-				<i class="bi bi-trash"></i>
-			</a>
-		</td>
-	</tr>
+	@table.Row() {
+		@table.Cell(table.CellProps{Class: "text-left"}) {
+			{ cookie.LastLogin.FormatDateTime() }
+		}
+		@table.Cell(table.CellProps{Class: "text-left"}) {
+			{ cookie.UserAgent }
+		}
+		@table.Cell(table.CellProps{Class: "text-right"}) {
+			@button.Button(button.Props{
+				Variant: button.VariantGhost,
+				Attributes: templ.Attributes{
+					"hx-delete":  string(urlb.ProfileCookies(cookie.Value)),
+					"hx-trigger": "click",
+					"hx-confirm": "Sind Sie sicher, dass Sie dieses Cookie löschen möchten?",
+					"title":      "Sitzung beenden",
+				},
+			}) {
+				@icon.Trash(icon.Props{
+					Color: "var(--destructive)",
+				})
+			}
+		}
+	}
 }
