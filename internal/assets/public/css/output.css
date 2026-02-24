@@ -376,26 +376,6 @@
       margin-block-end: calc(calc(var(--spacing) * 1.5) * calc(1 - var(--tw-space-y-reverse)));
     }
   }
-  .divide-blue-500 {
-    :where(& > :not(:last-child)) {
-      border-color: var(--color-blue-500);
-    }
-  }
-  .divide-gray-500 {
-    :where(& > :not(:last-child)) {
-      border-color: var(--color-gray-500);
-    }
-  }
-  .divide-orange-500 {
-    :where(& > :not(:last-child)) {
-      border-color: var(--color-orange-500);
-    }
-  }
-  .divide-red-500 {
-    :where(& > :not(:last-child)) {
-      border-color: var(--color-red-500);
-    }
-  }
   .overflow-hidden {
     overflow: hidden;
   }

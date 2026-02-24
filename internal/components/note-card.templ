@@ -3,6 +3,7 @@ package components
 import (
 	"fmt"
 
+	"github.com/knackwurstking/pg-press/internal/components/button"
 	"github.com/knackwurstking/pg-press/internal/components/card"
 	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -19,21 +20,13 @@ templ NoteCard(note *shared.Note, tools []*shared.Tool) {
 				// Note Level Icon
 				switch note.Level {
 					case shared.LevelNormal:
-						@icon.StickyNote(icon.Props{
-							Color: "divide-gray-500",
-						})
+						@icon.StickyNote(icon.Props{})
 					case shared.LevelInfo:
-						@icon.Info(icon.Props{
-							Color: "divide-blue-500",
-						})
+						@icon.Info(icon.Props{})
 					case shared.LevelAttention:
-						@icon.MessageCircleWarning(icon.Props{
-							Color: "divide-orange-500",
-						})
+						@icon.MessageCircleWarning(icon.Props{})
 					case shared.LevelBroken:
-						@icon.CircleAlert(icon.Props{
-							Color: "divide-red-500",
-						})
+						@icon.CircleAlert(icon.Props{})
 					default:
 						{{ panic(fmt.Sprintf("unknown note level: %d", note.Level)) }}
 				}
@@ -44,26 +37,33 @@ templ NoteCard(note *shared.Note, tools []*shared.Tool) {
 			</span>
 			// Actions
 			<span class="flex gap-2">
-				// TODO: Icon Buttons: Edit (pencil), Delete (trash)
-				<button
-					class={ css.ButtonIcon, css.Secondary, css.ButtonSmall }
-					hx-get={ urlb.DialogEditNote(note.ID, note.Linked) }
-					hx-trigger="click"
-					hx-target="body"
-					hx-swap="beforeend"
-					title="Notiz bearbeiten"
-				>
-					<i class="bi bi-pencil"></i>
-				</button>
-				<button
-					class={ css.ButtonIcon, css.ButtonSmall, css.Destructive }
-					hx-delete={ urlb.NotesDelete(note.ID) }
-					hx-trigger="click"
-					hx-confirm="Sind Sie sicher, dass Sie diese Notiz löschen möchten?"
-					title="Notiz löschen"
-				>
-					<i class="bi bi-trash"></i>
-				</button>
+				@button.Button(button.Props{
+					Variant: button.VariantGhost,
+					Attributes: templ.Attributes{
+						"hx-get":     string(urlb.DialogEditNote(note.ID, note.Linked)),
+						"hx-trigger": "click",
+						"hx-target":  "body",
+						"hx-swap":    "beforeend",
+						"title":      "Notiz bearbeiten",
+					},
+				}) {
+					@icon.Pencil(icon.Props{
+						Color: "var(--primary)",
+					})
+				}
+				@button.Button(button.Props{
+					Variant: button.VariantGhost,
+					Attributes: templ.Attributes{
+						"hx-delete":  string(urlb.NotesDelete(note.ID)),
+						"hx-trigger": "click",
+						"hx-confirm": "Sind Sie sicher, dass Sie diese Notiz löschen möchten?",
+						"title":      "Notiz löschen",
+					},
+				}) {
+					@icon.Trash(icon.Props{
+						Color: "var(--destructive)",
+					})
+				}
 			</span>
 		}
 		@card.Content(card.ContentProps{
