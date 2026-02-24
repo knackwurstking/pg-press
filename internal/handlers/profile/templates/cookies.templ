@@ -3,6 +3,7 @@ package templates
 import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/knackwurstking/ui/pkg/css"
@@ -15,26 +16,27 @@ type CookiesProps struct {
 
 templ Cookies(p CookiesProps) {
 	if len(p.Cookies) > 0 {
-		<details
+		<div
 			id="cookies"
-			class="cookies-details"
-			open
 			if p.OOB {
 				hx-swap-oob="true"
 			}
+			open
 		>
-			<summary class="cookies-summary">
-				<i class="bi bi-cookie"></i>
+			<div class="text-2xl flex gap-2 items-center mb-2">
+				@icon.Cookie()
 				Aktive Sitzungen { fmt.Sprintf("%d", len(p.Cookies)) }
-			</summary>
-			@cookiesTable(p.Cookies)
-			<figure class={ css.OverflowAuto }></figure>
-		</details>
+			</div>
+			<figure>
+				@cookiesTable(p.Cookies)
+			</figure>
+		</div>
 	} else {
 		@components.NotFoundText("Keine aktiven Sitzungen gefunden")
 	}
 }
 
+// TODO: Migrate to templui with tailwindcss
 templ cookiesTable(cookies []*shared.Cookie) {
 	<table class={ "cookies-table", css.TableBorderless }>
 		<thead>

@@ -1,7 +1,6 @@
 package templates
 
 import (
-	"fmt"
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/components/button"
 	"github.com/knackwurstking/pg-press/internal/components/icon"
@@ -39,8 +38,8 @@ templ profileHeader(user *shared.User) {
 		}
 	</script>
 	<div class="p-4">
-		<div class="flex justify-between items-center">
-			<h1 class="text-3xl font-bold">{ user.Name }</h1>
+		<div class="flex justify-between items-center mb-2">
+			<div class="text-3xl font-bold">{ user.Name }</div>
 			@button.Button(button.Props{
 				Variant: button.VariantSecondary,
 				Attributes: templ.Attributes{
@@ -51,7 +50,7 @@ templ profileHeader(user *shared.User) {
 				@icon.Pencil()
 			}
 		</div>
-		<div class="flex flex-wrap gap-4 justify-between items-center mt-2">
+		<div class="flex flex-wrap gap-4 justify-between items-center">
 			<small name="telegram-id" class="flex items-center gap-2">
 				@components.TelegramIcon()
 				Telegram ID: { user.ID }
@@ -69,18 +68,18 @@ templ profileHeader(user *shared.User) {
 	</div>
 }
 
-// TODO: Continue here...
 templ sectionCookies() {
-	<div class={ css.Border } style={ fmt.Sprintf("overflow: hidden; background: %s", css.VarColor50) }>
+	<section name="cookies">
 		<span
 			id="cookies"
 			hx-get={ urlb.ProfileCookies("") }
 			hx-trigger="load"
 			hx-swap="outerHTML"
 		></span>
-	</div>
+	</section>
 }
 
+// TODO: Migrate to templui & tailwindcss
 templ editUserDialog(user *shared.User) {
 	<dialog
 		id="edit-user-name-dialog"
