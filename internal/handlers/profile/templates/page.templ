@@ -22,7 +22,7 @@ templ Page(p PageProps) {
 			NavContent:     components.StandardNavContent(),
 		},
 	) {
-		<main class={ css.Container, css.ContainerFluid } style="max-width: 42rem; margin: 0 auto;">
+		<main class="mt-8 p-8">
 			@profileHeader(p.User)
 			@sectionCookies()
 			@editUserDialog(p.User)
