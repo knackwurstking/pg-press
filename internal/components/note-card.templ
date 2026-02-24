@@ -8,25 +8,32 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"github.com/knackwurstking/ui/pkg/css"
 )
 
-templ NoteCard(note *shared.Note, tools []*shared.Tool) {
-	@card.Card(card.Props{}) {
+templ NoteCard(note *shared.Note, tools []*shared.Tool, props ...card.Props) {
+	@card.Card(props...) {
 		@card.Header(card.HeaderProps{
-			Class: "flex justify-between items-center gap-4",
+			Class: "flex flex-row flex-nowrap justify-between items-center gap-4",
 		}) {
-			<span class="flex gap-4">
+			<span class="flex gap-4 items-center">
 				// Note Level Icon
 				switch note.Level {
 					case shared.LevelNormal:
-						@icon.StickyNote(icon.Props{})
+						@icon.StickyNote(icon.Props{
+							Color: "gray",
+						})
 					case shared.LevelInfo:
-						@icon.Info(icon.Props{})
+						@icon.Info(icon.Props{
+							Color: "blue",
+						})
 					case shared.LevelAttention:
-						@icon.MessageCircleWarning(icon.Props{})
+						@icon.MessageSquareWarning(icon.Props{
+							Color: "orange",
+						})
 					case shared.LevelBroken:
-						@icon.CircleAlert(icon.Props{})
+						@icon.TriangleAlert(icon.Props{
+							Color: "red",
+						})
 					default:
 						{{ panic(fmt.Sprintf("unknown note level: %d", note.Level)) }}
 				}
@@ -73,18 +80,18 @@ templ NoteCard(note *shared.Note, tools []*shared.Tool) {
 		}
 		if len(tools) > 0 && note.Linked != "" {
 			@card.Footer() {
-				// TODO: If the note is linked to a tool or press, show the linked entity with a link to it
-				<small class={ css.Muted, css.Ghost }>
-					<span class={ css.MR }>Verknüpft mit:</span>
+				<small>
+					<span>Verknüpft mit:</span>
 					{{ linked := note.GetLinked() }}
 					switch linked.Name {
 						case "tool":
 							for _, t := range tools {
 								if t.ID == shared.EntityID(linked.ID) {
-									<a
-										href={ urlb.Tool(t.ID) }
-										class="tool-link"
-									>
+									@button.Button(button.Props{
+										Variant: button.VariantLink,
+										Size:    button.SizeSm,
+										Href:    string(urlb.Tool(t.ID)),
+									}) {
 										{ fmt.Sprintf(
 											"Werkzeug %dx%d %s %s (%s)", 
 											t.Width, t.Height, 
@@ -92,18 +99,19 @@ templ NoteCard(note *shared.Note, tools []*shared.Tool) {
 											t.Code, 
 											t.Position.German(),
 										) }
-									</a>
+									}
 								}
 							}
 						case "press":
-							<a
-								href={ urlb.Press(shared.EntityID(linked.ID)) }
-								class="press-link"
-							>
+							@button.Button(button.Props{
+								Variant: button.VariantLink,
+								Size:    button.SizeSm,
+								Href:    string(urlb.Press(shared.EntityID(linked.ID))),
+							}) {
 								{ fmt.Sprintf("Presse %d", linked.ID) }
-							</a>
+							}
 						default:
-							<span>{ note.Linked }</span>
+							<span class="text-muted">{ note.Linked }</span>
 					}
 				</small>
 			}

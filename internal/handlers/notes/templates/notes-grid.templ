@@ -2,12 +2,13 @@ package templates
 
 import (
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/card"
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
 
 templ NotesGrid(notes []*shared.Note, tools []*shared.Tool) {
 	if len(notes) > 0 {
-		<div class="flex flex-wrap gap-4 grow">
+		<div class="flex flex-wrap gap-4">
 			for _, note := range notes {
 				{{
 					skip := false
@@ -22,7 +23,9 @@ templ NotesGrid(notes []*shared.Note, tools []*shared.Tool) {
 					}
 				}}
 				if !skip {
-					@components.NoteCard(note, tools)
+					@components.NoteCard(note, tools, card.Props{
+						Class: "flex-auto w-fit h-fit",
+					})
 				}
 			}
 		</div>

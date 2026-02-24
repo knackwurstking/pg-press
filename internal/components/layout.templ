@@ -105,7 +105,13 @@ templ styles() {
 }
 
 templ appBar(title string, navContent templ.Component) {
-	<span class="fixed top-0 left-0 w-full z-50 shadow-sm flex items-center justify-between">
+	<span
+		class={
+			"fixed top-0 left-0 z-50 w-full",
+			"flex items-center justify-between",
+			"border-b shadow-sm backdrop-blur-md",
+		}
+	>
 		<span class="px-4 py-2">
 			<h5 id="app-bar-title" class="text-lg font-medium">{ title }</h5>
 		</span>
