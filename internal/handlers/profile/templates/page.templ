@@ -3,6 +3,8 @@ package templates
 import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/button"
+	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
@@ -16,14 +18,14 @@ type PageProps struct {
 templ Page(p PageProps) {
 	@components.Layout(
 		components.LayoutProps{
-			PageTitle:      "PG Presse | Profil",
-			AppBarTitle:    "Profil",
-			AdditionalHead: additionalHead(),
-			NavContent:     components.StandardNavContent(),
+			PageTitle:   "PG Presse | Profil",
+			AppBarTitle: "Profil",
+			NavContent:  components.StandardNavContent(),
 		},
 	) {
 		<main class="mt-8 p-8">
 			@profileHeader(p.User)
+			<br/>
 			@sectionCookies()
 			@editUserDialog(p.User)
 		</main>
@@ -31,36 +33,43 @@ templ Page(p PageProps) {
 }
 
 templ profileHeader(user *shared.User) {
-	<div class={ "profile-header", css.Border }>
-		<div class={ css.Flex, css.JustifyBetween, css.ItemsCenter, css.MB }>
-			<h1>{ user.Name }</h1>
-			<button
-				class={ css.ButtonIcon, css.Secondary }
-				onclick='document.querySelector("#edit-user-name-dialog").showModal();'
-				title="Benutzername bearbeiten"
-			>
-				<i class="bi bi-pen"></i>
-			</button>
+	<script>
+		function openEditUserDialog() {
+			document.querySelector("#edit-user-name-dialog").showModal();
+		}
+	</script>
+	<div class="p-4">
+		<div class="flex justify-between items-center">
+			<h1 class="text-3xl font-bold">{ user.Name }</h1>
+			@button.Button(button.Props{
+				Variant: button.VariantSecondary,
+				Attributes: templ.Attributes{
+					"onclick": "openEditUserDialog()",
+					"title":   "Benutzername bearbeiten",
+				},
+			}) {
+				@icon.Pencil()
+			}
 		</div>
-		<div
-			class={ css.Flex, css.FlexWrap, css.Gap, css.JustifyBetween, css.ItemsCenter }
-		>
-			<div class="telegram-id">
-				<i class="bi bi-telegram"></i>
+		<div class="flex flex-wrap gap-4 justify-between items-center mt-2">
+			<small name="telegram-id" class="flex items-center gap-2">
+				@components.TelegramIcon()
 				Telegram ID: { user.ID }
-			</div>
-			<a
-				role="button"
-				href={ templ.SafeURL(env.ServerPathPrefix + "/logout") }
-				class={ css.Ghost, css.Destructive, css.Flex, css.Gap }
-			>
-				<i class="bi bi-box-arrow-right"></i>
+			</small>
+			@button.Button(button.Props{
+				Variant: button.VariantDestructive,
+				Attributes: templ.Attributes{
+					"href":  string(templ.SafeURL(env.ServerPathPrefix + "/logout")),
+					"title": "Abmelden",
+				},
+			}) {
 				Abmelden
-			</a>
+			}
 		</div>
 	</div>
 }
 
+// TODO: Continue here...
 templ sectionCookies() {
 	<div class={ css.Border } style={ fmt.Sprintf("overflow: hidden; background: %s", css.VarColor50) }>
 		<span
@@ -105,54 +114,4 @@ templ editUserDialog(user *shared.User) {
 			</footer>
 		</form>
 	</dialog>
-}
-
-templ additionalHead() {
-	<style>
-		.profile-header {
-			background: var(--ui-color-100);
-			padding: calc(var(--ui-spacing) * 2);
-			margin-bottom: calc(var(--ui-spacing) * 2);
-		}
-
-		.profile-header h1 {
-			margin: 0;
-			color: var(--ui-text);
-			font-size: 2.25rem;
-		}
-
-		.telegram-id {
-			color: var(--ui-color-600);
-			font-size: 0.95rem;
-			background: var(--ui-color-200);
-			padding: calc(var(--ui-spacing) / 2) var(--ui-spacing);
-			border-radius: var(--ui-radius);
-			border: var(--ui-border-width) var(--ui-border-style) var(--ui-color-300);
-		}
-
-		.profile-dialog {
-			background: var(--ui-bg);
-			border-radius: calc(var(--ui-radius) * 2);
-			padding: calc(var(--ui-spacing) * 2);
-			box-shadow: 0 10px 25px var(--ui-backdrop-color);
-		}
-
-		.profile-dialog label {
-			margin-bottom: var(--ui-spacing);
-		}
-
-		.profile-dialog input {
-			margin-top: calc(var(--ui-spacing) / 2);
-			font-size: 1rem;
-		}
-
-		.no-cookies {
-			text-align: center;
-			color: var(--ui-color-600);
-			padding: calc(var(--ui-spacing) * 2);
-			background: var(--ui-color-100);
-			border-radius: var(--ui-radius);
-			font-style: italic;
-		}
-	</style>
 }
