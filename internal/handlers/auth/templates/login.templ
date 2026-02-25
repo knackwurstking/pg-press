@@ -2,6 +2,10 @@ package templates
 
 import (
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/button"
+	"github.com/knackwurstking/pg-press/internal/components/dialog"
+	"github.com/knackwurstking/pg-press/internal/components/form"
+	"github.com/knackwurstking/pg-press/internal/components/input"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
@@ -24,25 +28,51 @@ templ Page(p PageProps) {
 }
 
 templ apiKeyDialog(apiKey, invalidApiKey string) {
-	<dialog id="login-dialog" oncancel="event.preventDefault();">
-		<form
-			action={ urlb.Login("", nil) }
-			method="post"
-		>
-			<label class="flex flex-col">
-				API-Schlüssel
-				<input
-					name="api-key"
-					type="text"
-					placeholder="API-Schlüssel"
-					value={ apiKey }
-					aria-invalid?={ invalidApiKey == "true" }
-					required
-				/>
-			</label>
-			<footer class="flex">
-				<button class="flex-1" type="submit">Anmelden</button>
-			</footer>
+	@dialog.Dialog(dialog.Props{
+		ID:               "login-dialog",
+		DisableClickAway: true,
+		DisableESC:       true,
+		Open:             true,
+	}) {
+		<form action={ urlb.Login("", nil) } method="post">
+			@dialog.Content() {
+				@dialog.Title() {
+					Login
+				}
+				@form.Item() {
+					@form.Label(form.LabelProps{
+						For: "api-key",
+					}) {
+						API-Schlüssel
+					}
+					{{ hasError := invalidApiKey == "true" }}
+					@input.Input(input.Props{
+						ID:          "api-key",
+						Name:        "api-key",
+						Type:        "text",
+						Placeholder: "API-Schlüssel",
+						Value:       apiKey,
+						HasError:    hasError,
+						Attributes: templ.Attributes{
+							"required": "true",
+						},
+					})
+					if hasError {
+						@form.Message(form.MessageProps{
+							Variant: form.MessageVariantError,
+						}) {
+							Ungültiger API-Schlüssel
+						}
+					}
+				}
+				@dialog.Footer() {
+					@button.Button(button.Props{
+						Type: button.TypeSubmit,
+					}) {
+						Anmelden
+					}
+				}
+			}
 		</form>
-	</dialog>
+	}
 }
