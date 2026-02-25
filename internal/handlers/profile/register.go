@@ -20,6 +20,7 @@ func Register(e *echo.Echo, path string) {
 		env.ServerPathPrefix,
 		[]*ui.EchoRoute{
 			ui.NewEchoRoute(http.MethodGet, path, GetProfilePage),
+			ui.NewEchoRoute(http.MethodPost, path, PostProfilePage),
 			ui.NewEchoRoute(http.MethodGet, path+"/cookies", HTMXGetCookies),
 			ui.NewEchoRoute(http.MethodDelete, path+"/cookies", HTMXDeleteCookies),
 		},

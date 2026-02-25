@@ -28,6 +28,7 @@ templ Page(p PageProps) {
 			@profileHeader(p.User)
 			<br/>
 			@sectionCookies()
+			@editUserDialog(p.User)
 		</main>
 	}
 }
@@ -36,71 +37,16 @@ templ profileHeader(user *shared.User) {
 	<div class="p-4">
 		<div class="flex justify-between items-center mb-2">
 			<div class="text-3xl font-bold">{ user.Name }</div>
-			@dialog.Dialog(dialog.Props{
-				ID:               "edit-user-name-dialog",
-				DisableClickAway: true,
-				DisableESC:       true,
-				Open:             false,
+			@dialog.Trigger(dialog.TriggerProps{
+				For: "edit-user-name-dialog",
 			}) {
-				@dialog.Trigger(dialog.TriggerProps{
-					For: "edit-user-name-dialog-trigger",
+				@button.Button(button.Props{
+					Variant: button.VariantSecondary,
+					Attributes: templ.Attributes{
+						"title": "Benutzername bearbeiten",
+					},
 				}) {
-					@button.Button(button.Props{
-						ID:      "edit-user-name-button-trigger",
-						Variant: button.VariantSecondary,
-						Attributes: templ.Attributes{
-							"title": "Benutzername bearbeiten",
-						},
-					}) {
-						@icon.Pencil()
-					}
-				}
-				@dialog.Content(dialog.ContentProps{
-					DisableAutoFocus: true,
-				}) {
-					<form action={ urlb.Profile() }>
-						@form.Item() {
-							@form.Label(form.LabelProps{
-								For: "user-name",
-							}) {
-								Benutzername ändern
-							}
-							@input.Input(input.Props{
-								ID:          "user-name",
-								Value:       user.Name,
-								Placeholder: "Neuer Benutzername",
-								Type:        input.TypeText,
-								Attributes: templ.Attributes{
-									"required": true,
-								},
-							})
-						}
-						@dialog.Footer() {
-							@dialog.Close(dialog.CloseProps{
-								For: "edit-user-name-dialog-close",
-							}) {
-								@button.Button(button.Props{
-									ID:      "edit-user-name-button-close",
-									Variant: button.VariantSecondary,
-									Attributes: templ.Attributes{
-										"title": "Abbrechen",
-									},
-								}) {
-									Abbrechen
-								}
-							}
-							@dialog.Close(dialog.CloseProps{
-								For: "edit-user-name-dialog-submit",
-							}) {
-								@button.Button(button.Props{
-									ID:   "edit-user-name-button-submit",
-									Type: "submit",
-								}) {
-									Ändern
-								}
-							}
-						}
-					</form>
+					@icon.Pencil()
 				}
 			}
 		</div>
@@ -131,4 +77,47 @@ templ sectionCookies() {
 			hx-swap="outerHTML"
 		></span>
 	</section>
+}
+
+templ editUserDialog(user *shared.User) {
+	@dialog.Dialog(dialog.Props{
+		ID:               "edit-user-name-dialog",
+		DisableClickAway: true,
+		DisableESC:       true,
+		Open:             false,
+	}) {
+		@dialog.Content(dialog.ContentProps{
+			DisableAutoFocus: true,
+		}) {
+			<form action={ urlb.Profile() } method="POST">
+				@form.Item() {
+					@form.Label(form.LabelProps{
+						For: "user-name",
+					}) {
+						Benutzername ändern
+					}
+					@input.Input(input.Props{
+						ID:          "user-name",
+						Name:        "user-name",
+						Value:       user.Name,
+						Placeholder: "Neuer Benutzername",
+						Type:        input.TypeText,
+						Attributes: templ.Attributes{
+							"required": true,
+						},
+					})
+				}
+				<br/>
+				@dialog.Footer() {
+					@dialog.Close() {
+						@button.Button(button.Props{
+							Type: "submit",
+						}) {
+							Ändern
+						}
+					}
+				}
+			</form>
+		}
+	}
 }
