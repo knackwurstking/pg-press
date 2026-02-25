@@ -1,9 +1,9 @@
+// TODO: Migrate to templui
 package templates
 
 import (
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"github.com/knackwurstking/ui/pkg/css"
 )
 
 type PageProps struct {
@@ -15,7 +15,7 @@ templ Page(p PageProps) {
 		PageTitle:   "PG Presse | Login",
 		AppBarTitle: "Login",
 	}) {
-		<main class={ css.Container }>
+		<main class="mt-8 p-8">
 			@apiKeyDialog(p.FormData["api-key"], p.FormData["invalid-api-key"])
 			<script>
 				document.querySelector("#login-dialog").showModal();
@@ -25,12 +25,12 @@ templ Page(p PageProps) {
 }
 
 templ apiKeyDialog(apiKey, invalidApiKey string) {
-	<dialog id="login-dialog" class={ css.DialogClean } oncancel="event.preventDefault();">
+	<dialog id="login-dialog" oncancel="event.preventDefault();">
 		<form
 			action={ urlb.Login("", nil) }
 			method="post"
 		>
-			<label class={ css.Flex, css.FlexCol }>
+			<label class="flex flex-col">
 				API-Schlüssel
 				<input
 					name="api-key"
@@ -41,8 +41,8 @@ templ apiKeyDialog(apiKey, invalidApiKey string) {
 					required
 				/>
 			</label>
-			<footer class={ css.Flex }>
-				<button class={ css.Flex1 } type="submit">Anmelden</button>
+			<footer class="flex">
+				<button class="flex-1" type="submit">Anmelden</button>
 			</footer>
 		</form>
 	</dialog>
