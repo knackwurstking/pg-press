@@ -3,7 +3,10 @@ package templates
 import (
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/components/button"
+	"github.com/knackwurstking/pg-press/internal/components/dialog"
+	"github.com/knackwurstking/pg-press/internal/components/form"
 	"github.com/knackwurstking/pg-press/internal/components/icon"
+	"github.com/knackwurstking/pg-press/internal/components/input"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
@@ -32,22 +35,62 @@ templ Page(p PageProps) {
 }
 
 templ profileHeader(user *shared.User) {
-	<script>
-		function openEditUserDialog() {
-			document.querySelector("#edit-user-name-dialog").showModal();
-		}
-	</script>
 	<div class="p-4">
 		<div class="flex justify-between items-center mb-2">
 			<div class="text-3xl font-bold">{ user.Name }</div>
-			@button.Button(button.Props{
-				Variant: button.VariantSecondary,
-				Attributes: templ.Attributes{
-					"onclick": "openEditUserDialog()",
-					"title":   "Benutzername bearbeiten",
-				},
+			@dialog.Dialog(dialog.Props{
+				ID:               "edit-user-name-dialog",
+				DisableClickAway: true,
+				DisableESC:       true,
+				Open:             false,
 			}) {
-				@icon.Pencil()
+				@dialog.Trigger(dialog.TriggerProps{}) {
+					@button.Button(button.Props{
+						Variant: button.VariantSecondary,
+						Attributes: templ.Attributes{
+							"title": "Benutzername bearbeiten",
+						},
+					}) {
+						@icon.Pencil()
+					}
+				}
+				@dialog.Content(dialog.ContentProps{
+					DisableAutoFocus: true,
+				}) {
+					<form action={ urlb.Profile() }>
+						@form.Item() {
+							@form.Label(form.LabelProps{
+								For: "user-name",
+							}) {
+								Benutzername ändern
+							}
+							@input.Input(input.Props{
+								ID:          "user-name",
+								Value:       user.Name,
+								Placeholder: "Neuer Benutzername",
+								Type:        input.TypeText,
+								Attributes: templ.Attributes{
+									"required": true,
+								},
+							})
+						}
+						// TODO: Migrate to templui & tailwindcss
+						<footer class={ css.Flex, css.Gap, css.JustifyEnd, css.MT }>
+							<a
+								role="button"
+								href={ urlb.Profile() }
+								class={ css.Secondary, css.Flex, css.Gap }
+							>
+								<i class="bi bi-x-circle"></i>
+								Schließen
+							</a>
+							<button type="submit" class={ css.Primary, css.Flex, css.Gap }>
+								<i class="bi bi-check-circle"></i>
+								Ändern
+							</button>
+						</footer>
+					</form>
+				}
 			}
 		</div>
 		<div class="flex flex-wrap gap-4 justify-between items-center">
@@ -79,38 +122,5 @@ templ sectionCookies() {
 	</section>
 }
 
-// TODO: Migrate to templui & tailwindcss
 templ editUserDialog(user *shared.User) {
-	<dialog
-		id="edit-user-name-dialog"
-		class={ "profile-dialog", css.Border, css.DialogClean }
-		oncancel="event.preventDefault()"
-	>
-		<form action={ urlb.Profile() }>
-			<label class={ css.Flex, css.FlexCol }>
-				<strong>Benutzername ändern</strong>
-				<input
-					name="user-name"
-					type="text"
-					value={ user.Name }
-					placeholder="Neuer Benutzername"
-					required
-				/>
-			</label>
-			<footer class={ css.Flex, css.Gap, css.JustifyEnd, css.MT }>
-				<a
-					role="button"
-					href={ urlb.Profile() }
-					class={ css.Secondary, css.Flex, css.Gap }
-				>
-					<i class="bi bi-x-circle"></i>
-					Schließen
-				</a>
-				<button type="submit" class={ css.Primary, css.Flex, css.Gap }>
-					<i class="bi bi-check-circle"></i>
-					Ändern
-				</button>
-			</footer>
-		</form>
-	</dialog>
 }
