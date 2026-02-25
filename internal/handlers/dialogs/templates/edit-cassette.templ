@@ -4,20 +4,48 @@ import (
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/button"
+	"github.com/knackwurstking/pg-press/internal/components/dialog"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 
 	"github.com/knackwurstking/ui/pkg/css"
 )
 
-templ NewCassetteDialog() {
-	@components.FormDialog("cassette-dialog", http.MethodPost, urlb.DialogEditCassette(0)) {
-		{{ cassette := &shared.Tool{} }}
-		@toolFormat(cassette.Width, cassette.Height)
-		@toolType(cassette.Type)
-		@toolCode(cassette.Code)
-		@cassetteThickness(cassette.MinThickness, cassette.MaxThickness)
-		@components.FormDialogFooter("Abbrechen", "Erstellen")
+templ NewCassetteDialog(errs ...DialogError) {
+	{{ hasError := len(errs) > 0 }}
+	@dialog.Dialog(dialog.Props{
+		ID:               DialogIDNewCassette,
+		DisableClickAway: true,
+		DisableESC:       true,
+		Open:             hasError,
+	}) {
+		@dialog.Content() {
+			@dialog.Header() {
+				Neue Kassette
+			}
+			<form
+				method={ http.MethodPost }
+				action={ urlb.DialogEditCassette(0) }
+				{ stdHxDialogProps... }
+			>
+				// TODO: Show errors
+				{{ cassette := &shared.Tool{} }}
+				@toolFormat(cassette.Width, cassette.Height)
+				@toolType(cassette.Type)
+				@toolCode(cassette.Code)
+				@cassetteThickness(cassette.MinThickness, cassette.MaxThickness)
+				@dialog.Footer() {
+					@dialog.Close() {
+						@button.Button(button.Props{
+							Type: button.TypeSubmit,
+						}) {
+							Erstellen
+						}
+					}
+				}
+			</form>
+		}
 	}
 }
 
