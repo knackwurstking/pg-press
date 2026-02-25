@@ -46,6 +46,7 @@ templ NoteCard(note *shared.Note, tools []*shared.Tool, props ...card.Props) {
 			<span class="flex gap-2">
 				@button.Button(button.Props{
 					Variant: button.VariantGhost,
+					Size:    button.SizeIcon,
 					Attributes: templ.Attributes{
 						"hx-get":     string(urlb.DialogEditNote(note.ID, note.Linked)),
 						"hx-trigger": "click",
@@ -60,6 +61,7 @@ templ NoteCard(note *shared.Note, tools []*shared.Tool, props ...card.Props) {
 				}
 				@button.Button(button.Props{
 					Variant: button.VariantGhost,
+					Size:    button.SizeIcon,
 					Attributes: templ.Attributes{
 						"hx-delete":  string(urlb.NotesDelete(note.ID)),
 						"hx-trigger": "click",

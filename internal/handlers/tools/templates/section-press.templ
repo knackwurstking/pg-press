@@ -48,13 +48,13 @@ templ SectionPress(p SectionPressProps) {
 // TODO: Migrate to templui and tailwindcss...
 templ listPressItem(p *shared.PressUtilization) {
 	{{ title := p.Press().German() }}
-	<li title={ title }>
-		// ...
-		<a
-			role="button"
-			href={ urlb.Press(p.PressID) }
-			class={ css.Outline, css.Contrast, css.Flex, css.JustifyBetween, css.ItemsCenter }
-		>
+	<div class="press-container flex flex-col gap-4">
+		@button.Button(button.Props{
+			Class:   "h-fit",
+			Variant: button.VariantOutline,
+			Href:    string(urlb.Press(p.PressID)),
+		}) {
+			// ...
 			<span class={ css.Flex, css.FlexCol, css.GapLg, css.WFull }>
 				<h5>{ title }</h5>
 				<span class={ css.Flex, css.FlexWrap, css.GapLg, css.JustifyBetween, css.ItemsCenter, css.WFull }>
@@ -113,7 +113,7 @@ templ listPressItem(p *shared.PressUtilization) {
 					}
 				</span>
 			</span>
-			<i class="bi bi-chevron-right"></i>
-		</a>
-	</li>
+			@icon.ChevronRight()
+		}
+	</div>
 }

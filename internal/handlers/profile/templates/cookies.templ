@@ -75,6 +75,7 @@ templ cookieRow(cookie *shared.Cookie) {
 		@table.Cell(table.CellProps{Class: "text-right"}) {
 			@button.Button(button.Props{
 				Variant: button.VariantGhost,
+				Size:    button.SizeIcon,
 				Attributes: templ.Attributes{
 					"hx-delete":  string(urlb.ProfileCookies(cookie.Value)),
 					"hx-trigger": "click",
