@@ -38,12 +38,12 @@ type CyclesSectionContentProps struct {
 }
 
 templ CyclesSectionContent(p *CyclesSectionContentProps) {
-	@components.SectionTitle(components.MainTitle, "Werkzeugnutzung & Zyklen")
+	@components.SectionTitle(components.TitleLevel4, "Werkzeugnutzung & Zyklen")
 	<div class={ css.Flex, css.FlexCol, css.Gap }>
 		@components.Section(templ.Attributes{
 			"id": "tool-status-section",
 		}) {
-			@components.SectionTitle(components.SubTitle, "Aktueller Status")
+			@components.SectionTitle(components.TitleLevel5, "Aktueller Status")
 			@toolStatus(p)
 		}
 		// For now tool cycles for top cassette tools are ignored
@@ -88,7 +88,7 @@ templ regenerations(p *CyclesSectionContentProps) {
 	@components.Section(templ.Attributes{
 		"id": "regenerations-section",
 	}) {
-		@components.SectionTitle(components.SubTitle, "Regenerationen") {
+		@components.SectionTitle(components.TitleLevel5, "Regenerationen") {
 			@components.SectionTitleAction(components.SectionTitleActionProps{
 				Icon:  icon.Plus(),
 				Url:   urlb.DialogEditToolRegenerationGet(p.Tool.ID),
@@ -146,7 +146,7 @@ templ cyclesTable(p *CyclesSectionContentProps) {
 	@components.Section(templ.Attributes{
 		"id": "cycles-section",
 	}) {
-		@components.SectionTitle(components.SubTitle, "Pressennutzungsverlauf") {
+		@components.SectionTitle(components.TitleLevel5, "Pressennutzungsverlauf") {
 			@components.SectionTitleAction(components.SectionTitleActionProps{
 				Icon:  icon.Plus(),
 				Url:   urlb.DialogEditCycleGet(0, p.Tool.ID, false),

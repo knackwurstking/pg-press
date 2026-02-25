@@ -59,7 +59,7 @@ templ cyclesSection() {
 
 templ toolSelection(position shared.Slot, current *shared.Tool, tools []*shared.Tool) {
 	@components.Section(nil) {
-		@components.SectionTitle(components.SubTitle, fmt.Sprintf("%s", position.German()))
+		@components.SectionTitle(components.TitleLevel5, fmt.Sprintf("%s", position.German()))
 		if current != nil {
 			<p>Aktuelles Werkzeug: { current.German() }</p>
 		} else {

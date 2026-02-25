@@ -23,7 +23,7 @@ templ UppperMetalSheets(metalSheets []*shared.UpperMetalSheet, tool *shared.Tool
 			return 0
 		})
 	}}
-	@components.SectionTitle(components.MainTitle, "Bleche") {
+	@components.SectionTitle(components.TitleLevel4, "Bleche") {
 		@components.SectionTitleAction(components.SectionTitleActionProps{
 			Url:   urlb.DialogEditMetalSheet(0, tool.ID, shared.SlotUnknown),
 			Icon:  icon.Plus(),
@@ -47,7 +47,7 @@ templ LowerMetalSheets(metalSheets []*shared.LowerMetalSheet, tool *shared.Tool,
 			return 0
 		})
 	}}
-	@components.SectionTitle(components.MainTitle, "Bleche") {
+	@components.SectionTitle(components.TitleLevel5, "Bleche") {
 		@components.SectionTitleAction(components.SectionTitleActionProps{
 			Url:   urlb.DialogEditMetalSheet(0, tool.ID, shared.SlotUnknown),
 			Icon:  icon.Plus(),

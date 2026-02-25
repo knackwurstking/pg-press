@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/button"
+	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/components/input"
 	"github.com/knackwurstking/pg-press/internal/components/label"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -22,7 +24,6 @@ type SectionToolsProps struct {
 	NotesCount         map[shared.EntityID]int
 }
 
-// TODO: Migrate to templui and tailwindcss...
 templ SectionTools(p SectionToolsProps) {
 	<span
 		hx-get={ urlb.ToolsSectionTools() }
@@ -31,32 +32,37 @@ templ SectionTools(p SectionToolsProps) {
 	></span>
 	@inputFilterTools(p.Tools)
 	@components.ActionBar() {
-		// TODO: ...
-		<button
-			hx-get={ urlb.DialogEditCassette(0) }
-			hx-trigger="click"
-			hx-swap="beforeend"
-			class={ css.Flex, css.Gap, css.Secondary }
-			disabled?={ !p.User.IsAdmin() }
-		>
-			<i class="bi bi-plus-lg"></i>
-			<span>Kassette</span>
-		</button>
-		<button
-			hx-get={ urlb.DialogEditTool(0) }
-			hx-trigger="click"
-			hx-swap="beforeend"
-			class={ css.Flex, css.Gap, css.Primary }
-			disabled?={ !p.User.IsAdmin() }
-		>
-			<i class="bi bi-plus-lg"></i>
-			<span>Werkzeug</span>
-		</button>
+		@button.Button(button.Props{
+			Size: button.SizeSm,
+			Attributes: templ.Attributes{
+				"hx-get":     string(urlb.DialogEditCassette(0)),
+				"hx-trigger": "click",
+				"hx-target":  "body",
+				"hx-swap":    "beforeend",
+			},
+			Disabled: !p.User.IsAdmin(),
+		}) {
+			@icon.Plus()
+			Kassette
+		}
+		@button.Button(button.Props{
+			Size: button.SizeSm,
+			Attributes: templ.Attributes{
+				"hx-get":     string(urlb.DialogEditTool(0)),
+				"hx-trigger": "click",
+				"hx-target":  "body",
+				"hx-swap":    "beforeend",
+			},
+			Disabled: !p.User.IsAdmin(),
+		}) {
+			@icon.Plus()
+			Werkzeug
+		}
 	}
-	<div id="tools-container" class={ css.Flex, css.FlexCol, css.Gap }>
+	<div id="tools-container" class="flex flex-col gap-4">
 		@ToolsList(p)
 	</div>
-	<script>
+	<script name="tools-filter">
 		function filterToolsList(event, skipHistory) {
 			var target = event
 				? event.currentTarget
@@ -126,16 +132,11 @@ templ SectionTools(p SectionToolsProps) {
 	</script>
 }
 
-// TODO: ...
+// TODO: Migrate to TemplUI...
 templ ToolsList(p SectionToolsProps) {
-	<details id="tools-details">
-		<summary>
-			if len(p.Tools) == 1 {
-				1 Werkzeug
-			} else {
-				{ fmt.Sprintf("%d Werkzeuge", len(p.Tools)) }
-			}
-		</summary>
+	// Tools List
+	@components.Section(nil) {
+		@components.SectionTitle(components.TitleLevel4, "Ober & Unterteile")
 		<ul
 			id="tools-list"
 			class={ css.Flex, css.FlexCol, css.Gap, css.P0 }
@@ -183,15 +184,10 @@ templ ToolsList(p SectionToolsProps) {
 				</li>
 			}
 		</ul>
-	</details>
-	<details id="cassettes-details">
-		<summary>
-			if len(p.Cassettes) == 1 {
-				1 Kassette
-			} else {
-				{ fmt.Sprintf("%d Kassetten", len(p.Cassettes)) }
-			}
-		</summary>
+	}
+	// Cassettes List
+	@components.Section(nil) {
+		@components.SectionTitle(components.TitleLevel4, "Kassetten")
 		<ul
 			id="cassettes-list"
 			class={ css.Flex, css.FlexCol, css.Gap, css.P0 }
@@ -225,7 +221,7 @@ templ ToolsList(p SectionToolsProps) {
 				</li>
 			}
 		</ul>
-	</details>
+	}
 }
 
 templ inputFilterTools(tools []*shared.Tool) {

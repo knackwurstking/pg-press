@@ -15,7 +15,7 @@ type BindingSectionProps struct {
 
 templ BindingSection(props BindingSectionProps) {
 	<span id="binding-section" class={ css.Flex, css.FlexCol, css.Gap }>
-		@components.SectionTitle(components.SubTitle, "Werkzeuge Binden")
+		@components.SectionTitle(components.TitleLevel5, "Werkzeuge Binden")
 		<span
 			class={ css.Flex, css.Gap, css.FlexWrap }
 			if !props.IsAdmin {

@@ -8,20 +8,32 @@ templ Section(attr templ.Attributes) {
 	</section>
 }
 
-type SectionTitleLevel int8
+type TitleLevel int8
 
 const (
-	MainTitle SectionTitleLevel = iota
-	SubTitle
+	TitleLevel1 TitleLevel = iota
+	TitleLevel2
+	TitleLevel3
+	TitleLevel4
+	TitleLevel5
+	TitleLevel6
 )
 
-templ SectionTitle(level SectionTitleLevel, text string) {
+templ SectionTitle(level TitleLevel, text string) {
 	<div class="flex justify-between items-center my-4">
 		switch level {
-			case MainTitle:
-				<h4>{ text }</h4>
-			case SubTitle:
-				<h5>{ text }</h5>
+			case TitleLevel1:
+				<h1 class="text-6xl font-bold mb-2">{ text }</h1>
+			case TitleLevel2:
+				<h2 class="text-5xl font-bold mb-2">{ text }</h2>
+			case TitleLevel3:
+				<h3 class="text-4xl font-bold mb-2">{ text }</h3>
+			case TitleLevel4:
+				<h4 class="text-3xl font-bold mb-2">{ text }</h4>
+			case TitleLevel5:
+				<h5 class="text-2xl font-bold mb-2">{ text }</h5>
+			case TitleLevel6:
+				<h6 class="text-xl font-bold mb-2">{ text }</h6>
 			default:
 				{ text }
 		}

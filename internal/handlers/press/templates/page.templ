@@ -78,7 +78,7 @@ templ sectionNotes(p PageProps) {
 		"id":    "notes-section",
 		"class": css.MT,
 	}) {
-		@components.SectionTitle(components.SubTitle, "Notizen") {
+		@components.SectionTitle(components.TitleLevel5, "Notizen") {
 			@components.SectionTitleAction(components.SectionTitleActionProps{
 				Url:   urlb.DialogEditNote(0, fmt.Sprintf("press_%d", p.Press.Number)),
 				Icon:  icon.Plus(),
