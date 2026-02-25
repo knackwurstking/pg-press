@@ -11,7 +11,6 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components/label"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"github.com/knackwurstking/ui/pkg/css"
 )
 
 type SectionToolsProps struct {
@@ -132,16 +131,12 @@ templ SectionTools(p SectionToolsProps) {
 	</script>
 }
 
-// TODO: Migrate to TemplUI...
 templ ToolsList(p SectionToolsProps) {
+	{{ listClasses := "flex flex-col gap-4 p-0 list-none" }}
 	// Tools List
 	@components.Section(nil) {
 		@components.SectionTitle(components.TitleLevel4, "Ober & Unterteile")
-		<ul
-			id="tools-list"
-			class={ css.Flex, css.FlexCol, css.Gap, css.P0 }
-			style="list-style: none;"
-		>
+		<ul id="tools-list" class={ listClasses }>
 			for _, t := range p.Tools {
 				if !p.User.IsAdmin() && t.IsDead {
 					{{ continue }}
@@ -150,7 +145,7 @@ templ ToolsList(p SectionToolsProps) {
 				if (strings.ToLower(t.Type) == "unbekannt" || strings.ToLower(t.Code) == "unbekannt") && !p.User.IsAdmin() {
 					{{ continue }}
 				}
-				<li id={ fmt.Sprintf("tool-%d", t.ID) } class="tool-item" style="display: none;">
+				<li id={ fmt.Sprintf("tool-%d", t.ID) } class="tool-item hidden">
 					{{
 						var cassette *shared.Tool
 						for _, c := range p.Cassettes {
@@ -188,13 +183,9 @@ templ ToolsList(p SectionToolsProps) {
 	// Cassettes List
 	@components.Section(nil) {
 		@components.SectionTitle(components.TitleLevel4, "Kassetten")
-		<ul
-			id="cassettes-list"
-			class={ css.Flex, css.FlexCol, css.Gap, css.P0 }
-			style="list-style: none;"
-		>
+		<ul id="cassettes-list" class={ listClasses }>
 			for _, c := range p.Cassettes {
-				<li id={ fmt.Sprintf("cassette-%d", c.ID) } class="tool-item" style="display: none;">
+				<li id={ fmt.Sprintf("cassette-%d", c.ID) } class="tool-item">
 					{{
 						var boundTool *shared.Tool
 						for _, t := range p.Tools {

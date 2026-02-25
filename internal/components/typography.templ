@@ -1,0 +1,40 @@
+package components
+
+type TitleLevel int8
+
+const (
+	TitleLevel1 TitleLevel = iota
+	TitleLevel2
+	TitleLevel3
+	TitleLevel4
+	TitleLevel5
+	TitleLevel6
+)
+
+templ Title(level TitleLevel, text string, props ...templ.Attributes) {
+	{{
+		prop := templ.Attributes{}
+		if len(props) > 0 {
+			prop = props[0]
+		}
+
+		class, _ := prop["class"]
+		delete(prop, "class")
+	}}
+	switch level {
+		case TitleLevel1:
+			<h1 class={ "text-5xl font-bold mb-2", class } { prop... }>{ text }</h1>
+		case TitleLevel2:
+			<h2 class={ "text-4xl font-bold mb-2", class } { prop... }>{ text }</h2>
+		case TitleLevel3:
+			<h3 class={ "text-3xl font-bold mb-2", class } { prop... }>{ text }</h3>
+		case TitleLevel4:
+			<h4 class={ "text-2xl font-bold mb-2", class } { prop... }>{ text }</h4>
+		case TitleLevel5:
+			<h5 class={ "text-1xl font-bold mb-2", class } { prop... }>{ text }</h5>
+		case TitleLevel6:
+			<h6 class={ "text-lg font-bold mb-2", class } { prop... }>{ text }</h6>
+		default:
+			<span { prop... }>{ text }</span>
+	}
+}
