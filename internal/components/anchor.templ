@@ -59,9 +59,6 @@ templ ToolAnchor(p ToolAnchorProps) {
 			</div>
 		}
 	</div>
-	<div class="flex flex-col gap-4 justify-between items-center">
-		@icon.ChevronRight()
-	</div>
 	@toolAnchorTotalCycles(p.Tool.ID)
 	if p.EnableCounts {
 		@toolAnchorCounts(p.NotesCount, p.RegenerationsCount)
@@ -103,9 +100,6 @@ templ CassetteAnchor(p CassetteAnchorProps) {
 				@CassetteStateBadge(p.Cassette, p.BindingTool, p.IsRegenerating)
 			</div>
 		}
-	</div>
-	<div class="flex flex-col gap-4 justify-between items-center">
-		@icon.ChevronRight()
 	</div>
 	if p.Cassette.Code != "" {
 		@toolAnchorTotalCycles(p.Cassette.ID)
