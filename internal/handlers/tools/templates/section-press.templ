@@ -67,10 +67,10 @@ templ listPressItem(p *shared.PressUtilization) {
 										p.SlotUpper.Type,
 									)
 								}}
-								<span class="flex flex-col justify-center items-start">
+								<span class="flex flex-col justify-center items-start gap-1">
 									@badge.Badge(badge.Props{
 										Class:   "text-bold",
-										Variant: badge.VariantDefault,
+										Variant: badge.VariantSecondary,
 									}) {
 										{ shared.SlotUpper.German() }
 									}
@@ -87,7 +87,7 @@ templ listPressItem(p *shared.PressUtilization) {
 										p.SlotUpperCassette.MaxThickness,
 									)
 								}}
-								<span class="flex flex-col justify-center items-start">
+								<span class="flex flex-col justify-center items-start gap-1">
 									@badge.Badge(badge.Props{
 										Class:   "text-bold",
 										Variant: badge.VariantSecondary,
@@ -108,7 +108,7 @@ templ listPressItem(p *shared.PressUtilization) {
 							)
 						}}
 						<!-- Lower Tool -->
-						<span class="flex flex-col justify-center items-start">
+						<span class="flex flex-col justify-center items-start gap-1">
 							@badge.Badge(badge.Props{
 								Class:   "text-bold",
 								Variant: badge.VariantSecondary,
