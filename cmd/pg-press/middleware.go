@@ -49,8 +49,8 @@ func init() {
 		env.ServerPathPrefix + "/login",
 
 		// CSS
-		env.ServerPathPrefix + "/css/bootstrap-icons.min.css",
-		env.ServerPathPrefix + "/css/ui.min.css",
+		env.ServerPathPrefix + "/css/bootstrap-icons.min.css", // TODO: Remove
+		env.ServerPathPrefix + "/css/output.css",
 		env.ServerPathPrefix + "/css/main-layout.css",
 
 		// JS
@@ -58,8 +58,8 @@ func init() {
 		env.ServerPathPrefix + "/js/layout.js",
 
 		// Fonts
-		env.ServerPathPrefix + "/bootstrap-icons.woff",
-		env.ServerPathPrefix + "/bootstrap-icons.woff2",
+		env.ServerPathPrefix + "/bootstrap-icons.woff",  // TODO: Remove
+		env.ServerPathPrefix + "/bootstrap-icons.woff2", // TODO: Remove
 
 		// Icons
 		env.ServerPathPrefix + "/apple-touch-icon-180x180.png",
