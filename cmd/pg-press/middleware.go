@@ -57,6 +57,12 @@ func init() {
 		env.ServerPathPrefix + "/js/htmx-v2.0.7.min.js",
 		env.ServerPathPrefix + "/js/layout.js",
 
+		// TemplUI Component Scripts
+		env.ServerPathPrefix + "/js/dialog.min.js",
+		env.ServerPathPrefix + "/js/input.min.js",
+		env.ServerPathPrefix + "/js/label.min.js",
+		env.ServerPathPrefix + "/js/tabs.min.js",
+
 		// Fonts
 		env.ServerPathPrefix + "/bootstrap-icons.woff",  // TODO: Remove
 		env.ServerPathPrefix + "/bootstrap-icons.woff2", // TODO: Remove
