@@ -75,10 +75,6 @@ templ styles() {
 			overflow: hidden;
 		}
 
-		.app-bar~* {
-			padding-top: calc(var(--ui-app-bar-height) + 1rem);
-		}
-
 		details summary::after {
 			font-family: "bootstrap-icons";
 			content: "\f285";
@@ -92,8 +88,8 @@ templ styles() {
 
 		.image-viewer button.close {
 			position: fixed;
-			top: var(--ui-spacing);
-			right: var(--ui-spacing);
+			top: var(--spacing);
+			right: var(--spacing);
 		}
 
 		.image-viewer img {
@@ -110,9 +106,6 @@ templ styles() {
 		}
 
 		.spinner {
-			/* utils: .ui-backdrop */
-			background-color: var(--ui-backdrop-color);
-
 			position: absolute;
 			top: 0;
 			left: 0;
@@ -130,8 +123,8 @@ templ styles() {
 			content: "";
 			width: 2.5rem;
 			height: 2.5rem;
-			border: 2px var(--ui-border-style) var(--ui-border-color);
-			border-top-color: var(--ui-primary);
+			border: 2px solid var(--border);
+			border-top-color: var(--primary);
 			border-radius: 50%;
 			animation: spinner 0.6s linear infinite;
 		}
