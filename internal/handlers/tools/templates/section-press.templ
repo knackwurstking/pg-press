@@ -14,13 +14,14 @@ type SectionPressProps struct {
 	User                   *shared.User
 }
 
+// TODO: Migrate to templui and tailwindcss
 templ SectionPress(p SectionPressProps) {
 	<span
 		hx-get={ urlb.ToolsSectionPress() }
 		hx-trigger="tools-tab from:body"
 		hx-target="#tab-content"
 	></span>
-	@components.ActionBar(nil) {
+	@components.ActionBar() {
 		<button
 			hx-get={ urlb.DialogEditPressGet(-1) }
 			hx-trigger="click"

@@ -52,7 +52,7 @@ templ sectionActions(p PageProps) {
 	if !p.User.IsAdmin() {
 		{{ return }}
 	}
-	@components.ActionBar(nil) {
+	@components.ActionBar() {
 		<button
 			class={ css.Secondary }
 			hx-get={ urlb.DialogEditPressGet(p.Press.ID) }

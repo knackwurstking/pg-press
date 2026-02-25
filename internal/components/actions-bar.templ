@@ -1,18 +1,19 @@
 package components
 
-templ ActionBar(attr templ.Attributes) {
+templ ActionBar(props ...templ.Attributes) {
 	{{
-		if attr == nil {
-			attr = templ.Attributes{}
+		prop := templ.Attributes{}
+		if len(props) > 0 {
+			prop = props[0]
 		}
 
-		if c, ok := attr["class"]; ok {
-			attr["class"] = "flex gap-4 justify-end p-4 " + c.(string)
+		if c, ok := prop["class"]; ok {
+			prop["class"] = "flex gap-4 justify-end p-4 " + c.(string)
 		} else {
-			attr["class"] = "flex gap-4 justify-end p-4"
+			prop["class"] = "flex gap-4 justify-end p-4"
 		}
 	}}
-	<div { attr... }>
+	<div { prop... }>
 		{ children... }
 	</div>
 }

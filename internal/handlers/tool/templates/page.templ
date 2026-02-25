@@ -69,7 +69,7 @@ templ actionBarContent(p *PageProps) {
 	if !p.User.IsAdmin() {
 		{{ return }}
 	}
-	@components.ActionBar(nil) {
+	@components.ActionBar() {
 		if p.Tool.IsDead {
 			// TODO: Revive tool/cassette button here
 		} else {
