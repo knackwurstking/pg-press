@@ -7,10 +7,6 @@ import (
 	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
-// -----------------------------------------------------------------------------
-// Tool Anchor
-// -----------------------------------------------------------------------------
-
 type ToolAnchorProps struct {
 	Tool               *shared.Tool // Required
 	BindingCassette    *shared.Tool // Optional
@@ -31,93 +27,47 @@ templ ToolAnchor(p ToolAnchorProps) {
 			panic(fmt.Sprintf("cassette is required, got %s", p.BindingCassette.Position.German()))
 		}
 	}}
-	// NOTE: Muted button
-	<a
-		role="button"
-		class="flex justify-between items-center p-4"
-		href={ urlb.Tool(p.Tool.ID) }
-	>
-		<div
-			class={
-				"flex flex-col gap-2 w-full",
-				templ.KV("justify-between", p.BindingCassette != nil),
-			}
-		>
-			<span class="font-semibold">
-				{ p.Tool.German() }
-			</span>
-			if p.EnableBadges {
-				<div class="flex gap-4 justify-start items-center w-full">
-					@badge.Badge(badge.Props{
-						Variant: badge.VariantDefault,
-					}) {
-						{ p.Tool.Position.German() }
-					}
-					@ToolStateBadge(p.Tool, p.Press, p.IsRegenerating)
-					<span
-						class={
-							"total-cycles-container",
-							"flex justify-end items-center",
-							"w-full pr-4",
-							"text-sm",
-						}
-						hx-get={ urlb.ToolTotalCycles(p.Tool.ID) }
-						hx-trigger="load"
-						hx-swap="innerHTML"
-					></span>
-				</div>
-			}
-			if p.BindingCassette != nil {
-				// NOTE: info ghost
-				<div class="text-sm italic">
-					<i class="text-xs">
-						if p.BindingCassette.MinThickness == 0 {
-							Kassette: { p.BindingCassette.MaxThickness }mm
-						} else {
-							Kassette: { p.BindingCassette.MinThickness }mm -> { p.BindingCassette.MaxThickness }mm
-						}
-					</i>
-				</div>
-			}
-		</div>
-		<div class="flex flex-col gap-4 justify-between items-center">
-			<i class="bi bi-chevron-right"></i>
-		</div>
-		if p.EnableCounts {
-			@ToolAnchorCounts(p.NotesCount, p.RegenerationsCount)
+	<div
+		class={
+			"flex flex-col gap-2 w-full",
+			templ.KV("justify-between", p.BindingCassette != nil),
 		}
-	</a>
-}
-
-templ ToolAnchorCounts(notesCount, regenerationsCount int) {
-	<span
-		class="flex justify-end items-center gap-2 text-xs absolute"
-		style="top: 0.15rem; right: 0.25rem;"
 	>
-		if notesCount > 0 {
+		<div class="font-semibold py-4 px-2">
+			{ p.Tool.German() }
+		</div>
+		if p.EnableBadges {
+			<div class="flex gap-4 justify-start items-center w-full">
+				@badge.Badge(badge.Props{
+					Variant: badge.VariantDefault,
+				}) {
+					{ p.Tool.Position.German() }
+				}
+				@ToolStateBadge(p.Tool, p.Press, p.IsRegenerating)
+			</div>
+		}
+		if p.BindingCassette != nil {
 			// NOTE: info ghost
-			<span>
-				<i class="bi bi-info-circle"></i>
-				<span>
-					{ notesCount }
-				</span>
-			</span>
+			<div class="text-sm italic p-2 text-blue-500">
+				<i class="text-xs">
+					if p.BindingCassette.MinThickness == 0 {
+						Kassette: { p.BindingCassette.MaxThickness }mm
+					} else {
+						Kassette: { p.BindingCassette.MinThickness }mm -> { p.BindingCassette.MaxThickness }mm
+					}
+				</i>
+			</div>
 		}
-		if regenerationsCount > 0 {
-			// NOTE: warning ghost
-			<span>
-				<i class="bi bi-arrow-repeat"></i>
-				<span>
-					{ regenerationsCount }
-				</span>
-			</span>
-		}
-	</span>
+	</div>
+	<div class="flex flex-col gap-4 justify-between items-center">
+		// TODO: Migrate to templui and tailwindcss
+		<i class="bi bi-chevron-right"></i>
+	</div>
+	@toolAnchorTotalCycles(p.Tool.ID)
+	if p.EnableCounts {
+		@toolAnchorCounts(p.NotesCount, p.RegenerationsCount)
+	}
 }
-
-// -----------------------------------------------------------------------------
-// Cassette Anchor
-// -----------------------------------------------------------------------------
 
 type CassetteAnchorProps struct {
 	Cassette    *shared.Tool // Required
@@ -140,57 +90,42 @@ templ CassetteAnchor(p CassetteAnchorProps) {
 			panic("CassetteAnchor: Cassette is required")
 		}
 	}}
-	// NOTE: muted
-	<a
-		role="button"
-		class="flex justify-between items-center p-4"
-		href={ urlb.Tool(p.Cassette.ID) }
-	>
-		<div class="flex flex-col gap-2 justify-between w-full">
-			<span class="font-semibold">
-				{ p.Cassette.German() }
-			</span>
-			if p.EnableBadges {
-				<div class="flex gap-4 justify-start items-center w-full">
-					@badge.Badge(badge.Props{
-						Variant: badge.VariantDefault,
-					}) {
-						{ p.Cassette.Position.German() }
-					}
-					@CassetteStateBadge(p.Cassette, p.BindingTool, p.IsRegenerating)
-					if p.Cassette.Code != "" {
-						<span
-							class={
-								"total-cycles-container",
-								"flex justify-end items-center",
-								"w-full pr-4",
-								"text-sm",
-							}
-							hx-get={ urlb.ToolTotalCycles(p.Cassette.ID) }
-							hx-trigger="load"
-							hx-swap="innerHTML"
-						></span>
-					}
-				</div>
-			}
+	<div class="flex flex-col gap-2 justify-between w-full">
+		<div class="font-semibold py-4 px-2">
+			{ p.Cassette.German() }
 		</div>
-		<div class="flex flex-col gap-4 justify-between items-center">
-			<i class="bi bi-chevron-right"></i>
-		</div>
-		if p.EnableCounts {
-			@CassetteAnchorCounts(p.NotesCount, p.RegenerationsCount)
+		if p.EnableBadges {
+			<div class="flex gap-4 justify-start items-center w-full">
+				@badge.Badge(badge.Props{
+					Variant: badge.VariantDefault,
+				}) {
+					{ p.Cassette.Position.German() }
+				}
+				@CassetteStateBadge(p.Cassette, p.BindingTool, p.IsRegenerating)
+			</div>
 		}
-	</a>
+	</div>
+	<div class="flex flex-col gap-4 justify-between items-center">
+		// TODO: Migrate to templui and tailwindcss
+		<i class="bi bi-chevron-right"></i>
+	</div>
+	if p.Cassette.Code != "" {
+		@toolAnchorTotalCycles(p.Cassette.ID)
+	}
+	if p.EnableCounts {
+		@toolAnchorCounts(p.NotesCount, p.RegenerationsCount)
+	}
 }
 
-templ CassetteAnchorCounts(notesCount, regenerationsCount int) {
+templ toolAnchorCounts(notesCount, regenerationsCount int) {
 	<span
 		class="flex justify-end items-center gap-2 text-xs absolute"
-		style="top: 0.15rem; right: 0.25rem;"
+		style="top: var(--spacing); right: calc(var(--spacing) * 2);"
 	>
 		if notesCount > 0 {
 			// NOTE: info ghost
 			<span>
+				// TODO: Migrate to templui and tailwindcss
 				<i class="bi bi-info-circle"></i>
 				<span>
 					{ notesCount }
@@ -200,6 +135,7 @@ templ CassetteAnchorCounts(notesCount, regenerationsCount int) {
 		if regenerationsCount > 0 {
 			// NOTE: warning ghost
 			<span>
+				// TODO: Migrate to templui and tailwindcss
 				<i class="bi bi-arrow-repeat"></i>
 				<span>
 					{ regenerationsCount }
@@ -207,4 +143,20 @@ templ CassetteAnchorCounts(notesCount, regenerationsCount int) {
 			</span>
 		}
 	</span>
+}
+
+templ toolAnchorTotalCycles(toolID shared.EntityID) {
+	<span
+		class={
+			"total-cycles-container",
+			"absolute",
+			"flex justify-end items-center",
+			"w-fit",
+			"text-sm",
+		}
+		style="bottom: var(--spacing); right: calc(var(--spacing) * 2);"
+		hx-get={ urlb.ToolTotalCycles(toolID) }
+		hx-trigger="load"
+		hx-swap="innerHTML"
+	></span>
 }

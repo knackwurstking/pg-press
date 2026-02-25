@@ -29,8 +29,8 @@ templ ToolStateBadge(tool *shared.Tool, press *shared.Press, isRegenerating bool
 	}) {
 		if press != nil {
 			<span class="flex flex-col justify-center items-center">
-				<span class="font-bold">Eingebaut</span>
-				<span>{ press.German() }</span>
+				<small class="font-bold">Eingebaut</small>
+				<small class="font-thin">{ press.German() }</small>
 			</span>
 		} else {
 			if isRegenerating {
@@ -66,8 +66,8 @@ templ CassetteStateBadge(cassette *shared.Tool, boundToTool *shared.Tool, isRege
 	}) {
 		if boundToTool != nil {
 			<span class="flex flex-col justify-center items-center">
-				<span class="font-bold">Gebunden</span>
-				<span>{ boundToTool.German() }</span>
+				<small class="font-bold">Gebunden</small>
+				<small class="font-thin">{ boundToTool.German() }</small>
 			</span>
 		} else {
 			if isRegenerating {

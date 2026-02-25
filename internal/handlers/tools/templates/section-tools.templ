@@ -2,7 +2,6 @@ package templates
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/components/button"
@@ -117,24 +116,21 @@ templ SectionTools(p SectionToolsProps) {
 	</script>
 }
 
-// TODO: Create some button items like the press item
 templ ToolsList(p SectionToolsProps) {
-	{{ listClasses := "flex flex-col gap-4 p-0 list-none" }}
 	// Tools List
 	@components.Section(nil) {
 		@components.SectionTitle(components.TitleLevel4, "Ober & Unterteile")
-		// TODO: ...
-		//<div class="press-container flex flex-col gap-4">
-		<ul id="tools-list" class={ listClasses }>
+		<div id="tools-list" class="flex flex-col gap-4">
 			for _, t := range p.Tools {
 				if !p.User.IsAdmin() && t.IsDead {
 					{{ continue }}
 				}
-				// NOTE: This is just a provisorium
-				if (strings.ToLower(t.Type) == "unbekannt" || strings.ToLower(t.Code) == "unbekannt") && !p.User.IsAdmin() {
-					{{ continue }}
-				}
-				<li id={ fmt.Sprintf("tool-%d", t.ID) } class="tool-item">
+				@button.Button(button.Props{
+					ID:      fmt.Sprintf("tool-%d-link", t.ID),
+					Class:   "tool-item h-fit relative",
+					Variant: button.VariantOutline,
+					Href:    string(urlb.Tool(t.ID)),
+				}) {
 					{{
 						var cassette *shared.Tool
 						for _, c := range p.Cassettes {
@@ -165,16 +161,21 @@ templ ToolsList(p SectionToolsProps) {
 						RegenerationsCount: p.RegenerationsCount[t.ID],
 						NotesCount:         p.NotesCount[t.ID],
 					})
-				</li>
+				}
 			}
-		</ul>
+		</div>
 	}
 	// Cassettes List
 	@components.Section(nil) {
 		@components.SectionTitle(components.TitleLevel4, "Kassetten")
-		<ul id="cassettes-list" class={ listClasses }>
+		<div id="cassettes-list" class="flex flex-col gap-4">
 			for _, c := range p.Cassettes {
-				<li id={ fmt.Sprintf("cassette-%d", c.ID) } class="tool-item">
+				@button.Button(button.Props{
+					ID:      fmt.Sprintf("cassette-%d-link", c.ID),
+					Class:   "tool-item h-fit relative",
+					Variant: button.VariantOutline,
+					Href:    string(urlb.Tool(c.ID)),
+				}) {
 					{{
 						var boundTool *shared.Tool
 						for _, t := range p.Tools {
@@ -198,9 +199,9 @@ templ ToolsList(p SectionToolsProps) {
 						RegenerationsCount: p.RegenerationsCount[c.ID],
 						NotesCount:         p.NotesCount[c.ID],
 					})
-				</li>
+				}
 			}
-		</ul>
+		</div>
 	}
 }
 
