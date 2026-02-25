@@ -3,7 +3,6 @@ package templates
 import (
 	"net/http"
 
-	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/components/button"
 	"github.com/knackwurstking/pg-press/internal/components/dialog"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -13,12 +12,22 @@ import (
 )
 
 templ NewCassetteDialog(errs ...DialogError) {
-	{{ hasError := len(errs) > 0 }}
+	{{
+		hasError := len(errs) > 0
+
+		var attr templ.Attributes
+		if hasError {
+			attr = templ.Attributes{
+				"hx-swap-oob": "true",
+			}
+		}
+	}}
 	@dialog.Dialog(dialog.Props{
 		ID:               DialogIDNewCassette,
 		DisableClickAway: true,
 		DisableESC:       true,
 		Open:             hasError,
+		Attributes:       attr,
 	}) {
 		@dialog.Content() {
 			@dialog.Header() {
@@ -49,16 +58,58 @@ templ NewCassetteDialog(errs ...DialogError) {
 	}
 }
 
-templ EditCassetteDialog(cassette *shared.Tool) {
-	@components.FormDialog("cassette-edit-dialog", http.MethodPut, urlb.DialogEditCassette(cassette.ID)) {
-		@toolFormat(cassette.Width, cassette.Height)
-		@toolType(cassette.Type)
-		@toolCode(cassette.Code)
-		@cassetteThickness(cassette.MinThickness, cassette.MaxThickness)
-		@components.FormDialogFooter("Abbrechen", "Aktualisieren")
+templ EditCassetteDialog(cassette *shared.Tool, errs ...DialogError) {
+	{{
+		hasError := len(errs) > 0
+
+		var attr templ.Attributes
+		if hasError {
+			attr = templ.Attributes{
+				"hx-swap-oob": "true",
+			}
+		}
+	}}
+	@dialog.Dialog(dialog.Props{
+		ID:               DialogIDEditCassette,
+		DisableClickAway: true,
+		DisableESC:       true,
+		Open:             hasError,
+		Attributes:       attr,
+	}) {
+		@dialog.Content() {
+			@dialog.Header() {
+				Kassette Bearbeiten
+			}
+			<form
+				method={ http.MethodPost }
+				action={ urlb.DialogEditCassette(0) }
+				{ stdHxDialogProps... }
+			>
+				// TODO: Show errors
+				@toolFormat(cassette.Width, cassette.Height)
+				@toolType(cassette.Type)
+				@toolCode(cassette.Code)
+				@cassetteThickness(cassette.MinThickness, cassette.MaxThickness)
+				@dialog.Footer() {
+					@button.Button(button.Props{
+						Type: button.TypeReset,
+					}) {
+						Reset
+					}
+					@dialog.Close() {
+						@button.Button(button.Props{
+							Type: button.TypeSubmit,
+						}) {
+							Aktualisieren
+						}
+					}
+				}
+			</form>
+		}
 	}
 }
 
+// TODO: Migrate to templui and tailwindcss
 templ cassetteThickness(inputMinThickness float32, inputMaxThickness float32) {
 	<div class={ css.Flex, css.FlexCol, css.ItemsStart, css.WFull }>
 		<label>Dicke (mm)</label>

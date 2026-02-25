@@ -1,8 +1,8 @@
 package templates
 
 import (
-	"fmt"
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/tabs"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/knackwurstking/ui/pkg/css"
@@ -25,45 +25,78 @@ templ Page(p PageProps) {
 			AdditionalHead: additionalHead(),
 		},
 	) {
-		<main class={ css.Container, css.ContainerFluid }>
-			<div
-				class={ css.Tabs, css.Backdrop, css.Z20 }
-				style={
-					"position: fixed;",
-					fmt.Sprintf("top: calc(%s + %s)", css.VarAppBarHeight, css.VarSpacing),
-					fmt.Sprintf("width: calc(100%% - %s * 2)", css.VarSpacing),
+		<main>
+			@tabs.Tabs() {
+				@tabs.List() {
+					@tabs.Trigger(tabs.TriggerProps{
+						Value: "press",
+					}) {
+						Pressen
+					}
+					@tabs.Trigger(tabs.TriggerProps{
+						Value: "tool",
+					}) {
+						Werkzeuge
+					}
 				}
-			>
-				// Press Section Tab - `SectionPress`
-				<div
-					data-index="0"
-					class={ css.TabsTab, css.Secondary, css.Ghost }
-					hx-get={ urlb.ToolsSectionPress() }
-					hx-trigger="load-tab-content"
-					hx-target="#tab-content"
-					onclick="toggleTab(event)"
-				>
-					Pressen
-				</div>
-				// Tools Section Tab - `SectionTools`
-				<div
-					data-index="1"
-					class={ css.TabsTab, css.Secondary, css.Ghost }
-					hx-get={ urlb.ToolsSectionTools() }
-					hx-trigger="load-tab-content"
-					hx-target="#tab-content"
-					onclick="toggleTab(event)"
-				>
-					Werkzeuge
-				</div>
-			</div>
-			// Tab Content, where the content goes '#tab-content'
-			<div
-				id="tab-content"
-				class={ css.P, css.WFull, css.HFit }
-				style="margin-top: 50px;"
-				hx-on::after-request={ filterToolsList(templ.JSExpression("null"), true) }
-			></div>
+				@tabs.Content(tabs.ContentProps{
+					Value: "press",
+				}) {
+					<span
+						hx-get={ urlb.ToolsSectionPress() }
+						hx-trigger="load"
+						hx-swap="outerHTML"
+					></span>
+				}
+				@tabs.Content(tabs.ContentProps{
+					Value: "tool",
+				}) {
+					<span
+						hx-get={ urlb.ToolsSectionTools() }
+						hx-trigger="load"
+						hx-swap="outerHTML"
+					></span>
+				}
+			}
+			// TODO: Remove old tab implementation and migrate to the new one above
+			//<div
+			//	class={ css.Tabs, css.Backdrop, css.Z20 }
+			//	style={
+			//		"position: fixed;",
+			//		fmt.Sprintf("top: calc(%s + %s)", css.VarAppBarHeight, css.VarSpacing),
+			//		fmt.Sprintf("width: calc(100%% - %s * 2)", css.VarSpacing),
+			//	}
+			//>
+			//	// Press Section Tab - `SectionPress`
+			//	<div
+			//		data-index="0"
+			//		class={ css.TabsTab, css.Secondary, css.Ghost }
+			//		hx-get={ urlb.ToolsSectionPress() }
+			//		hx-trigger="load-tab-content"
+			//		hx-target="#tab-content"
+			//		onclick="toggleTab(event)"
+			//	>
+			//		Pressen
+			//	</div>
+			//	// Tools Section Tab - `SectionTools`
+			//	<div
+			//		data-index="1"
+			//		class={ css.TabsTab, css.Secondary, css.Ghost }
+			//		hx-get={ urlb.ToolsSectionTools() }
+			//		hx-trigger="load-tab-content"
+			//		hx-target="#tab-content"
+			//		onclick="toggleTab(event)"
+			//	>
+			//		Werkzeuge
+			//	</div>
+			//</div>
+			//// Tab Content, where the content goes '#tab-content'
+			//<div
+			//	id="tab-content"
+			//	class={ css.P, css.WFull, css.HFit }
+			//	style="margin-top: 50px;"
+			//	hx-on::after-request={ filterToolsList(templ.JSExpression("null"), true) }
+			//></div>
 		</main>
 	}
 }
