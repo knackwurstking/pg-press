@@ -35,7 +35,9 @@ templ apiKeyDialog(apiKey, invalidApiKey string) {
 		Open:             true,
 	}) {
 		<form action={ urlb.Login("", nil) } method="post">
-			@dialog.Content() {
+			@dialog.Content(dialog.ContentProps{
+				HideCloseButton: true,
+			}) {
 				@dialog.Title() {
 					Login
 				}
