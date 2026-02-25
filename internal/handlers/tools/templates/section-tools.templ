@@ -11,10 +11,9 @@ import (
 )
 
 type SectionToolsProps struct {
-	Tools     []*shared.Tool
-	Cassettes []*shared.Tool
-	// ActiveTools maps Tool/Cassette ID to Press
-	ActiveTools        map[shared.EntityID]*shared.Press
+	Tools              []*shared.Tool
+	Cassettes          []*shared.Tool
+	ActiveTools        map[shared.EntityID]*shared.Press // ActiveTools maps Tool/Cassette ID to Press
 	User               *shared.User
 	IsRegenerating     map[shared.EntityID]bool
 	RegenerationsCount map[shared.EntityID]int
@@ -25,7 +24,7 @@ templ SectionTools(p SectionToolsProps) {
 	<span
 		hx-get={ urlb.ToolsSectionTools() }
 		hx-trigger="tools-tab from:body"
-		hx-target="#tab-content"
+		hx-target="#tools-tab-content"
 	></span>
 	@inputFilterTools(p.Tools)
 	@components.ActionBar(templ.Attributes{
@@ -82,29 +81,6 @@ templ SectionTools(p SectionToolsProps) {
 		});
 	})();
 	</script>
-}
-
-templ inputFilterTools(tools []*shared.Tool) {
-	<div
-		class={ css.Flex, css.FlexWrap, css.GapSm, css.JustifyEvenly, css.Backdrop, css.Z10 }
-		style={
-			"position: fixed",
-			fmt.Sprintf("top: calc(%s + %s + 2.5rem)", css.VarAppBarHeight, css.VarSpacing),
-			fmt.Sprintf("width: calc(100%% - %s * 4)", css.VarSpacing),
-		}
-	>
-		<label
-			class={ css.Flex, css.Flex1, css.FlexCol, css.WFull }
-		>
-			Suche (Lazy)
-			<input
-				id="tools-filter"
-				type="search"
-				oninput={ filterToolsList(templ.JSExpression("event"), false) }
-				hx-preserve="true"
-			/>
-		</label>
-	</div>
 }
 
 templ ToolsList(p SectionToolsProps) {
@@ -206,4 +182,68 @@ templ ToolsList(p SectionToolsProps) {
 			}
 		</ul>
 	</details>
+}
+
+templ inputFilterTools(tools []*shared.Tool) {
+	<div
+		class={ css.Flex, css.FlexWrap, css.GapSm, css.JustifyEvenly, css.Backdrop, css.Z10 }
+		style={
+			"position: fixed",
+			fmt.Sprintf("top: calc(%s + %s + 2.5rem)", css.VarAppBarHeight, css.VarSpacing),
+			fmt.Sprintf("width: calc(100%% - %s * 4)", css.VarSpacing),
+		}
+	>
+		<label
+			class={ css.Flex, css.Flex1, css.FlexCol, css.WFull }
+		>
+			Suche (Lazy)
+			<input
+				id="tools-filter"
+				type="search"
+				oninput={ filterToolsList(templ.JSExpression("event"), false) }
+				hx-preserve="true"
+			/>
+		</label>
+	</div>
+}
+
+script filterToolsList(event templ.JSExpression, skipHistory bool) {
+	var target = event
+		? event.currentTarget
+		: document.querySelector(`#tools-filter`);
+	if (!target) return;
+
+	var query = target.value
+		.toLowerCase()
+		.split(" ")
+		.filter((v) => !!v);
+	var targets = document.querySelectorAll(
+		`#tools-container .tool-item`,
+	);
+
+	if (!skipHistory) {
+		var urlParams = new URLSearchParams(window.location.search);
+		urlParams.set("tools_filter", query.join(" "));
+		window.history.replaceState({}, "", `?${urlParams.toString()}`);
+	}
+
+	if (query.length === 0) {
+		targets.forEach((child) => {
+			child.style.display = "block";
+		});
+		return;
+	}
+
+	targets.forEach((child) => {
+		var match = query.every((value) =>
+			child.textContent.toLowerCase().includes(value),
+		);
+		if (match) {
+			child.style.display = "block";
+			// If this item is inside a details tag, ensure it's open, query details tag from stack
+			child.closest("details")?.setAttribute("open", "true");
+			return;
+		}
+		child.style.display = "none";
+	});
 }

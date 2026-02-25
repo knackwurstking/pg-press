@@ -3,20 +3,10 @@ package templates
 import (
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/components/tabs"
-	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"github.com/knackwurstking/ui/pkg/css"
 )
 
-// HX Triggers:
-// - load-tab-content: Custom trigger to load tab content when a tab is clicked.
-//   This trigger targets the `#tab-content` div and loads the corresponding section content.
-
-type PageProps struct {
-	User *shared.User
-}
-
-templ Page(p PageProps) {
+templ Page() {
 	@components.Layout(
 		components.LayoutProps{
 			PageTitle:      "PG Presse | Werkzeuge",
@@ -42,96 +32,34 @@ templ Page(p PageProps) {
 				@tabs.Content(tabs.ContentProps{
 					Value: "press",
 				}) {
-					<span
+					<div
+						id="press-tab-content"
 						hx-get={ urlb.ToolsSectionPress() }
 						hx-trigger="load"
-						hx-swap="outerHTML"
-					></span>
+					>
+						@components.Spinner()
+					</div>
 				}
 				@tabs.Content(tabs.ContentProps{
 					Value: "tool",
 				}) {
-					<span
+					<div
+						id="tool-tab-content"
 						hx-get={ urlb.ToolsSectionTools() }
 						hx-trigger="load"
-						hx-swap="outerHTML"
-					></span>
+					>
+						@components.Spinner()
+					</div>
 				}
 			}
-			// TODO: Remove old tab implementation and migrate to the new one above
-			//<div
-			//	class={ css.Tabs, css.Backdrop, css.Z20 }
-			//	style={
-			//		"position: fixed;",
-			//		fmt.Sprintf("top: calc(%s + %s)", css.VarAppBarHeight, css.VarSpacing),
-			//		fmt.Sprintf("width: calc(100%% - %s * 2)", css.VarSpacing),
-			//	}
-			//>
-			//	// Press Section Tab - `SectionPress`
-			//	<div
-			//		data-index="0"
-			//		class={ css.TabsTab, css.Secondary, css.Ghost }
-			//		hx-get={ urlb.ToolsSectionPress() }
-			//		hx-trigger="load-tab-content"
-			//		hx-target="#tab-content"
-			//		onclick="toggleTab(event)"
-			//	>
-			//		Pressen
-			//	</div>
-			//	// Tools Section Tab - `SectionTools`
-			//	<div
-			//		data-index="1"
-			//		class={ css.TabsTab, css.Secondary, css.Ghost }
-			//		hx-get={ urlb.ToolsSectionTools() }
-			//		hx-trigger="load-tab-content"
-			//		hx-target="#tab-content"
-			//		onclick="toggleTab(event)"
-			//	>
-			//		Werkzeuge
-			//	</div>
-			//</div>
-			//// Tab Content, where the content goes '#tab-content'
-			//<div
-			//	id="tab-content"
-			//	class={ css.P, css.WFull, css.HFit }
-			//	style="margin-top: 50px;"
-			//	hx-on::after-request={ filterToolsList(templ.JSExpression("null"), true) }
-			//></div>
 		</main>
 	}
 }
 
 templ additionalHead() {
 	<script>
-		var currentTab = null;
-
-		// Tab toggle handler
-		//
-		// @param {Event & { currentTarget: HTMLElement }} event
-		function toggleTab(event) {
-			document
-				.querySelectorAll(".{{ css.Tabs }} .{{ css.TabsTab }}")
-				.forEach((tab) => tab.classList.remove("{{ css.TabsTabActive }}"));
-
-			currentTab = event.currentTarget;
-			currentTab.classList.add("{{ css.TabsTabActive }}");
-			currentTab.dispatchEvent(new Event("load-tab-content"));
-
-			localStorage.setItem("last-active-tab", currentTab.dataset.index);
-		}
-
 		document.addEventListener("DOMContentLoaded", function () {
-			window.setTriggers("tools-tab");
-
-			var lastActiveTab = parseInt(localStorage.getItem("last-active-tab"));
-			if (isNaN(lastActiveTab)) {
-				lastActiveTab = 1;
-			}
-			toggleTab({
-				currentTarget: document.querySelector(
-					`.{{ css.Tabs }} > .{{ css.TabsTab }}[data-index="${lastActiveTab}"]`,
-				),
-			});
+			window.setTriggers("press-tab-conent", "tool-tab-content");
 		});
 	</script>
 }
