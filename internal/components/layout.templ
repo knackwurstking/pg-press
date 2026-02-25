@@ -1,6 +1,8 @@
 package components
 
 import (
+	"github.com/knackwurstking/pg-press/internal/components/dialog"
+	"github.com/knackwurstking/pg-press/internal/components/input"
 	"github.com/knackwurstking/pg-press/internal/components/label"
 	"github.com/knackwurstking/pg-press/internal/env"
 
@@ -60,16 +62,13 @@ templ links() {
 templ scripts() {
 	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/htmx-v2.0.7.min.js") }></script>
 	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/layout.js") }></script>
+	@dialog.Script()
+	@input.Script()
 	@label.Script()
 	@tabs.Script()
 }
 
 templ styles() {
-	//@css.StylesThemeTemplUI()
-	//@css.StylesReset()
-	//@css.StylesGlobal()
-	//@css.StylesComponents()
-	//@css.StylesUtils()
 	<style>
 		html:has(dialog[open]),
 		body:has(dialog[open]) {
