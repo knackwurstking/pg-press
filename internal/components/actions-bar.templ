@@ -1,7 +1,5 @@
 package components
 
-import "github.com/knackwurstking/ui/pkg/css"
-
 templ ActionBar(attr templ.Attributes) {
 	{{
 		if attr == nil {
@@ -9,20 +7,9 @@ templ ActionBar(attr templ.Attributes) {
 		}
 
 		if c, ok := attr["class"]; ok {
-			attr["class"] = templ.CSSClasses{
-				css.Flex,
-				css.Gap,
-				css.JustifyEnd,
-				css.P,
-				c,
-			}.String()
+			attr["class"] = "flex gap-4 justify-end p-4 " + c.(string)
 		} else {
-			attr["class"] = templ.CSSClasses{
-				css.Flex,
-				css.Gap,
-				css.JustifyEnd,
-				css.P,
-			}.String()
+			attr["class"] = "flex gap-4 justify-end p-4"
 		}
 	}}
 	<div { attr... }>

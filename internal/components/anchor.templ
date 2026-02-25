@@ -31,24 +31,23 @@ templ ToolAnchor(p ToolAnchorProps) {
 			panic(fmt.Sprintf("cassette is required, got %s", p.BindingCassette.Position.German()))
 		}
 	}}
+	// NOTE: Muted button
 	<a
 		role="button"
-		class={ css.Muted, css.Flex, css.JustifyBetween, css.ItemsCenter, css.P }
+		class="flex justify-between items-center p-4"
 		href={ urlb.Tool(p.Tool.ID) }
 	>
 		<div
 			class={
-				css.Flex, css.FlexCol, css.GapSm, css.WFull,
-				templ.KV(css.JustifyBetween, p.BindingCassette != nil),
+				"flex flex-col gap-2 w-full",
+				templ.KV("justify-between", p.BindingCassette != nil),
 			}
 		>
-			<span class={ css.TextSemibold }>
+			<span class="font-semibold">
 				{ p.Tool.German() }
 			</span>
 			if p.EnableBadges {
-				<div
-					class={ css.Flex, css.Gap, css.JustifyStart, css.ItemsCenter, css.WFull }
-				>
+				<div class="flex gap-4 justify-start items-center w-full">
 					@SmallBadge("primary", "text-bold") {
 						{ p.Tool.Position.German() }
 					}
@@ -56,9 +55,9 @@ templ ToolAnchor(p ToolAnchorProps) {
 					<span
 						class={
 							"total-cycles-container",
-							css.Flex, css.JustifyEnd, css.ItemsCenter,
-							css.WFull, css.PR,
-							css.TextSM,
+							"flex justify-end items-center",
+							"w-full pr-4",
+							"text-sm",
 						}
 						hx-get={ urlb.ToolTotalCycles(p.Tool.ID) }
 						hx-trigger="load"
