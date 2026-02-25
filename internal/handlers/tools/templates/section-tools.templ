@@ -20,6 +20,7 @@ type SectionToolsProps struct {
 	NotesCount         map[shared.EntityID]int
 }
 
+// TODO: Migrate to templui and tailwindcss
 templ SectionTools(p SectionToolsProps) {
 	<span
 		hx-get={ urlb.ToolsSectionTools() }
