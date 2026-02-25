@@ -24,7 +24,7 @@ templ Cookies(p CookiesProps) {
 			}
 			open
 		>
-			<div class="text-2xl flex gap-2 items-center mb-2">
+			<div class="text-2xl flex gap-2 items-center mb-4">
 				@icon.Cookie()
 				Aktive Sitzungen { fmt.Sprintf("%d", len(p.Cookies)) }
 			</div>
