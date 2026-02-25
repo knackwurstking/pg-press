@@ -114,10 +114,10 @@ templ appBar(title string, navContent templ.Component) {
 		<span class="px-4 py-2">
 			<h5 id="app-bar-title" class="text-lg font-medium">{ title }</h5>
 		</span>
-		<span class="px-4 py-2 flex gap-1">
-			if navContent != nil {
+		if navContent != nil {
+			<span class="px-4 py-2 flex gap-1">
 				@navContent
-			}
-		</span>
+			</span>
+		}
 	</span>
 }
