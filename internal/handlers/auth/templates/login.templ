@@ -14,7 +14,6 @@ templ Page(p PageProps) {
 	@components.Layout(components.LayoutProps{
 		PageTitle:   "PG Presse | Login",
 		AppBarTitle: "Login",
-		NavContent:  components.StandardNavContent(),
 	}) {
 		<main class={ css.Container }>
 			@apiKeyDialog(p.FormData["api-key"], p.FormData["invalid-api-key"])
