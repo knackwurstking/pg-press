@@ -2,13 +2,13 @@ package components
 
 import (
 	"fmt"
-	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/ui/pkg/css"
 	"strings"
+
+	"github.com/knackwurstking/pg-press/internal/shared"
 )
 
 templ SmallBadge(classNames ...string) {
-	{{ classNames = append([]string{css.Badge, css.BadgeSM}, classNames...) }}
+	// NOTE: Badge with size sm
 	<small class={ strings.Join(classNames, " ") }>
 		{ children... }
 	</small>
@@ -33,10 +33,8 @@ templ ToolStateBadge(tool *shared.Tool, press *shared.Press, isRegenerating bool
 	}}
 	@SmallBadge(color) {
 		if press != nil {
-			<span
-				class={ css.Flex, css.FlexCol, css.Gap0, css.JustifyCenter, css.ItemsCenter }
-			>
-				<span class={ css.TextBold }>Eingebaut</span>
+			<span class="flex flex-col justify-center items-center">
+				<span class="font-bold">Eingebaut</span>
 				<span>{ press.German() }</span>
 			</span>
 		} else {
@@ -70,10 +68,8 @@ templ CassetteStateBadge(cassette *shared.Tool, boundToTool *shared.Tool, isRege
 	}}
 	@SmallBadge(color) {
 		if boundToTool != nil {
-			<span
-				class={ css.Flex, css.FlexCol, css.Gap0, css.JustifyCenter, css.ItemsCenter }
-			>
-				<span class={ css.TextBold }>Gebunden</span>
+			<span class="flex flex-col justify-center items-center">
+				<span class="font-bold">Gebunden</span>
 				<span>{ boundToTool.German() }</span>
 			</span>
 		} else {
