@@ -19,8 +19,8 @@ type SectionPressProps struct {
 templ SectionPress(p SectionPressProps) {
 	<span
 		hx-get={ urlb.ToolsSectionPress() }
-		hx-trigger="tools-tab from:body"
-		hx-target="#tab-content"
+		hx-trigger="press-tab-content from:body"
+		hx-target="#press-tab-content"
 	></span>
 	@components.ActionBar() {
 		@button.Button(button.Props{
