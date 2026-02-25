@@ -16,7 +16,6 @@ type SectionPressProps struct {
 	User                   *shared.User
 }
 
-// TODO: Migrate to templui and tailwindcss...
 templ SectionPress(p SectionPressProps) {
 	<span
 		hx-get={ urlb.ToolsSectionPress() }
@@ -38,8 +37,7 @@ templ SectionPress(p SectionPressProps) {
 			Presse Hinzufügen
 		}
 	}
-	// ...
-	<div id="press-container" class={ css.Flex, css.FlexCol, css.Gap }>
+	<div id="press-container" class="flex flex-col gap-4">
 		for _, e := range p.PressUtilizationsOrder {
 			{{ u := p.PressUtilizations[e] }}
 			@listPressItem(u)
@@ -47,9 +45,11 @@ templ SectionPress(p SectionPressProps) {
 	</div>
 }
 
+// TODO: Migrate to templui and tailwindcss...
 templ listPressItem(p *shared.PressUtilization) {
 	{{ title := p.Press().German() }}
 	<li title={ title }>
+		// ...
 		<a
 			role="button"
 			href={ urlb.Press(p.PressID) }
