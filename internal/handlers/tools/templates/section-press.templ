@@ -3,6 +3,7 @@ package templates
 import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/badge"
 	"github.com/knackwurstking/pg-press/internal/components/button"
 	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -53,7 +54,7 @@ templ listPressItem(p *shared.PressUtilization) {
 			Href:    string(urlb.Press(p.PressID)),
 		}) {
 			<span class="flex flex-col gap-6 w-full">
-				<h5>{ title }</h5>
+				<h5 class="text-primary">{ title }</h5>
 				<span class="flex flex-wrap gap-4 justify-between items-center w-full">
 					if p.SlotUpper != nil || p.SlotUpperCassette != nil {
 						<!-- Upper Tool -->
@@ -67,7 +68,10 @@ templ listPressItem(p *shared.PressUtilization) {
 									)
 								}}
 								<span class="flex flex-col justify-center items-start">
-									@components.SmallBadge("primary", "text-bold") {
+									@badge.Badge(badge.Props{
+										Class:   "text-bold",
+										Variant: badge.VariantDefault,
+									}) {
 										{ shared.SlotUpper.German() }
 									}
 									<small class="text-sm">{ text }</small>
@@ -84,7 +88,10 @@ templ listPressItem(p *shared.PressUtilization) {
 									)
 								}}
 								<span class="flex flex-col justify-center items-start">
-									@components.SmallBadge("primary", "text-bold") {
+									@badge.Badge(badge.Props{
+										Class:   "text-bold",
+										Variant: badge.VariantSecondary,
+									}) {
 										{ shared.SlotUpperCassette.German() }
 									}
 									<small class="text-sm">{ text }</small>
@@ -102,7 +109,10 @@ templ listPressItem(p *shared.PressUtilization) {
 						}}
 						<!-- Lower Tool -->
 						<span class="flex flex-col justify-center items-start">
-							@components.SmallBadge("primary", "text-bold") {
+							@badge.Badge(badge.Props{
+								Class:   "text-bold",
+								Variant: badge.VariantSecondary,
+							}) {
 								{ shared.SlotLower.German() }
 							}
 							<small class="text-sm">{ text }</small>

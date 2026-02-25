@@ -2,6 +2,7 @@ package components
 
 import (
 	"fmt"
+	"github.com/knackwurstking/pg-press/internal/components/badge"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 )
@@ -47,7 +48,9 @@ templ ToolAnchor(p ToolAnchorProps) {
 			</span>
 			if p.EnableBadges {
 				<div class="flex gap-4 justify-start items-center w-full">
-					@SmallBadge("primary", "text-bold") {
+					@badge.Badge(badge.Props{
+						Variant: badge.VariantDefault,
+					}) {
 						{ p.Tool.Position.German() }
 					}
 					@ToolStateBadge(p.Tool, p.Press, p.IsRegenerating)
@@ -149,8 +152,9 @@ templ CassetteAnchor(p CassetteAnchorProps) {
 			</span>
 			if p.EnableBadges {
 				<div class="flex gap-4 justify-start items-center w-full">
-					// NOTE: primary
-					@SmallBadge("text-primary-foreground", "bg-primary", "font-bold") {
+					@badge.Badge(badge.Props{
+						Variant: badge.VariantDefault,
+					}) {
 						{ p.Cassette.Position.German() }
 					}
 					@CassetteStateBadge(p.Cassette, p.BindingTool, p.IsRegenerating)

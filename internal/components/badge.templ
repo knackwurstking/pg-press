@@ -2,17 +2,10 @@ package components
 
 import (
 	"fmt"
-	"strings"
 
+	"github.com/knackwurstking/pg-press/internal/components/badge"
 	"github.com/knackwurstking/pg-press/internal/shared"
 )
-
-templ SmallBadge(classNames ...string) {
-	// NOTE: Badge with size sm
-	<small class={ strings.Join(classNames, " ") }>
-		{ children... }
-	</small>
-}
 
 templ ToolStateBadge(tool *shared.Tool, press *shared.Press, isRegenerating bool) {
 	{{
@@ -20,18 +13,20 @@ templ ToolStateBadge(tool *shared.Tool, press *shared.Press, isRegenerating bool
 			panic(fmt.Sprintf("tool expected, got %s", tool.Position.German()))
 		}
 
-		var color string
+		var variant badge.Variant
 		if press != nil {
-			color = "secondary"
+			variant = badge.VariantSecondary
 		} else if isRegenerating {
-			color = "warning"
+			variant = badge.VariantOutline
 		} else if tool.IsDead {
-			color = "destructive"
+			variant = badge.VariantDestructive
 		} else {
-			color = "info"
+			variant = badge.VariantDefault
 		}
 	}}
-	@SmallBadge(color) {
+	@badge.Badge(badge.Props{
+		Variant: variant,
+	}) {
 		if press != nil {
 			<span class="flex flex-col justify-center items-center">
 				<span class="font-bold">Eingebaut</span>
@@ -55,18 +50,20 @@ templ CassetteStateBadge(cassette *shared.Tool, boundToTool *shared.Tool, isRege
 			panic(fmt.Sprintf("cassette expected, got %s", cassette.Position.German()))
 		}
 
-		var color string
+		var variant badge.Variant
 		if isRegenerating {
-			color = "warning"
+			variant = badge.VariantOutline
 		} else if cassette.IsDead {
-			color = "destructive"
+			variant = badge.VariantDestructive
 		} else if boundToTool != nil {
-			color = "secondary"
+			variant = badge.VariantSecondary
 		} else {
-			color = "info"
+			variant = badge.VariantDefault
 		}
 	}}
-	@SmallBadge(color) {
+	@badge.Badge(badge.Props{
+		Variant: variant,
+	}) {
 		if boundToTool != nil {
 			<span class="flex flex-col justify-center items-center">
 				<span class="font-bold">Gebunden</span>
