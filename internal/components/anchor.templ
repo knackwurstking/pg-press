@@ -3,6 +3,7 @@ package components
 import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/internal/components/badge"
+	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 )
@@ -47,7 +48,6 @@ templ ToolAnchor(p ToolAnchorProps) {
 			</div>
 		}
 		if p.BindingCassette != nil {
-			// NOTE: info ghost
 			<div class="text-sm italic text-blue-500 pt-1">
 				<i class="text-xs">
 					if p.BindingCassette.MinThickness == 0 {
@@ -60,8 +60,7 @@ templ ToolAnchor(p ToolAnchorProps) {
 		}
 	</div>
 	<div class="flex flex-col gap-4 justify-between items-center">
-		// TODO: Migrate to templui and tailwindcss
-		<i class="bi bi-chevron-right"></i>
+		@icon.ChevronRight()
 	</div>
 	@toolAnchorTotalCycles(p.Tool.ID)
 	if p.EnableCounts {
@@ -106,8 +105,7 @@ templ CassetteAnchor(p CassetteAnchorProps) {
 		}
 	</div>
 	<div class="flex flex-col gap-4 justify-between items-center">
-		// TODO: Migrate to templui and tailwindcss
-		<i class="bi bi-chevron-right"></i>
+		@icon.ChevronRight()
 	</div>
 	if p.Cassette.Code != "" {
 		@toolAnchorTotalCycles(p.Cassette.ID)
@@ -119,24 +117,24 @@ templ CassetteAnchor(p CassetteAnchorProps) {
 
 templ toolAnchorCounts(notesCount, regenerationsCount int) {
 	<span
-		class="flex justify-end items-center gap-2 text-xs absolute"
+		class="flex justify-end items-center gap-3 text-xs absolute"
 		style="top: var(--spacing); right: calc(var(--spacing) * 2);"
 	>
 		if notesCount > 0 {
-			// NOTE: info ghost
-			<span>
-				// TODO: Migrate to templui and tailwindcss
-				<i class="bi bi-info-circle"></i>
+			<span class="flex flex-row flex-nowrap gap-1">
+				@icon.Info(icon.Props{
+					Class: "text-blue-500",
+				})
 				<span>
 					{ notesCount }
 				</span>
 			</span>
 		}
 		if regenerationsCount > 0 {
-			// NOTE: warning ghost
-			<span>
-				// TODO: Migrate to templui and tailwindcss
-				<i class="bi bi-arrow-repeat"></i>
+			<span class="flex flex-row flex-nowrap gap-1">
+				@icon.Repeat(icon.Props{
+					Class: "text-orange-500",
+				})
 				<span>
 					{ regenerationsCount }
 				</span>
