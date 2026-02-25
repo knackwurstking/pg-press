@@ -84,7 +84,7 @@ templ SectionTools(p SectionToolsProps) {
 
 			if (query.length === 0) {
 				targets.forEach((child) => {
-					child.style.display = "block";
+					child.classList.remove("hidden");
 				});
 				return;
 			}
@@ -94,12 +94,10 @@ templ SectionTools(p SectionToolsProps) {
 					child.textContent.toLowerCase().includes(value),
 				);
 				if (match) {
-					child.style.display = "block";
-					// If this item is inside a details tag, ensure it's open, query details tag from stack
-					child.closest("details")?.setAttribute("open", "true");
+					child.classList.remove("hidden");
 					return;
 				}
-				child.style.display = "none";
+				child.classList.add("hidden");
 			});
 		}
 
@@ -115,27 +113,18 @@ templ SectionTools(p SectionToolsProps) {
 					el.value = query;
 				}
 			}
-
-			document.querySelectorAll("#tools-container details").forEach(function(detail) {
-				var id = detail.id;
-
-				// Get state from localStorage an set to details
-				detail.open = localStorage.getItem(`details-open-${id}`) === "true";
-
-				detail.addEventListener("toggle", function() {
-					// Save state to localStorage
-					localStorage.setItem(`details-open-${id}`, detail.open);
-				});
-			});
 		})();
 	</script>
 }
 
+// TODO: Create some button items like the press item
 templ ToolsList(p SectionToolsProps) {
 	{{ listClasses := "flex flex-col gap-4 p-0 list-none" }}
 	// Tools List
 	@components.Section(nil) {
 		@components.SectionTitle(components.TitleLevel4, "Ober & Unterteile")
+		// TODO: ...
+		//<div class="press-container flex flex-col gap-4">
 		<ul id="tools-list" class={ listClasses }>
 			for _, t := range p.Tools {
 				if !p.User.IsAdmin() && t.IsDead {
@@ -145,7 +134,7 @@ templ ToolsList(p SectionToolsProps) {
 				if (strings.ToLower(t.Type) == "unbekannt" || strings.ToLower(t.Code) == "unbekannt") && !p.User.IsAdmin() {
 					{{ continue }}
 				}
-				<li id={ fmt.Sprintf("tool-%d", t.ID) } class="tool-item hidden">
+				<li id={ fmt.Sprintf("tool-%d", t.ID) } class="tool-item">
 					{{
 						var cassette *shared.Tool
 						for _, c := range p.Cassettes {
