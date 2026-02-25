@@ -10,7 +10,6 @@ import (
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"github.com/knackwurstking/ui/pkg/css"
 )
 
 type PageProps struct {
@@ -44,8 +43,11 @@ templ profileHeader(user *shared.User) {
 				DisableESC:       true,
 				Open:             false,
 			}) {
-				@dialog.Trigger(dialog.TriggerProps{}) {
+				@dialog.Trigger(dialog.TriggerProps{
+					For: "edit-user-name-dialog-trigger",
+				}) {
 					@button.Button(button.Props{
+						ID:      "edit-user-name-button-trigger",
 						Variant: button.VariantSecondary,
 						Attributes: templ.Attributes{
 							"title": "Benutzername bearbeiten",
@@ -74,21 +76,31 @@ templ profileHeader(user *shared.User) {
 								},
 							})
 						}
-						// TODO: Migrate to templui & tailwindcss
-						<footer class={ css.Flex, css.Gap, css.JustifyEnd, css.MT }>
-							<a
-								role="button"
-								href={ urlb.Profile() }
-								class={ css.Secondary, css.Flex, css.Gap }
-							>
-								<i class="bi bi-x-circle"></i>
-								Schließen
-							</a>
-							<button type="submit" class={ css.Primary, css.Flex, css.Gap }>
-								<i class="bi bi-check-circle"></i>
-								Ändern
-							</button>
-						</footer>
+						@dialog.Footer() {
+							@dialog.Close(dialog.CloseProps{
+								For: "edit-user-name-dialog-close",
+							}) {
+								@button.Button(button.Props{
+									ID:      "edit-user-name-button-close",
+									Variant: button.VariantSecondary,
+									Attributes: templ.Attributes{
+										"title": "Abbrechen",
+									},
+								}) {
+									Abbrechen
+								}
+							}
+							@dialog.Close(dialog.CloseProps{
+								For: "edit-user-name-dialog-submit",
+							}) {
+								@button.Button(button.Props{
+									ID:   "edit-user-name-button-submit",
+									Type: "submit",
+								}) {
+									Ändern
+								}
+							}
+						}
 					</form>
 				}
 			}
@@ -120,7 +132,4 @@ templ sectionCookies() {
 			hx-swap="outerHTML"
 		></span>
 	</section>
-}
-
-templ editUserDialog(user *shared.User) {
 }
