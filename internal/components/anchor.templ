@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"github.com/knackwurstking/ui/pkg/css"
 )
 
 // -----------------------------------------------------------------------------
@@ -66,8 +65,9 @@ templ ToolAnchor(p ToolAnchorProps) {
 				</div>
 			}
 			if p.BindingCassette != nil {
-				<div class={ css.TextSM, css.Italic, css.Info, css.Ghost }>
-					<i class={ css.TextXS }>
+				// NOTE: info ghost
+				<div class="text-sm italic">
+					<i class="text-xs">
 						if p.BindingCassette.MinThickness == 0 {
 							Kassette: { p.BindingCassette.MaxThickness }mm
 						} else {
@@ -77,7 +77,7 @@ templ ToolAnchor(p ToolAnchorProps) {
 				</div>
 			}
 		</div>
-		<div class={ css.Flex, css.FlexCol, css.Gap, css.JustifyBetween, css.ItemsCenter }>
+		<div class="flex flex-col gap-4 justify-between items-center">
 			<i class="bi bi-chevron-right"></i>
 		</div>
 		if p.EnableCounts {
@@ -88,11 +88,12 @@ templ ToolAnchor(p ToolAnchorProps) {
 
 templ ToolAnchorCounts(notesCount, regenerationsCount int) {
 	<span
-		class={ css.Flex, css.JustifyEnd, css.ItemsCenter, css.GapSm, css.TextXS }
-		style="position: absolute; top: 0.15rem; right: 0.25rem;"
+		class="flex justify-end items-center gap-2 text-xs absolute"
+		style="top: 0.15rem; right: 0.25rem;"
 	>
 		if notesCount > 0 {
-			<span class={ css.Info, css.Ghost }>
+			// NOTE: info ghost
+			<span>
 				<i class="bi bi-info-circle"></i>
 				<span>
 					{ notesCount }
@@ -100,7 +101,8 @@ templ ToolAnchorCounts(notesCount, regenerationsCount int) {
 			</span>
 		}
 		if regenerationsCount > 0 {
-			<span class={ css.Warning, css.Ghost }>
+			// NOTE: warning ghost
+			<span>
 				<i class="bi bi-arrow-repeat"></i>
 				<span>
 					{ regenerationsCount }
@@ -135,20 +137,20 @@ templ CassetteAnchor(p CassetteAnchorProps) {
 			panic("CassetteAnchor: Cassette is required")
 		}
 	}}
+	// NOTE: muted
 	<a
 		role="button"
-		class={ css.Muted, css.Flex, css.JustifyBetween, css.ItemsCenter, css.P }
+		class="flex justify-between items-center p-4"
 		href={ urlb.Tool(p.Cassette.ID) }
 	>
-		<div
-			class={ css.Flex, css.FlexCol, css.GapSm, css.JustifyBetween, css.WFull }
-		>
-			<span class={ css.TextSemibold }>
+		<div class="flex flex-col gap-2 justify-between w-full">
+			<span class="font-semibold">
 				{ p.Cassette.German() }
 			</span>
 			if p.EnableBadges {
-				<div class={ css.Flex, css.Gap, css.JustifyStart, css.ItemsCenter, css.WFull }>
-					@SmallBadge(css.Primary, css.TextBold) {
+				<div class="flex gap-4 justify-start items-center w-full">
+					// NOTE: primary
+					@SmallBadge("text-primary-foreground", "bg-primary", "font-bold") {
 						{ p.Cassette.Position.German() }
 					}
 					@CassetteStateBadge(p.Cassette, p.BindingTool, p.IsRegenerating)
@@ -156,9 +158,9 @@ templ CassetteAnchor(p CassetteAnchorProps) {
 						<span
 							class={
 								"total-cycles-container",
-								css.Flex, css.JustifyEnd, css.ItemsCenter,
-								css.WFull, css.PR,
-								css.TextSM,
+								"flex justify-end items-center",
+								"w-full pr-4",
+								"text-sm",
 							}
 							hx-get={ urlb.ToolTotalCycles(p.Cassette.ID) }
 							hx-trigger="load"
@@ -168,9 +170,7 @@ templ CassetteAnchor(p CassetteAnchorProps) {
 				</div>
 			}
 		</div>
-		<div
-			class={ css.Flex, css.FlexCol, css.Gap, css.JustifyBetween, css.ItemsCenter }
-		>
+		<div class="flex flex-col gap-4 justify-between items-center">
 			<i class="bi bi-chevron-right"></i>
 		</div>
 		if p.EnableCounts {
@@ -181,11 +181,12 @@ templ CassetteAnchor(p CassetteAnchorProps) {
 
 templ CassetteAnchorCounts(notesCount, regenerationsCount int) {
 	<span
-		class={ css.Flex, css.JustifyEnd, css.ItemsCenter, css.GapSm, css.TextXS, css.Absolute }
+		class="flex justify-end items-center gap-2 text-xs absolute"
 		style="top: 0.15rem; right: 0.25rem;"
 	>
 		if notesCount > 0 {
-			<span class={ css.Info, css.Ghost }>
+			// NOTE: info ghost
+			<span>
 				<i class="bi bi-info-circle"></i>
 				<span>
 					{ notesCount }
@@ -193,7 +194,8 @@ templ CassetteAnchorCounts(notesCount, regenerationsCount int) {
 			</span>
 		}
 		if regenerationsCount > 0 {
-			<span class={ css.Warning, css.Ghost }>
+			// NOTE: warning ghost
+			<span>
 				<i class="bi bi-arrow-repeat"></i>
 				<span>
 					{ regenerationsCount }
