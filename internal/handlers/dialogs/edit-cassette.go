@@ -50,7 +50,7 @@ func PostCassette(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 	if id > 0 {
-		PutCassette(c)
+		updateCassette(c)
 	}
 
 	tool, ierr := parseCassetteForm(c, nil)
@@ -73,8 +73,7 @@ func PostCassette(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-// PutCassette handles updating an existing cassette
-func PutCassette(c echo.Context) *echo.HTTPError {
+func updateCassette(c echo.Context) *echo.HTTPError {
 	id, merr := utils.GetQueryInt64(c, "id")
 	if merr != nil {
 		return merr.Echo()
