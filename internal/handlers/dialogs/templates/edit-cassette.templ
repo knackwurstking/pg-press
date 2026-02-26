@@ -15,10 +15,8 @@ import (
 
 templ NewCassetteDialog(ierr *errors.InputError) {
 	{{
-		hasError := ierr != nil
-
 		var attr templ.Attributes
-		if hasError {
+		if ierr != nil {
 			attr = templ.Attributes{
 				"hx-swap-oob": "true",
 			}
@@ -28,7 +26,7 @@ templ NewCassetteDialog(ierr *errors.InputError) {
 		ID:               DialogIDNewCassette,
 		DisableClickAway: true,
 		DisableESC:       true,
-		Open:             hasError,
+		Open:             true,
 		Attributes:       attr,
 	}) {
 		@dialog.Content() {
@@ -50,11 +48,15 @@ templ NewCassetteDialog(ierr *errors.InputError) {
 				{{ cassette := &shared.Tool{} }}
 				// TODO: Handle Errors
 				@toolFormat(cassette.Width, cassette.Height)
+				<br/>
 				// TODO: Handle Errors
 				@toolType(cassette.Type)
+				<br/>
 				// TODO: Handle Errors
 				@toolCode(cassette.Code)
+				<br/>
 				@cassetteThickness(cassette.MinThickness, cassette.MaxThickness, ierr)
+				<br/>
 				@dialog.Footer() {
 					@dialog.Close() {
 						@button.Button(button.Props{
@@ -71,10 +73,8 @@ templ NewCassetteDialog(ierr *errors.InputError) {
 
 templ EditCassetteDialog(cassette *shared.Tool, ierr *errors.InputError) {
 	{{
-		hasError := ierr != nil
-
 		var attr templ.Attributes
-		if hasError {
+		if ierr != nil {
 			attr = templ.Attributes{
 				"hx-swap-oob": "true",
 			}
@@ -84,7 +84,7 @@ templ EditCassetteDialog(cassette *shared.Tool, ierr *errors.InputError) {
 		ID:               DialogIDEditCassette,
 		DisableClickAway: true,
 		DisableESC:       true,
-		Open:             hasError,
+		Open:             true,
 		Attributes:       attr,
 	}) {
 		@dialog.Content() {
@@ -98,10 +98,13 @@ templ EditCassetteDialog(cassette *shared.Tool, ierr *errors.InputError) {
 			>
 				// TODO: Handle Errors
 				@toolFormat(cassette.Width, cassette.Height)
+				<br/>
 				// TODO: Handle Errors
 				@toolType(cassette.Type)
+				<br/>
 				// TODO: Handle Errors
 				@toolCode(cassette.Code)
+				<br/>
 				@cassetteThickness(
 					cassette.MinThickness,
 					cassette.MaxThickness,
@@ -127,57 +130,55 @@ templ EditCassetteDialog(cassette *shared.Tool, ierr *errors.InputError) {
 }
 
 templ cassetteThickness(inputMinThickness float32, inputMaxThickness float32, ierr *errors.InputError) {
-	<div class="flex flex-col items-start w-full">
-		@form.Item() {
-			@form.Label() {
-				Dicke (mm)
-			}
-			<div class="flex gap-2 items-center w-full">
-				// Min Thickness
-				{{
-					var value string
-					if inputMinThickness != 0 {
-						value = fmt.Sprintf("%.1f", inputMinThickness)
-					}
-				}}
-				@input.Input(input.Props{
-					ID:          "min-thickness",
-					Class:       "w-full",
-					Name:        "min-thickness",
-					Placeholder: "z.B. 8.5",
-					Value:       value,
-					Type:        input.TypeNumber,
-					Attributes: templ.Attributes{
-						"step":     "0.1",
-						"required": false,
-					},
-					HasError: ierr != nil && ierr.InputID == "min-thickness",
-				})
-				// Separator
-				<span class="text-xl" style="margin: auto 0;">-</span>
-				// Max Thickness
-				@input.Input(input.Props{
-					ID:          "max-thickness",
-					Class:       "w-full",
-					Name:        "max-thickness",
-					Placeholder: "z.B. 12.5",
-					Value:       fmt.Sprintf("%.1f", inputMaxThickness),
-					Type:        input.TypeNumber,
-					Attributes: templ.Attributes{
-						"step":     "0.1",
-						"required": true,
-					},
-					HasError: ierr != nil && ierr.InputID == "max-thickness",
-				})
-			</div>
-			// Error Messages
-			if ierr != nil && (ierr.InputID == "min-thickness" || ierr.InputID == "max-thickness") {
-				@form.Message(form.MessageProps{
-					Variant: form.MessageVariantError,
-				}) {
-					{ ierr.Error() }
+	@form.Item() {
+		@form.Label() {
+			Dicke (mm)
+		}
+		<div class="flex gap-2 items-center w-full">
+			// Min Thickness
+			{{
+				var value string
+				if inputMinThickness != 0 {
+					value = fmt.Sprintf("%.1f", inputMinThickness)
 				}
+			}}
+			@input.Input(input.Props{
+				ID:          "min-thickness",
+				Class:       "w-full",
+				Name:        "min-thickness",
+				Placeholder: "z.B. 8.5",
+				Value:       value,
+				Type:        input.TypeNumber,
+				Attributes: templ.Attributes{
+					"step":     "0.1",
+					"required": false,
+				},
+				HasError: ierr != nil && ierr.InputID == "min-thickness",
+			})
+			// Separator
+			<span class="text-xl" style="margin: auto 0;">-</span>
+			// Max Thickness
+			@input.Input(input.Props{
+				ID:          "max-thickness",
+				Class:       "w-full",
+				Name:        "max-thickness",
+				Placeholder: "z.B. 12.5",
+				Value:       fmt.Sprintf("%.1f", inputMaxThickness),
+				Type:        input.TypeNumber,
+				Attributes: templ.Attributes{
+					"step":     "0.1",
+					"required": true,
+				},
+				HasError: ierr != nil && ierr.InputID == "max-thickness",
+			})
+		</div>
+		// Error Messages
+		if ierr != nil && (ierr.InputID == "min-thickness" || ierr.InputID == "max-thickness") {
+			@form.Message(form.MessageProps{
+				Variant: form.MessageVariantError,
+			}) {
+				{ ierr.Error() }
 			}
 		}
-	</div>
+	}
 }
