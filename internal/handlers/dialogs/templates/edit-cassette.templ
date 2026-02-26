@@ -5,6 +5,7 @@ import (
 
 	"github.com/knackwurstking/pg-press/internal/components/button"
 	"github.com/knackwurstking/pg-press/internal/components/dialog"
+	"github.com/knackwurstking/pg-press/internal/components/form"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 
@@ -109,9 +110,8 @@ templ EditCassetteDialog(cassette *shared.Tool, errs ...DialogError) {
 	}
 }
 
-// TODO: Migrate to templui and tailwindcss
 templ cassetteThickness(inputMinThickness float32, inputMaxThickness float32) {
-	<div class={ css.Flex, css.FlexCol, css.ItemsStart, css.WFull }>
+	<div class="flex flex-col items-start w-full">
 		<label>Dicke (mm)</label>
 		<div class={ css.Flex, css.GapSm }>
 			<input
@@ -141,3 +141,4 @@ templ cassetteThickness(inputMinThickness float32, inputMaxThickness float32) {
 		</div>
 	</div>
 }
+

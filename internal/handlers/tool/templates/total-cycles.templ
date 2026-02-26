@@ -1,38 +1,18 @@
 package templates
 
-import (
-	"fmt"
-
-	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/ui/pkg/css"
-)
+import "github.com/knackwurstking/pg-press/internal/shared"
 
 // TotalCycles renders an input field displaying the total cycles since last regeneration
 templ TotalCycles(totalCycles int64, input bool) {
 	{{
-		var colorClass = css.Contrast + " " + css.Ghost
-
-		if totalCycles > shared.ToolCyclesWarning {
-			colorClass = css.Warning + " " + css.Ghost
-		}
-
-		if totalCycles > shared.ToolCyclesError {
-			colorClass = css.Destructive + " " + css.Ghost
+		var colorClass string
+		if totalCycles > shared.ToolCyclesWarning && totalCycles <= shared.ToolCyclesError {
+			colorClass = "text-orange-500 border-orange-500/10"
+		} else if totalCycles > shared.ToolCyclesError {
+			colorClass = "text-red-500 border-red-500/10"
 		}
 	}}
-	if input {
-		<input
-			class={ colorClass }
-			type="number"
-			value={ fmt.Sprintf("%d", totalCycles) }
-			readonly
-			title="Gesamtzyklen seit der letzten Regenerierung"
-		/>
-	} else {
-		<span class={ css.Card, css.CardCompact, css.CardFlat, colorClass }>
-			<span class={ css.CardBody }>
-				{ totalCycles }
-			</span>
-		</span>
-	}
+	<span class={ "p-2 border rounded-md secondary", colorClass }>
+		{ totalCycles }
+	</span>
 }
