@@ -23,7 +23,6 @@ func Register(e *echo.Echo, path string) {
 		// Edit cassette dialog
 		ui.NewEchoRoute(http.MethodGet, path+"/edit-cassette", GetCassetteDialog),
 		ui.NewEchoRoute(http.MethodPost, path+"/edit-cassette", PostCassette),
-		ui.NewEchoRoute(http.MethodPut, path+"/edit-cassette", PutCassette),
 
 		// Edit note dialog
 		ui.NewEchoRoute(http.MethodGet, path+"/edit-note", GetEditNote),

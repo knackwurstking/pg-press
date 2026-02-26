@@ -36,7 +36,7 @@ templ NewCassetteDialog(oob bool, ierr *errors.InputError) {
 			<form
 				method={ http.MethodPost }
 				action={ urlb.DialogEditCassette(0) }
-				{ stdHxDialogFormProps... }
+				enctype="multipart/form-data"
 			>
 				{{ cassette := &shared.Tool{} }}
 				// TODO: Handle Errors
@@ -51,12 +51,10 @@ templ NewCassetteDialog(oob bool, ierr *errors.InputError) {
 				@cassetteThickness(cassette.MinThickness, cassette.MaxThickness, ierr)
 				<br/>
 				@dialog.Footer() {
-					@dialog.Close() {
-						@button.Button(button.Props{
-							Type: button.TypeSubmit,
-						}) {
-							Erstellen
-						}
+					@button.Button(button.Props{
+						Type: button.TypeSubmit,
+					}) {
+						Erstellen
 					}
 				}
 			</form>
@@ -81,7 +79,7 @@ templ EditCassetteDialog(oob bool, cassette *shared.Tool, ierr *errors.InputErro
 			<form
 				method={ http.MethodPost }
 				action={ urlb.DialogEditCassette(0) }
-				{ stdHxDialogFormProps... }
+				enctype="multipart/form-data"
 			>
 				// TODO: Handle Errors
 				@toolFormat(cassette.Width, cassette.Height)

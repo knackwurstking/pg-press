@@ -45,6 +45,14 @@ func GetCassetteDialog(c echo.Context) *echo.HTTPError {
 }
 
 func PostCassette(c echo.Context) *echo.HTTPError {
+	id, merr := utils.GetQueryInt64(c, "id")
+	if merr != nil {
+		return merr.Echo()
+	}
+	if id > 0 {
+		PutCassette(c)
+	}
+
 	tool, ierr := parseCassetteForm(c, nil)
 	if ierr != nil {
 		// TODO: Re-render dialog with edited content and error message (OOB)
@@ -53,13 +61,15 @@ func PostCassette(c echo.Context) *echo.HTTPError {
 
 	log.Debug("Creating new cassette: %v", tool.String())
 
-	merr := db.AddTool(tool)
+	merr = db.AddTool(tool)
 	if merr != nil {
+		// TODO: Re-render dialog with edited content and error message (OOB)
 		return merr.Echo()
 	}
 
 	utils.SetHXTrigger(c, "tools-tab")
 
+	// TODO: Close the new cassette dialog
 	return nil
 }
 
