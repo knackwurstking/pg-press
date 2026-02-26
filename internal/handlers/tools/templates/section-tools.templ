@@ -30,6 +30,7 @@ templ SectionTools(p SectionToolsProps) {
 	></span>
 	@inputFilterTools(p.Tools)
 	@components.ActionBar() {
+		// TODO: Create dialog trigger (!)
 		@button.Button(button.Props{
 			Size: button.SizeSm,
 			Attributes: templ.Attributes{
@@ -43,6 +44,7 @@ templ SectionTools(p SectionToolsProps) {
 			@icon.Plus()
 			Kassette
 		}
+		// TODO: Create dialog trigger
 		@button.Button(button.Props{
 			Size: button.SizeSm,
 			Attributes: templ.Attributes{
