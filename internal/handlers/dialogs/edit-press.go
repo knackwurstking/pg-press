@@ -3,7 +3,6 @@ package dialogs
 import (
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
-	"github.com/knackwurstking/pg-press/internal/handlers/dialogs/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/utils"
 
@@ -22,7 +21,7 @@ func GetEditPress(c echo.Context) *echo.HTTPError {
 			return merr.Echo()
 		}
 
-		t := templates.EditPressDialog(press)
+		t := EditPressDialog(press)
 		err := t.Render(c.Request().Context(), c.Response())
 		if err != nil {
 			return errors.NewRenderError(err, "EditPressDialog")
@@ -30,7 +29,7 @@ func GetEditPress(c echo.Context) *echo.HTTPError {
 		return nil
 	}
 
-	t := templates.NewPressDialog()
+	t := NewPressDialog()
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "NewPressDialog")

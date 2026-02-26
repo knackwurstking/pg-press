@@ -5,7 +5,6 @@ import (
 
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
-	"github.com/knackwurstking/pg-press/internal/handlers/dialogs/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/knackwurstking/pg-press/internal/utils"
@@ -29,7 +28,7 @@ func GetCassetteDialog(c echo.Context) *echo.HTTPError {
 
 	if tool != nil {
 		log.Debug("Rendering edit cassette dialog: %#v", tool.String())
-		t := templates.EditCassetteDialog(tool, nil)
+		t := EditCassetteDialog(tool, nil)
 		if err := t.Render(c.Request().Context(), c.Response()); err != nil {
 			return errors.NewRenderError(err, "EditCassetteDialog")
 		}
@@ -37,7 +36,7 @@ func GetCassetteDialog(c echo.Context) *echo.HTTPError {
 	}
 
 	log.Debug("Rendering new cassette dialog...")
-	t := templates.NewCassetteDialog(true, nil)
+	t := NewCassetteDialog(true, nil)
 	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.NewRenderError(err, "NewCassetteDialog")
 	}

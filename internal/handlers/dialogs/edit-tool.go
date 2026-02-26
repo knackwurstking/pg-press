@@ -3,7 +3,6 @@ package dialogs
 import (
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
-	"github.com/knackwurstking/pg-press/internal/handlers/dialogs/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/knackwurstking/pg-press/internal/utils"
@@ -24,7 +23,7 @@ func GetToolDialog(c echo.Context) *echo.HTTPError {
 
 	if tool != nil {
 		log.Debug("Rendering edit tool dialog: %#v", tool.String())
-		t := templates.EditToolDialog(tool)
+		t := EditToolDialog(tool)
 		err := t.Render(c.Request().Context(), c.Response())
 		if err != nil {
 			return errors.NewRenderError(err, "EditToolDialog")
@@ -33,7 +32,7 @@ func GetToolDialog(c echo.Context) *echo.HTTPError {
 	}
 
 	log.Debug("Rendering new tool dialog...")
-	t := templates.NewToolDialog()
+	t := NewToolDialog()
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "NewToolDialog")

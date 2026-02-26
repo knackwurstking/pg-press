@@ -6,7 +6,6 @@ import (
 
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
-	"github.com/knackwurstking/pg-press/internal/handlers/dialogs/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/utils"
 
@@ -32,7 +31,7 @@ func GetEditNote(c echo.Context) *echo.HTTPError {
 
 	if note != nil {
 		log.Debug("Rendering edit note dialog [note=%v, linked=%v, user_name=%s]", note, linked, c.Get("user-name"))
-		t := templates.EditNoteDialog(note, linked, user)
+		t := EditNoteDialog(note, linked, user)
 		err := t.Render(c.Request().Context(), c.Response())
 		if err != nil {
 			return errors.NewRenderError(err, "EditNoteDialog")
@@ -41,7 +40,7 @@ func GetEditNote(c echo.Context) *echo.HTTPError {
 	}
 
 	log.Debug("Rendering new note dialog [linked=%v, user_name=%s]", linked, c.Get("user-name"))
-	t := templates.NewNoteDialog(linked, user)
+	t := NewNoteDialog(linked, user)
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "NewNoteDialog")
