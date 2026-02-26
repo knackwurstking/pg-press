@@ -1,6 +1,7 @@
 package dialogs
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/internal/db"
@@ -36,7 +37,7 @@ func GetCassetteDialog(c echo.Context) *echo.HTTPError {
 	}
 
 	log.Debug("Rendering new cassette dialog...")
-	t := NewCassetteDialog(true, nil)
+	t := NewCassetteDialog(true, true, nil)
 	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.NewRenderError(err, "NewCassetteDialog")
 	}
@@ -45,33 +46,38 @@ func GetCassetteDialog(c echo.Context) *echo.HTTPError {
 }
 
 func PostCassette(c echo.Context) *echo.HTTPError {
-	id, merr := utils.GetQueryInt64(c, "id")
-	if merr != nil {
-		return merr.Echo()
-	}
+	id, _ := utils.GetQueryInt64(c, "id")
 	if id > 0 {
 		updateCassette(c)
 	}
 
 	tool, ierr := parseCassetteForm(c, nil)
 	if ierr != nil {
-		t := NewCassetteDialog(true, ierr)
+		t := NewCassetteDialog(true, true, ierr)
 		if err := t.Render(c.Request().Context(), c.Response()); err != nil {
 			return errors.NewRenderError(err, "NewCassetteDialog")
 		}
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid input: %s", ierr.Error())
 	}
 
 	log.Debug("Creating new cassette: %v", tool.String())
 
-	merr = db.AddTool(tool)
+	merr := db.AddTool(tool)
 	if merr != nil {
-		// TODO: Re-render dialog with edited content and error message (OOB)
+		ierr = errors.NewInputError("form", fmt.Sprintf("Failed to create cassette: %s", merr.Error()))
+		t := NewCassetteDialog(true, true, ierr)
+		if err := t.Render(c.Request().Context(), c.Response()); err != nil {
+			return errors.NewRenderError(err, "NewCassetteDialog")
+		}
 		return merr.Echo()
 	}
 
 	utils.SetHXTrigger(c, "tools-tab")
 
-	// TODO: Close the new cassette dialog
+	t := NewCassetteDialog(false, true, ierr) // TODO: Close...
+	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
+		return errors.NewRenderError(err, "NewCassetteDialog")
+	}
 	return nil
 }
 
@@ -134,6 +140,8 @@ func parseCassetteForm(c echo.Context, tool *shared.Tool) (*shared.Tool, *errors
 	maxThickness, err := utils.SanitizeFloat(c.FormValue("max-thickness"))
 	if err != nil {
 		return nil, errors.NewInputError("max-thickness", "Invalid max thickness: must be a valid number")
+	} else if maxThickness <= 0 {
+		return nil, errors.NewInputError("max-thickness", "Max thickness must be greater than zero")
 	}
 	tool.MaxThickness = float32(maxThickness)
 

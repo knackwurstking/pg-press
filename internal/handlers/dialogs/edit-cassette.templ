@@ -13,11 +13,20 @@ import (
 	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
-templ NewCassetteDialog(oob bool, ierr *errors.InputError) {
+type CassetteFormData struct {
+	MinThickness float32 `form:"min-thickness"`
+	MaxThickness float32 `form:"max-thickness"`
+
+	InputError *errors.InputError
+}
+
+// TODO: Add CassetteFormData
+templ NewCassetteDialog(open, oob bool, ierr *errors.InputError) {
 	@dialog.Dialog(dialog.Props{
 		ID:               DialogIDNewCassette,
 		DisableClickAway: true,
 		DisableESC:       true,
+		Open:             open,
 		Attributes: templ.Attributes{
 			"hx-swap-oob": oob,
 		},
@@ -34,8 +43,8 @@ templ NewCassetteDialog(oob bool, ierr *errors.InputError) {
 				}
 			}
 			<form
-				method={ http.MethodPost }
-				action={ urlb.DialogEditCassette(0) }
+				hx-post={ urlb.DialogEditCassette(0) }
+				hx-trigger="submit"
 				enctype="multipart/form-data"
 			>
 				{{ cassette := &shared.Tool{} }}
@@ -90,11 +99,7 @@ templ EditCassetteDialog(oob bool, cassette *shared.Tool, ierr *errors.InputErro
 				// TODO: Handle Errors
 				@toolCode(cassette.Code)
 				<br/>
-				@cassetteThickness(
-					cassette.MinThickness,
-					cassette.MaxThickness,
-					ierr,
-				)
+				@cassetteThickness(cassette.MinThickness, cassette.MaxThickness, ierr)
 				@dialog.Footer() {
 					@button.Button(button.Props{
 						Type: button.TypeReset,
@@ -115,7 +120,6 @@ templ EditCassetteDialog(oob bool, cassette *shared.Tool, ierr *errors.InputErro
 }
 
 templ cassetteThickness(inputMinThickness float32, inputMaxThickness float32, ierr *errors.InputError) {
-	{{ hxPreserve := fmt.Sprintf("%t", ierr != nil) }}
 	@form.Item() {
 		@form.Label() {
 			Dicke (mm)
@@ -136,9 +140,8 @@ templ cassetteThickness(inputMinThickness float32, inputMaxThickness float32, ie
 				Value:       value,
 				Type:        input.TypeNumber,
 				Attributes: templ.Attributes{
-					"step":        "0.1",
-					"required":    false,
-					"hx-preserve": hxPreserve, // TODO: Does this work?
+					"step":     "0.1",
+					"required": false,
 				},
 				HasError: ierr != nil && ierr.InputID == "min-thickness",
 			})
@@ -153,9 +156,8 @@ templ cassetteThickness(inputMinThickness float32, inputMaxThickness float32, ie
 				Value:       fmt.Sprintf("%.1f", inputMaxThickness),
 				Type:        input.TypeNumber,
 				Attributes: templ.Attributes{
-					"step":        "0.1",
-					"required":    true,
-					"hx-preserve": hxPreserve, // TODO: Does this work?
+					"step":     "0.1",
+					"required": true,
 				},
 				HasError: ierr != nil && ierr.InputID == "max-thickness",
 			})
