@@ -5,9 +5,11 @@ import (
 
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/components/button"
+	"github.com/knackwurstking/pg-press/internal/components/dialog"
 	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/components/input"
 	"github.com/knackwurstking/pg-press/internal/components/label"
+	dialogs "github.com/knackwurstking/pg-press/internal/handlers/dialogs/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 )
@@ -30,33 +32,39 @@ templ SectionTools(p SectionToolsProps) {
 	></span>
 	@inputFilterTools(p.Tools)
 	@components.ActionBar() {
-		// TODO: Create dialog trigger (!)
-		@button.Button(button.Props{
-			Size: button.SizeSm,
-			Attributes: templ.Attributes{
-				"hx-get":     string(urlb.DialogEditCassette(0)),
-				"hx-trigger": "click",
-				"hx-target":  "body",
-				"hx-swap":    "beforeend",
-			},
-			Disabled: !p.User.IsAdmin(),
+		@dialog.Trigger(dialog.TriggerProps{
+			For: dialogs.DialogIDNewCassette,
 		}) {
-			@icon.Plus()
-			Kassette
+			@button.Button(button.Props{
+				Size: button.SizeSm,
+				Attributes: templ.Attributes{
+					"hx-get":     string(urlb.DialogEditCassette(0)),
+					"hx-trigger": "click",
+					"hx-target":  "body",
+					"hx-swap":    "beforeend",
+				},
+				Disabled: !p.User.IsAdmin(),
+			}) {
+				@icon.Plus()
+				Kassette
+			}
 		}
-		// TODO: Create dialog trigger
-		@button.Button(button.Props{
-			Size: button.SizeSm,
-			Attributes: templ.Attributes{
-				"hx-get":     string(urlb.DialogEditTool(0)),
-				"hx-trigger": "click",
-				"hx-target":  "body",
-				"hx-swap":    "beforeend",
-			},
-			Disabled: !p.User.IsAdmin(),
+		@dialog.Trigger(dialog.TriggerProps{
+			For: "", // TODO: The tool dialog needs to be updated first
 		}) {
-			@icon.Plus()
-			Werkzeug
+			@button.Button(button.Props{
+				Size: button.SizeSm,
+				Attributes: templ.Attributes{
+					"hx-get":     string(urlb.DialogEditTool(0)),
+					"hx-trigger": "click",
+					"hx-target":  "body",
+					"hx-swap":    "beforeend",
+				},
+				Disabled: !p.User.IsAdmin(),
+			}) {
+				@icon.Plus()
+				Werkzeug
+			}
 		}
 	}
 	<div id="tools-container" class="flex flex-col gap-4">
