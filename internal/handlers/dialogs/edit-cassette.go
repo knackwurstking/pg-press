@@ -48,7 +48,7 @@ func GetCassetteDialog(c echo.Context) *echo.HTTPError {
 func PostCassette(c echo.Context) *echo.HTTPError {
 	tool, ierr := parseCassetteForm(c, nil)
 	if ierr != nil {
-		// TODO: Re-render dialog with edited content and error message
+		// TODO: Re-render dialog with edited content and error message (OOB)
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid input: %s", ierr.Error())
 	}
 
@@ -77,7 +77,7 @@ func PutCassette(c echo.Context) *echo.HTTPError {
 
 	tool, ierr := parseCassetteForm(c, tool)
 	if ierr != nil {
-		// TODO: Re-render dialog with edited content and error message
+		// TODO: Re-render dialog with edited content and error message (OOB)
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid input: %s", ierr.Error())
 	}
 
