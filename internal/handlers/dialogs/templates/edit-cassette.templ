@@ -1,19 +1,21 @@
 package templates
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/internal/components/button"
 	"github.com/knackwurstking/pg-press/internal/components/dialog"
+	"github.com/knackwurstking/pg-press/internal/components/form"
+	"github.com/knackwurstking/pg-press/internal/components/input"
+	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-
-	"github.com/knackwurstking/ui/pkg/css"
 )
 
-templ NewCassetteDialog(errs ...DialogError) {
+templ NewCassetteDialog(ierr *errors.InputError) {
 	{{
-		hasError := len(errs) > 0
+		hasError := ierr != nil
 
 		var attr templ.Attributes
 		if hasError {
@@ -33,17 +35,26 @@ templ NewCassetteDialog(errs ...DialogError) {
 			@dialog.Header() {
 				Neue Kassette
 			}
+			if ierr != nil && ierr.InputID == "form" {
+				@dialog.Description() {
+					<span class="text-destructive">{ ierr.Error() }</span>
+					<br/>
+					Bitte korrigieren Sie die Fehler im Formular und versuchen Sie es erneut.
+				}
+			}
 			<form
 				method={ http.MethodPost }
 				action={ urlb.DialogEditCassette(0) }
-				{ stdHxDialogProps... }
+				{ stdHxDialogFormProps... }
 			>
-				// TODO: Show errors
 				{{ cassette := &shared.Tool{} }}
+				// TODO: Handle Errors
 				@toolFormat(cassette.Width, cassette.Height)
+				// TODO: Handle Errors
 				@toolType(cassette.Type)
+				// TODO: Handle Errors
 				@toolCode(cassette.Code)
-				@cassetteThickness(cassette.MinThickness, cassette.MaxThickness)
+				@cassetteThickness(cassette.MinThickness, cassette.MaxThickness, ierr)
 				@dialog.Footer() {
 					@dialog.Close() {
 						@button.Button(button.Props{
@@ -58,9 +69,9 @@ templ NewCassetteDialog(errs ...DialogError) {
 	}
 }
 
-templ EditCassetteDialog(cassette *shared.Tool, errs ...DialogError) {
+templ EditCassetteDialog(cassette *shared.Tool, ierr *errors.InputError) {
 	{{
-		hasError := len(errs) > 0
+		hasError := ierr != nil
 
 		var attr templ.Attributes
 		if hasError {
@@ -83,13 +94,19 @@ templ EditCassetteDialog(cassette *shared.Tool, errs ...DialogError) {
 			<form
 				method={ http.MethodPost }
 				action={ urlb.DialogEditCassette(0) }
-				{ stdHxDialogProps... }
+				{ stdHxDialogFormProps... }
 			>
-				// TODO: Show errors
+				// TODO: Handle Errors
 				@toolFormat(cassette.Width, cassette.Height)
+				// TODO: Handle Errors
 				@toolType(cassette.Type)
+				// TODO: Handle Errors
 				@toolCode(cassette.Code)
-				@cassetteThickness(cassette.MinThickness, cassette.MaxThickness)
+				@cassetteThickness(
+					cassette.MinThickness,
+					cassette.MaxThickness,
+					ierr,
+				)
 				@dialog.Footer() {
 					@button.Button(button.Props{
 						Type: button.TypeReset,
@@ -109,35 +126,58 @@ templ EditCassetteDialog(cassette *shared.Tool, errs ...DialogError) {
 	}
 }
 
-// TODO: Migrate to templui and tailwindcss
-templ cassetteThickness(inputMinThickness float32, inputMaxThickness float32) {
+templ cassetteThickness(inputMinThickness float32, inputMaxThickness float32, ierr *errors.InputError) {
 	<div class="flex flex-col items-start w-full">
-		<label>Dicke (mm)</label>
-		<div class={ css.Flex, css.GapSm }>
-			<input
-				type="number"
-				step="0.1"
-				id="min-thickness"
-				class={ css.WFull }
-				name="min_thickness"
-				placeholder="z.B. 8.5"
-				if inputMinThickness != 0 {
-					value={ inputMinThickness }
+		@form.Item() {
+			@form.Label() {
+				Dicke (mm)
+			}
+			<div class="flex gap-2 items-center w-full">
+				// Min Thickness
+				{{
+					var value string
+					if inputMinThickness != 0 {
+						value = fmt.Sprintf("%.1f", inputMinThickness)
+					}
+				}}
+				@input.Input(input.Props{
+					ID:          "min-thickness",
+					Class:       "w-full",
+					Name:        "min-thickness",
+					Placeholder: "z.B. 8.5",
+					Value:       value,
+					Type:        input.TypeNumber,
+					Attributes: templ.Attributes{
+						"step":     "0.1",
+						"required": false,
+					},
+					HasError: ierr != nil && ierr.InputID == "min-thickness",
+				})
+				// Separator
+				<span class="text-xl" style="margin: auto 0;">-</span>
+				// Max Thickness
+				@input.Input(input.Props{
+					ID:          "max-thickness",
+					Class:       "w-full",
+					Name:        "max-thickness",
+					Placeholder: "z.B. 12.5",
+					Value:       fmt.Sprintf("%.1f", inputMaxThickness),
+					Type:        input.TypeNumber,
+					Attributes: templ.Attributes{
+						"step":     "0.1",
+						"required": true,
+					},
+					HasError: ierr != nil && ierr.InputID == "max-thickness",
+				})
+			</div>
+			// Error Messages
+			if ierr != nil && (ierr.InputID == "min-thickness" || ierr.InputID == "max-thickness") {
+				@form.Message(form.MessageProps{
+					Variant: form.MessageVariantError,
+				}) {
+					{ ierr.Error() }
 				}
-			/>
-			<span class={ css.TextXL } style="margin: auto 0;">-</span>
-			<input
-				type="number"
-				step="0.1"
-				id="max-thickness"
-				class={ css.WFull }
-				name="max_thickness"
-				placeholder="z.B. 12.5"
-				if inputMaxThickness != 0 {
-					value={ inputMaxThickness }
-				}
-				required
-			/>
-		</div>
+			}
+		}
 	</div>
 }
