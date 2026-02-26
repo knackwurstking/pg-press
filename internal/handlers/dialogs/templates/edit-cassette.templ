@@ -13,21 +13,14 @@ import (
 	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
-templ NewCassetteDialog(ierr *errors.InputError) {
-	{{
-		var attr templ.Attributes
-		if ierr != nil {
-			attr = templ.Attributes{
-				"hx-swap-oob": "true",
-			}
-		}
-	}}
+templ NewCassetteDialog(oob bool, ierr *errors.InputError) {
 	@dialog.Dialog(dialog.Props{
 		ID:               DialogIDNewCassette,
 		DisableClickAway: true,
 		DisableESC:       true,
-		Open:             true,
-		Attributes:       attr,
+		Attributes: templ.Attributes{
+			"hx-swap-oob": oob,
+		},
 	}) {
 		@dialog.Content() {
 			@dialog.Header() {
