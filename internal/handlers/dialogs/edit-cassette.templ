@@ -64,21 +64,15 @@ templ NewCassetteDialog(oob bool, ierr *errors.InputError) {
 	}
 }
 
-templ EditCassetteDialog(cassette *shared.Tool, ierr *errors.InputError) {
-	{{
-		var attr templ.Attributes
-		if ierr != nil {
-			attr = templ.Attributes{
-				"hx-swap-oob": "true",
-			}
-		}
-	}}
+templ EditCassetteDialog(oob bool, cassette *shared.Tool, ierr *errors.InputError) {
 	@dialog.Dialog(dialog.Props{
 		ID:               DialogIDEditCassette,
 		DisableClickAway: true,
 		DisableESC:       true,
 		Open:             true,
-		Attributes:       attr,
+		Attributes: templ.Attributes{
+			"hx-swap-oob": oob,
+		},
 	}) {
 		@dialog.Content() {
 			@dialog.Header() {

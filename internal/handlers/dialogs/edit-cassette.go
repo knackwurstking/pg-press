@@ -28,7 +28,7 @@ func GetCassetteDialog(c echo.Context) *echo.HTTPError {
 
 	if tool != nil {
 		log.Debug("Rendering edit cassette dialog: %#v", tool.String())
-		t := EditCassetteDialog(tool, nil)
+		t := EditCassetteDialog(true, tool, nil)
 		if err := t.Render(c.Request().Context(), c.Response()); err != nil {
 			return errors.NewRenderError(err, "EditCassetteDialog")
 		}
