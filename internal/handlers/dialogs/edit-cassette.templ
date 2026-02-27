@@ -14,30 +14,40 @@ import (
 )
 
 type CassetteFormData struct {
-	MinThickness float32 `form:"min-thickness"`
-	MaxThickness float32 `form:"max-thickness"`
+	Width, Height int     `form:"width" form:"height"`
+	Type          string  `form:"type"`
+	Code          string  `form:"code"`
+	MinThickness  float32 `form:"min-thickness"`
+	MaxThickness  float32 `form:"max-thickness"`
 
-	InputError *errors.InputError
+	Open, OOB bool
+
+	Error *errors.InputError
 }
 
-// TODO: Add CassetteFormData
-templ NewCassetteDialog(open, oob bool, ierr *errors.InputError) {
+templ NewCassetteDialog(props ...CassetteFormData) {
+	{{
+		prop := CassetteFormData{}
+		if len(props) > 0 {
+			prop = props[0]
+		}
+	}}
 	@dialog.Dialog(dialog.Props{
 		ID:               DialogIDNewCassette,
 		DisableClickAway: true,
 		DisableESC:       true,
-		Open:             open,
+		Open:             prop.Open,
 		Attributes: templ.Attributes{
-			"hx-swap-oob": oob,
+			"hx-swap-oob": prop.OOB,
 		},
 	}) {
 		@dialog.Content() {
 			@dialog.Header() {
 				Neue Kassette
 			}
-			if ierr != nil && ierr.InputID == "form" {
+			if prop.Error != nil && prop.Error.InputID == "form" {
 				@dialog.Description() {
-					<span class="text-destructive">{ ierr.Error() }</span>
+					<span class="text-destructive">{ prop.Error.Error() }</span>
 					<br/>
 					Bitte korrigieren Sie die Fehler im Formular und versuchen Sie es erneut.
 				}
@@ -48,16 +58,13 @@ templ NewCassetteDialog(open, oob bool, ierr *errors.InputError) {
 				enctype="multipart/form-data"
 			>
 				{{ cassette := &shared.Tool{} }}
-				// TODO: Handle Errors
 				@toolFormat(cassette.Width, cassette.Height)
 				<br/>
-				// TODO: Handle Errors
 				@toolType(cassette.Type)
 				<br/>
-				// TODO: Handle Errors
 				@toolCode(cassette.Code)
 				<br/>
-				@cassetteThickness(cassette.MinThickness, cassette.MaxThickness, ierr)
+				@cassetteThickness(cassette.MinThickness, cassette.MaxThickness, prop.Error)
 				<br/>
 				@dialog.Footer() {
 					@button.Button(button.Props{
@@ -90,13 +97,10 @@ templ EditCassetteDialog(oob bool, cassette *shared.Tool, ierr *errors.InputErro
 				action={ urlb.DialogEditCassette(0) }
 				enctype="multipart/form-data"
 			>
-				// TODO: Handle Errors
 				@toolFormat(cassette.Width, cassette.Height)
 				<br/>
-				// TODO: Handle Errors
 				@toolType(cassette.Type)
 				<br/>
-				// TODO: Handle Errors
 				@toolCode(cassette.Code)
 				<br/>
 				@cassetteThickness(cassette.MinThickness, cassette.MaxThickness, ierr)
