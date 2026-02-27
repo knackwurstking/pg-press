@@ -29,7 +29,18 @@ func GetCassetteDialog(c echo.Context) *echo.HTTPError {
 
 	if tool != nil {
 		log.Debug("Rendering edit cassette dialog: %#v", tool.String())
-		t := EditCassetteDialog(true, tool, nil)
+		t := EditCassetteDialog(EditCassetteDialogProps{
+			CassetteFormData: CassetteFormData{
+				Type:         tool.Type,
+				Code:         tool.Code,
+				Width:        tool.Width,
+				Height:       tool.Height,
+				MinThickness: tool.MinThickness,
+				MaxThickness: tool.MaxThickness,
+			},
+			OOB:  true,
+			Open: true,
+		})
 		if err := t.Render(c.Request().Context(), c.Response()); err != nil {
 			return errors.NewRenderError(err, "EditCassetteDialog")
 		}
@@ -37,7 +48,7 @@ func GetCassetteDialog(c echo.Context) *echo.HTTPError {
 	}
 
 	log.Debug("Rendering new cassette dialog...")
-	t := NewCassetteDialog(CassetteDialogProps{
+	t := NewCassetteDialog(NewCassetteDialogProps{
 		OOB:  true,
 		Open: true,
 	})
@@ -51,15 +62,16 @@ func GetCassetteDialog(c echo.Context) *echo.HTTPError {
 func PostCassette(c echo.Context) *echo.HTTPError {
 	id, _ := utils.GetQueryInt64(c, "id")
 	if id > 0 {
-		updateCassette(c)
+		updateCassette(c, shared.EntityID(id))
 	}
 
-	tool, ierr := parseCassetteForm(c, nil)
+	formData, ierr := parseCassetteForm(c)
 	if ierr != nil {
-		t := NewCassetteDialog(CassetteDialogProps{
-			Open:  true,
-			OOB:   true,
-			Error: ierr,
+		t := NewCassetteDialog(NewCassetteDialogProps{
+			CassetteFormData: formData,
+			Open:             true,
+			OOB:              true,
+			Error:            ierr,
 		})
 		if err := t.Render(c.Request().Context(), c.Response()); err != nil {
 			return errors.NewRenderError(err, "NewCassetteDialog")
@@ -67,15 +79,25 @@ func PostCassette(c echo.Context) *echo.HTTPError {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid input: %s", ierr.Error())
 	}
 
-	log.Debug("Creating new cassette: %v", tool.String())
+	tool := &shared.Tool{
+		Position:     shared.SlotUpperCassette,
+		Type:         formData.Type,
+		Code:         formData.Code,
+		Width:        formData.Width,
+		Height:       formData.Height,
+		MinThickness: formData.MinThickness,
+		MaxThickness: formData.MaxThickness,
+	}
 
-	merr := db.AddTool(tool)
-	if merr != nil {
+	log.Debug("Creating new cassette: %#v", tool.String())
+
+	if merr := db.AddTool(tool); merr != nil {
 		ierr = errors.NewInputError("form", fmt.Sprintf("Failed to create cassette: %s", merr.Error()))
-		t := NewCassetteDialog(CassetteDialogProps{
-			Open:  true,
-			OOB:   true,
-			Error: ierr,
+		t := NewCassetteDialog(NewCassetteDialogProps{
+			CassetteFormData: formData,
+			Open:             true,
+			OOB:              true,
+			Error:            ierr,
 		})
 		if err := t.Render(c.Request().Context(), c.Response()); err != nil {
 			return errors.NewRenderError(err, "NewCassetteDialog")
@@ -85,10 +107,11 @@ func PostCassette(c echo.Context) *echo.HTTPError {
 
 	utils.SetHXTrigger(c, "tools-tab")
 
-	t := NewCassetteDialog(CassetteDialogProps{
-		Open:  false,
-		OOB:   true,
-		Error: ierr,
+	t := NewCassetteDialog(NewCassetteDialogProps{
+		CassetteFormData: formData,
+		Open:             false,
+		OOB:              true,
+		Error:            ierr,
 	})
 	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.NewRenderError(err, "NewCassetteDialog")
@@ -96,26 +119,55 @@ func PostCassette(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func updateCassette(c echo.Context) *echo.HTTPError {
-	id, merr := utils.GetQueryInt64(c, "id")
-	if merr != nil {
-		return merr.Echo()
-	}
-	tool, merr := db.GetTool(shared.EntityID(id))
-	if merr != nil {
-		return merr.Echo()
-	}
-
-	tool, ierr := parseCassetteForm(c, tool)
+func updateCassette(c echo.Context, toolID shared.EntityID) *echo.HTTPError {
+	formData, ierr := parseCassetteForm(c)
 	if ierr != nil {
-		// TODO: Re-render dialog with edited content and error message (OOB)
+		t := EditCassetteDialog(EditCassetteDialogProps{
+			CassetteFormData: formData,
+			Open:             true,
+			OOB:              true,
+			Error:            ierr,
+		})
+		if err := t.Render(c.Request().Context(), c.Response()); err != nil {
+			return errors.NewRenderError(err, "EditCassetteDialog")
+		}
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid input: %s", ierr.Error())
 	}
 
-	log.Debug("Updating cassette: %v", tool.String())
-
-	merr = db.UpdateTool(tool)
+	tool, merr := db.GetTool(shared.EntityID(toolID))
 	if merr != nil {
+		ierr := errors.NewInputError("id", fmt.Sprintf("Cassette with ID %d not found", toolID))
+		t := EditCassetteDialog(EditCassetteDialogProps{
+			CassetteFormData: formData,
+			Open:             true,
+			OOB:              true,
+			Error:            ierr,
+		})
+		if err := t.Render(c.Request().Context(), c.Response()); err != nil {
+			return errors.NewRenderError(err, "EditCassetteDialog")
+		}
+		return merr.Echo()
+	}
+	tool.Type = formData.Type
+	tool.Code = formData.Code
+	tool.Width = formData.Width
+	tool.Height = formData.Height
+	tool.MinThickness = formData.MinThickness
+	tool.MaxThickness = formData.MaxThickness
+
+	log.Debug("Updating cassette: %#v", tool.String())
+
+	if merr = db.UpdateTool(tool); merr != nil {
+		ierr = errors.NewInputError("form", fmt.Sprintf("Failed to update cassette: %s", merr.Error()))
+		t := EditCassetteDialog(EditCassetteDialogProps{
+			CassetteFormData: formData,
+			Open:             true,
+			OOB:              true,
+			Error:            ierr,
+		})
+		if err := t.Render(c.Request().Context(), c.Response()); err != nil {
+			return errors.NewRenderError(err, "EditCassetteDialog")
+		}
 		return merr.Echo()
 	}
 
@@ -125,46 +177,40 @@ func updateCassette(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func parseCassetteForm(c echo.Context, tool *shared.Tool) (*shared.Tool, *errors.InputError) {
-	if tool == nil {
-		tool = &shared.Tool{
-			Position: shared.SlotUpperCassette,
-		}
-	}
-
+func parseCassetteForm(c echo.Context) (data CassetteFormData, ierr *errors.InputError) {
 	// Sanitize inputs by trimming whitespace
-	tool.Type = utils.SanitizeText(c.FormValue("type"))
-	tool.Code = utils.SanitizeText(c.FormValue("code"))
+	data.Type = utils.SanitizeText(c.FormValue("type"))
+	data.Code = utils.SanitizeText(c.FormValue("code"))
 
 	// Convert vWidth and vHeight to integers with sanitization
 	var err error
-	tool.Width, err = utils.SanitizeInt(c.FormValue("width"))
+	data.Width, err = utils.SanitizeInt(c.FormValue("width"))
 	if err != nil {
-		return nil, errors.NewInputError("width", "Invalid width: must be an integer")
+		ierr = errors.NewInputError("width", "Invalid width: must be an integer")
+		return
 	}
 
-	tool.Height, err = utils.SanitizeInt(c.FormValue("height"))
+	data.Height, err = utils.SanitizeInt(c.FormValue("height"))
 	if err != nil {
-		return nil, errors.NewInputError("height", "Invalid height: must be an integer")
+		ierr = errors.NewInputError("height", "Invalid height: must be an integer")
+		return
 	}
 
 	// Convert thickness values to floats with sanitization, min thickness can be zero
 	minThickness, _ := utils.SanitizeFloat(c.FormValue("min-thickness"))
-	tool.MinThickness = float32(minThickness)
+	data.MinThickness = float32(minThickness)
 
 	maxThickness, err := utils.SanitizeFloat(c.FormValue("max-thickness"))
 	if err != nil {
-		return nil, errors.NewInputError("max-thickness", "Invalid max thickness: must be a valid number")
+		ierr = errors.NewInputError("max-thickness", "Invalid max thickness: must be a valid number")
+		return
 	} else if maxThickness <= 0 {
-		return nil, errors.NewInputError("max-thickness", "Max thickness must be greater than zero")
+		ierr = errors.NewInputError("max-thickness", "Max thickness must be greater than zero")
+		return
 	}
-	tool.MaxThickness = float32(maxThickness)
+	data.MaxThickness = float32(maxThickness)
 
-	log.Debug("Cassette dialog form values: tool=%v", tool)
+	log.Debug("Cassette dialog form values: %#v", data)
 
-	if verr := tool.Validate(); verr != nil {
-		return tool, errors.NewInputError("form", verr.Error())
-	}
-
-	return tool, nil
+	return
 }

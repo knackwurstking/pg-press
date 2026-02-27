@@ -33,7 +33,7 @@ templ SectionTools(p SectionToolsProps) {
 	@inputFilterTools(p.Tools)
 	@components.ActionBar() {
 		@dialog.Trigger(dialog.TriggerProps{
-			For: dialogs.DialogIDNewCassette,
+			For: dialogs.NewCassetteDialogID,
 		}) {
 			@button.Button(button.Props{
 				Size: button.SizeSm,
@@ -50,7 +50,7 @@ templ SectionTools(p SectionToolsProps) {
 			}
 		}
 		@dialog.Trigger(dialog.TriggerProps{
-			For: "", // TODO: The tool dialog needs to be updated first
+			For: dialogs.EditCassetteDialogID,
 		}) {
 			@button.Button(button.Props{
 				Size: button.SizeSm,
@@ -71,6 +71,7 @@ templ SectionTools(p SectionToolsProps) {
 		@ToolsList(p)
 	</div>
 	@dialogs.NewCassetteDialog()
+	@dialogs.EditCassetteDialog()
 	<script name="tools-filter">
 		function filterToolsList(event, skipHistory) {
 			var target = event

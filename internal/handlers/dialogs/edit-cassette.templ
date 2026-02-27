@@ -13,21 +13,26 @@ import (
 	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
-type CassetteDialogProps struct {
-	Width, Height int     `form:"width" form:"height"`
-	Type          string  `form:"type"`
-	Code          string  `form:"code"`
-	MinThickness  float32 `form:"min-thickness"`
-	MaxThickness  float32 `form:"max-thickness"`
+type CassetteFormData struct {
+	Width        int     `form:"width"`
+	Height       int     `form:"height"`
+	Type         string  `form:"type"`
+	Code         string  `form:"code"`
+	MinThickness float32 `form:"min-thickness"`
+	MaxThickness float32 `form:"max-thickness"`
+}
+
+type NewCassetteDialogProps struct {
+	CassetteFormData
 
 	Open, OOB bool
 
 	Error *errors.InputError
 }
 
-templ NewCassetteDialog(props ...CassetteDialogProps) {
+templ NewCassetteDialog(props ...NewCassetteDialogProps) {
 	{{
-		prop := CassetteDialogProps{}
+		prop := NewCassetteDialogProps{}
 		if len(props) > 0 {
 			prop = props[0]
 		}
@@ -38,7 +43,7 @@ templ NewCassetteDialog(props ...CassetteDialogProps) {
 		}
 	}}
 	@dialog.Dialog(dialog.Props{
-		ID:               DialogIDNewCassette,
+		ID:               NewCassetteDialogID,
 		DisableClickAway: true,
 		DisableESC:       true,
 		Open:             prop.Open,
@@ -81,16 +86,28 @@ templ NewCassetteDialog(props ...CassetteDialogProps) {
 	}
 }
 
-// TODO: Update props, like the new dialog
-templ EditCassetteDialog(oob bool, cassette *shared.Tool, ierr *errors.InputError) {
+type EditCassetteDialogProps struct {
+	CassetteFormData
+
+	Open, OOB bool
+
+	Error *errors.InputError
+}
+
+templ EditCassetteDialog(props ...EditCassetteDialogProps) {
 	{{
+		prop := EditCassetteDialogProps{}
+		if len(props) > 0 {
+			prop = props[0]
+		}
+
 		attr := templ.Attributes{}
-		if oob {
+		if prop.OOB {
 			attr["hx-swap-oob"] = "true"
 		}
 	}}
 	@dialog.Dialog(dialog.Props{
-		ID:               DialogIDEditCassette,
+		ID:               EditCassetteDialogID,
 		DisableClickAway: true,
 		DisableESC:       true,
 		Open:             true,
@@ -105,13 +122,13 @@ templ EditCassetteDialog(oob bool, cassette *shared.Tool, ierr *errors.InputErro
 				action={ urlb.DialogEditCassette(0) }
 				enctype="multipart/form-data"
 			>
-				@toolFormat(cassette.Width, cassette.Height, ierr)
+				@toolFormat(prop.Width, prop.Height, prop.Error)
 				<br/>
-				@toolType(cassette.Type, ierr)
+				@toolType(prop.Type, prop.Error)
 				<br/>
-				@toolCode(cassette.Code, ierr)
+				@toolCode(prop.Code, prop.Error)
 				<br/>
-				@cassetteThickness(cassette.MinThickness, cassette.MaxThickness, ierr)
+				@cassetteThickness(prop.MinThickness, prop.MaxThickness, prop.Error)
 				@dialog.Footer() {
 					@button.Button(button.Props{
 						Type: button.TypeReset,
