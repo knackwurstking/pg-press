@@ -1,9 +1,13 @@
 package dialogs
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/form"
+	"github.com/knackwurstking/pg-press/internal/components/input"
+	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 
@@ -14,7 +18,7 @@ templ NewToolDialog() {
 	@components.FormDialog("tool-dialog", http.MethodPost, urlb.DialogEditTool(0)) {
 		{{ tool := &shared.Tool{} }}
 		@toolPosition(tool.Position)
-		@toolFormat(tool.Width, tool.Height)
+		@toolFormat(tool.Width, tool.Height, nil)
 		@toolType(tool.Type)
 		@toolCode(tool.Code)
 		@components.FormDialogFooter("Abbrechen", "Erstellen")
@@ -24,13 +28,14 @@ templ NewToolDialog() {
 templ EditToolDialog(tool *shared.Tool) {
 	@components.FormDialog("tool-edit-dialog", http.MethodPut, urlb.DialogEditTool(tool.ID)) {
 		@toolPosition(tool.Position)
-		@toolFormat(tool.Width, tool.Height)
+		@toolFormat(tool.Width, tool.Height, nil)
 		@toolType(tool.Type)
 		@toolCode(tool.Code)
 		@components.FormDialogFooter("Abbrechen", "Aktualisieren")
 	}
 }
 
+// TODO: Migrate to templui with tailwindcss
 templ toolPosition(inputPosition shared.Slot) {
 	<div
 		class={ css.Flex, css.FlexRow, css.Gap }
@@ -69,42 +74,59 @@ templ toolPosition(inputPosition shared.Slot) {
 	</div>
 }
 
-// TODO: Migrate to templui with tailwindcss
-templ toolFormat(inputWidth int, inputHeight int) {
-	<div
-		class={ css.Flex, css.FlexCol, css.ItemsStart, css.WFull }
-	>
-		<label>Format</label>
-		<div
-			class={ css.Flex, css.GapSm }
-		>
-			<input
-				type="number"
-				id="width"
-				class={ css.WFull }
-				name="width"
-				placeholder="z.B. 120"
+templ toolFormat(inputWidth int, inputHeight int, ierr *errors.InputError) {
+	@form.Item() {
+		@form.Label() {
+			Format
+		}
+		<div class="flex gap-2 items-center w-full">
+			{{
+				value := ""
 				if inputWidth != 0 {
-					value={ inputWidth }
+					value = fmt.Sprintf("%d", inputWidth)
 				}
-				required
-			/>
-			<span class={ css.TextXL } style="margin: auto 0;">x</span>
-			<input
-				type="number"
-				id="height"
-				class={ css.WFull }
-				name="height"
-				placeholder="z.B. 60"
+			}}
+			@input.Input(input.Props{
+				Type:        "number",
+				ID:          "width",
+				Name:        "width",
+				Placeholder: "z.B. 120",
+				Value:       value,
+				Attributes: templ.Attributes{
+					"required": true,
+				},
+				HasError: ierr != nil && ierr.InputID == "width",
+			})
+			<span class="text-xl" style="margin: auto 0;">x</span>
+			{{
 				if inputHeight != 0 {
-					value={ inputHeight }
+					value = fmt.Sprintf("%d", inputHeight)
 				}
-				required
-			/>
+			}}
+			@input.Input(input.Props{
+				Type:        "number",
+				ID:          "height",
+				Name:        "height",
+				Placeholder: "z.B. 60",
+				Value:       value,
+				Attributes: templ.Attributes{
+					"required": true,
+				},
+				HasError: ierr != nil && ierr.InputID == "height",
+			})
 		</div>
-	</div>
+		// Error Messages
+		if ierr != nil && (ierr.InputID == "width" || ierr.InputID == "height") {
+			@form.Message(form.MessageProps{
+				Variant: form.MessageVariantError,
+			}) {
+				{ ierr.Error() }
+			}
+		}
+	}
 }
 
+// TODO: Migrate to templui with tailwindcss
 templ toolType(inputType string) {
 	<div
 		class={ css.Flex, css.FlexCol, css.ItemsStart, css.WFull }
@@ -122,6 +144,7 @@ templ toolType(inputType string) {
 	</div>
 }
 
+// TODO: Migrate to templui with tailwindcss
 templ toolCode(inputCode string) {
 	<div
 		class={ css.Flex, css.FlexCol, css.ItemsStart, css.WFull }

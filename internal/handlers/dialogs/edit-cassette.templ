@@ -58,7 +58,7 @@ templ NewCassetteDialog(props ...CassetteDialogProps) {
 				enctype="multipart/form-data"
 			>
 				{{ cassette := &shared.Tool{} }}
-				@toolFormat(cassette.Width, cassette.Height)
+				@toolFormat(cassette.Width, cassette.Height, prop.Error)
 				<br/>
 				@toolType(cassette.Type)
 				<br/>
@@ -97,7 +97,7 @@ templ EditCassetteDialog(oob bool, cassette *shared.Tool, ierr *errors.InputErro
 				action={ urlb.DialogEditCassette(0) }
 				enctype="multipart/form-data"
 			>
-				@toolFormat(cassette.Width, cassette.Height)
+				@toolFormat(cassette.Width, cassette.Height, ierr)
 				<br/>
 				@toolType(cassette.Type)
 				<br/>
