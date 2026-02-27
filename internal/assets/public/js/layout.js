@@ -39,7 +39,20 @@ document.addEventListener("DOMContentLoaded", function() {
 		"visibilitychange",
 		debounce(function() {
 			if (document.visibilityState === "visible") {
-				console.log("Page became visible - reloading HTMX sections");
+				// Do nothing if any dialog is open
+				var dialogs = document.querySelectorAll("dialog[open]")
+				if (dialogs.length > 0) {
+					console.debug("Dialogs are open, skipping HTMX reload");
+					return;
+				}
+				dialogs = document.querySelectorAll(`[data-tui-dialog-open="true"]`)
+				if (dialogs.length > 0) {
+					console.debug("TUI Dialogs are open, skipping HTMX reload");
+					return;
+				}
+
+				// Reload HTMX sections by dispatching custom events
+				console.debug("Page became visible - reloading HTMX sections");
 				if (window.triggers.length > 0) {
 					console.debug("Triggers: ", window.triggers);
 					window.triggers.forEach(function(trigger) {

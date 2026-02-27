@@ -7,11 +7,10 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components/dialog"
 	"github.com/knackwurstking/pg-press/internal/components/form"
 	"github.com/knackwurstking/pg-press/internal/components/input"
+	"github.com/knackwurstking/pg-press/internal/components/selectbox"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-
-	"github.com/knackwurstking/ui/pkg/css"
 )
 
 type ToolFormData struct {
@@ -66,21 +65,19 @@ templ NewToolDialog(props ...NewToolDialogProps) {
 				enctype="multipart/form-data"
 			>
 				{{ tool := &shared.Tool{} }}
-				@toolPosition(tool.Position)
+				@toolPosition(tool.Position, prop.Error)
 				<br/>
 				@toolFormat(tool.Width, tool.Height, prop.Error)
 				<br/>
 				@toolType(tool.Type, prop.Error)
 				<br/>
-				@toolCode(tool.Code, prop.Error)
+				@toolCode(tool.Code, true, prop.Error)
 				<br/>
 				@dialog.Footer() {
-					@dialog.Close() {
-						@button.Button(button.Props{
-							Type: button.TypeSubmit,
-						}) {
-							Erstellen
-						}
+					@button.Button(button.Props{
+						Type: button.TypeSubmit,
+					}) {
+						Erstellen
 					}
 				}
 			</form>
@@ -134,13 +131,13 @@ templ EditToolDialog(props ...EditToolDialogProps) {
 				enctype="multipart/form-data"
 			>
 				{{ tool := &shared.Tool{} }}
-				@toolPosition(tool.Position)
+				@toolPosition(tool.Position, prop.Error)
 				<br/>
 				@toolFormat(tool.Width, tool.Height, prop.Error)
 				<br/>
 				@toolType(tool.Type, prop.Error)
 				<br/>
-				@toolCode(tool.Code, prop.Error)
+				@toolCode(tool.Code, true, prop.Error)
 				<br/>
 				@dialog.Footer() {
 					@dialog.Close() {
@@ -156,43 +153,52 @@ templ EditToolDialog(props ...EditToolDialogProps) {
 	}
 }
 
-// TODO: Migrate to templui with tailwindcss
-templ toolPosition(inputPosition shared.Slot) {
-	<div
-		class={ css.Flex, css.FlexRow, css.Gap }
-	>
-		<span
-			class={ css.Flex, css.FlexCol, css.ItemsStart }
-		>
-			<label for="position">Position</label>
-			<select id="position" name="position" required>
-				<option
-					value=""
-					if inputPosition == shared.SlotUnknown {
-						selected
-					}
-				>
-					Position auswählen
-				</option>
-				<option
-					value={ shared.SlotUpper }
-					if inputPosition == shared.SlotUpper {
-						selected
-					}
-				>
+templ toolPosition(inputPosition shared.Slot, ierr *errors.InputError) {
+	@form.Item() {
+		@form.Label(form.LabelProps{
+			For: "position",
+		}) {
+			Position
+		}
+		@selectbox.SelectBox() {
+			@selectbox.Trigger(selectbox.TriggerProps{
+				ID:   "position",
+				Name: "position",
+				Attributes: templ.Attributes{
+					"required": true,
+				},
+				HasError: ierr != nil && ierr.InputID == "position",
+			}) {
+				@selectbox.Value(selectbox.ValueProps{
+					Placeholder: "Position auswählen",
+				})
+			}
+			@selectbox.Content(selectbox.ContentProps{
+				NoSearch: true,
+			}) {
+				@selectbox.Item(selectbox.ItemProps{
+					Value:    fmt.Sprintf("%d", shared.SlotUpper),
+					Selected: inputPosition == shared.SlotUpper,
+				}) {
 					Oberteil
-				</option>
-				<option
-					value={ shared.SlotLower }
-					if inputPosition == shared.SlotLower {
-						selected
-					}
-				>
+				}
+				@selectbox.Item(selectbox.ItemProps{
+					Value:    fmt.Sprintf("%d", shared.SlotLower),
+					Selected: inputPosition == shared.SlotLower,
+				}) {
 					Unterteil
-				</option>
-			</select>
-		</span>
-	</div>
+				}
+			}
+		}
+		// Error Messages
+		if ierr != nil && (ierr.InputID == "position") {
+			@form.Message(form.MessageProps{
+				Variant: form.MessageVariantError,
+			}) {
+				{ ierr.Error() }
+			}
+		}
+	}
 }
 
 templ toolFormat(inputWidth int, inputHeight int, ierr *errors.InputError) {
@@ -273,7 +279,7 @@ templ toolType(inputType string, ierr *errors.InputError) {
 	}
 }
 
-templ toolCode(inputCode string, ierr *errors.InputError) {
+templ toolCode(inputCode string, required bool, ierr *errors.InputError) {
 	@form.Item() {
 		@form.Label() {
 			Code
@@ -287,6 +293,9 @@ templ toolCode(inputCode string, ierr *errors.InputError) {
 			Placeholder: "z.B. 3573",
 			Value:       inputCode,
 			HasError:    ierr != nil && ierr.InputID == "code",
+			Attributes: templ.Attributes{
+				"required": required,
+			},
 		})
 		if ierr != nil && ierr.InputID == "code" {
 			@form.Message(form.MessageProps{
