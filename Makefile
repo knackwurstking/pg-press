@@ -23,7 +23,7 @@ clean:
 
 generate:
 	templ generate
-	npx tailwindcss -i ./internal/assets/public/css/input.css -o ./internal/assets/public/css/output.css
+	tailwindcss -i ./internal/assets/public/css/input.css -o ./internal/assets/public/css/output.css
 
 init: generate
 	go mod tidy -v
