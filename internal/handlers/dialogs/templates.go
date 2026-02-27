@@ -4,4 +4,7 @@ package dialogs
 const (
 	NewCassetteDialogID  = "cassette-dialog"
 	EditCassetteDialogID = "cassette-edit-dialog"
+
+	NewToolDialogID  = "tool-dialog"
+	EditToolDialogID = "tool-edit-dialog"
 )

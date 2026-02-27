@@ -97,7 +97,7 @@ type EditCassetteDialogProps struct {
 templ EditCassetteDialog(props ...EditCassetteDialogProps) {
 	{{
 		if len(props) == 0 {
-			panic("missing props for the EditCassetteDialog")
+			panic("EditCassetteDialog requires one argument of type EditCassetteDialogProps")
 		}
 		prop := props[0]
 
@@ -136,6 +136,7 @@ templ EditCassetteDialog(props ...EditCassetteDialogProps) {
 				@toolCode(prop.Code, prop.Error)
 				<br/>
 				@cassetteThickness(prop.MinThickness, prop.MaxThickness, prop.Error)
+				<br/>
 				@dialog.Footer() {
 					@button.Button(button.Props{
 						Type: button.TypeReset,

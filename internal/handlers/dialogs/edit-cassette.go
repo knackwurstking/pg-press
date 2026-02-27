@@ -38,8 +38,9 @@ func GetCassetteDialog(c echo.Context) *echo.HTTPError {
 				MinThickness: tool.MinThickness,
 				MaxThickness: tool.MaxThickness,
 			},
-			OOB:  true,
-			Open: true,
+			ToolID: tool.ID,
+			OOB:    true,
+			Open:   true,
 		})
 		if err := t.Render(c.Request().Context(), c.Response()); err != nil {
 			return errors.NewRenderError(err, "EditCassetteDialog")
@@ -123,6 +124,7 @@ func updateCassette(c echo.Context, toolID shared.EntityID) *echo.HTTPError {
 	if ierr != nil {
 		t := EditCassetteDialog(EditCassetteDialogProps{
 			CassetteFormData: formData,
+			ToolID:           toolID,
 			Open:             true,
 			OOB:              true,
 			Error:            ierr,
@@ -135,9 +137,10 @@ func updateCassette(c echo.Context, toolID shared.EntityID) *echo.HTTPError {
 
 	tool, merr := db.GetTool(shared.EntityID(toolID))
 	if merr != nil {
-		ierr := errors.NewInputError("id", fmt.Sprintf("Cassette with ID %d not found", toolID))
+		ierr := errors.NewInputError("form", fmt.Sprintf("Cassette with ID %d not found", toolID))
 		t := EditCassetteDialog(EditCassetteDialogProps{
 			CassetteFormData: formData,
+			ToolID:           toolID,
 			Open:             true,
 			OOB:              true,
 			Error:            ierr,
@@ -154,12 +157,13 @@ func updateCassette(c echo.Context, toolID shared.EntityID) *echo.HTTPError {
 	tool.MinThickness = formData.MinThickness
 	tool.MaxThickness = formData.MaxThickness
 
-	log.Debug("Updating cassette: %#v", tool.String())
+	log.Debug("Updating cassette: %#v", tool)
 
 	if merr = db.UpdateTool(tool); merr != nil {
 		ierr = errors.NewInputError("form", fmt.Sprintf("Failed to update cassette: %s", merr.Error()))
 		t := EditCassetteDialog(EditCassetteDialogProps{
 			CassetteFormData: formData,
+			ToolID:           toolID,
 			Open:             true,
 			OOB:              true,
 			Error:            ierr,
@@ -174,9 +178,8 @@ func updateCassette(c echo.Context, toolID shared.EntityID) *echo.HTTPError {
 	utils.SetHXRedirect(c, urlb.Tool(tool.ID))
 
 	t := EditCassetteDialog(EditCassetteDialogProps{
-		Open:  false,
-		OOB:   true,
-		Error: ierr,
+		Open: false,
+		OOB:  true,
 	})
 	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.NewRenderError(err, "EditCassetteDialog")

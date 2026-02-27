@@ -2,9 +2,9 @@ package dialogs
 
 import (
 	"fmt"
-	"net/http"
 
-	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/button"
+	"github.com/knackwurstking/pg-press/internal/components/dialog"
 	"github.com/knackwurstking/pg-press/internal/components/form"
 	"github.com/knackwurstking/pg-press/internal/components/input"
 	"github.com/knackwurstking/pg-press/internal/errors"
@@ -14,26 +14,145 @@ import (
 	"github.com/knackwurstking/ui/pkg/css"
 )
 
-// TODO: Migrate to templui with tailwindcss
-templ NewToolDialog() {
-	@components.FormDialog("tool-dialog", http.MethodPost, urlb.DialogEditTool(0)) {
-		{{ tool := &shared.Tool{} }}
-		@toolPosition(tool.Position)
-		@toolFormat(tool.Width, tool.Height, nil)
-		@toolType(tool.Type, nil)
-		@toolCode(tool.Code, nil)
-		@components.FormDialogFooter("Abbrechen", "Erstellen")
+type ToolFormData struct {
+	Position shared.Slot `form:"position"`
+	Width    int         `form:"width"`
+	Height   int         `form:"height"`
+	Type     string      `form:"type"`
+	Code     string      `form:"code"`
+}
+
+type NewToolDialogProps struct {
+	ToolFormData
+
+	Open, OOB bool
+
+	Error *errors.InputError
+}
+
+templ NewToolDialog(props ...NewToolDialogProps) {
+	{{
+		prop := NewToolDialogProps{}
+		if len(props) > 0 {
+			prop = props[0]
+		}
+
+		attr := templ.Attributes{}
+		if prop.OOB {
+			attr["hx-swap-oob"] = "true"
+		}
+	}}
+	@dialog.Dialog(dialog.Props{
+		ID:               NewToolDialogID,
+		DisableClickAway: true,
+		DisableESC:       true,
+		Open:             prop.Open,
+		Attributes:       attr,
+	}) {
+		@dialog.Content() {
+			@dialog.Header() {
+				Neues Werkzeug
+			}
+			if prop.Error != nil && prop.Error.InputID == "form" {
+				@dialog.Description() {
+					<span class="text-destructive">{ prop.Error.Error() }</span>
+					<br/>
+					Bitte korrigieren Sie die Fehler im Formular und versuchen Sie es erneut.
+				}
+			}
+			<form
+				hx-post={ urlb.DialogEditTool(0) }
+				hx-trigger="submit"
+				enctype="multipart/form-data"
+			>
+				{{ tool := &shared.Tool{} }}
+				@toolPosition(tool.Position)
+				<br/>
+				@toolFormat(tool.Width, tool.Height, prop.Error)
+				<br/>
+				@toolType(tool.Type, prop.Error)
+				<br/>
+				@toolCode(tool.Code, prop.Error)
+				<br/>
+				@dialog.Footer() {
+					@dialog.Close() {
+						@button.Button(button.Props{
+							Type: button.TypeSubmit,
+						}) {
+							Erstellen
+						}
+					}
+				}
+			</form>
+		}
 	}
 }
 
-// TODO: Migrate to templui with tailwindcss
-templ EditToolDialog(tool *shared.Tool) {
-	@components.FormDialog("tool-edit-dialog", http.MethodPut, urlb.DialogEditTool(tool.ID)) {
-		@toolPosition(tool.Position)
-		@toolFormat(tool.Width, tool.Height, nil)
-		@toolType(tool.Type, nil)
-		@toolCode(tool.Code, nil)
-		@components.FormDialogFooter("Abbrechen", "Aktualisieren")
+type EditToolDialogProps struct {
+	ToolFormData
+
+	ToolID shared.EntityID
+
+	Open, OOB bool
+
+	Error *errors.InputError
+}
+
+templ EditToolDialog(props ...EditToolDialogProps) {
+	{{
+		prop := EditToolDialogProps{}
+		if len(props) > 0 {
+			prop = props[0]
+		}
+
+		attr := templ.Attributes{}
+		if prop.OOB {
+			attr["hx-swap-oob"] = "true"
+		}
+	}}
+	@dialog.Dialog(dialog.Props{
+		ID:               EditToolDialogID,
+		DisableClickAway: true,
+		DisableESC:       true,
+		Open:             prop.Open,
+		Attributes:       attr,
+	}) {
+		@dialog.Content() {
+			@dialog.Header() {
+				Werkzeug Bearbeiten
+			}
+			if prop.Error != nil && prop.Error.InputID == "form" {
+				@dialog.Description() {
+					<span class="text-destructive">{ prop.Error.Error() }</span>
+					<br/>
+					Bitte korrigieren Sie die Fehler im Formular und versuchen Sie es erneut.
+				}
+			}
+			<form
+				hx-post={ urlb.DialogEditTool(prop.ToolID) }
+				hx-trigger="submit"
+				enctype="multipart/form-data"
+			>
+				{{ tool := &shared.Tool{} }}
+				@toolPosition(tool.Position)
+				<br/>
+				@toolFormat(tool.Width, tool.Height, prop.Error)
+				<br/>
+				@toolType(tool.Type, prop.Error)
+				<br/>
+				@toolCode(tool.Code, prop.Error)
+				<br/>
+				@dialog.Footer() {
+					@dialog.Close() {
+						@button.Button(button.Props{
+							Type: button.TypeSubmit,
+						}) {
+							Aktualisieren
+						}
+					}
+				}
+			</form>
+		}
 	}
 }
 

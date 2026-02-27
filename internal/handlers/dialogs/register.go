@@ -18,7 +18,6 @@ func Register(e *echo.Echo, path string) {
 		// Edit tool dialog
 		ui.NewEchoRoute(http.MethodGet, path+"/edit-tool", GetToolDialog),
 		ui.NewEchoRoute(http.MethodPost, path+"/edit-tool", PostTool),
-		ui.NewEchoRoute(http.MethodPut, path+"/edit-tool", PutTool),
 
 		// Edit cassette dialog
 		ui.NewEchoRoute(http.MethodGet, path+"/edit-cassette", GetCassetteDialog),

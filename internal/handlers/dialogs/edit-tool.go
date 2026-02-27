@@ -1,6 +1,9 @@
 package dialogs
 
 import (
+	"fmt"
+	"net/http"
+
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -22,8 +25,19 @@ func GetToolDialog(c echo.Context) *echo.HTTPError {
 	}
 
 	if tool != nil {
-		log.Debug("Rendering edit tool dialog: %#v", tool.String())
-		t := EditToolDialog(tool)
+		log.Debug("Rendering edit tool dialog: %#v", tool)
+		t := EditToolDialog(EditToolDialogProps{
+			ToolFormData: ToolFormData{
+				Type:     tool.Type,
+				Code:     tool.Code,
+				Position: tool.Position,
+				Width:    tool.Width,
+				Height:   tool.Height,
+			},
+			ToolID: tool.ID,
+			OOB:    true,
+			Open:   true,
+		})
 		err := t.Render(c.Request().Context(), c.Response())
 		if err != nil {
 			return errors.NewRenderError(err, "EditToolDialog")
@@ -32,7 +46,10 @@ func GetToolDialog(c echo.Context) *echo.HTTPError {
 	}
 
 	log.Debug("Rendering new tool dialog...")
-	t := NewToolDialog()
+	t := NewToolDialog(NewToolDialogProps{
+		Open: true,
+		OOB:  true,
+	})
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "NewToolDialog")
@@ -42,89 +59,159 @@ func GetToolDialog(c echo.Context) *echo.HTTPError {
 }
 
 func PostTool(c echo.Context) *echo.HTTPError {
-	tool, verr := parseToolForm(c, nil)
-	if verr != nil {
-		return verr.HTTPError().Echo()
+	id, _ := utils.GetQueryInt64(c, "id")
+	if id > 0 {
+		updateTool(c, shared.EntityID(id))
 	}
 
-	log.Debug("Creating new tool: %#v", tool.String())
+	formData, ierr := parseToolForm(c)
+	if ierr != nil {
+		t := NewToolDialog(NewToolDialogProps{
+			ToolFormData: formData,
+			OOB:          true,
+			Open:         true,
+			Error:        ierr,
+		})
+		if err := t.Render(c.Request().Context(), c.Response()); err != nil {
+			return errors.NewRenderError(err, "NewToolDialog")
+		}
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid form data: %v", ierr)
+	}
+	log.Debug("Creating new tool: %#v", formData)
 
-	merr := db.AddTool(tool)
-	if merr != nil {
+	tool := &shared.Tool{
+		Type:     formData.Type,
+		Code:     formData.Code,
+		Position: formData.Position,
+		Width:    formData.Width,
+		Height:   formData.Height,
+	}
+	if merr := db.AddTool(tool); merr != nil {
+		ierr = errors.NewInputError("form", fmt.Sprintf("Failed to create tool: %s", merr.Error()))
+		t := NewToolDialog(NewToolDialogProps{
+			ToolFormData: formData,
+			OOB:          true,
+			Open:         true,
+			Error:        ierr,
+		})
+		if err := t.Render(c.Request().Context(), c.Response()); err != nil {
+			return errors.NewRenderError(err, "NewToolDialog")
+		}
 		return merr.Echo()
 	}
 
 	utils.SetHXTrigger(c, "tools-tab")
 
+	// Close dialog
+	t := NewToolDialog(NewToolDialogProps{
+		OOB:  true,
+		Open: false,
+	})
+	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
+		return errors.NewRenderError(err, "NewToolDialog")
+	}
 	return nil
 }
 
-// PutTool handles updating an existing tool
-func PutTool(c echo.Context) *echo.HTTPError {
-	id, merr := utils.GetQueryInt64(c, "id")
+func updateTool(c echo.Context, toolID shared.EntityID) *echo.HTTPError {
+	formData, ierr := parseToolForm(c)
+	if ierr != nil {
+		t := EditToolDialog(EditToolDialogProps{
+			ToolFormData: formData,
+			ToolID:       toolID,
+			OOB:          true,
+			Open:         true,
+			Error:        ierr,
+		})
+		if err := t.Render(c.Request().Context(), c.Response()); err != nil {
+			return errors.NewRenderError(err, "EditToolDialog")
+		}
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid form data: %v", ierr)
+	}
+
+	tool, merr := db.GetTool(toolID)
 	if merr != nil {
+		t := EditToolDialog(EditToolDialogProps{
+			ToolFormData: formData,
+			ToolID:       toolID,
+			OOB:          true,
+			Open:         true,
+			Error:        errors.NewInputError("form", fmt.Sprintf("Failed to load tool: %s", merr.Error())),
+		})
+		if err := t.Render(c.Request().Context(), c.Response()); err != nil {
+			return errors.NewRenderError(err, "EditToolDialog")
+		}
 		return merr.Echo()
 	}
-	tool, merr := db.GetTool(shared.EntityID(id))
-	if merr != nil {
-		return merr.Echo()
-	}
+	tool.Type = formData.Type
+	tool.Code = formData.Code
+	tool.Position = formData.Position
+	tool.Width = formData.Width
+	tool.Height = formData.Height
 
-	tool, verr := parseToolForm(c, tool)
-	if verr != nil {
-		return verr.HTTPError().Echo()
-	}
+	log.Debug("Updating tool: %#v", tool)
 
-	log.Debug("Updating tool: %#v", tool.String())
-
-	merr = db.UpdateTool(tool)
-	if merr != nil {
+	if merr = db.UpdateTool(tool); merr != nil {
+		t := EditToolDialog(EditToolDialogProps{
+			ToolFormData: formData,
+			ToolID:       toolID,
+			OOB:          true,
+			Open:         true,
+			Error:        errors.NewInputError("form", fmt.Sprintf("Failed to update tool: %s", merr.Error())),
+		})
+		if err := t.Render(c.Request().Context(), c.Response()); err != nil {
+			return errors.NewRenderError(err, "EditToolDialog")
+		}
 		return merr.Echo()
 	}
 
 	// Set HX headers
 	utils.SetHXRedirect(c, urlb.Tool(tool.ID))
 
+	// Close dialog
+	t := EditToolDialog(EditToolDialogProps{
+		OOB:  true,
+		Open: false,
+	})
+	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
+		return errors.NewRenderError(err, "EditToolDialog")
+	}
 	return nil
 }
 
-func parseToolForm(c echo.Context, tool *shared.Tool) (*shared.Tool, *errors.ValidationError) {
-	if tool == nil {
-		tool = &shared.Tool{}
-	}
-
+func parseToolForm(c echo.Context) (data ToolFormData, ierr *errors.InputError) {
 	// Sanitize inputs by trimming whitespace
-	tool.Type = utils.SanitizeText(c.FormValue("type"))
-	tool.Code = utils.SanitizeText(c.FormValue("code"))
+	data.Type = utils.SanitizeText(c.FormValue("type"))
+	data.Code = utils.SanitizeText(c.FormValue("code"))
 
 	// Need to convert the vPosition to an integer
 	position, err := utils.SanitizeInt(c.FormValue("position"))
 	if err != nil {
-		return nil, errors.NewValidationError("invalid position: %s", c.FormValue("position"))
+		ierr = errors.NewInputError("position", fmt.Sprintf("Invalid position: %s", c.FormValue("position")))
+		return
 	}
 	switch v := shared.Slot(position); v {
 	case shared.SlotUpper, shared.SlotLower:
-		tool.Position = shared.Slot(position)
+		data.Position = shared.Slot(position)
 	default:
-		return nil, errors.NewValidationError("invalid position: %v", v)
+		ierr = errors.NewInputError("position", fmt.Sprintf("Invalid position: %s", c.FormValue("position")))
+		return
 	}
 
 	// Convert width and height to integers with sanitization
-	tool.Width, err = utils.SanitizeInt(c.FormValue("width"))
+	data.Width, err = utils.SanitizeInt(c.FormValue("width"))
 	if err != nil {
-		return nil, errors.NewValidationError("invalid width: %s", c.FormValue("width"))
+		ierr = errors.NewInputError("width", fmt.Sprintf("Invalid width: %s", c.FormValue("width")))
+		return
 	}
 
-	tool.Height, err = utils.SanitizeInt(c.FormValue("height"))
+	data.Height, err = utils.SanitizeInt(c.FormValue("height"))
 	if err != nil {
-		return nil, errors.NewValidationError("invalid height: %s", c.FormValue("height"))
+		ierr = errors.NewInputError("height", fmt.Sprintf("Invalid height: %s", c.FormValue("height")))
+		return
 	}
 
-	log.Debug("Tool dialog form values: tool=%v", tool)
+	log.Debug("Tool dialog form values: %#v", data)
 
-	if verr := tool.Validate(); verr != nil {
-		return tool, verr
-	}
-
-	return tool, nil
+	return
 }
