@@ -31,15 +31,18 @@ templ NewCassetteDialog(props ...CassetteDialogProps) {
 		if len(props) > 0 {
 			prop = props[0]
 		}
+
+		attr := templ.Attributes{}
+		if prop.OOB {
+			attr["hx-swap-oob"] = "true"
+		}
 	}}
 	@dialog.Dialog(dialog.Props{
 		ID:               DialogIDNewCassette,
 		DisableClickAway: true,
 		DisableESC:       true,
 		Open:             prop.Open,
-		Attributes: templ.Attributes{
-			"hx-swap-oob": prop.OOB,
-		},
+		Attributes:       attr,
 	}) {
 		@dialog.Content() {
 			@dialog.Header() {
@@ -80,14 +83,18 @@ templ NewCassetteDialog(props ...CassetteDialogProps) {
 
 // TODO: Update props, like the new dialog
 templ EditCassetteDialog(oob bool, cassette *shared.Tool, ierr *errors.InputError) {
+	{{
+		attr := templ.Attributes{}
+		if oob {
+			attr["hx-swap-oob"] = "true"
+		}
+	}}
 	@dialog.Dialog(dialog.Props{
 		ID:               DialogIDEditCassette,
 		DisableClickAway: true,
 		DisableESC:       true,
 		Open:             true,
-		Attributes: templ.Attributes{
-			"hx-swap-oob": oob,
-		},
+		Attributes:       attr,
 	}) {
 		@dialog.Content() {
 			@dialog.Header() {
