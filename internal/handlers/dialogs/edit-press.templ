@@ -5,16 +5,80 @@ import (
 	"slices"
 
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/button"
+	"github.com/knackwurstking/pg-press/internal/components/dialog"
+	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/knackwurstking/ui/pkg/css"
 )
 
-templ NewPressDialog() {
-	@components.FormDialog("notes-dialog", http.MethodPost, urlb.DialogEditPressPost(-1)) {
-		@PressContent(nil)
-		@components.FormDialogFooter("Abbrechen", "Erstellen")
+type PressFormData struct {
+	Number       int    `form:"press_number"`
+	Type         string `form:"machine_type"`
+	Code         string `form:"code"`
+	CyclesOffset int    `form:"cycles_offset"`
+}
+
+type NewPressDialogProps struct {
+	PressFormData
+
+	Open, OOB bool
+
+	Error *errors.InputError
+}
+
+templ NewPressDialog(props ...NewPressDialogProps) {
+	{{
+		prop := NewPressDialogProps{}
+		if len(props) > 0 {
+			prop = props[0]
+		}
+
+		attr := templ.Attributes{}
+		if prop.OOB {
+			attr["hx-swap-oob"] = "true"
+		}
+	}}
+	@dialog.Dialog(dialog.Props{
+		ID:               NewPressDialogID,
+		DisableClickAway: true,
+		DisableESC:       true,
+		Open:             prop.Open,
+		Attributes:       attr,
+	}) {
+		@dialog.Content() {
+			@dialog.Header() {
+				Neue Presse
+			}
+			@dialogFormError(prop.Error)
+			<form
+				hx-post={ urlb.DialogEditPressPost(-1) }
+				hx-trigger="submit"
+				enctype="multipart/form-data"
+			>
+				// TODO: PressContent... Also pass `prop.Error`
+				@PressContent(nil)
+				@dialog.Footer() {
+					@button.Button(button.Props{
+						Type: button.TypeSubmit,
+					}) {
+						Erstellen
+					}
+				}
+			</form>
+		}
 	}
+}
+
+type EditPressDialogProps struct {
+	PressFormData
+
+	PressID *shared.EntityID
+
+	Open, OOB bool
+
+	Error *errors.InputError
 }
 
 templ EditPressDialog(press *shared.Press) {
@@ -34,6 +98,7 @@ templ EditPressDialog(press *shared.Press) {
 	}
 }
 
+// TODO: ...
 templ PressContent(press *shared.Press) {
 	{{
 		if press == nil {

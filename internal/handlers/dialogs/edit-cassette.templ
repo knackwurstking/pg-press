@@ -52,13 +52,7 @@ templ NewCassetteDialog(props ...NewCassetteDialogProps) {
 			@dialog.Header() {
 				Neue Kassette
 			}
-			if prop.Error != nil && prop.Error.InputID == "form" {
-				@dialog.Description() {
-					<span class="text-destructive">{ prop.Error.Error() }</span>
-					<br/>
-					Bitte korrigieren Sie die Fehler im Formular und versuchen Sie es erneut.
-				}
-			}
+			@dialogFormError(prop.Error)
 			<form
 				hx-post={ urlb.DialogEditCassette(0) }
 				hx-trigger="submit"
@@ -117,13 +111,7 @@ templ EditCassetteDialog(props ...EditCassetteDialogProps) {
 			@dialog.Header() {
 				Kassette Bearbeiten
 			}
-			if prop.Error != nil && prop.Error.InputID == "form" {
-				@dialog.Description() {
-					<span class="text-destructive">{ prop.Error.Error() }</span>
-					<br/>
-					Bitte korrigieren Sie die Fehler im Formular und versuchen Sie es erneut.
-				}
-			}
+			@dialogFormError(prop.Error)
 			<form
 				hx-post={ urlb.DialogEditCassette(prop.ToolID) }
 				hx-trigger="submit"

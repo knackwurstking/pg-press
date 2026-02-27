@@ -52,13 +52,7 @@ templ NewToolDialog(props ...NewToolDialogProps) {
 			@dialog.Header() {
 				Neues Werkzeug
 			}
-			if prop.Error != nil && prop.Error.InputID == "form" {
-				@dialog.Description() {
-					<span class="text-destructive">{ prop.Error.Error() }</span>
-					<br/>
-					Bitte korrigieren Sie die Fehler im Formular und versuchen Sie es erneut.
-				}
-			}
+			@dialogFormError(prop.Error)
 			<form
 				hx-post={ urlb.DialogEditTool(0) }
 				hx-trigger="submit"
@@ -118,13 +112,7 @@ templ EditToolDialog(props ...EditToolDialogProps) {
 			@dialog.Header() {
 				Werkzeug Bearbeiten
 			}
-			if prop.Error != nil && prop.Error.InputID == "form" {
-				@dialog.Description() {
-					<span class="text-destructive">{ prop.Error.Error() }</span>
-					<br/>
-					Bitte korrigieren Sie die Fehler im Formular und versuchen Sie es erneut.
-				}
-			}
+			@dialogFormError(prop.Error)
 			<form
 				hx-post={ urlb.DialogEditTool(prop.ToolID) }
 				hx-trigger="submit"

@@ -1,0 +1,27 @@
+package dialogs
+
+import (
+	"github.com/knackwurstking/pg-press/internal/components/dialog"
+	"github.com/knackwurstking/pg-press/internal/errors"
+)
+
+// Dialog IDs used for dialog triggers `dialog.Trigger`
+const (
+	NewCassetteDialogID  = "cassette-dialog"
+	EditCassetteDialogID = "cassette-edit-dialog"
+
+	NewToolDialogID  = "tool-dialog"
+	EditToolDialogID = "tool-edit-dialog"
+
+	NewPressDialogID = "press-dialog"
+)
+
+templ dialogFormError(err *errors.InputError) {
+	if err != nil && err.InputID == "form" {
+		@dialog.Description() {
+			<span class="text-destructive">{ err.Error() }</span>
+			<br/>
+			Bitte korrigieren Sie die Fehler im Formular und versuchen Sie es erneut.
+		}
+	}
+}
