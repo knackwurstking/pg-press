@@ -14,23 +14,25 @@ import (
 	"github.com/knackwurstking/ui/pkg/css"
 )
 
+// TODO: Migrate to templui with tailwindcss
 templ NewToolDialog() {
 	@components.FormDialog("tool-dialog", http.MethodPost, urlb.DialogEditTool(0)) {
 		{{ tool := &shared.Tool{} }}
 		@toolPosition(tool.Position)
 		@toolFormat(tool.Width, tool.Height, nil)
-		@toolType(tool.Type)
-		@toolCode(tool.Code)
+		@toolType(tool.Type, nil)
+		@toolCode(tool.Code, nil)
 		@components.FormDialogFooter("Abbrechen", "Erstellen")
 	}
 }
 
+// TODO: Migrate to templui with tailwindcss
 templ EditToolDialog(tool *shared.Tool) {
 	@components.FormDialog("tool-edit-dialog", http.MethodPut, urlb.DialogEditTool(tool.ID)) {
 		@toolPosition(tool.Position)
 		@toolFormat(tool.Width, tool.Height, nil)
-		@toolType(tool.Type)
-		@toolCode(tool.Code)
+		@toolType(tool.Type, nil)
+		@toolCode(tool.Code, nil)
 		@components.FormDialogFooter("Abbrechen", "Aktualisieren")
 	}
 }
@@ -126,37 +128,53 @@ templ toolFormat(inputWidth int, inputHeight int, ierr *errors.InputError) {
 	}
 }
 
-// TODO: Migrate to templui with tailwindcss
-templ toolType(inputType string) {
-	<div
-		class={ css.Flex, css.FlexCol, css.ItemsStart, css.WFull }
-	>
-		<label for="type">Typ</label>
-		<input
-			type="text"
-			id="type"
-			class={ css.WFull }
-			name="type"
-			placeholder="z.B. MASS, FC, GTC"
-			value={ inputType }
-			required
-		/>
-	</div>
+templ toolType(inputType string, ierr *errors.InputError) {
+	@form.Item() {
+		@form.Label() {
+			Type
+		}
+		@input.Input(input.Props{
+			Type:        "text",
+			ID:          "type",
+			Name:        "type",
+			Placeholder: "z.B. MASS, FC, GTC",
+			Value:       inputType,
+			Attributes: templ.Attributes{
+				"required": true,
+			},
+			HasError: ierr != nil && ierr.InputID == "type",
+		})
+		if ierr != nil && ierr.InputID == "type" {
+			@form.Message(form.MessageProps{
+				Variant: form.MessageVariantError,
+			}) {
+				{ ierr.Error() }
+			}
+		}
+	}
 }
 
-// TODO: Migrate to templui with tailwindcss
-templ toolCode(inputCode string) {
-	<div
-		class={ css.Flex, css.FlexCol, css.ItemsStart, css.WFull }
-	>
-		<label for="code">Code</label>
-		<input
-			type="text"
-			id="code"
-			class={ css.WFull }
-			name="code"
-			placeholder="z.B. 3573"
-			value={ inputCode }
-		/>
-	</div>
+templ toolCode(inputCode string, ierr *errors.InputError) {
+	@form.Item() {
+		@form.Label() {
+			Code
+			<span class="text-sm text-gray-500 ml-1">(optional)</span>
+		}
+		@input.Input(input.Props{
+			Class:       "w-full",
+			Type:        "text",
+			ID:          "code",
+			Name:        "code",
+			Placeholder: "z.B. 3573",
+			Value:       inputCode,
+			HasError:    ierr != nil && ierr.InputID == "code",
+		})
+		if ierr != nil && ierr.InputID == "code" {
+			@form.Message(form.MessageProps{
+				Variant: form.MessageVariantError,
+			}) {
+				{ ierr.Error() }
+			}
+		}
+	}
 }

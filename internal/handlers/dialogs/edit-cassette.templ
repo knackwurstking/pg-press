@@ -60,9 +60,9 @@ templ NewCassetteDialog(props ...CassetteDialogProps) {
 				{{ cassette := &shared.Tool{} }}
 				@toolFormat(cassette.Width, cassette.Height, prop.Error)
 				<br/>
-				@toolType(cassette.Type)
+				@toolType(cassette.Type, prop.Error)
 				<br/>
-				@toolCode(cassette.Code)
+				@toolCode(cassette.Code, prop.Error)
 				<br/>
 				@cassetteThickness(cassette.MinThickness, cassette.MaxThickness, prop.Error)
 				<br/>
@@ -78,6 +78,7 @@ templ NewCassetteDialog(props ...CassetteDialogProps) {
 	}
 }
 
+// TODO: Update props, like the new dialog
 templ EditCassetteDialog(oob bool, cassette *shared.Tool, ierr *errors.InputError) {
 	@dialog.Dialog(dialog.Props{
 		ID:               DialogIDEditCassette,
@@ -99,9 +100,9 @@ templ EditCassetteDialog(oob bool, cassette *shared.Tool, ierr *errors.InputErro
 			>
 				@toolFormat(cassette.Width, cassette.Height, ierr)
 				<br/>
-				@toolType(cassette.Type)
+				@toolType(cassette.Type, ierr)
 				<br/>
-				@toolCode(cassette.Code)
+				@toolCode(cassette.Code, ierr)
 				<br/>
 				@cassetteThickness(cassette.MinThickness, cassette.MaxThickness, ierr)
 				@dialog.Footer() {
