@@ -1,14 +1,10 @@
 package components
 
 import (
-	"github.com/knackwurstking/pg-press/internal/components/dialog"
-	"github.com/knackwurstking/pg-press/internal/components/input"
-	"github.com/knackwurstking/pg-press/internal/components/label"
-	"github.com/knackwurstking/pg-press/internal/components/popover"
+	"fmt"
 	"github.com/knackwurstking/pg-press/internal/env"
+	"github.com/knackwurstking/pg-press/internal/utils"
 
-	"github.com/knackwurstking/pg-press/internal/components/selectbox"
-	"github.com/knackwurstking/pg-press/internal/components/tabs"
 	"github.com/knackwurstking/ui/pkg/ui"
 )
 
@@ -64,12 +60,13 @@ templ links() {
 templ scripts() {
 	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/htmx-v2.0.7.min.js") }></script>
 	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/layout.js") }></script>
-	@dialog.Script()
-	@input.Script()
-	@label.Script()
-	@tabs.Script()
-	@selectbox.Script()
-	@popover.Script()
+	// Import component scripts
+	<script defer nonce={ templ.GetNonce(ctx) } src={ utils.ScriptURL(fmt.Sprintf("%s/js/dialog.min.js", env.ServerPathPrefix)) }></script>
+	<script defer nonce={ templ.GetNonce(ctx) } src={ utils.ScriptURL(fmt.Sprintf("%s/js/input.min.js", env.ServerPathPrefix)) }></script>
+	<script defer nonce={ templ.GetNonce(ctx) } src={ utils.ScriptURL(fmt.Sprintf("%s/js/label.min.js", env.ServerPathPrefix)) }></script>
+	<script defer nonce={ templ.GetNonce(ctx) } src={ utils.ScriptURL(fmt.Sprintf("%s/js/tabs.min.js", env.ServerPathPrefix)) }></script>
+	<script defer nonce={ templ.GetNonce(ctx) } src={ utils.ScriptURL(fmt.Sprintf("%s/js/selectbox.min.js", env.ServerPathPrefix)) }></script>
+	<script defer nonce={ templ.GetNonce(ctx) } src={ utils.ScriptURL(fmt.Sprintf("%s/js/popover.min.js", env.ServerPathPrefix)) }></script>
 }
 
 templ styles() {
