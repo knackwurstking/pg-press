@@ -2,7 +2,6 @@ package dialogs
 
 import (
 	"fmt"
-	"net/http"
 
 	"github.com/knackwurstking/pg-press/internal/components/button"
 	"github.com/knackwurstking/pg-press/internal/components/dialog"
@@ -89,6 +88,7 @@ templ NewCassetteDialog(props ...NewCassetteDialogProps) {
 type EditCassetteDialogProps struct {
 	CassetteFormData
 
+	ToolID    shared.EntityID
 	Open, OOB bool
 
 	Error *errors.InputError
@@ -96,10 +96,10 @@ type EditCassetteDialogProps struct {
 
 templ EditCassetteDialog(props ...EditCassetteDialogProps) {
 	{{
-		prop := EditCassetteDialogProps{}
-		if len(props) > 0 {
-			prop = props[0]
+		if len(props) == 0 {
+			panic("missing props for the EditCassetteDialog")
 		}
+		prop := props[0]
 
 		attr := templ.Attributes{}
 		if prop.OOB {
@@ -110,16 +110,23 @@ templ EditCassetteDialog(props ...EditCassetteDialogProps) {
 		ID:               EditCassetteDialogID,
 		DisableClickAway: true,
 		DisableESC:       true,
-		Open:             true,
+		Open:             prop.Open,
 		Attributes:       attr,
 	}) {
 		@dialog.Content() {
 			@dialog.Header() {
 				Kassette Bearbeiten
 			}
+			if prop.Error != nil && prop.Error.InputID == "form" {
+				@dialog.Description() {
+					<span class="text-destructive">{ prop.Error.Error() }</span>
+					<br/>
+					Bitte korrigieren Sie die Fehler im Formular und versuchen Sie es erneut.
+				}
+			}
 			<form
-				method={ http.MethodPost }
-				action={ urlb.DialogEditCassette(0) }
+				hx-post={ urlb.DialogEditCassette(prop.ToolID) }
+				hx-trigger="submit"
 				enctype="multipart/form-data"
 			>
 				@toolFormat(prop.Width, prop.Height, prop.Error)

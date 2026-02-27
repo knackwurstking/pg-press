@@ -108,10 +108,9 @@ func PostCassette(c echo.Context) *echo.HTTPError {
 	utils.SetHXTrigger(c, "tools-tab")
 
 	t := NewCassetteDialog(NewCassetteDialogProps{
-		CassetteFormData: formData,
-		Open:             false,
-		OOB:              true,
-		Error:            ierr,
+		Open:  false,
+		OOB:   true,
+		Error: ierr,
 	})
 	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.NewRenderError(err, "NewCassetteDialog")
@@ -174,6 +173,14 @@ func updateCassette(c echo.Context, toolID shared.EntityID) *echo.HTTPError {
 	// Set HX headers
 	utils.SetHXRedirect(c, urlb.Tool(tool.ID))
 
+	t := EditCassetteDialog(EditCassetteDialogProps{
+		Open:  false,
+		OOB:   true,
+		Error: ierr,
+	})
+	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
+		return errors.NewRenderError(err, "EditCassetteDialog")
+	}
 	return nil
 }
 
