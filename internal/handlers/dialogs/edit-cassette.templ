@@ -13,7 +13,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
-type CassetteFormData struct {
+type CassetteDialogProps struct {
 	Width, Height int     `form:"width" form:"height"`
 	Type          string  `form:"type"`
 	Code          string  `form:"code"`
@@ -25,9 +25,9 @@ type CassetteFormData struct {
 	Error *errors.InputError
 }
 
-templ NewCassetteDialog(props ...CassetteFormData) {
+templ NewCassetteDialog(props ...CassetteDialogProps) {
 	{{
-		prop := CassetteFormData{}
+		prop := CassetteDialogProps{}
 		if len(props) > 0 {
 			prop = props[0]
 		}

@@ -37,7 +37,10 @@ func GetCassetteDialog(c echo.Context) *echo.HTTPError {
 	}
 
 	log.Debug("Rendering new cassette dialog...")
-	t := NewCassetteDialog(true, true, nil)
+	t := NewCassetteDialog(CassetteDialogProps{
+		OOB:  true,
+		Open: true,
+	})
 	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.NewRenderError(err, "NewCassetteDialog")
 	}
@@ -53,7 +56,11 @@ func PostCassette(c echo.Context) *echo.HTTPError {
 
 	tool, ierr := parseCassetteForm(c, nil)
 	if ierr != nil {
-		t := NewCassetteDialog(true, true, ierr)
+		t := NewCassetteDialog(CassetteDialogProps{
+			Open:  true,
+			OOB:   true,
+			Error: ierr,
+		})
 		if err := t.Render(c.Request().Context(), c.Response()); err != nil {
 			return errors.NewRenderError(err, "NewCassetteDialog")
 		}
@@ -65,7 +72,11 @@ func PostCassette(c echo.Context) *echo.HTTPError {
 	merr := db.AddTool(tool)
 	if merr != nil {
 		ierr = errors.NewInputError("form", fmt.Sprintf("Failed to create cassette: %s", merr.Error()))
-		t := NewCassetteDialog(true, true, ierr)
+		t := NewCassetteDialog(CassetteDialogProps{
+			Open:  true,
+			OOB:   true,
+			Error: ierr,
+		})
 		if err := t.Render(c.Request().Context(), c.Response()); err != nil {
 			return errors.NewRenderError(err, "NewCassetteDialog")
 		}
@@ -74,7 +85,11 @@ func PostCassette(c echo.Context) *echo.HTTPError {
 
 	utils.SetHXTrigger(c, "tools-tab")
 
-	t := NewCassetteDialog(false, true, ierr) // TODO: Close...
+	t := NewCassetteDialog(CassetteDialogProps{
+		Open:  false,
+		OOB:   true,
+		Error: ierr,
+	})
 	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.NewRenderError(err, "NewCassetteDialog")
 	}

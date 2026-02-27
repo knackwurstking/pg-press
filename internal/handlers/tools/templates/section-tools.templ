@@ -70,7 +70,7 @@ templ SectionTools(p SectionToolsProps) {
 	<div id="tools-container" class="flex flex-col gap-4">
 		@ToolsList(p)
 	</div>
-	@dialogs.NewCassetteDialog(false, false, nil)
+	@dialogs.NewCassetteDialog()
 	<script name="tools-filter">
 		function filterToolsList(event, skipHistory) {
 			var target = event
