@@ -27,12 +27,14 @@ templ Markdown(props ...Props) {
 			prop.Attributes = templ.Attributes{}
 		}
 
-		prop.Attributes["data-markdown-content"] = prop.Content
+		if prop.UseMarkdown {
+			prop.Attributes["data-markdown-content"] = prop.Content
 
-		if c, ok := prop.Attributes["class"]; ok {
-			prop.Attributes["class"] = fmt.Sprintf("markdown-content %v", c)
-		} else {
-			prop.Attributes["class"] = "markdown-content"
+			if c, ok := prop.Attributes["class"]; ok {
+				prop.Attributes["class"] = fmt.Sprintf("markdown-content %v", c)
+			} else {
+				prop.Attributes["class"] = "markdown-content"
+			}
 		}
 	}}
 	if prop.UseMarkdown {
@@ -40,7 +42,7 @@ templ Markdown(props ...Props) {
 			@components.Spinner()
 		</div>
 	} else {
-		<pre>{ prop.Content }</pre>
+		<pre { prop.Attributes... }>{ prop.Content }</pre>
 	}
 }
 
