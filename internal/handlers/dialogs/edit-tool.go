@@ -61,7 +61,7 @@ func GetToolDialog(c echo.Context) *echo.HTTPError {
 func PostTool(c echo.Context) *echo.HTTPError {
 	id, _ := utils.GetQueryInt64(c, "id")
 	if id > 0 {
-		updateTool(c, shared.EntityID(id))
+		return updateTool(c, shared.EntityID(id))
 	}
 
 	formData, ierr := parseToolForm(c)

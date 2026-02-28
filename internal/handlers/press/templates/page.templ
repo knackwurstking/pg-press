@@ -55,7 +55,7 @@ templ sectionActions(p PageProps) {
 	@components.ActionBar() {
 		<button
 			class={ css.Secondary }
-			hx-get={ urlb.DialogEditPressGet(p.Press.ID) }
+			hx-get={ urlb.DialogEditPress(p.Press.ID) }
 			hx-trigger="click"
 			hx-target="body"
 			hx-swap="beforeend"

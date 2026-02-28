@@ -10,7 +10,7 @@ import (
 )
 
 func GetEditPress(c echo.Context) *echo.HTTPError {
-	id, merr := utils.GetQueryInt8(c, "id")
+	id, merr := utils.GetQueryInt64(c, "id")
 	if merr != nil && !merr.IsNotFoundError() {
 		return merr.Echo()
 	}
@@ -21,7 +21,17 @@ func GetEditPress(c echo.Context) *echo.HTTPError {
 			return merr.Echo()
 		}
 
-		t := EditPressDialog(press)
+		t := EditPressDialog(EditPressDialogProps{
+			PressFormData: PressFormData{
+				Number:       press.Number,
+				Type:         press.Type,
+				Code:         press.Code,
+				CyclesOffset: press.CyclesOffset,
+			},
+			PressID: press.ID,
+			OOB:     true,
+			Open:    true,
+		})
 		err := t.Render(c.Request().Context(), c.Response())
 		if err != nil {
 			return errors.NewRenderError(err, "EditPressDialog")
@@ -29,7 +39,10 @@ func GetEditPress(c echo.Context) *echo.HTTPError {
 		return nil
 	}
 
-	t := NewPressDialog()
+	t := NewPressDialog(NewPressDialogProps{
+		OOB:  true,
+		Open: true,
+	})
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "NewPressDialog")
@@ -37,7 +50,14 @@ func GetEditPress(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
+// TODO: Re-Render dialog with error or close at the end...
 func PostPress(c echo.Context) *echo.HTTPError {
+	// Get press number from query first
+	id, _ := utils.GetQueryInt64(c, "id")
+	if id > 0 {
+		return updatePress(c, shared.EntityID(id))
+	}
+
 	data, verr := parseEditPressForm(c)
 	if verr != nil {
 		return verr.HTTPError().Echo()
@@ -58,7 +78,8 @@ func PostPress(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func PutPress(c echo.Context) *echo.HTTPError {
+// TODO: Re-Render dialog with error or close at the end
+func updatePress(c echo.Context, id shared.EntityID) *echo.HTTPError {
 	data, verr := parseEditPressForm(c)
 	if verr != nil {
 		return verr.HTTPError().Echo()
@@ -96,12 +117,6 @@ type editPressForm struct {
 }
 
 func parseEditPressForm(c echo.Context) (*editPressForm, *errors.ValidationError) {
-	// Press ID
-	vPressID, err := utils.SanitizeInt64(c.FormValue("press_id"))
-	if err != nil {
-		return nil, errors.NewValidationError("invalid press ID: %v", err)
-	}
-
 	// Press Number
 	vPressNumber, err := utils.SanitizeInt8(c.FormValue("press_number"))
 	if err != nil {

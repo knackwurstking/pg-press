@@ -1,23 +1,23 @@
 package dialogs
 
 import (
-	"net/http"
-	"slices"
+	"fmt"
 
-	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/components/button"
 	"github.com/knackwurstking/pg-press/internal/components/dialog"
+	"github.com/knackwurstking/pg-press/internal/components/form"
+	"github.com/knackwurstking/pg-press/internal/components/input"
+	"github.com/knackwurstking/pg-press/internal/components/selectbox"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"github.com/knackwurstking/ui/pkg/css"
 )
 
 type PressFormData struct {
-	Number       int    `form:"press_number"`
-	Type         string `form:"machine_type"`
-	Code         string `form:"code"`
-	CyclesOffset int    `form:"cycles_offset"`
+	Number       shared.PressNumber `form:"press_number"`
+	Type         shared.MachineType `form:"machine_type"`
+	Code         string             `form:"code"`
+	CyclesOffset int64              `form:"cycles_offset"`
 }
 
 type NewPressDialogProps struct {
@@ -53,12 +53,11 @@ templ NewPressDialog(props ...NewPressDialogProps) {
 			}
 			@dialogFormError(prop.Error)
 			<form
-				hx-post={ urlb.DialogEditPressPost(-1) }
+				hx-post={ urlb.DialogEditPress(-1) }
 				hx-trigger="submit"
 				enctype="multipart/form-data"
 			>
-				// TODO: PressContent... Also pass `prop.Error`
-				@PressContent(nil)
+				@PressContent(prop.PressFormData, prop.Error)
 				@dialog.Footer() {
 					@button.Button(button.Props{
 						Type: button.TypeSubmit,
@@ -74,103 +73,175 @@ templ NewPressDialog(props ...NewPressDialogProps) {
 type EditPressDialogProps struct {
 	PressFormData
 
-	PressID *shared.EntityID
+	PressID shared.EntityID
 
 	Open, OOB bool
 
 	Error *errors.InputError
 }
 
-templ EditPressDialog(press *shared.Press) {
-	@components.FormDialog("notes-edit-dialog", http.MethodPut, urlb.DialogEditPressPut(press.ID)) {
-		<input type="hidden" name="press_id" value={ press.ID }/>
-		@PressContent(press)
-		@components.FormDialogFooter("Abbrechen", "Aktualisieren") {
-			<button
-				class={ css.Destructive }
-				hx-delete={ urlb.PressDelete(press.ID) }
-				hx-trigger="click"
-				hx-confirm="Möchten Sie diese Presse wirklich entfernen? Diese Aktion kann nicht rückgängig gemacht werden."
+templ EditPressDialog(props ...EditPressDialogProps) {
+	{{
+		prop := EditPressDialogProps{}
+		if len(props) > 0 {
+			prop = props[0]
+		}
+
+		attr := templ.Attributes{}
+		if prop.OOB {
+			attr["hx-swap-oob"] = "true"
+		}
+	}}
+	@dialog.Dialog(dialog.Props{
+		ID:               EditPressDialogID,
+		DisableClickAway: true,
+		DisableESC:       true,
+		Open:             prop.Open,
+		Attributes:       attr,
+	}) {
+		@dialog.Content() {
+			@dialog.Header() {
+				Presse Bearbeiten
+			}
+			@dialogFormError(prop.Error)
+			<form
+				hx-post={ urlb.DialogEditPress(prop.PressID) }
+				hx-trigger="submit"
+				enctype="multipart/form-data"
 			>
-				Entfernen
-			</button>
+				@PressContent(prop.PressFormData, prop.Error)
+				@dialog.Footer() {
+					@button.Button(button.Props{
+						Variant: button.VariantDestructive,
+						Attributes: templ.Attributes{
+							"hx-delete":  urlb.PressDelete(prop.PressID),
+							"hx-trigger": "click",
+							"hx-confirm": "Möchten Sie diese Presse wirklich entfernen? Diese Aktion kann nicht rückgängig gemacht werden.",
+						},
+					}) {
+						Entfernen
+					}
+					@button.Button(button.Props{
+						Type: button.TypeSubmit,
+					}) {
+						Aktualisieren
+					}
+				}
+			</form>
 		}
 	}
 }
 
-// TODO: ...
-templ PressContent(press *shared.Press) {
-	{{
-		if press == nil {
-			press = &shared.Press{}
+templ PressContent(props PressFormData, ierr *errors.InputError) {
+	@form.ItemFlex() {
+		@form.Label(form.LabelProps{
+			For: "press_number",
+		}) {
+			Number
 		}
-	}}
-	// Press Number and Machine Type
-	<span class={ css.Flex, css.FlexRow, css.Gap, css.JustifyBetween }>
-		<label
-			for="press_number"
-			class={ css.Flex, css.FlexCol, css.Gap }
-		>
-			<span>Number</span>
-			<input
-				style="max-width: 8ch;"
-				type="number"
-				name="press_number"
-				step="1"
-				value={ press.Number }
-				required
-			/>
-		</label>
-		<label
-			for="machine_type"
-			class={ css.Flex, css.FlexCol, css.Gap }
-		>
-			<span>Typ</span>
-			<select id="machine_type" name="machine_type" required>
-				<option
-					vlaue=""
-					disabled
-					selected?={ !slices.Contains(
-						[]shared.MachineType{"SACMI", "SITI"}, press.Type,
-					) }
-				>
-					Bitte Wählen
-				</option>
-				<option value="SACMI" selected?={ press.Type == "SACMI" }>
-					SACMI
-				</option>
-				<option value="SITI" selected?={ press.Type == "SITI" }>
-					SITI
-				</option>
-			</select>
-		</label>
-	</span>
-	// Press Code
-	<label
-		for="code"
-		class={ css.Flex, css.FlexCol, css.Gap }
-	>
-		<span>Code</span>
-		<input
-			id="code"
-			name="code"
-			type="text"
-			value={ press.Code }
-			required
-		/>
-	</label>
-	// Cycles Offset
-	<label
-		for="cycles_offset"
-		class={ css.Flex, css.FlexCol, css.Gap }
-	>
-		<span>Zyklen Offset</span>
-		<input
-			id="cycles_offset"
-			name="cycles_offset"
-			type="number"
-			step="1"
-			value={ press.CyclesOffset }
-		/>
-	</label>
+		@input.Input(input.Props{
+			ID:   "press_number",
+			Name: "press_number",
+			Type: input.TypeNumber,
+			Attributes: templ.Attributes{
+				"step":     "1",
+				"min":      "0",
+				"max":      "100",
+				"required": "true",
+			},
+			Value:    fmt.Sprintf("%d", props.Number),
+			HasError: ierr != nil && ierr.InputID == "press_number",
+		})
+		@form.Label(form.LabelProps{
+			For: "machine_type",
+		}) {
+			Type
+		}
+		@selectbox.SelectBox() {
+			@selectbox.Trigger(selectbox.TriggerProps{
+				ID:   "machine_type",
+				Name: "machine_type",
+				Attributes: templ.Attributes{
+					"required": true,
+				},
+				HasError: ierr != nil && ierr.InputID == "machine_type",
+			}) {
+				@selectbox.Value(selectbox.ValueProps{
+					Placeholder: "Bitte Wählen",
+				})
+			}
+			@selectbox.Content(selectbox.ContentProps{
+				NoSearch: true,
+			}) {
+				@selectbox.Item(selectbox.ItemProps{
+					Value:    fmt.Sprintf("%v", shared.MachineTypeSACMI),
+					Selected: props.Type == shared.MachineTypeSACMI,
+				}) {
+					{ shared.MachineTypeSACMI.String() }
+				}
+				@selectbox.Item(selectbox.ItemProps{
+					Value:    fmt.Sprintf("%v", shared.MachineTypeSACMI),
+					Selected: props.Type == shared.MachineTypeSITI,
+				}) {
+					{ shared.MachineTypeSITI.String() }
+				}
+			}
+		}
+		if ierr != nil && (ierr.InputID == "press_number" || ierr.InputID == "machine_type") {
+			@form.Message(form.MessageProps{
+				Variant: form.MessageVariantError,
+			}) {
+				{ ierr.Error() }
+			}
+		}
+	}
+	@form.Item() {
+		@form.Label(form.LabelProps{
+			For: "code",
+		}) {
+			Code
+		}
+		@input.Input(input.Props{
+			ID:    "code",
+			Name:  "code",
+			Type:  input.TypeText,
+			Value: props.Code,
+			Attributes: templ.Attributes{
+				"required": true,
+			},
+			HasError: ierr != nil && ierr.InputID == "code",
+		})
+		if ierr != nil && ierr.InputID == "code" {
+			@form.Message(form.MessageProps{
+				Variant: form.MessageVariantError,
+			}) {
+				{ ierr.Error() }
+			}
+		}
+	}
+	@form.Item() {
+		@form.Label(form.LabelProps{
+			For: "cycles_offset",
+		}) {
+			Zyklen Offset
+		}
+		@input.Input(input.Props{
+			ID:   "cycles_offset",
+			Name: "cycles_offset",
+			Type: input.TypeNumber,
+			Attributes: templ.Attributes{
+				"step":     "1",
+				"required": true,
+			},
+			Value:    fmt.Sprintf("%d", props.CyclesOffset),
+			HasError: ierr != nil && ierr.InputID == "cycles_offset",
+		})
+		if ierr != nil && ierr.InputID == "cycles_offset" {
+			@form.Message(form.MessageProps{
+				Variant: form.MessageVariantError,
+			}) {
+				{ ierr.Error() }
+			}
+		}
+	}
 }

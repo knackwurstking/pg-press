@@ -27,7 +27,7 @@ templ SectionPress(p SectionPressProps) {
 		@button.Button(button.Props{
 			Size: button.SizeSm,
 			Attributes: templ.Attributes{
-				"hx-get":     string(urlb.DialogEditPressGet(-1)),
+				"hx-get":     string(urlb.DialogEditPress(-1)),
 				"hx-trigger": "click",
 				"hx-target":  "body",
 				"hx-swap":    "beforeend",

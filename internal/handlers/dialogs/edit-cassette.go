@@ -63,7 +63,7 @@ func GetCassetteDialog(c echo.Context) *echo.HTTPError {
 func PostCassette(c echo.Context) *echo.HTTPError {
 	id, _ := utils.GetQueryInt64(c, "id")
 	if id > 0 {
-		updateCassette(c, shared.EntityID(id))
+		return updateCassette(c, shared.EntityID(id))
 	}
 
 	formData, ierr := parseCassetteForm(c)

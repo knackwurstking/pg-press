@@ -58,27 +58,13 @@ func DialogEditCyclePut() templ.SafeURL {
 }
 
 // DialogEditPressGet constructs edit press dialog GET URL
-func DialogEditPressGet(pressID shared.EntityID) templ.SafeURL {
-	if pressID > -1 {
-		return BuildURLWithParams("/dialog/edit-press", map[string]string{
-			"id": pressID.String(),
-		})
+func DialogEditPress(pressID shared.EntityID) templ.SafeURL {
+	params := map[string]string{}
+	if pressID != 0 {
+		params["id"] = fmt.Sprintf("%d", pressID)
 	}
-	return BuildURL("/dialog/edit-press")
-}
 
-// DialogEditPressPost constructs edit press dialog POST URL
-func DialogEditPressPost(pressID shared.EntityID) templ.SafeURL {
-	return DialogEditPressGet(pressID)
-}
-
-// DialogEditPressPut constructs edit press dialog PUT URL
-func DialogEditPressPut(pressID shared.EntityID) templ.SafeURL {
-	return BuildURLWithParams(
-		"/dialog/edit-press", map[string]string{
-			"id": pressID.String(),
-		},
-	)
+	return BuildURLWithParams("/dialog/edit-press", params)
 }
 
 func DialogEditTool(toolID shared.EntityID) templ.SafeURL {
