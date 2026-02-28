@@ -57,7 +57,8 @@ templ NewPressDialog(props ...NewPressDialogProps) {
 				hx-trigger="submit"
 				enctype="multipart/form-data"
 			>
-				@PressContent(prop.PressFormData, prop.Error)
+				@pressContent(prop.PressFormData, prop.Error)
+				<br/>
 				@dialog.Footer() {
 					@button.Button(button.Props{
 						Type: button.TypeSubmit,
@@ -109,7 +110,8 @@ templ EditPressDialog(props ...EditPressDialogProps) {
 				hx-trigger="submit"
 				enctype="multipart/form-data"
 			>
-				@PressContent(prop.PressFormData, prop.Error)
+				@pressContent(prop.PressFormData, prop.Error)
+				<br/>
 				@dialog.Footer() {
 					@button.Button(button.Props{
 						Variant: button.VariantDestructive,
@@ -132,58 +134,72 @@ templ EditPressDialog(props ...EditPressDialogProps) {
 	}
 }
 
-templ PressContent(props PressFormData, ierr *errors.InputError) {
-	@form.ItemFlex() {
-		@form.Label(form.LabelProps{
-			For: "press_number",
-		}) {
-			Number
-		}
-		@input.Input(input.Props{
-			ID:   "press_number",
-			Name: "press_number",
-			Type: input.TypeNumber,
-			Attributes: templ.Attributes{
-				"step":     "1",
-				"min":      "0",
-				"max":      "100",
-				"required": "true",
-			},
-			Value:    fmt.Sprintf("%d", props.Number),
-			HasError: ierr != nil && ierr.InputID == "press_number",
-		})
-		@form.Label(form.LabelProps{
-			For: "machine_type",
-		}) {
-			Type
-		}
-		@selectbox.SelectBox() {
-			@selectbox.Trigger(selectbox.TriggerProps{
-				ID:   "machine_type",
-				Name: "machine_type",
-				Attributes: templ.Attributes{
-					"required": true,
-				},
-				HasError: ierr != nil && ierr.InputID == "machine_type",
+templ pressContent(props PressFormData, ierr *errors.InputError) {
+	@pressNumberAndType(props.Number, props.Type, ierr)
+	<br/>
+	@pressCode(props.Code, ierr)
+	<br/>
+	@pressCyclesOffset(props.CyclesOffset, ierr)
+}
+
+templ pressNumberAndType(number shared.PressNumber, machineType shared.MachineType, ierr *errors.InputError) {
+	@form.ItemFlex(form.ItemProps{
+		Class: "justify-between",
+	}) {
+		@form.Item() {
+			@form.Label(form.LabelProps{
+				For: "press_number",
 			}) {
-				@selectbox.Value(selectbox.ValueProps{
-					Placeholder: "Bitte Wählen",
-				})
+				Number
 			}
-			@selectbox.Content(selectbox.ContentProps{
-				NoSearch: true,
+			@input.Input(input.Props{
+				ID:   "press_number",
+				Name: "press_number",
+				Type: input.TypeNumber,
+				Attributes: templ.Attributes{
+					"step":     "1",
+					"min":      "0",
+					"max":      "100",
+					"required": "true",
+				},
+				Value:    fmt.Sprintf("%d", number),
+				HasError: ierr != nil && ierr.InputID == "press_number",
+			})
+		}
+		@form.Item() {
+			@form.Label(form.LabelProps{
+				For: "machine_type",
 			}) {
-				@selectbox.Item(selectbox.ItemProps{
-					Value:    fmt.Sprintf("%v", shared.MachineTypeSACMI),
-					Selected: props.Type == shared.MachineTypeSACMI,
+				Type
+			}
+			@selectbox.SelectBox() {
+				@selectbox.Trigger(selectbox.TriggerProps{
+					ID:   "machine_type",
+					Name: "machine_type",
+					Attributes: templ.Attributes{
+						"required": true,
+					},
+					HasError: ierr != nil && ierr.InputID == "machine_type",
 				}) {
-					{ shared.MachineTypeSACMI.String() }
+					@selectbox.Value(selectbox.ValueProps{
+						Placeholder: "Bitte Wählen",
+					})
 				}
-				@selectbox.Item(selectbox.ItemProps{
-					Value:    fmt.Sprintf("%v", shared.MachineTypeSACMI),
-					Selected: props.Type == shared.MachineTypeSITI,
+				@selectbox.Content(selectbox.ContentProps{
+					NoSearch: true,
 				}) {
-					{ shared.MachineTypeSITI.String() }
+					@selectbox.Item(selectbox.ItemProps{
+						Value:    fmt.Sprintf("%v", shared.MachineTypeSACMI),
+						Selected: machineType == shared.MachineTypeSACMI,
+					}) {
+						{ shared.MachineTypeSACMI.String() }
+					}
+					@selectbox.Item(selectbox.ItemProps{
+						Value:    fmt.Sprintf("%v", shared.MachineTypeSITI),
+						Selected: machineType == shared.MachineTypeSITI,
+					}) {
+						{ shared.MachineTypeSITI.String() }
+					}
 				}
 			}
 		}
@@ -195,6 +211,9 @@ templ PressContent(props PressFormData, ierr *errors.InputError) {
 			}
 		}
 	}
+}
+
+templ pressCode(code string, ierr *errors.InputError) {
 	@form.Item() {
 		@form.Label(form.LabelProps{
 			For: "code",
@@ -205,7 +224,7 @@ templ PressContent(props PressFormData, ierr *errors.InputError) {
 			ID:    "code",
 			Name:  "code",
 			Type:  input.TypeText,
-			Value: props.Code,
+			Value: code,
 			Attributes: templ.Attributes{
 				"required": true,
 			},
@@ -219,6 +238,9 @@ templ PressContent(props PressFormData, ierr *errors.InputError) {
 			}
 		}
 	}
+}
+
+templ pressCyclesOffset(cyclesOffset int64, ierr *errors.InputError) {
 	@form.Item() {
 		@form.Label(form.LabelProps{
 			For: "cycles_offset",
@@ -233,7 +255,7 @@ templ PressContent(props PressFormData, ierr *errors.InputError) {
 				"step":     "1",
 				"required": true,
 			},
-			Value:    fmt.Sprintf("%d", props.CyclesOffset),
+			Value:    fmt.Sprintf("%d", cyclesOffset),
 			HasError: ierr != nil && ierr.InputID == "cycles_offset",
 		})
 		if ierr != nil && ierr.InputID == "cycles_offset" {
