@@ -73,21 +73,25 @@ templ reportListItem(tr *shared.TroubleReport, user *shared.User) {
 			})
 			// Attachments Preview Container
 			if len(tr.LinkedAttachments) > 0 {
-				// TODO: Migrate to templui with tailwindcss
-				<div
-					class="attachments-preview-placeholder"
-					data-trouble-report-id={ fmt.Sprintf("%d", tr.ID) }
-					hx-get={ urlb.TroubleReportsAttachmentsPreview(tr.ID) }
-					hx-trigger="click"
-					hx-swap="outerHTML"
-					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-				>
-					<div class="attachments-preview-label">
-						<i class="bi bi-paperclip"></i>
-						Anhänge ({ len(tr.LinkedAttachments) }) - Klicken Sie hier, um zu laden...
-					</div>
-				</div>
+				@attachmentsPreview(tr.LinkedAttachments)
 			}
 		}
 	}
+}
+
+// TODO: Migrate to templui with tailwindcss
+templ attachmentsPreview(linkedAttachments []string) {
+	<div
+		class="attachments-preview-placeholder"
+		data-trouble-report-id={ fmt.Sprintf("%d", tr.ID) }
+		hx-get={ urlb.TroubleReportsAttachmentsPreview(tr.ID) }
+		hx-trigger="click"
+		hx-swap="outerHTML"
+		hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+	>
+		<div class="attachments-preview-label">
+			<i class="bi bi-paperclip"></i>
+			Anhänge ({ len(tr.LinkedAttachments) }) - Klicken Sie hier, um zu laden...
+		</div>
+	</div>
 }
