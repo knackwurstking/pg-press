@@ -1,9 +1,7 @@
 package components
 
 import (
-	"fmt"
 	"github.com/knackwurstking/pg-press/internal/env"
-	"github.com/knackwurstking/pg-press/internal/utils"
 
 	"github.com/knackwurstking/ui/pkg/ui"
 )
@@ -61,12 +59,132 @@ templ scripts() {
 	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/htmx-v2.0.7.min.js") }></script>
 	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/layout.js") }></script>
 	// Import component scripts
-	<script defer nonce={ templ.GetNonce(ctx) } src={ utils.ScriptURL(fmt.Sprintf("%s/js/dialog.min.js", env.ServerPathPrefix)) }></script>
-	<script defer nonce={ templ.GetNonce(ctx) } src={ utils.ScriptURL(fmt.Sprintf("%s/js/input.min.js", env.ServerPathPrefix)) }></script>
-	<script defer nonce={ templ.GetNonce(ctx) } src={ utils.ScriptURL(fmt.Sprintf("%s/js/label.min.js", env.ServerPathPrefix)) }></script>
-	<script defer nonce={ templ.GetNonce(ctx) } src={ utils.ScriptURL(fmt.Sprintf("%s/js/tabs.min.js", env.ServerPathPrefix)) }></script>
-	<script defer nonce={ templ.GetNonce(ctx) } src={ utils.ScriptURL(fmt.Sprintf("%s/js/selectbox.min.js", env.ServerPathPrefix)) }></script>
-	<script defer nonce={ templ.GetNonce(ctx) } src={ utils.ScriptURL(fmt.Sprintf("%s/js/popover.min.js", env.ServerPathPrefix)) }></script>
+	<script defer nonce={ templ.GetNonce(ctx) } src={ ui.AssetURL(env.ServerPathPrefix, "/js/dialog.min.js") }></script>
+	<script defer nonce={ templ.GetNonce(ctx) } src={ ui.AssetURL(env.ServerPathPrefix, "/js/input.min.js") }></script>
+	<script defer nonce={ templ.GetNonce(ctx) } src={ ui.AssetURL(env.ServerPathPrefix, "/js/label.min.js") }></script>
+	<script defer nonce={ templ.GetNonce(ctx) } src={ ui.AssetURL(env.ServerPathPrefix, "/js/tabs.min.js") }></script>
+	<script defer nonce={ templ.GetNonce(ctx) } src={ ui.AssetURL(env.ServerPathPrefix, "/js/selectbox.min.js") }></script>
+	<script defer nonce={ templ.GetNonce(ctx) } src={ ui.AssetURL(env.ServerPathPrefix, "/js/popover.min.js") }></script>
+	// TODO: Remove after updating to the current ui version
+	<script name="markdown">
+		function escapeHTML(text) {
+			return text
+				.replaceAll('&', '&amp;')
+				.replaceAll('<', '&lt;')
+				.replaceAll('>', '&gt;')
+				.replaceAll('"', '&quot;')
+				.replaceAll("'", '&#39;')
+				.replaceAll("/", '&#x2F;');
+		}
+
+		function renderMarkdownToHTML(content) {
+			if (!content || content.trim() === '') {
+				return '';
+			}
+
+			var processed = content;
+
+			// Process code blocks first (before other transformations)
+			processed = processed.replace(/```(\w*)\n([\s\S]*?)```/g, function(_match, lang, code) {
+				return '<pre><code class="language-' + lang + '">' + escapeHTML(code.trim()) + '</code></pre>';
+			});
+
+			// Inline code
+			processed = processed.replace(/`(.*?)`/g, '<code>$1</code>');
+
+			// Strikethrough
+			processed = processed.replace(/~~(.*?)~~/g, '<del>$1</del>');
+
+			// Headers
+			processed = processed.replace(/^### (.*$)/gm, '<h3>$1</h3>');
+			processed = processed.replace(/^## (.*$)/gm, '<h2>$1</h2>');
+			processed = processed.replace(/^# (.*$)/gm, '<h1>$1</h1>');
+
+			// Emphasis
+			processed = processed.replace(/__(.*?)__/g, '<u>$1</u>');
+			processed = processed.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+			processed = processed.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+			// Task lists
+			processed = processed.replace(/^- \[ \] (.*$)/gm, '<li class="task-item"><input type="checkbox" disabled> $1</li>');
+			processed = processed.replace(/^- \[x\] (.*$)/gm, '<li class="task-item"><input type="checkbox" checked disabled> $1</li>');
+
+			// Lists (unordered and ordered)
+			processed = processed.replace(/^- (.*$)/gm, '<li class="ul-item">$1</li>');
+			processed = processed.replace(/^\d+\. (.*$)/gm, '<li class="ol-item">$1</li>');
+
+			// Blockquotes
+			processed = processed.replace(/^> (.*$)/gm, '<bq-line>$1</bq-line>');
+
+			// Tables
+			processed = processed.replace(/^\|(.+)\|$/gm, function(match, cols) {
+				var cells = cols.split('|').map(function(c) { return c.trim(); });
+				if (cells.some(function(c) { return /^[-:]+$/.test(c); })) {
+					return null; // Skip separator row
+				}
+				var isHeader = !processed.match(/^\|.+\|\s*$/m) || match.index < 100;
+				var tag = isHeader ? 'th' : 'td';
+				var row = cells.map(function(c) { return '<' + tag + '>' + c + '</' + tag + '>'; }).join('');
+				return '<tr>' + row + '</tr>';
+			});
+			processed = processed.replace(/(<tr>[\s\S]*?<\/tr>(?:\s*<tr>[\s\S]*?<\/tr>)*)/g, '<table>$1</table>');
+
+			// Group list items
+			processed = processed
+				.replace(/(<li class="ul-item">[\s\S]*?<\/li>(?:\s*<li class="ul-item">[\s\S]*?<\/li>)*)/gm, '<ul>$1</ul>')
+				.replace(/(<li class="ol-item">[\s\S]*?<\/li>(?:\s*<li class="ol-item">[\s\S]*?<\/li>)*)/gm, '<ol>$1</ol>')
+				.replace(/(<li class="task-item">[\s\S]*?<\/li>(?:\s*<li class="task-item">[\s\S]*?<\/li>)*)/gm, '<ul class="task-list">$1</ul>')
+				.replace(/(<bq-line>[\s\S]*?<\/bq-line>(?:\s*<bq-line>[\s\S]*?<\/bq-line>)*)/gm, '<blockquote>$1</blockquote>');
+
+			// Clean up temporary classes and tags
+			processed = processed
+				.replace(/class="[uo]l-item"/g, '')
+				.replace(/class="task-item"/g, '')
+				.replace(/<bq-line>/g, '')
+				.replace(/<\/bq-line>/g, '\n');
+
+			// Process paragraphs
+			var paragraphs = processed.split(/\n\s*\n/);
+			return paragraphs.map(function(paragraph) {
+				paragraph = paragraph.trim();
+				if (!paragraph) return '';
+
+				if (paragraph.match(/^<(h[1-6]|ul|ol|li|table|blockquote|pre|div)/)) {
+					return paragraph;
+				}
+
+				var withLineBreaks = paragraph.replace(/\n/g, '<br/>');
+				return '<p>' + withLineBreaks + '</p>';
+			}).join('\n\n');
+		}
+
+		function processMarkdownContent() {
+			var containers = document.querySelectorAll('.markdown-content[data-markdown-content]');
+			containers.forEach(function(container) {
+				var content = container.getAttribute('data-markdown-content');
+				if (content) {
+					var html = renderMarkdownToHTML(content);
+					container.innerHTML = html || '<pre>' + content.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</pre>';
+				}
+			});
+		}
+
+		// Initialize on DOM ready
+		function initializeMarkdown() {
+			setTimeout(processMarkdownContent, 10);
+		}
+
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', initializeMarkdown);
+		} else {
+			initializeMarkdown();
+		}
+
+		// Re-process after HTMX swaps
+		document.addEventListener('htmx:afterSwap', function() {
+			setTimeout(processMarkdownContent, 50);
+		});
+	</script>
 }
 
 templ styles() {
@@ -128,6 +246,143 @@ templ styles() {
 			border-top-color: var(--primary);
 			border-radius: 50%;
 			animation: spinner 0.6s linear infinite;
+		}
+	</style>
+	// TODO: This markdown styles can be removed if updating to the current ui version
+	<style name="markdown">
+		.markdown-content {
+			line-height: 1.6;
+			color: var(--ui-text);
+		}
+
+		.markdown-content h1,
+		.markdown-content h2,
+		.markdown-content h3,
+		.markdown-content h4,
+		.markdown-content h5,
+		.markdown-content h6 {
+			margin: 0.8em 0 0.4em 0;
+			font-weight: bold;
+			line-height: 1.3;
+		}
+
+		.markdown-content h1 {
+			font-size: 1.4em;
+		}
+
+		.markdown-content h2 {
+			font-size: 1.2em;
+		}
+
+		.markdown-content h3 {
+			font-size: 1.1em;
+		}
+
+		.markdown-content p {
+			margin: 0.5em 0 1em 0;
+		}
+
+		.markdown-content ul,
+		.markdown-content li {
+			list-style: unset !important;
+		}
+
+		.markdown-content ul,
+		.markdown-content ol {
+			margin: 0.5em 0;
+			padding-left: 1.5em;
+			list-style: inherit;
+		}
+
+		.markdown-content ul {
+			list-style-type: disc;
+		}
+
+		.markdown-content ol {
+			list-style-type: decimal;
+		}
+
+		.markdown-content li {
+			margin: 0.25em 0;
+			display: list-item;
+		}
+
+		.markdown-content code {
+			font-size: 0.85em;
+			padding: 0.125em 0.25em;
+			border-radius: 2px;
+		}
+
+		.markdown-content pre {
+			margin: 1em 0;
+			padding: 1em;
+			border-radius: 4px;
+			overflow-x: auto;
+		}
+
+		.markdown-content strong {
+			font-weight: 600;
+		}
+
+		.markdown-content em {
+			font-style: italic;
+		}
+
+		.markdown-content u {
+			text-decoration: underline;
+		}
+
+		.markdown-content blockquote {
+			margin: 1em 0;
+			padding: 0.5em 1em;
+			border-left: 3px solid var(--ui-border);
+			background: var(--ui-bg-subtle);
+		}
+
+		.markdown-content pre code {
+			display: block;
+			padding: 1em;
+			background: var(--ui-bg-subtle);
+			border-radius: 4px;
+			overflow-x: auto;
+		}
+
+		.markdown-content del {
+			text-decoration: line-through;
+			color: var(--ui-text-subtle);
+		}
+
+		.markdown-content table {
+			width: 100%;
+			border-collapse: collapse;
+			margin: 1em 0;
+		}
+
+		.markdown-content th,
+		.markdown-content td {
+			padding: 0.5em;
+			border: 1px solid var(--ui-border);
+			text-align: left;
+		}
+
+		.markdown-content th {
+			background: var(--ui-bg-subtle);
+			font-weight: 600;
+		}
+
+		.markdown-content ul.task-list {
+			list-style: none;
+			padding-left: 0;
+		}
+
+		.markdown-content ul.task-list li {
+			display: flex;
+			align-items: flex-start;
+			gap: 0.5em;
+		}
+
+		.markdown-content ul.task-list input[type="checkbox"] {
+			margin-top: 0.25em;
 		}
 	</style>
 }

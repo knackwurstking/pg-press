@@ -1,0 +1,49 @@
+// TODO: Use ui component after updating to the current ui version
+package markdown
+
+import (
+	"fmt"
+	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/ui/pkg/ui"
+	"path/filepath"
+)
+
+type Props struct {
+	ID          string
+	Class       string
+	Attributes  templ.Attributes
+	UseMarkdown bool
+	Content     string
+}
+
+templ Markdown(props ...Props) {
+	{{
+		if len(props) == 0 {
+			props = append(props, Props{})
+		}
+		prop := props[0]
+
+		prop.Attributes["data-markdown-content"] = prop.Content
+
+		if c, ok := prop.Attributes["class"]; ok {
+			prop.Attributes["class"] = fmt.Sprintf("markdown-content %v", c)
+		} else {
+			prop.Attributes["class"] = "markdown-content"
+		}
+	}}
+	if prop.UseMarkdown {
+		<div { prop.Attributes... }>
+			@components.Spinner()
+		</div>
+	} else {
+		<pre>{ prop.Content }</pre>
+	}
+}
+
+templ Styles(serverPathToCSS ...string) {
+	<link rel="stylesheet" href={ ui.AssetURL(filepath.Join(serverPathToCSS...), "markdown.css") }/>
+}
+
+templ Scripts(serverPathToJS ...string) {
+	<script defer nonce={ templ.GetNonce(ctx) } src={ ui.AssetURL(filepath.Join(serverPathToJS...), "markdown.js") }></script>
+}

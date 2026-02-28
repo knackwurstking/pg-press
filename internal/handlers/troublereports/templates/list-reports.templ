@@ -4,108 +4,81 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/markdown"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	uicomponents "github.com/knackwurstking/ui/pkg/components"
 	"github.com/knackwurstking/ui/pkg/css"
 )
 
 templ ListReports(user *shared.User, troubleReports []*shared.TroubleReport) {
 	for _, tr := range troubleReports {
-		<span class="trouble-report">
-			<details
-				id={ fmt.Sprintf("trouble-report-%d", tr.ID) }
-				ontoggle="updateURLHash(event)"
-			>
-				<summary>{ tr.Title }</summary>
-				@uicomponents.MarkdownContent(
-					tr.Content,
-					&uicomponents.MarkdownContentProps{
-						UseMarkdown: tr.UseMarkdown,
-					},
-				)
-				<!-- Attachments Preview Container -->
-				if len(tr.LinkedAttachments) > 0 {
-					<br/>
-					<div
-						class="attachments-preview-placeholder"
-						data-trouble-report-id={ fmt.Sprintf("%d", tr.ID) }
-						hx-get={ urlb.TroubleReportsAttachmentsPreview(tr.ID) }
-						hx-trigger="click"
-						hx-swap="outerHTML"
-						hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-					>
-						<div class="attachments-preview-label">
-							<i class="bi bi-paperclip"></i>
-							Anhänge ({ len(tr.LinkedAttachments) }) - Klicken Sie hier, um zu laden...
-						</div>
-					</div>
-				}
-			</details>
-			<div class={ "actions", css.Flex, css.Gap, css.JustifyEnd, css.ItemsCenter }>
-				// Edit Report
-				<a
-					href={ urlb.Editor("troublereport", tr.ID, urlb.TroubleReports()) }
-					class={ css.ButtonIcon, css.Ghost }
-					role="button"
-				>
-					<i class="bi bi-pen"></i>
-				</a>
-				// Share Report (PDF)
-				<button
-					role="button"
-					class={ css.ButtonIcon, css.Info, css.Ghost }
-					title="Als PDF teilen"
-					onclick={ components.DownloadTroubleReportPDF(tr.ID) }
-				>
-					<i class="bi bi-share"></i>
-				</button>
-				// Admin only: Delete Report
-				<button
-					hx-delete={ urlb.TroubleReportsDelete(tr.ID) }
-					hx-trigger="click"
-					hx-target="#data"
-					hx-confirm="Sind Sie sicher, dass Sie diesen Fehlerbericht löschen möchten?"
-					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-					class={ css.ButtonIcon, css.Destructive, css.Ghost }
-					if !user.IsAdmin() {
-						disabled
-					}
-				>
-					<i class="bi bi-trash"></i>
-				</button>
-			</div>
-			<hr/>
-		</span>
+		@reportListItem(tr, user)
 	}
-	@uicomponents.MarkdownScript()
-	@uicomponents.MarkdownStyles()
-	<script>
-		if (location.hash !== "") {
-			var details = document.querySelector(location.hash);
-			console.debug(location.hash, details);
-			if (details) {
-				details.open = true;
-				setTimeout(
-					() =>
-						details.scrollIntoView({
-							behavior: "smooth",
-							block: "start",
-						}),
-					100,
-				);
-			}
-		}
+}
 
-		var urlParams = new URLSearchParams(window.location.search);
-		var searchParam = urlParams.get("search");
-		if (searchParam) {
-			var searchInput = document.querySelector('input[name="search"]');
-			if (searchInput) {
-				searchInput.value = searchParam;
-				var inputEvent = new Event("input", { bubbles: true });
-				searchInput.dispatchEvent(inputEvent);
+// TODO: Migrate to templui with tailwindcss
+templ reportListItem(tr *shared.TroubleReport, user *shared.User) {
+	<span class="trouble-report">
+		<details
+			id={ fmt.Sprintf("trouble-report-%d", tr.ID) }
+			ontoggle="updateURLHash(event)"
+		>
+			<summary>{ tr.Title }</summary>
+			@markdown.Markdown(markdown.Props{
+				UseMarkdown: tr.UseMarkdown,
+				Content:     tr.Content,
+			})
+			<!-- Attachments Preview Container -->
+			if len(tr.LinkedAttachments) > 0 {
+				<br/>
+				<div
+					class="attachments-preview-placeholder"
+					data-trouble-report-id={ fmt.Sprintf("%d", tr.ID) }
+					hx-get={ urlb.TroubleReportsAttachmentsPreview(tr.ID) }
+					hx-trigger="click"
+					hx-swap="outerHTML"
+					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+				>
+					<div class="attachments-preview-label">
+						<i class="bi bi-paperclip"></i>
+						Anhänge ({ len(tr.LinkedAttachments) }) - Klicken Sie hier, um zu laden...
+					</div>
+				</div>
 			}
-		}
-	</script>
+		</details>
+		<div class={ "actions", css.Flex, css.Gap, css.JustifyEnd, css.ItemsCenter }>
+			// Edit Report
+			<a
+				href={ urlb.Editor("troublereport", tr.ID, urlb.TroubleReports()) }
+				class={ css.ButtonIcon, css.Ghost }
+				role="button"
+			>
+				<i class="bi bi-pen"></i>
+			</a>
+			// Share Report (PDF)
+			<button
+				role="button"
+				class={ css.ButtonIcon, css.Info, css.Ghost }
+				title="Als PDF teilen"
+				onclick={ components.DownloadTroubleReportPDF(tr.ID) }
+			>
+				<i class="bi bi-share"></i>
+			</button>
+			// Admin only: Delete Report
+			<button
+				hx-delete={ urlb.TroubleReportsDelete(tr.ID) }
+				hx-trigger="click"
+				hx-target="#data"
+				hx-confirm="Sind Sie sicher, dass Sie diesen Fehlerbericht löschen möchten?"
+				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+				class={ css.ButtonIcon, css.Destructive, css.Ghost }
+				if !user.IsAdmin() {
+					disabled
+				}
+			>
+				<i class="bi bi-trash"></i>
+			</button>
+		</div>
+		<hr/>
+	</span>
 }
