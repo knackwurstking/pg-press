@@ -2,10 +2,12 @@ package templates
 
 import (
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/button"
+	"github.com/knackwurstking/pg-press/internal/components/icon"
+	"github.com/knackwurstking/pg-press/internal/components/input"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 
-	"github.com/knackwurstking/ui/pkg/css"
 	"github.com/knackwurstking/ui/pkg/ui"
 )
 
@@ -18,43 +20,51 @@ templ Page() {
 			NavContent:     components.StandardNavContent(),
 		},
 	) {
-		<main class={ css.Container, css.ContainerFluid }>
-			<!-- Search Bar -->
-			@components.Section(templ.Attributes{
-				"style": "margin-top: 0",
-				"class": templ.CSSClasses{
-					css.Flex, css.Gap, css.JustifyBetween,
-				}.String(),
-			}) {
-				<input
-					style="margin: auto 0; width: 100%"
-					type="search"
-					name="search"
-					placeholder="Suche"
-					aria-label="Suche"
-					oninput="window.search(event)"
-				/>
-			}
-			<!-- Page Actions: Create -->
-			@components.ActionBar() {
-				<a
-					href={ urlb.Editor("troublereport", 0, urlb.TroubleReports()) }
-					class={ css.Flex, css.Gap, css.JustifyBetween, css.ItemsCenter }
-					role="button"
-				>
-					<i class="bi bi-plus-lg"></i>
-					Erstellen
-				</a>
-			}
-			<!-- Trouble Reports Entries -->
-			@components.Section(templ.Attributes{
-				"id":                        "data",
-				"hx-get":                    string(urlb.TroubleReportsData()),
-				"hx-trigger":                "load, reload-trouble-reports from:body",
-				"hx-on:htmx:response-error": "alert(event.detail.xhr.responseText)",
-			})
+		<main class="mt-8 p-8">
+			@searchBar()
+			@actionBar()
+			@troubleReportEntries()
 		</main>
 	}
+}
+
+templ searchBar() {
+	@components.Section(templ.Attributes{
+		"style": "margin-top: 0",
+		"class": "flex gap-4 justify-between items-center",
+	}) {
+		@input.Input(input.Props{
+			ID:          "trouble-reports-search",
+			Name:        "trouble-reports-search",
+			Class:       "w-full my-auto mx-0",
+			Type:        input.TypeSearch,
+			Placeholder: "Suche",
+			Attributes: templ.Attributes{
+				"oninput": "window.search(event)",
+			},
+		})
+	}
+}
+
+templ actionBar() {
+	@components.ActionBar() {
+		@button.Button(button.Props{
+			Variant: button.VariantLink,
+			Href:    string(urlb.Editor("troublereport", 0, urlb.TroubleReports())),
+		}) {
+			@icon.Plus()
+			Erstellen
+		}
+	}
+}
+
+templ troubleReportEntries() {
+	@components.Section(templ.Attributes{
+		"id":                        "data",
+		"hx-get":                    string(urlb.TroubleReportsData()),
+		"hx-trigger":                "load, reload-trouble-reports from:body",
+		"hx-on:htmx:response-error": "alert(event.detail.xhr.responseText)",
+	})
 }
 
 templ additionalHead() {
