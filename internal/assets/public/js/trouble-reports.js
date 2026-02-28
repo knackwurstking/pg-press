@@ -18,7 +18,7 @@ function search(event) {
 			return term.length > 0;
 		});
 
-		var troubleReports = document.querySelectorAll("span.trouble-report");
+		var troubleReports = document.querySelectorAll(".trouble-report");
 
 		for (var i = 0; i < troubleReports.length; i++) {
 			var report = troubleReports[i];
@@ -65,17 +65,17 @@ function search(event) {
 }
 
 function updateURLHash(event) {
-	var details = event.target;
-	if (details.open) {
-		// Update URL hash when details is opened
+	var target = event.currentTarget;
+	if (target) {
+		console.debug("Accordion toggled:", target);
 		history.replaceState(null, "", "#" + details.id);
-	} else {
-		// Clear hash when details is closed
-		history.replaceState(
-			null,
-			"",
-			window.location.pathname + window.location.search,
-		);
+
+		// TODO: Clear hash when accordion is closed
+		//history.replaceState(
+		//	null,
+		//	"",
+		//	window.location.pathname + window.location.search,
+		//);
 	}
 }
 

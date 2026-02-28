@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/accordion"
 	"github.com/knackwurstking/pg-press/internal/components/markdown"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
@@ -12,25 +13,67 @@ import (
 
 templ ListReports(user *shared.User, troubleReports []*shared.TroubleReport) {
 	for _, tr := range troubleReports {
-		@reportListItem(tr, user)
+		@accordion.Accordion(accordion.Props{
+			Class: "w-full",
+		}) {
+			@reportListItem(tr, user)
+		}
 	}
 }
 
-// TODO: Migrate to templui with tailwindcss
 templ reportListItem(tr *shared.TroubleReport, user *shared.User) {
-	<span class="trouble-report">
-		<details
-			id={ fmt.Sprintf("trouble-report-%d", tr.ID) }
-			ontoggle="updateURLHash(event)"
-		>
-			<summary>{ tr.Title }</summary>
+	@accordion.Item(accordion.ItemProps{
+		ID:    fmt.Sprintf("trouble-report-%d", tr.ID),
+		Class: "trouble-report",
+		Attributes: templ.Attributes{
+			"ontoggle": `updateURLHash(event)`,
+		},
+	}) {
+		@accordion.Trigger() {
+			{ tr.Title }
+			// TODO: Migrate to templui with tailwindcss
+			<div class={ "actions", css.Flex, css.Gap, css.JustifyEnd, css.ItemsCenter }>
+				// Edit Report
+				<a
+					href={ urlb.Editor("troublereport", tr.ID, urlb.TroubleReports()) }
+					class={ css.ButtonIcon, css.Ghost }
+					role="button"
+				>
+					<i class="bi bi-pen"></i>
+				</a>
+				// Share Report (PDF)
+				<button
+					role="button"
+					class={ css.ButtonIcon, css.Info, css.Ghost }
+					title="Als PDF teilen"
+					onclick={ components.DownloadTroubleReportPDF(tr.ID) }
+				>
+					<i class="bi bi-share"></i>
+				</button>
+				// Admin only: Delete Report
+				<button
+					hx-delete={ urlb.TroubleReportsDelete(tr.ID) }
+					hx-trigger="click"
+					hx-target="#data"
+					hx-confirm="Sind Sie sicher, dass Sie diesen Fehlerbericht löschen möchten?"
+					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+					class={ css.ButtonIcon, css.Destructive, css.Ghost }
+					if !user.IsAdmin() {
+						disabled
+					}
+				>
+					<i class="bi bi-trash"></i>
+				</button>
+			</div>
+		}
+		@accordion.Content() {
 			@markdown.Markdown(markdown.Props{
 				UseMarkdown: tr.UseMarkdown,
 				Content:     tr.Content,
 			})
-			<!-- Attachments Preview Container -->
+			// Attachments Preview Container
 			if len(tr.LinkedAttachments) > 0 {
-				<br/>
+				// TODO: Migrate to templui with tailwindcss
 				<div
 					class="attachments-preview-placeholder"
 					data-trouble-report-id={ fmt.Sprintf("%d", tr.ID) }
@@ -45,40 +88,6 @@ templ reportListItem(tr *shared.TroubleReport, user *shared.User) {
 					</div>
 				</div>
 			}
-		</details>
-		<div class={ "actions", css.Flex, css.Gap, css.JustifyEnd, css.ItemsCenter }>
-			// Edit Report
-			<a
-				href={ urlb.Editor("troublereport", tr.ID, urlb.TroubleReports()) }
-				class={ css.ButtonIcon, css.Ghost }
-				role="button"
-			>
-				<i class="bi bi-pen"></i>
-			</a>
-			// Share Report (PDF)
-			<button
-				role="button"
-				class={ css.ButtonIcon, css.Info, css.Ghost }
-				title="Als PDF teilen"
-				onclick={ components.DownloadTroubleReportPDF(tr.ID) }
-			>
-				<i class="bi bi-share"></i>
-			</button>
-			// Admin only: Delete Report
-			<button
-				hx-delete={ urlb.TroubleReportsDelete(tr.ID) }
-				hx-trigger="click"
-				hx-target="#data"
-				hx-confirm="Sind Sie sicher, dass Sie diesen Fehlerbericht löschen möchten?"
-				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-				class={ css.ButtonIcon, css.Destructive, css.Ghost }
-				if !user.IsAdmin() {
-					disabled
-				}
-			>
-				<i class="bi bi-trash"></i>
-			</button>
-		</div>
-		<hr/>
-	</span>
+		}
+	}
 }
