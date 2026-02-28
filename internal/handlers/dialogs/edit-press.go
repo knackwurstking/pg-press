@@ -1,6 +1,9 @@
 package dialogs
 
 import (
+	"fmt"
+	"net/http"
+
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -58,14 +61,14 @@ func PostPress(c echo.Context) *echo.HTTPError {
 		return updatePress(c, shared.EntityID(id))
 	}
 
-	data, verr := parseEditPressForm(c)
-	if verr != nil {
-		return verr.HTTPError().Echo()
+	data, ierr := parseEditPressForm(c)
+	if ierr != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid input: %v", ierr))
 	}
 
 	merr := db.AddPress(&shared.Press{
-		Number:       data.PressNumber,
-		Type:         data.MachineType,
+		Number:       data.Number,
+		Type:         data.Type,
 		Code:         data.Code,
 		CyclesOffset: data.CyclesOffset,
 	})
@@ -80,20 +83,20 @@ func PostPress(c echo.Context) *echo.HTTPError {
 
 // TODO: Re-Render dialog with error or close at the end
 func updatePress(c echo.Context, id shared.EntityID) *echo.HTTPError {
-	data, verr := parseEditPressForm(c)
-	if verr != nil {
-		return verr.HTTPError().Echo()
+	data, ierr := parseEditPressForm(c)
+	if ierr != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid input: %v", ierr))
 	}
 
-	press, herr := db.GetPress(data.PressID)
+	press, herr := db.GetPress(id)
 	if herr != nil {
 		return herr.Echo()
 	}
 
 	merr := db.UpdatePress(&shared.Press{
 		ID:           press.ID,
-		Number:       data.PressNumber,
-		Type:         data.MachineType,
+		Number:       data.Number,
+		Type:         data.Type,
 		Code:         data.Code,
 		CyclesOffset: data.CyclesOffset,
 		SlotUp:       press.SlotUp,
@@ -108,37 +111,31 @@ func updatePress(c echo.Context, id shared.EntityID) *echo.HTTPError {
 	return nil
 }
 
-type editPressForm struct {
-	PressID      shared.EntityID
-	PressNumber  shared.PressNumber
-	MachineType  shared.MachineType
-	Code         string
-	CyclesOffset int64
-}
-
-func parseEditPressForm(c echo.Context) (*editPressForm, *errors.ValidationError) {
+func parseEditPressForm(c echo.Context) (data *PressFormData, ierr *errors.InputError) {
 	// Press Number
 	vPressNumber, err := utils.SanitizeInt8(c.FormValue("press_number"))
 	if err != nil {
-		return nil, errors.NewValidationError("invalid press number: %v", err)
+		ierr = errors.NewInputError("press_number", fmt.Sprintf("invalid press number: %v", err))
+		return
 	}
+	data.Number = shared.PressNumber(vPressNumber)
 
-	code := utils.SanitizeText(c.FormValue("code"))
-	if code == "" {
-		return nil, errors.NewValidationError("code cannot be empty")
+	// Code
+	data.Code = utils.SanitizeText(c.FormValue("code"))
+	if data.Code == "" {
+		ierr = errors.NewInputError("code", "code cannot be empty")
+		return
 	}
 
 	// Cycles Offset
-	cyclesOffset, err := utils.SanitizeInt64(c.FormValue("cycles_offset"))
+	data.CyclesOffset, err = utils.SanitizeInt64(c.FormValue("cycles_offset"))
 	if err != nil {
-		return nil, errors.NewValidationError("invalid cycles offset: %v", err)
+		ierr = errors.NewInputError("cycles_offset", fmt.Sprintf("invalid cycles offset: %v", err))
+		return
 	}
 
-	return &editPressForm{
-		PressID:      shared.EntityID(vPressID),
-		PressNumber:  shared.PressNumber(vPressNumber),
-		MachineType:  shared.MachineType(utils.SanitizeText(c.FormValue("machine_type"))),
-		Code:         code,
-		CyclesOffset: cyclesOffset,
-	}, nil
+	// Machine Type
+	data.Type = shared.MachineType(utils.SanitizeText(c.FormValue("machine_type")))
+
+	return
 }

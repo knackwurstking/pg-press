@@ -41,7 +41,6 @@ func Register(e *echo.Echo, path string) {
 		// New/Edit a Press
 		ui.NewEchoRoute(http.MethodGet, path+"/edit-press", GetEditPress),
 		ui.NewEchoRoute(http.MethodPost, path+"/edit-press", PostPress),
-		ui.NewEchoRoute(http.MethodPut, path+"/edit-press", PutPress),
 
 		// Edit tool regeneration dialog
 		ui.NewEchoRoute(http.MethodGet, path+"/edit-tool-regeneration", GetEditToolRegeneration),
