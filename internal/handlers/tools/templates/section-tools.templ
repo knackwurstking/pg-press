@@ -5,7 +5,6 @@ import (
 
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/components/button"
-	"github.com/knackwurstking/pg-press/internal/components/dialog"
 	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/components/input"
 	"github.com/knackwurstking/pg-press/internal/components/label"
@@ -32,39 +31,31 @@ templ SectionTools(p SectionToolsProps) {
 	></span>
 	@inputFilterTools(p.Tools)
 	@components.ActionBar() {
-		@dialog.Trigger(dialog.TriggerProps{
-			For: dialogs.NewCassetteDialogID,
+		@button.Button(button.Props{
+			Size: button.SizeSm,
+			Attributes: templ.Attributes{
+				"hx-get":     string(urlb.DialogEditCassette(0)),
+				"hx-trigger": "click",
+				"hx-target":  "body",
+				"hx-swap":    "beforeend",
+			},
+			Disabled: !p.User.IsAdmin(),
 		}) {
-			@button.Button(button.Props{
-				Size: button.SizeSm,
-				Attributes: templ.Attributes{
-					"hx-get":     string(urlb.DialogEditCassette(0)),
-					"hx-trigger": "click",
-					"hx-target":  "body",
-					"hx-swap":    "beforeend",
-				},
-				Disabled: !p.User.IsAdmin(),
-			}) {
-				@icon.Plus()
-				Kassette
-			}
+			@icon.Plus()
+			Kassette
 		}
-		@dialog.Trigger(dialog.TriggerProps{
-			For: dialogs.EditCassetteDialogID,
+		@button.Button(button.Props{
+			Size: button.SizeSm,
+			Attributes: templ.Attributes{
+				"hx-get":     string(urlb.DialogEditTool(0)),
+				"hx-trigger": "click",
+				"hx-target":  "body",
+				"hx-swap":    "beforeend",
+			},
+			Disabled: !p.User.IsAdmin(),
 		}) {
-			@button.Button(button.Props{
-				Size: button.SizeSm,
-				Attributes: templ.Attributes{
-					"hx-get":     string(urlb.DialogEditTool(0)),
-					"hx-trigger": "click",
-					"hx-target":  "body",
-					"hx-swap":    "beforeend",
-				},
-				Disabled: !p.User.IsAdmin(),
-			}) {
-				@icon.Plus()
-				Werkzeug
-			}
+			@icon.Plus()
+			Werkzeug
 		}
 	}
 	<div id="tools-container" class="flex flex-col gap-4">
