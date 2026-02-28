@@ -68,16 +68,7 @@ func PostCassette(c echo.Context) *echo.HTTPError {
 
 	formData, ierr := parseCassetteForm(c)
 	if ierr != nil {
-		t := NewCassetteDialog(NewCassetteDialogProps{
-			CassetteFormData: formData,
-			Open:             true,
-			OOB:              true,
-			Error:            ierr,
-		})
-		if err := t.Render(c.Request().Context(), c.Response()); err != nil {
-			return errors.NewRenderError(err, "NewCassetteDialog")
-		}
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid input: %s", ierr.Error())
+		return ReRenderNewCassetteDialog(c, true, formData, ierr)
 	}
 
 	tool := &shared.Tool{
@@ -94,61 +85,24 @@ func PostCassette(c echo.Context) *echo.HTTPError {
 
 	if merr := db.AddTool(tool); merr != nil {
 		ierr = errors.NewInputError("form", fmt.Sprintf("Failed to create cassette: %s", merr.Error()))
-		t := NewCassetteDialog(NewCassetteDialogProps{
-			CassetteFormData: formData,
-			Open:             true,
-			OOB:              true,
-			Error:            ierr,
-		})
-		if err := t.Render(c.Request().Context(), c.Response()); err != nil {
-			return errors.NewRenderError(err, "NewCassetteDialog")
-		}
-		return merr.Echo()
+		return ReRenderNewCassetteDialog(c, true, formData, ierr)
 	}
 
 	utils.SetHXTrigger(c, "tools-tab")
 
-	t := NewCassetteDialog(NewCassetteDialogProps{
-		Open:  false,
-		OOB:   true,
-		Error: ierr,
-	})
-	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.NewRenderError(err, "NewCassetteDialog")
-	}
-	return nil
+	return ReRenderNewCassetteDialog(c, false, formData, nil)
 }
 
 func updateCassette(c echo.Context, toolID shared.EntityID) *echo.HTTPError {
 	formData, ierr := parseCassetteForm(c)
 	if ierr != nil {
-		t := EditCassetteDialog(EditCassetteDialogProps{
-			CassetteFormData: formData,
-			ToolID:           toolID,
-			Open:             true,
-			OOB:              true,
-			Error:            ierr,
-		})
-		if err := t.Render(c.Request().Context(), c.Response()); err != nil {
-			return errors.NewRenderError(err, "EditCassetteDialog")
-		}
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid input: %s", ierr.Error())
+		return ReRenderEditCassetteDialog(c, toolID, true, formData, ierr)
 	}
 
 	tool, merr := db.GetTool(shared.EntityID(toolID))
 	if merr != nil {
 		ierr := errors.NewInputError("form", fmt.Sprintf("Cassette with ID %d not found", toolID))
-		t := EditCassetteDialog(EditCassetteDialogProps{
-			CassetteFormData: formData,
-			ToolID:           toolID,
-			Open:             true,
-			OOB:              true,
-			Error:            ierr,
-		})
-		if err := t.Render(c.Request().Context(), c.Response()); err != nil {
-			return errors.NewRenderError(err, "EditCassetteDialog")
-		}
-		return merr.Echo()
+		return ReRenderEditCassetteDialog(c, toolID, true, formData, ierr)
 	}
 	tool.Type = formData.Type
 	tool.Code = formData.Code
@@ -160,31 +114,13 @@ func updateCassette(c echo.Context, toolID shared.EntityID) *echo.HTTPError {
 	log.Debug("Updating cassette: %#v", tool)
 
 	if merr = db.UpdateTool(tool); merr != nil {
-		ierr = errors.NewInputError("form", fmt.Sprintf("Failed to update cassette: %s", merr.Error()))
-		t := EditCassetteDialog(EditCassetteDialogProps{
-			CassetteFormData: formData,
-			ToolID:           toolID,
-			Open:             true,
-			OOB:              true,
-			Error:            ierr,
-		})
-		if err := t.Render(c.Request().Context(), c.Response()); err != nil {
-			return errors.NewRenderError(err, "EditCassetteDialog")
-		}
-		return merr.Echo()
+		return ReRenderEditCassetteDialog(c, toolID, true, formData, ierr)
 	}
 
 	// Set HX headers
 	utils.SetHXRedirect(c, urlb.Tool(tool.ID))
 
-	t := EditCassetteDialog(EditCassetteDialogProps{
-		Open: false,
-		OOB:  true,
-	})
-	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.NewRenderError(err, "EditCassetteDialog")
-	}
-	return nil
+	return ReRenderEditCassetteDialog(c, toolID, false, formData, nil)
 }
 
 func parseCassetteForm(c echo.Context) (data CassetteFormData, ierr *errors.InputError) {
@@ -223,4 +159,50 @@ func parseCassetteForm(c echo.Context) (data CassetteFormData, ierr *errors.Inpu
 	log.Debug("Cassette dialog form values: %#v", data)
 
 	return
+}
+
+func ReRenderCassetteDialog(c echo.Context, open bool, data CassetteFormData, ierr *errors.InputError) *echo.HTTPError {
+	t := EditCassetteDialog(EditCassetteDialogProps{
+		CassetteFormData: data,
+		Open:             open,
+		OOB:              true,
+		Error:            ierr,
+	})
+	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
+		return errors.NewRenderError(err, "EditCassetteDialog")
+	}
+	return nil
+}
+
+func ReRenderNewCassetteDialog(c echo.Context, open bool, data CassetteFormData, ierr *errors.InputError) *echo.HTTPError {
+	t := NewCassetteDialog(NewCassetteDialogProps{
+		CassetteFormData: data,
+		Open:             open,
+		OOB:              true,
+		Error:            ierr,
+	})
+	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
+		return errors.NewRenderError(err, "NewCassetteDialog")
+	}
+	if ierr != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid input: %s", ierr.Error()))
+	}
+	return nil
+}
+
+func ReRenderEditCassetteDialog(c echo.Context, toolID shared.EntityID, open bool, data CassetteFormData, ierr *errors.InputError) *echo.HTTPError {
+	t := EditCassetteDialog(EditCassetteDialogProps{
+		CassetteFormData: data,
+		ToolID:           toolID,
+		Open:             open,
+		OOB:              true,
+		Error:            ierr,
+	})
+	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
+		return errors.NewRenderError(err, "EditCassetteDialog")
+	}
+	if ierr != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid input: %s", ierr.Error()))
+	}
+	return nil
 }

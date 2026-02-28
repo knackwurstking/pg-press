@@ -66,16 +66,7 @@ func PostTool(c echo.Context) *echo.HTTPError {
 
 	formData, ierr := parseToolForm(c)
 	if ierr != nil {
-		t := NewToolDialog(NewToolDialogProps{
-			ToolFormData: formData,
-			OOB:          true,
-			Open:         true,
-			Error:        ierr,
-		})
-		if err := t.Render(c.Request().Context(), c.Response()); err != nil {
-			return errors.NewRenderError(err, "NewToolDialog")
-		}
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid form data: %v", ierr)
+		return ReRenderNewToolDialog(c, true, formData, ierr)
 	}
 	log.Debug("Creating new tool: %#v", formData)
 
@@ -88,60 +79,24 @@ func PostTool(c echo.Context) *echo.HTTPError {
 	}
 	if merr := db.AddTool(tool); merr != nil {
 		ierr = errors.NewInputError("form", fmt.Sprintf("Failed to create tool: %s", merr.Error()))
-		t := NewToolDialog(NewToolDialogProps{
-			ToolFormData: formData,
-			OOB:          true,
-			Open:         true,
-			Error:        ierr,
-		})
-		if err := t.Render(c.Request().Context(), c.Response()); err != nil {
-			return errors.NewRenderError(err, "NewToolDialog")
-		}
-		return merr.Echo()
+		return ReRenderNewToolDialog(c, true, formData, ierr)
 	}
 
 	utils.SetHXTrigger(c, "tools-tab")
 
-	// Close dialog
-	t := NewToolDialog(NewToolDialogProps{
-		OOB:  true,
-		Open: false,
-	})
-	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.NewRenderError(err, "NewToolDialog")
-	}
-	return nil
+	return ReRenderNewToolDialog(c, false, formData, nil)
 }
 
 func updateTool(c echo.Context, toolID shared.EntityID) *echo.HTTPError {
 	formData, ierr := parseToolForm(c)
 	if ierr != nil {
-		t := EditToolDialog(EditToolDialogProps{
-			ToolFormData: formData,
-			ToolID:       toolID,
-			OOB:          true,
-			Open:         true,
-			Error:        ierr,
-		})
-		if err := t.Render(c.Request().Context(), c.Response()); err != nil {
-			return errors.NewRenderError(err, "EditToolDialog")
-		}
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid form data: %v", ierr)
+		return ReRenderEditToolDialog(c, toolID, true, formData, ierr)
 	}
 
 	tool, merr := db.GetTool(toolID)
 	if merr != nil {
-		t := EditToolDialog(EditToolDialogProps{
-			ToolFormData: formData,
-			ToolID:       toolID,
-			OOB:          true,
-			Open:         true,
-			Error:        errors.NewInputError("form", fmt.Sprintf("Failed to load tool: %s", merr.Error())),
-		})
-		if err := t.Render(c.Request().Context(), c.Response()); err != nil {
-			return errors.NewRenderError(err, "EditToolDialog")
-		}
-		return merr.Echo()
+		ierr = errors.NewInputError("form", fmt.Sprintf("Failed to load tool: %s", merr.Error()))
+		return ReRenderEditToolDialog(c, toolID, true, formData, ierr)
 	}
 	tool.Type = formData.Type
 	tool.Code = formData.Code
@@ -152,31 +107,15 @@ func updateTool(c echo.Context, toolID shared.EntityID) *echo.HTTPError {
 	log.Debug("Updating tool: %#v", tool)
 
 	if merr = db.UpdateTool(tool); merr != nil {
-		t := EditToolDialog(EditToolDialogProps{
-			ToolFormData: formData,
-			ToolID:       toolID,
-			OOB:          true,
-			Open:         true,
-			Error:        errors.NewInputError("form", fmt.Sprintf("Failed to update tool: %s", merr.Error())),
-		})
-		if err := t.Render(c.Request().Context(), c.Response()); err != nil {
-			return errors.NewRenderError(err, "EditToolDialog")
-		}
-		return merr.Echo()
+		ierr = errors.NewInputError("form", fmt.Sprintf("Failed to update tool: %s", merr.Error()))
+		return ReRenderEditToolDialog(c, toolID, true, formData, ierr)
 	}
 
 	// Set HX headers
 	utils.SetHXRedirect(c, urlb.Tool(tool.ID))
 
 	// Close dialog
-	t := EditToolDialog(EditToolDialogProps{
-		OOB:  true,
-		Open: false,
-	})
-	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.NewRenderError(err, "EditToolDialog")
-	}
-	return nil
+	return ReRenderEditToolDialog(c, toolID, false, formData, nil)
 }
 
 func parseToolForm(c echo.Context) (data ToolFormData, ierr *errors.InputError) {
@@ -214,4 +153,37 @@ func parseToolForm(c echo.Context) (data ToolFormData, ierr *errors.InputError) 
 	log.Debug("Tool dialog form values: %#v", data)
 
 	return
+}
+
+func ReRenderNewToolDialog(c echo.Context, open bool, data ToolFormData, ierr *errors.InputError) *echo.HTTPError {
+	t := NewToolDialog(NewToolDialogProps{
+		ToolFormData: data,
+		Open:         open,
+		OOB:          true,
+		Error:        ierr,
+	})
+	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
+		return errors.NewRenderError(err, "NewToolDialog")
+	}
+	if ierr != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid form data: %v", ierr)
+	}
+	return nil
+}
+
+func ReRenderEditToolDialog(c echo.Context, toolID shared.EntityID, open bool, data ToolFormData, ierr *errors.InputError) *echo.HTTPError {
+	t := EditToolDialog(EditToolDialogProps{
+		ToolFormData: data,
+		ToolID:       toolID,
+		Open:         open,
+		OOB:          true,
+		Error:        ierr,
+	})
+	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
+		return errors.NewRenderError(err, "EditToolDialog")
+	}
+	if ierr != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid form data: %v", ierr)
+	}
+	return nil
 }
