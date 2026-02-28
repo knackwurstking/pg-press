@@ -73,25 +73,25 @@ templ reportListItem(tr *shared.TroubleReport, user *shared.User) {
 			})
 			// Attachments Preview Container
 			if len(tr.LinkedAttachments) > 0 {
-				@attachmentsPreview(tr.LinkedAttachments)
+				@attachmentsPreview(tr.ID, tr.LinkedAttachments)
 			}
 		}
 	}
 }
 
 // TODO: Migrate to templui with tailwindcss
-templ attachmentsPreview(linkedAttachments []string) {
+templ attachmentsPreview(trID shared.EntityID, linkedAttachments []string) {
 	<div
 		class="attachments-preview-placeholder"
-		data-trouble-report-id={ fmt.Sprintf("%d", tr.ID) }
-		hx-get={ urlb.TroubleReportsAttachmentsPreview(tr.ID) }
+		data-trouble-report-id={ fmt.Sprintf("%d", trID) }
+		hx-get={ urlb.TroubleReportsAttachmentsPreview(trID) }
 		hx-trigger="click"
 		hx-swap="outerHTML"
 		hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 	>
 		<div class="attachments-preview-label">
 			<i class="bi bi-paperclip"></i>
-			Anhänge ({ len(tr.LinkedAttachments) }) - Klicken Sie hier, um zu laden...
+			Anhänge ({ len(linkedAttachments) }) - Klicken Sie hier, um zu laden...
 		</div>
 	</div>
 }
