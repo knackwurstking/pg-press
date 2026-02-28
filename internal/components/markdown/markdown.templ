@@ -23,6 +23,10 @@ templ Markdown(props ...Props) {
 		}
 		prop := props[0]
 
+		if prop.Attributes == nil {
+			prop.Attributes = templ.Attributes{}
+		}
+
 		prop.Attributes["data-markdown-content"] = prop.Content
 
 		if c, ok := prop.Attributes["class"]; ok {
