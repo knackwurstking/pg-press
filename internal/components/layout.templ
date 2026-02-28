@@ -51,7 +51,6 @@ templ links() {
 	<link rel="apple-touch-icon" href={ ui.AssetURL(env.ServerPathPrefix, "/apple-touch-icon-180x180.png") }/>
 	<link rel="mask-icon" href={ ui.AssetURL(env.ServerPathPrefix, "/maskable-icon-512x512.png") } color="#b8bb26"/>
 	<link rel="manifest" href={ ui.AssetURL(env.ServerPathPrefix, "/manifest.json") }/>
-	<link rel="stylesheet" href={ ui.AssetURL(env.ServerPathPrefix, "/css/bootstrap-icons.min.css") }/>
 	<link rel="stylesheet" href={ ui.AssetURL(env.ServerPathPrefix, "/css/output.css") }/>
 }
 
@@ -188,23 +187,7 @@ templ scripts() {
 }
 
 templ styles() {
-	<style>
-		html:has(dialog[open]),
-		body:has(dialog[open]) {
-			overflow: hidden;
-		}
-
-		details summary::after {
-			font-family: "bootstrap-icons";
-			content: "\f285";
-		}
-
-		details[open] summary::after {
-			content: "\f282";
-		}
-
-		/* Image viewer styles */
-
+	<style name="image-viewer">
 		.image-viewer button.close {
 			position: fixed;
 			top: var(--spacing);

@@ -4,25 +4,6 @@
  */
 
 /* =================================================================
- * GENERAL TROUBLE REPORT STYLES
- * ================================================================= */
-
-/* Pre-formatted text styling */
-pre {
-	text-wrap: wrap;
-}
-
-/* Details element styling */
-details[id^="trouble-report-"] {
-	margin: var(--ui-spacing) auto;
-}
-
-/* Vote button styling */
-#vote-for-delete {
-	transform: scale(0.75);
-}
-
-/* =================================================================
  * ATTACHMENT PREVIEW STYLES
  * ================================================================= */
 
@@ -167,6 +148,7 @@ details[id^="trouble-report-"] {
 	from {
 		transform: rotate(0deg);
 	}
+
 	to {
 		transform: rotate(360deg);
 	}
@@ -188,6 +170,7 @@ details[id^="trouble-report-"] {
 		transform: scale(0.5);
 		opacity: 0;
 	}
+
 	to {
 		transform: scale(1);
 		opacity: 1;
@@ -204,6 +187,7 @@ details[id^="trouble-report-"] {
 	from {
 		transform: rotate(0deg);
 	}
+
 	to {
 		transform: rotate(360deg);
 	}
@@ -215,6 +199,7 @@ details[id^="trouble-report-"] {
 		transform: scale(0.5);
 		opacity: 0;
 	}
+
 	to {
 		transform: scale(1);
 		opacity: 1;
