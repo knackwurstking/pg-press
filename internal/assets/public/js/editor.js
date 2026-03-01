@@ -17,12 +17,12 @@ function toggleMarkdownFeatures() {
 	var textarea = document.getElementById('content');
 
 	if (checkbox.checked) {
-		previewContainer.style.display = 'block';
+		previewContainer.classList.remove("hidden")
 		textarea.setAttribute('placeholder', 'Inhalt (Markdown-Formatierung aktiviert)');
 		updatePreview();
 		textarea.addEventListener('input', updatePreview);
 	} else {
-		previewContainer.style.display = 'none';
+		previewContainer.classList.add("hidden")
 		textarea.removeEventListener('input', updatePreview);
 		textarea.setAttribute('placeholder', 'Inhalt');
 	}
