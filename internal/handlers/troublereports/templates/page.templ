@@ -69,9 +69,5 @@ templ troubleReportEntries() {
 
 // TODO: Import markdown component styles and scripts after updating to the current ui version
 templ additionalHead() {
-	<link
-		rel="stylesheet"
-		href={ ui.AssetURL(env.ServerPathPrefix, "/css/trouble-reports.css") }
-	/>
 	<script defer src={ ui.AssetURL(env.ServerPathPrefix, "/js/trouble-reports.js") }></script>
 }

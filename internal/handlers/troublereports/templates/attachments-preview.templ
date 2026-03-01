@@ -4,18 +4,19 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/knackwurstking/ui/pkg/css"
 )
 
 templ AttachmentsPreview(attachments []string) {
 	if len(attachments) > 0 {
-		<div class="attachments-preview-container">
-			<div class={ "attachments-preview-label", css.Flex, css.Gap, css.ItemsCenter, css.UserSelectNone }>
-				<i class="bi bi-paperclip"></i>
+		<div class="attachments-preview border p-4 rounded-md bg-muted text-muted-foreground">
+			<div class="attachments-preview-label flex gap-2 items-center select-none">
+				@icon.Paperclip()
 				Bilder ({ len(attachments) })
 			</div>
-			<div class={ "attachments-preview-scroll", css.Flex, css.Gap }>
+			<div class="attachments-preview-scroll flex gap-2">
 				for _, a := range attachments {
 					@attachmentPreviewItem(a)
 				}
