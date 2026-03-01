@@ -50,7 +50,7 @@ templ Page(props *PageProps) {
 		<main class="mt-8 p-8">
 			<div class="editor-container">
 				<form
-					class="editor-form flex flex-col gap-4 px-4"
+					class="editor-form flex flex-col gap-6 px-4"
 					method="POST"
 					action={ urlb.EditorSave() }
 					enctype="multipart/form-data"
@@ -59,9 +59,7 @@ templ Page(props *PageProps) {
 					@titleInput(props.Title)
 					@markdownToggle(props.UseMarkdown)
 					@contentTextarea(props.Content)
-					<br/>
 					@markdownPreview()
-					<br/>
 					if supportsAttachments(props.Type) {
 						@attachmentsSeparator()
 						@attachmentsSection(props.Attachments)
@@ -163,24 +161,16 @@ templ contentTextarea(content string) {
 	}
 }
 
-// TODO: Migrate to templui & tailwind
 templ markdownPreview() {
-	<div id="markdown-preview-container" class={ css.MY, css.TransitionAll } style="display: none;">
+	<div id="markdown-preview-container" class="hidden">
 		<div
 			id="markdown-preview"
-			class={ css.Border, css.Flex, css.FlexCol, css.OverflowHidden }
-			style={ fmt.Sprintf("height: 400px; border-radius: %s;", css.VarRadius) }
+			class="border flex flex-col overfow-hidden h-auto max-h-150 rounded"
 		>
-			<div
-				class={ css.PX, css.PYSm, 
-					css.BorderBottom, 
-					css.Muted, 
-					css.Flex, css.JustifyBetween, css.ItemsCenter, 
-					css.TextSemibold, css.TextSM }
-			>
+			<div class="p-2 border-b bg-muted text-muted-foreground font-semibold text-sm">
 				<span>Live-Vorschau</span>
 			</div>
-			<div id="preview-content" class={ "markdown-content", css.P, css.Flex1, css.OverflowYAuto }></div>
+			<div id="preview-content" class="markdown-content p flex-1 overflow-y-auto"></div>
 		</div>
 	</div>
 }
