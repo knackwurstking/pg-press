@@ -49,8 +49,7 @@ templ searchBar() {
 templ actionBar() {
 	@components.ActionBar() {
 		@button.Button(button.Props{
-			Variant: button.VariantLink,
-			Href:    string(urlb.Editor("troublereport", 0, urlb.TroubleReports())),
+			Href: string(urlb.Editor("troublereport", 0, urlb.TroubleReports())),
 		}) {
 			@icon.Plus()
 			Erstellen
