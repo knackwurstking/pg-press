@@ -15,7 +15,7 @@ templ AttachmentsPreview(attachments []string) {
 				@icon.Paperclip()
 				Bilder ({ len(attachments) })
 			</div>
-			<div class="attachments-preview-scroll flex gap-2">
+			<div class="attachments-preview-scroll flex gap-4 overflow-x-auto p-4">
 				for _, a := range attachments {
 					@attachmentPreviewItem(a)
 				}
@@ -27,13 +27,13 @@ templ AttachmentsPreview(attachments []string) {
 templ attachmentPreviewItem(attachment string) {
 	{{ src := urlb.Attachment(attachment) }}
 	<div
-		class="attachment-preview-item flex flex-col flex-wrap gap-2 items-center select-none scroll-x-auto"
+		class="attachment-preview-item cursor-pointer"
 		onclick={ components.OpenImageViewer(src) }
 		tabindex="0"
 		role="button"
 		aria-label={ fmt.Sprintf("Bild \"%s\" anzeigen", attachment) }
 	>
-		<div class="attachment-preview-image max-w-24 max-h-24 overflow-hidden rounded-md">
+		<div class="attachment-preview-image w-24 h-24 overflow-hidden rounded-md">
 			<img
 				loading="lazy"
 				src={ src }

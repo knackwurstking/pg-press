@@ -17,6 +17,7 @@ templ ListReports(user *shared.User, troubleReports []*shared.TroubleReport) {
 			Class: "w-full",
 		}) {
 			@reportListItem(tr, user)
+			<br/>
 		}
 	}
 }
@@ -24,14 +25,20 @@ templ ListReports(user *shared.User, troubleReports []*shared.TroubleReport) {
 templ reportListItem(tr *shared.TroubleReport, user *shared.User) {
 	@accordion.Item(accordion.ItemProps{
 		ID:    fmt.Sprintf("trouble-report-%d", tr.ID),
-		Class: "trouble-report",
+		Class: "trouble-report border rounded px-4",
 		Attributes: templ.Attributes{
 			"ontoggle": `updateURLHash(event)`,
 		},
 	}) {
 		@accordion.Trigger() {
-			{ tr.Title }
-			<div class="actions flex gap-2 justify-end items-center">
+			<span class="flex justify-between items-center w-full">
+				{ tr.Title }
+			</span>
+		}
+		@accordion.Content(accordion.ContentProps{
+			Class: "relative",
+		}) {
+			<div class="actions top-0 right-0 flex gap-2 justify-end items-center w-full">
 				// Edit Report
 				@button.Button(button.Props{
 					Size: button.SizeIcon,
@@ -63,7 +70,7 @@ templ reportListItem(tr *shared.TroubleReport, user *shared.User) {
 					Variant: button.VariantDestructive,
 					Size:    button.SizeIcon,
 					Attributes: templ.Attributes{
-						"hx-delete":             urlb.TroubleReportsDelete(tr.ID),
+						"hx-delete":             string(urlb.TroubleReportsDelete(tr.ID)),
 						"hx-trigger":            "click",
 						"hx-target":             "#data",
 						"hx-confirm":            "Sind Sie sicher, dass Sie diesen Fehlerbericht löschen möchten?",
@@ -75,8 +82,6 @@ templ reportListItem(tr *shared.TroubleReport, user *shared.User) {
 					@icon.Trash()
 				}
 			</div>
-		}
-		@accordion.Content() {
 			@markdown.Markdown(markdown.Props{
 				UseMarkdown: tr.UseMarkdown,
 				Content:     tr.Content,
@@ -91,7 +96,7 @@ templ reportListItem(tr *shared.TroubleReport, user *shared.User) {
 
 templ attachmentsPreview(trID shared.EntityID, linkedAttachments []string) {
 	<div
-		class="attachments-preview border p-4 rounded-md bg-muted text-muted-foreground"
+		class="attachments-preview border p-4 rounded-md bg-muted text-muted-foreground cursor-pointer"
 		data-trouble-report-id={ fmt.Sprintf("%d", trID) }
 		hx-get={ urlb.TroubleReportsAttachmentsPreview(trID) }
 		hx-trigger="click"
