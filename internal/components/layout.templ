@@ -317,21 +317,21 @@ templ styles() {
 		.markdown-content blockquote {
 			margin: 1em 0;
 			padding: 0.5em 1em;
-			border-left: 4px solid var(--border);
+			border-left: 4px solid var(--markdown-border, #e5e7eb);
 		}
 
 		.markdown-content pre code {
 			display: block;
 			padding: 1em;
-			background: var(--muted);
-			color: var(--muted-foreground);
+			background: var(--markdown-muted, #f3f4f6);
+			color: var(--markdown-foreground, #6b7280);
 			border-radius: 4px;
 			overflow-x: auto;
 		}
 
 		.markdown-content del {
 			text-decoration: line-through;
-			color: var(--muted);
+			color: var(--markdown-muted, #6b7280);
 		}
 
 		.markdown-content table {
@@ -343,12 +343,12 @@ templ styles() {
 		.markdown-content th,
 		.markdown-content td {
 			padding: 0.5em;
-			border: 1px solid var(--border);
+			border: 1px solid var(--markdown-border, #e5e7eb);
 			text-align: left;
 		}
 
 		.markdown-content th {
-			background: var(--muted);
+			background: var(--markdown-muted, #f3f4f6);
 			font-weight: 600;
 		}
 
