@@ -278,6 +278,7 @@ templ fileUploadArea() {
 	</div>
 }
 
+// TODO: Migrate to tailwindcss
 templ filePreviewArea() {
 	<div
 		id="file-preview"
@@ -309,16 +310,18 @@ templ filePreviewArea() {
 }
 
 templ formActions(options *PageProps) {
-	<div class={ css.MT, css.PT, css.BorderTop, css.Flex, css.Gap, css.JustifyEnd }>
-		<button type="submit" class={ css.Primary, css.Flex, css.GapSm, css.ItemsCenter }>
+	<div class="border-t flex gap-4 justify-end p-4">
+		@button.Button(button.Props{
+			Type: button.TypeSubmit,
+		}) {
 			if options.ID > 0 {
-				<i class="bi bi-check-circle"></i>
+				@icon.CircleCheck()
 				Aktualisieren
 			} else {
-				<i class="bi bi-plus-circle"></i>
+				@icon.CirclePlus()
 				Erstellen
 			}
-		</button>
+		}
 	</div>
 }
 
