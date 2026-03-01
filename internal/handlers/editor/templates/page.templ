@@ -182,12 +182,8 @@ templ attachmentsSeparator() {
 	</div>
 }
 
-// TODO: Migrate to templui
 templ attachmentsSection(attachments []string) {
-	<div
-		class={ css.Border, css.PLg, css.Muted, css.MT, css.TransitionAll }
-		style={ fmt.Sprintf("border-radius: %s;", css.VarRadius) }
-	>
+	<div class="border p-6 rounded bg-muted text-muted-foreground transition">
 		@attachmentsSectionHeader()
 		if len(attachments) > 0 {
 			@existingAttachments(attachments)
@@ -198,22 +194,20 @@ templ attachmentsSection(attachments []string) {
 }
 
 templ attachmentsSectionHeader() {
-	<div class={ css.MB }>
+	<div>
 		<h3
-			class={ css.TextLG, css.TextSemibold, css.Primary, css.Ghost, css.Flex, css.GapSm, css.ItemsCenter, css.MB }
+			class="text-lg font-semibold text-primary flex gap-2 items-center mb-2"
 		>
-			<i class="bi bi-paperclip"></i>
+			@icon.Paperclip()
 			Dateien & Anhänge
 		</h3>
-		<div
-			class={ css.P, css.BorderLeft, css.Primary, css.TextSM, css.TextMedium, css.Muted }
-			style="border-left-width: 4px;"
-		>
+		<div class="p-4 border-l bg-primary text-primary-foreground rounded text-sm my-2">
 			Bilder (max. 10MB pro Datei, max. 10 Dateien)
 		</div>
 	</div>
 }
 
+// TODO: Migrate to tailwindcss
 templ existingAttachments(attachments []string) {
 	<details class={ css.Border, css.MB } style={ fmt.Sprintf("border-radius: %s;", css.VarRadius) }>
 		<summary class={ css.P, css.CursorPointer, css.TextMedium, css.Flex, css.Gap, css.ItemsCenter }>
@@ -228,23 +222,23 @@ templ existingAttachments(attachments []string) {
 	</details>
 }
 
+// TODO: Migrate to tailwindcss
 templ existingAttachmentItem(attachment string, index int) {
 	<div
-		class={ css.P, css.Border, css.Flex, css.Gap, css.JustifyBetween, css.ItemsCenter }
+		class="p border flex gap-4 justify-between items-center rounded"
 		data-attachment-path={ attachment }
-		style={ fmt.Sprintf("border-radius: %s", css.VarRadius) }
 	>
-		<div class={ css.Flex, css.Gap, css.ItemsCenter }>
-			<span class={ css.TextMedium }>Anhang { index }</span>
-			<span class={ css.Muted, css.TextSM }>({ attachment })</span>
+		<div class="flex gap-4 items-center">
+			<span>Anhang { index }</span>
+			<span class="bg-muted text-muted-foreground text-sm">({ attachment })</span>
 		</div>
-		<div class={ css.Flex, css.GapSm }>
+		<div class="flex gap-2">
 			<button
 				type="button"
 				class={ css.Secondary, css.ButtonSmall }
 				onclick={ components.OpenImageViewer(urlb.Attachment(attachment)) }
 			>
-				<i class="bi bi-eye"></i>
+				@icon.Eye()
 				Anzeigen
 			</button>
 			<button
@@ -252,7 +246,7 @@ templ existingAttachmentItem(attachment string, index int) {
 				class={ css.Destructive, css.ButtonSmall }
 				onclick={ deleteAttachment(attachment) }
 			>
-				<i class="bi bi-trash"></i>
+				@icon.Trash()
 				Löschen
 			</button>
 		</div>
@@ -261,25 +255,26 @@ templ existingAttachmentItem(attachment string, index int) {
 
 templ fileUploadArea() {
 	<div
-		class={ css.Border, css.PXl, css.TextCenter, css.CursorPointer, css.TransitionAll, css.MB }
+		class="border rounded text-center cursor-pointer p-4 my-2 flex flex-col justify-center items-center gap-2"
 		onclick='document.getElementById("attachments").click();'
 		ondrop="handleFileDrop(event)"
 		ondragover="handleDragOver(event)"
 		ondragleave="handleDragLeave(event)"
-		style={ fmt.Sprintf("border-radius: %s;", css.VarRadius) }
 	>
-		<i class={ "bi", "bi-cloud-upload", css.Text2XL, css.MB }></i>
+		@icon.CloudUpload()
 		<div class={ css.TextMedium, css.MB }>Bilder hochladen</div>
-		<div class={ css.TextSM, css.Opacity75 }>Klicken oder Dateien hierher ziehen</div>
-		<input
-			type="file"
-			name="attachments"
-			id="attachments"
-			multiple
-			accept="image/*"
-			onchange="onAttachments(event)"
-			class={ css.Hidden }
-		/>
+		<div class="text-sm opacity-75">Klicken oder Dateien hierher ziehen</div>
+		@input.Input(input.Props{
+			ID:    "attachments",
+			Class: "hidden",
+			Name:  "attachments",
+			Type:  input.TypeFile,
+			Attributes: templ.Attributes{
+				"multiple": true,
+				"accept":   "image/*",
+				"onchange": "onAttachments(event)",
+			},
+		})
 	</div>
 }
 
