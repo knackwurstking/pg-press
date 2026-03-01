@@ -10,7 +10,7 @@ import (
 
 templ AttachmentsPreview(attachments []string) {
 	if len(attachments) > 0 {
-		<div class="attachments-preview-container">
+		<div class="attachments-preview border p-4 rounded-md bg-muted text-muted-foreground">
 			<div class={ "attachments-preview-label", css.Flex, css.Gap, css.ItemsCenter, css.UserSelectNone }>
 				<i class="bi bi-paperclip"></i>
 				Bilder ({ len(attachments) })

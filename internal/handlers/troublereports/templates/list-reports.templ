@@ -89,18 +89,17 @@ templ reportListItem(tr *shared.TroubleReport, user *shared.User) {
 	}
 }
 
-// TODO: Migrate to templui with tailwindcss
 templ attachmentsPreview(trID shared.EntityID, linkedAttachments []string) {
 	<div
-		class="attachments-preview-placeholder"
+		class="attachments-preview border p-4 rounded-md bg-muted text-muted-foreground"
 		data-trouble-report-id={ fmt.Sprintf("%d", trID) }
 		hx-get={ urlb.TroubleReportsAttachmentsPreview(trID) }
 		hx-trigger="click"
 		hx-swap="outerHTML"
-		hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
+		hx-on::response-error="alert(event.detail.xhr.responseText)"
 	>
-		<div class="attachments-preview-label">
-			<i class="bi bi-paperclip"></i>
+		<div class="attachments-preview-label font-bold flex items-center gap-2">
+			@icon.Paperclip()
 			Anhänge ({ len(linkedAttachments) }) - Klicken Sie hier, um zu laden...
 		</div>
 	</div>

@@ -7,29 +7,6 @@
  * ATTACHMENT PREVIEW STYLES
  * ================================================================= */
 
-/* Attachment Preview Container */
-.attachments-preview-container {
-	margin: var(--ui-spacing) 0;
-	border: 1px solid var(--ui-border-color);
-	border-radius: 4px;
-	padding: 12px;
-}
-
-.attachments-preview-label {
-	font-weight: bold;
-	display: flex;
-	align-items: center;
-	gap: 6px;
-}
-
-.attachments-preview-placeholder {
-	background-color: var(--ui-info);
-	border-radius: var(--ui-radius);
-	color: var(--ui-info-text);
-	cursor: pointer;
-	padding: var(--ui-spacing);
-}
-
 .attachments-preview-scroll {
 	padding: var(--ui-spacing);
 	display: flex;
