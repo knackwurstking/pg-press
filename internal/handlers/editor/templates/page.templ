@@ -9,6 +9,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components/form"
 	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/components/input"
+	"github.com/knackwurstking/pg-press/internal/components/textarea"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
@@ -57,7 +58,6 @@ templ Page(props *PageProps) {
 					@hiddenFields(props)
 					@titleInput(props.Title)
 					@markdownToggle(props.UseMarkdown)
-					<br/>
 					@contentTextarea(props.Content)
 					<br/>
 					@markdownPreview()
@@ -141,22 +141,29 @@ templ markdownToggle(useMarkdown bool) {
 	}
 }
 
-// TODO: Migrate...
 templ contentTextarea(content string) {
-	<div class={ css.Flex, css.FlexCol, css.GapSm }>
-		<label for="content" class={ css.TextSM, css.TextMedium }>Inhalt</label>
-		<textarea
-			name="content"
-			id="content"
-			class={ css.WFull, css.ResizeY }
-			placeholder="Inhalt eingeben..."
-			required
-			rows="15"
-			style="font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace; min-height: 400px;"
-		>{ content }</textarea>
-	</div>
+	@form.Item() {
+		@form.Label(form.LabelProps{
+			For: "content",
+		}) {
+			Inhalt
+		}
+		@textarea.Textarea(textarea.Props{
+			ID:          "content",
+			Class:       "w-full",
+			Name:        "content",
+			Placeholder: "Inhalt eingeben...",
+			Value:       content,
+			Rows:        15,
+			AutoResize:  false,
+			Attributes: templ.Attributes{
+				"required": true,
+			},
+		})
+	}
 }
 
+// TODO: Migrate to templui & tailwind
 templ markdownPreview() {
 	<div id="markdown-preview-container" class={ css.MY, css.TransitionAll } style="display: none;">
 		<div
@@ -172,14 +179,6 @@ templ markdownPreview() {
 					css.TextSemibold, css.TextSM }
 			>
 				<span>Live-Vorschau</span>
-				<button
-					type="button"
-					class={ css.Secondary, css.ButtonSmall, css.Flex, css.GapSm, css.ItemsCenter }
-					onclick="togglePreviewMode()"
-				>
-					<i class="bi bi-arrows-angle-expand"></i>
-					<span id="preview-toggle-text">Vollbild</span>
-				</button>
 			</div>
 			<div id="preview-content" class={ "markdown-content", css.P, css.Flex1, css.OverflowYAuto }></div>
 		</div>

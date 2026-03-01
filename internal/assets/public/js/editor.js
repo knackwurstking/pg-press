@@ -38,24 +38,6 @@ function updatePreview() {
 	previewContent.innerHTML = '<div class="markdown-content">' + html + '</div>';
 }
 
-function togglePreviewMode() {
-	var container = document.querySelector('.editor-container');
-	var toggleText = document.getElementById('preview-toggle-text');
-	var toggleIcon = document.querySelector('#markdown-preview button i');
-
-	isPreviewFullscreen = !isPreviewFullscreen;
-
-	if (isPreviewFullscreen) {
-		container.classList.add('preview-fullscreen');
-		toggleText.textContent = 'Split';
-		toggleIcon.className = 'bi bi-arrows-angle-contract';
-	} else {
-		container.classList.remove('preview-fullscreen');
-		toggleText.textContent = 'Vollbild';
-		toggleIcon.className = 'bi bi-arrows-angle-expand';
-	}
-}
-
 function insertMarkdown(before, after) {
 	var textarea = document.getElementById('content');
 	if (!textarea) return;
