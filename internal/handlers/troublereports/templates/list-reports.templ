@@ -3,12 +3,12 @@ package templates
 import (
 	"fmt"
 
-	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/components/accordion"
+	"github.com/knackwurstking/pg-press/internal/components/button"
+	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/components/markdown"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"github.com/knackwurstking/ui/pkg/css"
 )
 
 templ ListReports(user *shared.User, troubleReports []*shared.TroubleReport) {
@@ -31,39 +31,49 @@ templ reportListItem(tr *shared.TroubleReport, user *shared.User) {
 	}) {
 		@accordion.Trigger() {
 			{ tr.Title }
-			// TODO: Migrate to templui with tailwindcss
-			<div class={ "actions", css.Flex, css.Gap, css.JustifyEnd, css.ItemsCenter }>
+			<div class="actions flex gap-2 justify-end items-center">
 				// Edit Report
-				<a
-					href={ urlb.Editor("troublereport", tr.ID, urlb.TroubleReports()) }
-					class={ css.ButtonIcon, css.Ghost }
-					role="button"
-				>
-					<i class="bi bi-pen"></i>
-				</a>
+				@button.Button(button.Props{
+					Size: button.SizeIcon,
+					Attributes: templ.Attributes{
+						"title": "Fehlerbericht bearbeiten",
+					},
+					Href:     string(urlb.Editor("troublereport", tr.ID, urlb.TroubleReports())),
+					Disabled: !user.IsAdmin(),
+				}) {
+					@icon.Pen()
+				}
 				// Share Report (PDF)
-				<button
-					role="button"
-					class={ css.ButtonIcon, css.Info, css.Ghost }
-					title="Als PDF teilen"
-					onclick={ components.DownloadTroubleReportPDF(tr.ID) }
-				>
-					<i class="bi bi-share"></i>
-				</button>
+				@button.Button(button.Props{
+					Variant: button.VariantSecondary,
+					Size:    button.SizeIcon,
+					Attributes: templ.Attributes{
+						"onclick": fmt.Sprintf(
+							`downloadTroubleReportPDF(event, %s, %s)`,
+							urlb.TroubleReportsSharePDF(tr.ID),
+							"trouble_report_"+fmt.Sprintf("%d", tr.ID)+".pdf",
+						),
+						"title": "Fehlerbericht als PDF herunterladen",
+					},
+				}) {
+					@icon.Share()
+				}
 				// Admin only: Delete Report
-				<button
-					hx-delete={ urlb.TroubleReportsDelete(tr.ID) }
-					hx-trigger="click"
-					hx-target="#data"
-					hx-confirm="Sind Sie sicher, dass Sie diesen Fehlerbericht löschen möchten?"
-					hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
-					class={ css.ButtonIcon, css.Destructive, css.Ghost }
-					if !user.IsAdmin() {
-						disabled
-					}
-				>
-					<i class="bi bi-trash"></i>
-				</button>
+				@button.Button(button.Props{
+					Variant: button.VariantDestructive,
+					Size:    button.SizeIcon,
+					Attributes: templ.Attributes{
+						"hx-delete":             urlb.TroubleReportsDelete(tr.ID),
+						"hx-trigger":            "click",
+						"hx-target":             "#data",
+						"hx-confirm":            "Sind Sie sicher, dass Sie diesen Fehlerbericht löschen möchten?",
+						"hx-on::response-error": "alert(event.detail.xhr.responseText)",
+						"title":                 "Fehlerbericht löschen",
+					},
+					Disabled: !user.IsAdmin(),
+				}) {
+					@icon.Trash()
+				}
 			</div>
 		}
 		@accordion.Content() {
