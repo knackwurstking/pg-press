@@ -367,6 +367,13 @@ templ styles() {
 			margin-top: 0.25em;
 		}
 	</style>
+	<style name="markdown-overrides">
+		:root {
+			--markdown-border: var(--border);
+			--markdown-muted: var(--muted);
+			--markdown-foreground: var(--muted-foreground);
+		}
+	</style>
 }
 
 templ appBar(title string, navContent templ.Component) {
