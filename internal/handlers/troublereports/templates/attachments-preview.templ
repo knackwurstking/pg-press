@@ -10,7 +10,7 @@ import (
 
 templ AttachmentsPreview(attachments []string) {
 	if len(attachments) > 0 {
-		<div class="attachments-preview border p-4 rounded-md bg-muted text-muted-foreground">
+		<div class="attachments-preview border p-4 rounded bg-muted text-muted-foreground">
 			<div class="attachments-preview-label flex gap-2 items-center select-none">
 				@icon.Paperclip()
 				Bilder ({ len(attachments) })
@@ -33,7 +33,7 @@ templ attachmentPreviewItem(attachment string) {
 		role="button"
 		aria-label={ fmt.Sprintf("Bild \"%s\" anzeigen", attachment) }
 	>
-		<div class="attachment-preview-image w-24 h-24 overflow-hidden rounded-md">
+		<div class="attachment-preview-image w-24 h-24 overflow-hidden rounded">
 			<img
 				loading="lazy"
 				src={ src }

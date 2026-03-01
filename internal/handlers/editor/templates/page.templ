@@ -5,6 +5,7 @@ import (
 
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/components/button"
+	"github.com/knackwurstking/pg-press/internal/components/checkbox"
 	"github.com/knackwurstking/pg-press/internal/components/form"
 	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/components/input"
@@ -54,9 +55,7 @@ templ Page(props *PageProps) {
 					enctype="multipart/form-data"
 				>
 					@hiddenFields(props)
-					<br/>
 					@titleInput(props.Title)
-					<br/>
 					@markdownToggle(props.UseMarkdown)
 					<br/>
 					@contentTextarea(props.Content)
@@ -121,32 +120,28 @@ templ titleInput(title string) {
 	}
 }
 
-// TODO: ...
 templ markdownToggle(useMarkdown bool) {
-	<div class={ css.MY }>
-		<div
-			class={ css.P, css.Border, css.Muted, css.CursorPointer, css.TransitionAll }
-			style={ fmt.Sprintf("border-radius: %s", css.VarRadius) }
-		>
-			<label
-				for="use_markdown"
-				class={ css.Flex, css.Gap, css.ItemsCenter, css.CursorPointer }
-			>
-				<input
-					type="checkbox"
-					name="use_markdown"
-					id="use_markdown"
-					onchange="toggleMarkdownFeatures()"
-					if useMarkdown {
-						checked
-					}
-				/>
-				<span class={ css.TextMedium, css.WFull }>Markdown-Formatierung verwenden</span>
-			</label>
-		</div>
-	</div>
+	@form.ItemFlex(form.ItemProps{
+		Class: "p-4 text-muted-foreground bg-muted rounded border transition",
+	}) {
+		@checkbox.Checkbox(checkbox.Props{
+			ID:      "use_markdown",
+			Name:    "use_markdown",
+			Checked: useMarkdown,
+			Attributes: templ.Attributes{
+				"onchange": "toggleMarkdownFeatures()",
+			},
+		})
+		@form.Label(form.LabelProps{
+			Class: "cursor-pointer",
+			For:   "use_markdown",
+		}) {
+			Markdown-Formatierung verwenden
+		}
+	}
 }
 
+// TODO: Migrate...
 templ contentTextarea(content string) {
 	<div class={ css.Flex, css.FlexCol, css.GapSm }>
 		<label for="content" class={ css.TextSM, css.TextMedium }>Inhalt</label>

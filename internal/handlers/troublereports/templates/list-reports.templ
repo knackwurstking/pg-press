@@ -96,7 +96,7 @@ templ reportListItem(tr *shared.TroubleReport, user *shared.User) {
 
 templ attachmentsPreview(trID shared.EntityID, linkedAttachments []string) {
 	<div
-		class="attachments-preview border p-4 rounded-md bg-muted text-muted-foreground cursor-pointer"
+		class="attachments-preview border p-4 rounded bg-muted text-muted-foreground cursor-pointer"
 		data-trouble-report-id={ fmt.Sprintf("%d", trID) }
 		hx-get={ urlb.TroubleReportsAttachmentsPreview(trID) }
 		hx-trigger="click"
