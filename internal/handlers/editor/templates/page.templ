@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/accordion"
 	"github.com/knackwurstking/pg-press/internal/components/button"
 	"github.com/knackwurstking/pg-press/internal/components/checkbox"
 	"github.com/knackwurstking/pg-press/internal/components/form"
@@ -207,19 +208,23 @@ templ attachmentsSectionHeader() {
 	</div>
 }
 
-// TODO: Migrate to tailwindcss
 templ existingAttachments(attachments []string) {
-	<details class={ css.Border, css.MB } style={ fmt.Sprintf("border-radius: %s;", css.VarRadius) }>
-		<summary class={ css.P, css.CursorPointer, css.TextMedium, css.Flex, css.Gap, css.ItemsCenter }>
-			<i class="bi bi-images"></i>
-			Vorhandene Bilder ({ len(attachments) })
-		</summary>
-		<div id="existing-attachments" class={ css.Flex, css.FlexCol, css.Gap, css.MT }>
-			for attachmentIndex, attachment := range attachments {
-				@existingAttachmentItem(attachment, attachmentIndex+1)
+	@accordion.Accordion() {
+		@accordion.Item() {
+			@accordion.Trigger() {
+				@icon.Images()
+				Vorhandene Bilder ({ len(attachments) })
 			}
-		</div>
-	</details>
+			@accordion.Content(accordion.ContentProps{
+				ID:    "existing-attachments",
+				Class: "space-y-2",
+			}) {
+				for attachmentIndex, attachment := range attachments {
+					@existingAttachmentItem(attachment, attachmentIndex+1)
+				}
+			}
+		}
+	}
 }
 
 // TODO: Migrate to tailwindcss
