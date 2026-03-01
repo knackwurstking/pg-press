@@ -235,7 +235,6 @@ templ styles() {
 	<style name="markdown">
 		.markdown-content {
 			line-height: 1.6;
-			color: var(--ui-text);
 		}
 
 		.markdown-content h1,
@@ -304,7 +303,7 @@ templ styles() {
 		}
 
 		.markdown-content strong {
-			font-weight: 600;
+			font-weight: bold;
 		}
 
 		.markdown-content em {
@@ -318,21 +317,21 @@ templ styles() {
 		.markdown-content blockquote {
 			margin: 1em 0;
 			padding: 0.5em 1em;
-			border-left: 3px solid var(--ui-border);
-			background: var(--ui-bg-subtle);
+			border-left: 4px solid var(--border);
 		}
 
 		.markdown-content pre code {
 			display: block;
 			padding: 1em;
-			background: var(--ui-bg-subtle);
+			background: var(--muted);
+			color: var(--muted-foreground);
 			border-radius: 4px;
 			overflow-x: auto;
 		}
 
 		.markdown-content del {
 			text-decoration: line-through;
-			color: var(--ui-text-subtle);
+			color: var(--muted);
 		}
 
 		.markdown-content table {
@@ -344,12 +343,12 @@ templ styles() {
 		.markdown-content th,
 		.markdown-content td {
 			padding: 0.5em;
-			border: 1px solid var(--ui-border);
+			border: 1px solid var(--border);
 			text-align: left;
 		}
 
 		.markdown-content th {
-			background: var(--ui-bg-subtle);
+			background: var(--muted);
 			font-weight: 600;
 		}
 
