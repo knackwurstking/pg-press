@@ -6,7 +6,6 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"github.com/knackwurstking/ui/pkg/css"
 )
 
 templ AttachmentsPreview(attachments []string) {
@@ -28,26 +27,18 @@ templ AttachmentsPreview(attachments []string) {
 templ attachmentPreviewItem(attachment string) {
 	{{ src := urlb.Attachment(attachment) }}
 	<div
-		class={
-			"attachment-preview-item",
-			css.Flex, css.FlexCol, css.Gap, css.ItemsCenter,
-			css.UserSelectNone,
-			css.Ghost,
-		}
+		class="attachment-preview-item flex flex-col flex-wrap gap-2 items-center select-none scroll-x-auto"
 		onclick={ components.OpenImageViewer(src) }
 		tabindex="0"
 		role="button"
 		aria-label={ fmt.Sprintf("Bild \"%s\" anzeigen", attachment) }
 	>
-		<div class="attachment-preview-image">
+		<div class="attachment-preview-image max-w-24 max-h-24 overflow-hidden rounded-md">
 			<img
 				loading="lazy"
 				src={ src }
 				alt={ fmt.Sprintf("Anhang \"%s\"", attachment) }
-				class={
-					"preview-thumbnail",
-					css.UserSelectNone,
-				}
+				class="preview-thumbnail select-none object-cover w-full h-full"
 			/>
 		</div>
 	</div>
