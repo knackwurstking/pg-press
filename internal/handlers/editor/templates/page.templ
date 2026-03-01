@@ -4,10 +4,16 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/button"
+	"github.com/knackwurstking/pg-press/internal/components/form"
+	"github.com/knackwurstking/pg-press/internal/components/icon"
+	"github.com/knackwurstking/pg-press/internal/components/input"
+	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	uicomponents "github.com/knackwurstking/ui/pkg/components"
 	"github.com/knackwurstking/ui/pkg/css"
+	"github.com/knackwurstking/ui/pkg/ui"
 )
 
 type PageProps struct {
@@ -39,23 +45,29 @@ templ Page(props *PageProps) {
 		AdditionalHead: pageAdditionalHead(),
 		NavContent:     pageNavContent(props),
 	}) {
-		<main class={ css.Container, css.ContainerFluid }>
+		<main class="mt-8 p-8">
 			<div class="editor-container">
 				<form
-					class={ "editor-form", css.Flex, css.FlexCol, css.Gap, css.PX }
+					class="editor-form flex flex-col gap-4 px-4"
 					method="POST"
 					action={ urlb.EditorSave() }
 					enctype="multipart/form-data"
 				>
 					@hiddenFields(props)
+					<br/>
 					@titleInput(props.Title)
+					<br/>
 					@markdownToggle(props.UseMarkdown)
+					<br/>
 					@contentTextarea(props.Content)
+					<br/>
 					@markdownPreview()
+					<br/>
 					if supportsAttachments(props.Type) {
 						@attachmentsSeparator()
 						@attachmentsSection(props.Attachments)
 					}
+					<br/>
 					@formActions(props)
 				</form>
 			</div>
@@ -66,291 +78,50 @@ templ Page(props *PageProps) {
 
 templ pageNavContent(props *PageProps) {
 	if props.ReturnURL != "" {
-		<a href={ props.ReturnURL } class={ css.Secondary, css.Flex, css.Gap }>
-			<i class="bi bi-arrow-left"></i>
+		@button.Button(button.Props{
+			Variant: button.VariantSecondary,
+			Href:    string(props.ReturnURL),
+		}) {
+			@icon.ArrowLeft()
 			Zurück
-		</a>
+		}
 	}
 }
 
 templ pageAdditionalHead() {
 	@uicomponents.MarkdownStyles()
-	<style>
-		.markdown-content h1,
-		.markdown-content h2,
-		.markdown-content h3,
-		.markdown-content h4,
-		.markdown-content h5,
-		.markdown-content h6 {
-			margin: 0.8em 0 0.4em 0;
-			font-weight: bold;
-			line-height: 1.3;
-		}
-
-		.markdown-content h1 { font-size: 1.4em; }
-		.markdown-content h2 { font-size: 1.2em; }
-		.markdown-content h3 { font-size: 1.1em; }
-
-		.markdown-content p {
-			margin: 0.5em 0 1em 0;
-		}
-
-		.markdown-content ul,
-		.markdown-content ol {
-			margin: 0.5em 0;
-			padding-left: 1.5em;
-			list-style: inherit;
-		}
-
-		.markdown-content ul { list-style-type: disc; }
-		.markdown-content ol { list-style-type: decimal; }
-
-		.markdown-content li {
-			margin: 0.25em 0;
-			display: list-item;
-		}
-
-		.markdown-content code {
-			font-size: 0.85em;
-			padding: 0.125em 0.25em;
-			border-radius: 2px;
-		}
-
-		.markdown-content strong { font-weight: 600; }
-		.markdown-content em { font-style: italic; }
-
-		@media (max-width: 768px) {
-			#markdown-preview { min-height: 200px; }
-			.flex-wrap { justify-content: center; }
-		}
-
-		.transition-all:hover { border-color: var(--ui-primary); }
-		.border-2:hover {
-			border-color: var(--ui-primary);
-			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-		}
-
-		.file-upload-area:hover,
-		.file-upload-area.drag-over { border-color: var(--ui-primary); }
-
-		.preview-fullscreen textarea { display: none; }
-		.preview-fullscreen #markdown-preview { min-height: 600px; }
-	</style>
-	<script>
-		var selectedFiles = [];
-		var existingAttachmentsRemoval = [];
-		var isPreviewFullscreen = false;
-
-		document.addEventListener('DOMContentLoaded', initializeMarkdownFeatures);
-
-		function initializeMarkdownFeatures() {
-			var checkbox = document.getElementById('use_markdown');
-			if (checkbox) {
-				toggleMarkdownFeatures();
-			}
-		}
-
-		function toggleMarkdownFeatures() {
-			var checkbox = document.getElementById('use_markdown');
-			var previewContainer = document.getElementById('markdown-preview-container');
-			var textarea = document.getElementById('content');
-
-			if (checkbox.checked) {
-				previewContainer.style.display = 'block';
-				textarea.setAttribute('placeholder', 'Inhalt (Markdown-Formatierung aktiviert)');
-				updatePreview();
-				textarea.addEventListener('input', updatePreview);
-			} else {
-				previewContainer.style.display = 'none';
-				textarea.removeEventListener('input', updatePreview);
-				textarea.setAttribute('placeholder', 'Inhalt');
-			}
-		}
-
-		function updatePreview() {
-			var textarea = document.getElementById('content');
-			var previewContent = document.getElementById('preview-content');
-
-			if (!textarea || !previewContent) return;
-
-			var html = textarea.value ? renderMarkdownToHTML(textarea.value) : '';
-			previewContent.innerHTML = '<div class="markdown-content">' + html + '</div>';
-		}
-
-		function togglePreviewMode() {
-			var container = document.querySelector('.editor-container');
-			var toggleText = document.getElementById('preview-toggle-text');
-			var toggleIcon = document.querySelector('#markdown-preview button i');
-
-			isPreviewFullscreen = !isPreviewFullscreen;
-
-			if (isPreviewFullscreen) {
-				container.classList.add('preview-fullscreen');
-				toggleText.textContent = 'Split';
-				toggleIcon.className = 'bi bi-arrows-angle-contract';
-			} else {
-				container.classList.remove('preview-fullscreen');
-				toggleText.textContent = 'Vollbild';
-				toggleIcon.className = 'bi bi-arrows-angle-expand';
-			}
-		}
-
-		function insertMarkdown(before, after) {
-			var textarea = document.getElementById('content');
-			if (!textarea) return;
-
-			var start = textarea.selectionStart;
-			var end = textarea.selectionEnd;
-			var selectedText = textarea.value.substring(start, end);
-			var newText = before + selectedText + after;
-
-			textarea.value = textarea.value.substring(0, start) + newText + textarea.value.substring(end);
-
-			var newPos = selectedText === '' ? start + before.length : start + before.length + selectedText.length + after.length;
-
-			textarea.focus();
-			textarea.setSelectionRange(newPos, newPos);
-			updatePreview();
-		}
-
-		function updateExistingAttachmentsRemoval() {
-			var input = document.getElementById('existing-attachments-removal');
-			if (input) {
-				input.value = existingAttachmentsRemoval.join(',');
-			}
-		}
-
-		function formatFileSize(bytes) {
-			if (bytes === 0) return "0 Bytes";
-			var k = 1024;
-			var sizes = ["Bytes", "KB", "MB", "GB"];
-			var i = Math.floor(Math.log(bytes) / Math.log(k));
-			return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-		}
-
-		function onAttachments(event) {
-			selectedFiles = Array.from(event.target.files);
-			var previewArea = document.getElementById("file-preview");
-			var container = document.getElementById("new-attachments");
-
-			if (!previewArea || !container) return;
-
-			container.innerHTML = "";
-
-			if (selectedFiles.length > 0) {
-				previewArea.style.display = "block";
-
-				selectedFiles.forEach((file, index) => {
-					var sizeClass = file.size > 10 * 1024 * 1024 ? "attachment-error text-red" : "muted text-sm";
-					var sizeText = file.size > 10 * 1024 * 1024 ? "ZU GROSS!" : formatFileSize(file.size);
-
-					var template = previewArea.querySelector('template[name="attachment-item"]');
-					if (!template) return;
-
-					var item = template.content.cloneNode(true);
-
-					var nameElement = item.querySelector('.name');
-					if (nameElement) nameElement.textContent = file.name;
-
-					var sizeElement = item.querySelector('.size-text');
-					if (sizeElement) {
-						sizeElement.textContent = sizeText;
-						sizeElement.className += ' ' + sizeClass;
-					}
-
-					var deleteBtn = item.querySelector('button.delete');
-					if (deleteBtn) {
-						deleteBtn.onclick = () => {
-							selectedFiles.splice(index, 1);
-							var fileInput = document.getElementById("attachments");
-							var dt = new DataTransfer();
-							selectedFiles.forEach((file) => dt.items.add(file));
-							fileInput.files = dt.files;
-							onAttachments(event);
-						};
-					}
-
-					container.appendChild(item);
-				});
-
-				setTimeout(() => {
-					previewArea.scrollIntoView({behavior: "smooth", block: "start"});
-				}, 100);
-			} else {
-				previewArea.style.display = "none";
-			}
-		}
-
-		function handleDragOver(event) {
-			event.preventDefault();
-			event.currentTarget.classList.add('drag-over');
-		}
-
-		function handleDragLeave(event) {
-			event.preventDefault();
-			event.currentTarget.classList.remove('drag-over');
-		}
-
-		function handleFileDrop(event) {
-			event.preventDefault();
-			event.currentTarget.classList.remove('drag-over');
-
-			var files = event.dataTransfer.files;
-			if (files.length > 0) {
-				var fileInput = document.getElementById('attachments');
-				if (fileInput) {
-					fileInput.files = files;
-					onAttachments({ target: fileInput });
-				}
-			}
-		}
-
-		function deleteAttachment(attachment) {
-			if (!confirm("Sind Sie sicher, dass Sie diesen Anhang löschen möchten?")) {
-				return;
-			}
-
-			var attachmentItem = document.querySelector('#existing-attachments [data-attachment-path="' + attachment + '"]');
-
-			if (attachmentItem) {
-				attachmentItem.remove();
-				existingAttachmentsRemoval.push(attachment);
-				updateExistingAttachmentsRemoval();
-
-				var existingAttachments = document.getElementById('existing-attachments');
-				if (existingAttachments && existingAttachments.children.length === 0) {
-					var detailsSection = existingAttachments.closest('details');
-					if (detailsSection) {
-						detailsSection.style.display = 'none';
-					}
-				}
-			}
-		}
-	</script>
+	<script defer src={ ui.AssetURL(env.ServerPathPrefix, "/js/editor.js") }></script>
 }
 
 templ hiddenFields(options *PageProps) {
-	<input type="hidden" name="type" value={ options.Type }/>
-	<input type="hidden" name="id" value={ options.ID }/>
-	<input type="hidden" name="return_url" value={ string(options.ReturnURL) }/>
-	<input type="hidden" name="existing_attachments_removal" id="existing-attachments-removal" value=""/>
+	<input type="hidden" id="type" name="type" value={ options.Type }/>
+	<input type="hidden" id="id" name="id" value={ options.ID }/>
+	<input type="hidden" id="return_url" name="return_url" value={ string(options.ReturnURL) }/>
+	<input type="hidden" id="existing-attachments-removal" name="existing_attachments_removal" value=""/>
 }
 
 templ titleInput(title string) {
-	<div class={ css.Flex, css.FlexCol, css.GapSm, css.WFull }>
-		<label for="title" class={ css.TextSM, css.TextMedium }>Titel</label>
-		<input
-			type="text"
-			name="title"
-			id="title"
-			class={ css.WFull }
-			placeholder="Titel eingeben..."
-			value={ title }
-			required
-		/>
-	</div>
+	@form.Item() {
+		@form.Label(form.LabelProps{
+			For: "title",
+		}) {
+			Titel	
+		}
+		@input.Input(input.Props{
+			ID:          "title",
+			Class:       "w-full",
+			Name:        "title",
+			Type:        input.TypeText,
+			Placeholder: "Titel eingeben...",
+			Value:       title,
+			Attributes: templ.Attributes{
+				"required": true,
+			},
+		})
+	}
 }
 
+// TODO: ...
 templ markdownToggle(useMarkdown bool) {
 	<div class={ css.MY }>
 		<div
@@ -559,16 +330,6 @@ templ filePreviewArea() {
 
 templ formActions(options *PageProps) {
 	<div class={ css.MT, css.PT, css.BorderTop, css.Flex, css.Gap, css.JustifyEnd }>
-		if options.ReturnURL != "" {
-			<a
-				role="button"
-				href={ options.ReturnURL }
-				class={ css.Secondary, css.Flex, css.GapSm, css.ItemsCenter }
-			>
-				<i class="bi bi-x-circle"></i>
-				Abbrechen
-			</a>
-		}
 		<button type="submit" class={ css.Primary, css.Flex, css.GapSm, css.ItemsCenter }>
 			if options.ID > 0 {
 				<i class="bi bi-check-circle"></i>
