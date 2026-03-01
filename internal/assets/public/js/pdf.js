@@ -22,11 +22,9 @@ async function downloadPDF(event, url, fallbackFilename) {
 		var filename = filenameMatch?.[1] || fallbackFilename;
 
 		// Configure and trigger download
-		Object.assign(a, {
-			style: { display: 'none' },
-			href: downloadUrl,
-			download: filename
-		});
+		a.style.display = "none"
+		a.href = downloadUrl;
+		a.download = filename;
 
 		document.body.appendChild(a);
 		a.click();
