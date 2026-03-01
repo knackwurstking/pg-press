@@ -176,12 +176,13 @@ templ markdownPreview() {
 }
 
 templ attachmentsSeparator() {
-	<div class={ css.MYLg, css.Relative, css.Flex, css.ItemsCenter, css.JustifyCenter }>
-		<hr class={ css.WFull }/>
-		<div class={ css.Absolute, css.PX, css.TextLG } style={ fmt.Sprintf("background: %s;", css.VarBg) }>📎</div>
+	<div class="relative flex items-center justify-center">
+		<hr class="w-full"/>
+		<div class="absolute text-lg bg-background">📎</div>
 	</div>
 }
 
+// TODO: Migrate to templui
 templ attachmentsSection(attachments []string) {
 	<div
 		class={ css.Border, css.PLg, css.Muted, css.MT, css.TransitionAll }
