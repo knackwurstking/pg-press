@@ -35,9 +35,6 @@ type NewCycleDialogProps struct {
 	Error *errors.InputError
 }
 
-// tool *shared.Tool,
-// currentPress *shared.Press,
-// presses []*shared.Press,
 templ NewCycleDialog(props ...NewCycleDialogProps) {
 	{{
 		prop := NewCycleDialogProps{}
@@ -82,6 +79,7 @@ templ NewCycleDialog(props ...NewCycleDialogProps) {
 	}
 }
 
+// TODO: Migrate to templui and tailwind
 templ EditCycleDialog(
 	cycle *shared.Cycle,
 	tool *shared.Tool,
@@ -157,7 +155,9 @@ templ formPressSelection(pressID shared.EntityID, presses []*shared.Press, ierr 
 	}}
 	@components.Section(nil) {
 		@form.Item() {
-			@form.Label() {
+			@form.Label(form.LabelProps{
+				For: "press_id",
+			}) {
 				Presse
 			}
 			@selectbox.SelectBox() {
@@ -230,25 +230,34 @@ templ formDate(date shared.UnixMilli, ierr *errors.InputError) {
 	}
 }
 
-// TODO: Migrate to templui & tailwind
 templ formPressCycles(value int64, ierr *errors.InputError) {
 	@components.Section(templ.Attributes{
 		"class": templ.CSSClasses{
 			"total-cycles", css.Flex, css.FlexCol, css.GapSm,
 		}.String(),
 	}) {
-		<label for="press_cycles">Press Zyklen</label>
-		<input
-			type="number"
-			min="0"
-			step="1"
-			id="press_cycles"
-			name="press_cycles"
-			placeholder="Gesamtzyklen"
-			if value > 0 {
-				value={ fmt.Sprintf("%d", value) }
+		@form.Item() {
+			@form.Label(form.LabelProps{
+				For: "press_cycles",
+			}) {
+				Gesamtzyklen
 			}
-			required
-		/>
+			@input.Input(input.Props{
+				ID:   "press_cycles",
+				Name: "press_cycles",
+				Attributes: templ.Attributes{
+					"min":      "0",
+					"step":     "1",
+					"required": true,
+				},
+			})
+			if ierr != nil && ierr.InputID == "press_cycles" {
+				@form.Message(form.MessageProps{
+					Variant: form.MessageVariantError,
+				}) {
+					{ ierr.Error() }
+				}
+			}
+		}
 	}
 }
