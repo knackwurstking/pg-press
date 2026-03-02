@@ -56,7 +56,7 @@ templ reportListItem(tr *shared.TroubleReport, user *shared.User) {
 					Size:    button.SizeIcon,
 					Attributes: templ.Attributes{
 						"onclick": fmt.Sprintf(
-							`downloadTroubleReportPDF(event, %s, %s)`,
+							`downloadPDF(event, "%s", "%s")`,
 							urlb.TroubleReportsSharePDF(tr.ID),
 							"trouble_report_"+fmt.Sprintf("%d", tr.ID)+".pdf",
 						),
