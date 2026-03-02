@@ -88,7 +88,7 @@ func PostCassette(c echo.Context) *echo.HTTPError {
 		return ReRenderNewCassetteDialog(c, true, formData, ierr)
 	}
 
-	utils.SetHXTrigger(c, "tools-tab")
+	utils.SetHXTrigger(c, "tool-tab-content")
 
 	return ReRenderNewCassetteDialog(c, false, formData, nil)
 }

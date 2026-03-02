@@ -7,6 +7,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/knackwurstking/pg-press/internal/utils"
 
 	"github.com/labstack/echo/v4"
@@ -76,7 +77,7 @@ func PostPress(c echo.Context) *echo.HTTPError {
 		return ReRenderNewPressDialog(c, true, data, ierr)
 	}
 
-	utils.SetHXTrigger(c, "tools-tab")
+	utils.SetHXTrigger(c, "press-tab-content")
 
 	return ReRenderNewPressDialog(c, false, data, nil)
 }
@@ -107,7 +108,7 @@ func updatePress(c echo.Context, id shared.EntityID) *echo.HTTPError {
 		return ReRenderEditPressDialog(c, id, true, data, nil)
 	}
 
-	utils.SetHXTrigger(c, "tools-tab")
+	utils.SetHXRedirect(c, urlb.Press(press.ID))
 
 	return ReRenderEditPressDialog(c, id, false, data, nil)
 }

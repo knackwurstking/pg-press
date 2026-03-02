@@ -82,7 +82,7 @@ func PostTool(c echo.Context) *echo.HTTPError {
 		return ReRenderNewToolDialog(c, true, formData, ierr)
 	}
 
-	utils.SetHXTrigger(c, "tools-tab")
+	utils.SetHXTrigger(c, "tool-tab-content")
 
 	return ReRenderNewToolDialog(c, false, formData, nil)
 }

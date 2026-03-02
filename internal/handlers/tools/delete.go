@@ -3,6 +3,7 @@ package tools
 import (
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/knackwurstking/pg-press/internal/utils"
 	"github.com/labstack/echo/v4"
 )
@@ -19,7 +20,7 @@ func Delete(c echo.Context) *echo.HTTPError {
 	}
 	log.Debug("Deleted tool with ID: %d", id)
 
-	utils.SetHXTrigger(c, "tools-tab")
+	utils.SetHXRedirect(c, urlb.Tools())
 
 	return nil
 }
