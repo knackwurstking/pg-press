@@ -9,6 +9,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components/button"
 	"github.com/knackwurstking/pg-press/internal/components/dialog"
 	"github.com/knackwurstking/pg-press/internal/components/form"
+	"github.com/knackwurstking/pg-press/internal/components/input"
 	"github.com/knackwurstking/pg-press/internal/components/selectbox"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -194,7 +195,6 @@ templ formPressSelection(pressID shared.EntityID, presses []*shared.Press, ierr 
 	}
 }
 
-// TODO: Migrate to templui & tailwind
 templ formDate(date shared.UnixMilli, ierr *errors.InputError) {
 	{{
 		if date == 0 {
@@ -202,17 +202,31 @@ templ formDate(date shared.UnixMilli, ierr *errors.InputError) {
 		}
 	}}
 	@components.Section(nil) {
-		// TODO: Form component with label, date input and the optional error message
-		<span class={ css.Flex, css.FlexCol }>
-			<label for="stop">Ablesedatum</label>
-			<input
-				id="stop"
-				name="stop"
-				class={ css.WFit }
-				type="date"
-				value={ date }
-			/>
-		</span>
+		@form.Item() {
+			@form.Label(form.LabelProps{
+				For: "stop",
+			}) {
+				Ablesedatum
+			}
+			@input.Input(input.Props{
+				ID:    "stop",
+				Class: "w-fit",
+				Name:  "stop",
+				Type:  input.TypeDate,
+				Value: fmt.Sprintf("%s", date),
+				Attributes: templ.Attributes{
+					"required": true,
+				},
+				HasError: ierr != nil && ierr.InputID == "stop",
+			})
+			if ierr != nil && ierr.InputID == "stop" {
+				@form.Message(form.MessageProps{
+					Variant: form.MessageVariantError,
+				}) {
+					{ ierr.Error() }
+				}
+			}
+		}
 	}
 }
 
