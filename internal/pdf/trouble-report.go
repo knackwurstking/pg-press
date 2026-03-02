@@ -279,7 +279,7 @@ func generateImagesHTML(attachments []string) (string, error) {
 		dataURI := fmt.Sprintf("data:%s;base64,%s", img.MimeType(), base64Data)
 
 		imageTag := fmt.Sprintf(
-			`<div class="image-container"><img src="%s" alt="%s"><div class="image-caption">%s</div></div>`,
+			`<div class="image-container"><img loading="lazy" src="%s" alt="%s"><div class="image-caption">%s</div></div>`,
 			dataURI,
 			escapeHTML(a),
 			escapeHTML(a),
