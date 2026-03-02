@@ -65,7 +65,6 @@ templ Page(props *PageProps) {
 						@attachmentsSeparator()
 						@attachmentsSection(props.Attachments)
 					}
-					<br/>
 					@formActions(props)
 				</form>
 			</div>
@@ -228,16 +227,16 @@ templ existingAttachments(attachments []string) {
 
 templ existingAttachmentItem(attachment string, index int) {
 	<div
-		class="p border flex gap-4 justify-between items-center rounded"
+		class="p-2 border flex flex-wrap gap-4 justify-between items-center rounded"
 		data-attachment-path={ attachment }
 	>
-		<div class="flex gap-4 items-center">
-			<span>Anhang { index }</span>
-			<span class="bg-muted text-muted-foreground text-sm">({ attachment })</span>
+		<div class="flex flex-col items-start justify-center">
+			<span class="font-bold text-base">Anhang { index }</span>
+			<span class="bg-muted text-muted-foreground text-sm truncate">{ attachment }</span>
 		</div>
 		<div class="flex gap-2">
 			@button.Button(button.Props{
-				Variant: button.VariantSecondary,
+				Variant: button.VariantGhost,
 				Size:    button.SizeSm,
 				Attributes: templ.Attributes{
 					"onclick": fmt.Sprintf(`openImageViewer(%s)`, urlb.Attachment(attachment)),
