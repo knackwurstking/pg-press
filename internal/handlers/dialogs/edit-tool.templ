@@ -50,7 +50,7 @@ templ NewToolDialog(props ...ToolDialogProps) {
 			@dialog.Header() {
 				Neues Werkzeug
 			}
-			@renderDialogError(prop.Error, "form")
+			@renderDialogError(prop.Error)
 			<form
 				hx-post={ urlb.DialogEditTool(0) }
 				hx-trigger="submit"
@@ -100,7 +100,7 @@ templ EditToolDialog(toolID shared.EntityID, props ...ToolDialogProps) {
 			@dialog.Header() {
 				Werkzeug Bearbeiten
 			}
-			@renderDialogError(prop.Error, "form")
+			@renderDialogError(prop.Error)
 			<form
 				hx-post={ urlb.DialogEditTool(toolID) }
 				hx-trigger="submit"

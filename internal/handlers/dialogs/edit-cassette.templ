@@ -50,7 +50,7 @@ templ NewCassetteDialog(props ...CassetteDialogProps) {
 			@dialog.Header() {
 				Neue Kassette
 			}
-			@renderDialogError(prop.Error, "form")
+			@renderDialogError(prop.Error)
 			<form
 				hx-post={ urlb.DialogEditCassette(0) }
 				hx-trigger="submit"
@@ -99,7 +99,7 @@ templ EditCassetteDialog(toolID shared.EntityID, props ...CassetteDialogProps) {
 			@dialog.Header() {
 				Kassette Bearbeiten
 			}
-			@renderDialogError(prop.Error, "form")
+			@renderDialogError(prop.Error)
 			<form
 				hx-post={ urlb.DialogEditCassette(toolID) }
 				hx-trigger="submit"

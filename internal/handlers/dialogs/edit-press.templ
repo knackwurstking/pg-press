@@ -49,7 +49,7 @@ templ NewPressDialog(props ...PressDialogProps) {
 			@dialog.Header() {
 				Neue Presse
 			}
-			@renderDialogError(prop.Error, "form")
+			@renderDialogError(prop.Error)
 			<form
 				hx-post={ urlb.DialogEditPress(-1) }
 				hx-trigger="submit"
@@ -92,7 +92,7 @@ templ EditPressDialog(pressID shared.EntityID, props ...PressDialogProps) {
 			@dialog.Header() {
 				Presse Bearbeiten
 			}
-			@renderDialogError(prop.Error, "form")
+			@renderDialogError(prop.Error)
 			<form
 				hx-post={ urlb.DialogEditPress(pressID) }
 				hx-trigger="submit"

@@ -71,7 +71,7 @@ func PostPress(c echo.Context) *echo.HTTPError {
 		CyclesOffset: data.CyclesOffset,
 	})
 	if merr != nil {
-		ierr := errors.NewInputError("form", fmt.Sprintf("failed to add press: %v", merr))
+		ierr := errors.NewInputError("", fmt.Sprintf("failed to add press: %v", merr))
 		return reRenderNewPressDialog(c, true, data, ierr)
 	}
 
@@ -88,7 +88,7 @@ func updatePress(c echo.Context, id shared.EntityID) *echo.HTTPError {
 
 	press, herr := db.GetPress(id)
 	if herr != nil {
-		ierr := errors.NewInputError("form", fmt.Sprintf("failed to get press: %v", herr))
+		ierr := errors.NewInputError("", fmt.Sprintf("failed to get press: %v", herr))
 		return reRenderEditPressDialog(c, id, true, data, ierr)
 	}
 
@@ -102,7 +102,7 @@ func updatePress(c echo.Context, id shared.EntityID) *echo.HTTPError {
 		SlotDown:     press.SlotDown,
 	})
 	if merr != nil {
-		ierr := errors.NewInputError("form", fmt.Sprintf("failed to update press: %v", merr))
+		ierr := errors.NewInputError("", fmt.Sprintf("failed to update press: %v", merr))
 		return reRenderEditPressDialog(c, id, true, data, ierr)
 	}
 

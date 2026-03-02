@@ -83,7 +83,7 @@ func PostCassette(c echo.Context) *echo.HTTPError {
 	log.Debug("Creating new cassette: %#v", tool.String())
 
 	if merr := db.AddTool(tool); merr != nil {
-		ierr := errors.NewInputError("form", fmt.Sprintf("Failed to create cassette: %s", merr.Error()))
+		ierr := errors.NewInputError("", fmt.Sprintf("Failed to create cassette: %s", merr.Error()))
 		return reRenderNewCassetteDialog(c, true, formData, ierr)
 	}
 
@@ -100,7 +100,7 @@ func updateCassette(c echo.Context, toolID shared.EntityID) *echo.HTTPError {
 
 	tool, merr := db.GetTool(shared.EntityID(toolID))
 	if merr != nil {
-		ierr := errors.NewInputError("form", fmt.Sprintf("Cassette with ID %d not found", toolID))
+		ierr := errors.NewInputError("", fmt.Sprintf("Cassette with ID %d not found", toolID))
 		return reRenderEditCassetteDialog(c, toolID, true, formData, ierr)
 	}
 	tool.Type = formData.Type
@@ -113,7 +113,7 @@ func updateCassette(c echo.Context, toolID shared.EntityID) *echo.HTTPError {
 	log.Debug("Updating cassette: %#v", tool)
 
 	if merr = db.UpdateTool(tool); merr != nil {
-		ierr := errors.NewInputError("form", fmt.Sprintf("Failed to update cassette: %s", merr.Error()))
+		ierr := errors.NewInputError("", fmt.Sprintf("Failed to update cassette: %s", merr.Error()))
 		return reRenderEditCassetteDialog(c, toolID, true, formData, ierr)
 	}
 

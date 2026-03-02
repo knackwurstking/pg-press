@@ -134,7 +134,7 @@ func PostCycle(c echo.Context) *echo.HTTPError {
 
 	cycle := shared.NewCycle(data.ToolID, data.PressID, data.PressCycles, data.Stop)
 	if herr := db.AddCycle(cycle); herr != nil {
-		ierr := errors.NewInputError("form", fmt.Sprintf("failed to create cycle: %v", herr))
+		ierr := errors.NewInputError("", fmt.Sprintf("failed to create cycle: %v", herr))
 		return reRenderNewCycleDialog(c, true, data, ierr)
 	}
 
@@ -146,7 +146,7 @@ func PostCycle(c echo.Context) *echo.HTTPError {
 func updateCycle(c echo.Context, cycleID shared.EntityID) *echo.HTTPError {
 	cycle, herr := db.GetCycle(cycleID)
 	if herr != nil {
-		ierr := errors.NewInputError("form", fmt.Sprintf("failed to load cycle with ID %d: %v", cycleID, herr))
+		ierr := errors.NewInputError("", fmt.Sprintf("failed to load cycle with ID %d: %v", cycleID, herr))
 		return reRenderEditCycleDialog(c, cycleID, true, CycleFormData{}, ierr)
 	}
 
@@ -162,7 +162,7 @@ func updateCycle(c echo.Context, cycleID shared.EntityID) *echo.HTTPError {
 	log.Debug("Update existing cycle with ID %d. [data=%#v]", cycle.ID, data)
 
 	if herr := db.UpdateCycle(cycle); herr != nil {
-		ierr := errors.NewInputError("form", fmt.Sprintf("failed to update cycle: %v", herr))
+		ierr := errors.NewInputError("", fmt.Sprintf("failed to update cycle: %v", herr))
 		return reRenderEditCycleDialog(c, cycleID, true, data, ierr)
 	}
 

@@ -22,9 +22,9 @@ const (
 	EditCycleDialogID = "cycle-edit-dialog"
 )
 
-templ renderDialogError(err []*errors.InputError, inputIDs ...string) {
+templ renderDialogError(err []*errors.InputError) {
 	for _, e := range err {
-		if e != nil && slices.Contains(inputIDs, e.InputID) {
+		if e != nil && e.InputID == "" {
 			@dialog.Description() {
 				<span class="text-destructive">{ e.Error() }</span>
 			}

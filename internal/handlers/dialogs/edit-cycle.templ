@@ -56,7 +56,7 @@ templ NewCycleDialog(props ...CycleDialogProps) {
 			@dialog.Header() {
 				Neuer Zyklus
 			}
-			@renderDialogError(prop.Error, "form")
+			@renderDialogError(prop.Error)
 			<form
 				hx-post={ urlb.DialogEditCycle(0, prop.ToolID, false) }
 				hx-trigger="submit"
@@ -103,7 +103,7 @@ templ EditCycleDialog(cycleID shared.EntityID, props ...CycleDialogProps) {
 			@dialog.Header() {
 				Zyklus bearbeiten
 			}
-			@renderDialogError(prop.Error, "form")
+			@renderDialogError(prop.Error)
 			<form
 				hx-post={ urlb.DialogEditCycle(cycleID, prop.ToolID, toolChangeMode) }
 				hx-trigger="submit"

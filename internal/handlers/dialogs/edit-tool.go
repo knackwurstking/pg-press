@@ -77,7 +77,7 @@ func PostTool(c echo.Context) *echo.HTTPError {
 		Height:   formData.Height,
 	}
 	if merr := db.AddTool(tool); merr != nil {
-		ierr := errors.NewInputError("form", fmt.Sprintf("Failed to create tool: %s", merr.Error()))
+		ierr := errors.NewInputError("", fmt.Sprintf("Failed to create tool: %s", merr.Error()))
 		return reRenderNewToolDialog(c, true, formData, ierr)
 	}
 
@@ -94,7 +94,7 @@ func updateTool(c echo.Context, toolID shared.EntityID) *echo.HTTPError {
 
 	tool, merr := db.GetTool(toolID)
 	if merr != nil {
-		ierr := errors.NewInputError("form", fmt.Sprintf("Failed to load tool: %s", merr.Error()))
+		ierr := errors.NewInputError("", fmt.Sprintf("Failed to load tool: %s", merr.Error()))
 		return reRenderEditToolDialog(c, toolID, true, formData, ierr)
 	}
 	tool.Type = formData.Type
@@ -106,7 +106,7 @@ func updateTool(c echo.Context, toolID shared.EntityID) *echo.HTTPError {
 	log.Debug("Updating tool: %#v", tool)
 
 	if merr = db.UpdateTool(tool); merr != nil {
-		ierr := errors.NewInputError("form", fmt.Sprintf("Failed to update tool: %s", merr.Error()))
+		ierr := errors.NewInputError("", fmt.Sprintf("Failed to update tool: %s", merr.Error()))
 		return reRenderEditToolDialog(c, toolID, true, formData, ierr)
 	}
 
