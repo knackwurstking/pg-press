@@ -4,9 +4,10 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/button"
+	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"github.com/knackwurstking/ui/pkg/css"
 )
 
 type PageProps struct {
@@ -60,6 +61,7 @@ templ additionalHead() {
 			window.setTriggers(
 				"reload-notes",
 				"reload-metal-sheets",
+				"reload-cycles",
 			);
 		});
 	</script>
@@ -73,30 +75,29 @@ templ actionBarContent(p *PageProps) {
 		if p.Tool.IsDead {
 			// TODO: Revive tool/cassette button here
 		} else {
-			<button
-				class={ css.Destructive, css.Flex, css.Gap }
-				hx-patch={ urlb.ToolsMarkDead(p.Tool.ID) }
-				hx-trigger="click"
-				hx-confirm="Sind Sie sicher, dass Sie dieses Werkzeug löschen möchten?"
-			>
-				<i class="bi bi-trash"></i>
+			@button.Button(button.Props{
+				Variant: button.VariantDestructive,
+			}) {
+				@icon.Trash()
 				Mark as Dead
-			</button>
-		}
-		<button
-			class={ css.Primary, css.Flex, css.Gap }
-			if p.Tool.IsCassette() {
-				hx-get={ urlb.DialogEditCassette(p.Tool.ID) }
-			} else {
-				hx-get={ urlb.DialogEditTool(p.Tool.ID) }
 			}
-			hx-trigger="click"
-			hx-target="body"
-			hx-swap="beforeend"
-			hx-on::response-error="alert(event.detail.xhr.responseText)"
-		>
-			<i class="bi bi-pencil"></i>
+		}
+		@button.Button(button.Props{
+			Attributes: templ.Attributes{
+				"hx-get": func() string {
+					if p.Tool.IsCassette() {
+						return string(urlb.DialogEditCassette(p.Tool.ID))
+					}
+					return string(urlb.DialogEditTool(p.Tool.ID))
+				}(),
+				"hx-trigger":            "click",
+				"hx-target":             "body",
+				"hx-swap":               "beforeend",
+				"hx-on::response-error": "alert(event.detail.xhr.responseText)",
+			},
+		}) {
+			@icon.Pencil()
 			Bearbeiten
-		</button>
+		}
 	}
 }
