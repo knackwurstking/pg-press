@@ -39,7 +39,7 @@ type CyclesSectionContentProps struct {
 
 templ CyclesSectionContent(p *CyclesSectionContentProps) {
 	@components.SectionTitle(components.TitleLevel4, "Werkzeugnutzung & Zyklen")
-	<div class={ css.Flex, css.FlexCol, css.Gap }>
+	<div class="flex flex-col gap-4">
 		@components.Section(templ.Attributes{
 			"id": "tool-status-section",
 		}) {
@@ -53,8 +53,8 @@ templ CyclesSectionContent(p *CyclesSectionContentProps) {
 }
 
 templ toolStatus(p *CyclesSectionContentProps) {
-	<div class={ css.Flex, css.FlexCol, css.Gap }>
-		<span class={ css.Flex, css.GapLg }>
+	<div class="flex flex-col gap-4">
+		<span class="flex gap-6">
 			@RegenerationEdit(RegenerationEditProps{
 				Tool:              p.Tool,
 				ToolIsActive:      p.ActivePress != nil,
@@ -62,6 +62,7 @@ templ toolStatus(p *CyclesSectionContentProps) {
 				UserHasPermission: p.User.IsAdmin(),
 			})
 			if p.ActivePress != nil {
+				// TODO: Use a templui button here instead
 				<a
 					role="button"
 					class={ css.ButtonSmall, css.Ghost, css.Flex, css.Gap }

@@ -5,10 +5,11 @@ import (
 	"slices"
 
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/badge"
 	"github.com/knackwurstking/pg-press/internal/components/icon"
+	"github.com/knackwurstking/pg-press/internal/components/table"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"github.com/knackwurstking/ui/pkg/css"
 )
 
 templ UppperMetalSheets(metalSheets []*shared.UpperMetalSheet, tool *shared.Tool, user *shared.User) {
@@ -64,21 +65,32 @@ templ metalSheetTableForUpperSlot(position shared.Slot, metalSheets []*shared.Up
 		@components.NotFoundText("Keine Bleche für dieses Werkzeug gefunden")
 		{{ return }}
 	}
-	<figure class={ css.WFull, css.OverflowXScroll }>
-		<table class={ css.TableBorderless, css.TableCompact }>
-			<thead>
-				<tr>
-					<th>Stärke (mm)</th>
-					<th>Blech (mm)</th>
-					<th></th>
-				</tr>
-			</thead>
-			<tbody>
+	<figure class="w-full overflow-x-scroll">
+		@table.Table() {
+			@table.Header() {
+				@table.Row() {
+					@table.Head() {
+						Stärke (mm)
+					}
+					@table.Head() {
+						Blech (mm)
+					}
+					@table.Head() {
+					}
+				}
+			}
+			@table.Body() {
 				for _, sheet := range metalSheets {
-					<tr>
-						<td>{ fmt.Sprintf("%.1f", sheet.TileHeight) }</td>
-						<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
-						<td class={ css.ButtonGroup, css.Flex, css.JustifyEnd, css.ItemsCenter }>
+					@table.Row() {
+						@table.Cell() {
+							{ fmt.Sprintf("%.1f", sheet.TileHeight) }
+						}
+						@table.Cell() {
+							{ fmt.Sprintf("%.1f", sheet.Value) }
+						}
+						@table.Cell(table.CellProps{
+							Class: "flex justify-end items-center",
+						}) {
 							@components.TableActions(components.TableActionsOptions{
 								EditHref:        urlb.DialogEditMetalSheet(sheet.ID, 0, position),
 								EditAdminOnly:   false,
@@ -86,11 +98,11 @@ templ metalSheetTableForUpperSlot(position shared.Slot, metalSheets []*shared.Up
 								DeleteAdminOnly: true,
 								User:            user,
 							})
-						</td>
-					</tr>
+						}
+					}
 				}
-			</tbody>
-		</table>
+			}
+		}
 	</figure>
 }
 
@@ -99,31 +111,60 @@ templ metalSheetTableForLowerSlot(position shared.Slot, metalSheets []*shared.Lo
 		@components.NotFoundText("Keine Bleche für dieses Werkzeug gefunden")
 		{{ return }}
 	}
-	<figure class={ css.WFull, css.OverflowXScroll }>
-		<table class={ css.TableBorderless, css.TableCompact }>
-			<thead>
-				<tr>
-					<th>Stärke (mm)</th>
-					<th>Blech (mm)</th>
-					<th>Marke (mm)</th>
-					<th>Stf.</th>
-					<th>Hubende</th>
-					<th>Typ</th>
-					<th></th>
-				</tr>
-			</thead>
-			<tbody>
+	<figure class="w-full overflow-x-scroll">
+		@table.Table() {
+			@table.Header() {
+				@table.Row() {
+					@table.Head() {
+						Stärke (mm)
+					}
+					@table.Head() {
+						Blech (mm)
+					}
+					@table.Head() {
+						Marke (mm)
+					}
+					@table.Head() {
+						Stf.
+					}
+					@table.Head() {
+						Hubende
+					}
+					@table.Head() {
+						Typ
+					}
+					@table.Head() {
+					}
+				}
+			}
+			@table.Body() {
 				for _, sheet := range metalSheets {
-					<tr>
-						<td>{ fmt.Sprintf("%.1f", sheet.TileHeight) }</td>
-						<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
-						<td>{ fmt.Sprintf("%d", sheet.MarkeHeight) }</td>
-						<td>{ fmt.Sprintf("%.1f", sheet.STF) }</td>
-						<td>{ fmt.Sprintf("%.1f", sheet.STFMax) }</td>
-						<td>
-							<span class={ css.Badge, css.BadgeSM }>{ sheet.Identifier }</span>
-						</td>
-						<td class={ css.ButtonGroup, css.Flex, css.JustifyEnd, css.ItemsCenter }>
+					@table.Row() {
+						@table.Cell() {
+							{ fmt.Sprintf("%.1f", sheet.TileHeight) }
+						}
+						@table.Cell() {
+							{ fmt.Sprintf("%.1f", sheet.Value) }
+						}
+						@table.Cell() {
+							{ fmt.Sprintf("%d", sheet.MarkeHeight) }
+						}
+						@table.Cell() {
+							{ fmt.Sprintf("%.1f", sheet.STF) }
+						}
+						@table.Cell() {
+							{ fmt.Sprintf("%.1f", sheet.STFMax) }
+						}
+						@table.Cell() {
+							@badge.Badge(badge.Props{
+								Variant: badge.VariantSecondary,
+							}) {
+								{ sheet.Identifier }
+							}
+						}
+						@table.Cell(table.CellProps{
+							Class: "flex justify-end items-center",
+						}) {
 							@components.TableActions(components.TableActionsOptions{
 								EditHref:        urlb.DialogEditMetalSheet(sheet.ID, 0, position),
 								EditAdminOnly:   false,
@@ -131,10 +172,10 @@ templ metalSheetTableForLowerSlot(position shared.Slot, metalSheets []*shared.Lo
 								DeleteAdminOnly: true,
 								User:            user,
 							})
-						</td>
-					</tr>
+						}
+					}
 				}
-			</tbody>
-		</table>
+			}
+		}
 	</figure>
 }

@@ -6,7 +6,6 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"github.com/knackwurstking/ui/pkg/css"
 )
 
 templ Notes(toolID shared.EntityID, notes []*shared.Note) {
@@ -18,7 +17,7 @@ templ Notes(toolID shared.EntityID, notes []*shared.Note) {
 		})
 	}
 	if len(notes) > 0 {
-		<div class={ "notes-list", css.Flex, css.FlexCol, css.Gap }>
+		<div class="notes-list flex flex-col gap-4">
 			for _, n := range notes {
 				@components.NoteCard(n, nil)
 			}
