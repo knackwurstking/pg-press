@@ -2,9 +2,10 @@ package templates
 
 import (
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/button"
+	"github.com/knackwurstking/pg-press/internal/components/selectbox"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"github.com/knackwurstking/ui/pkg/css"
 )
 
 type BindingSectionProps struct {
@@ -14,57 +15,53 @@ type BindingSectionProps struct {
 }
 
 templ BindingSection(props BindingSectionProps) {
-	<span id="binding-section" class={ css.Flex, css.FlexCol, css.Gap }>
+	<span id="binding-section" class="flex flex-col gap-4">
 		@components.SectionTitle(components.TitleLevel5, "Werkzeuge Binden")
 		<span
-			class={ css.Flex, css.Gap, css.FlexWrap }
+			class="flex gap-4 flex-wrap"
 			if !props.IsAdmin {
 				disabled
 			}
 		>
-			<select
-				id="tool-binding-select"
-				class={ css.MaxWFull }
-				hx-patch={ urlb.ToolBind(props.Tool.ID) }
-				hx-vals="js:{target_id: event.target.value}"
-				hx-trigger="change"
-				hx-target="#binding-section"
-				hx-swap="outerHTML"
-				if props.Tool.Cassette > 0 {
-					disabled
+			@selectbox.SelectBox() {
+				@selectbox.Trigger(selectbox.TriggerProps{
+					Disabled: props.Tool.Cassette > 0,
+					Attributes: templ.Attributes{
+						"hx-patch":   string(urlb.ToolBind(props.Tool.ID)),
+						"hx-vals":    "js:{target_id: event.target.value}",
+						"hx-trigger": "change",
+						"hx-target":  "#binding-section",
+						"hx-swap":    "outerHTML",
+					},
+				}) {
+					@selectbox.Value(selectbox.ValueProps{
+						Placeholder: "Werkzeugbindung",
+					})
 				}
-			>
-				<option
-					value=""
-					disabled
-					selected?={ props.Tool.Cassette <= 0 }
-				>
-					if props.Tool.Position == shared.SlotUpper {
-						{ shared.SlotUpperCassette.German() }
-					} else {
-						{ shared.SlotUpper.German() }
+				@selectbox.Content(selectbox.ContentProps{
+					NoSearch: true,
+				}) {
+					for _, c := range props.CassettesForBinding {
+						@selectbox.Item(selectbox.ItemProps{
+							Value: c.ID.String(),
+						}) {
+							{ c.German() }
+						}
 					}
-					Binden
-				</option>
-				for _, c := range props.CassettesForBinding {
-					<option
-						value={ c.ID }
-						selected?={ c.ID == props.Tool.Cassette }
-					>{ c.German() }</option>
 				}
-			</select>
-			<button
-				class={ css.ButtonSmall, css.Destructive, css.Ghost }
-				hx-patch={ urlb.ToolUnbind(props.Tool.ID) }
-				hx-trigger="click"
-				hx-target="#binding-section"
-				hx-swap="outerHTML"
-				if props.Tool.Cassette <= 0 {
-					disabled
-				}
-			>
+			}
+			@button.Button(button.Props{
+				Variant:  button.VariantDestructive,
+				Disabled: props.Tool.Cassette <= 0,
+				Attributes: templ.Attributes{
+					"hx-patch":   string(urlb.ToolUnbind(props.Tool.ID)),
+					"hx-trigger": "click",
+					"hx-target":  "#binding-section",
+					"hx-swap":    "outerHTML",
+				},
+			}) {
 				Entbinden
-			</button>
+			}
 		</span>
 		if props.Tool.Cassette > 0 {
 			<span>
