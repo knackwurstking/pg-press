@@ -65,7 +65,7 @@ templ metalSheetTableForUpperSlot(position shared.Slot, metalSheets []*shared.Up
 		@components.NotFoundText("Keine Bleche für dieses Werkzeug gefunden")
 		{{ return }}
 	}
-	<figure class="w-full overflow-x-scroll">
+	<figure class="w-full overflow-x-auto">
 		@table.Table() {
 			@table.Header() {
 				@table.Row() {
@@ -111,7 +111,7 @@ templ metalSheetTableForLowerSlot(position shared.Slot, metalSheets []*shared.Lo
 		@components.NotFoundText("Keine Bleche für dieses Werkzeug gefunden")
 		{{ return }}
 	}
-	<figure class="w-full overflow-x-scroll">
+	<figure class="w-full overflow-x-auto">
 		@table.Table() {
 			@table.Header() {
 				@table.Row() {

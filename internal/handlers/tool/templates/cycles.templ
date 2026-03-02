@@ -4,7 +4,9 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/button"
 	"github.com/knackwurstking/pg-press/internal/components/icon"
+	"github.com/knackwurstking/pg-press/internal/components/table"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/knackwurstking/ui/pkg/css"
@@ -62,16 +64,16 @@ templ toolStatus(p *CyclesSectionContentProps) {
 				UserHasPermission: p.User.IsAdmin(),
 			})
 			if p.ActivePress != nil {
-				// TODO: Use a templui button here instead
-				<a
-					role="button"
-					class={ css.ButtonSmall, css.Ghost, css.Flex, css.Gap }
-					href={ urlb.Press(p.ActivePress.ID) }
-					title="Zur Pressenübersicht"
-				>
-					<i class="bi bi-arrow-right"></i>
+				@button.Button(button.Props{
+					Variant: button.VariantLink,
+					Href:    string(urlb.Press(p.ActivePress.ID)),
+					Attributes: templ.Attributes{
+						"title": "Zur Pressenübersicht",
+					},
+				}) {
+					@icon.ArrowRight()
 					{ p.ActivePress.German() }
-				</a>
+				}
 			}
 		</span>
 		// Skip the binding section for cassette type tools and for lower slot tools
@@ -99,21 +101,25 @@ templ regenerations(p *CyclesSectionContentProps) {
 		if len(p.Regenerations) == 0 {
 			@components.NotFoundText("Keine Regenerationen verzeichnet für dieses Werkzeug")
 		} else {
-			<figure class={ css.WFull, css.OverflowXScroll }>
-				<table title="Regenerationen">
-					<thead>
-						<tr>
-							<th name="start">Start</th>
-							<th name="stop">Stop</th>
-							<th name="actions"></th>
-						</tr>
-					</thead>
-					<tbody>
+			<figure class="w-full overflow-x-auto">
+				@table.Table() {
+					@table.Header() {
+						@table.Row() {
+							@table.Row() {
+								Start
+							}
+							@table.Row() {
+								Stop
+							}
+							@table.Row()
+						}
+					}
+					@table.Body() {
 						for _, r := range p.Regenerations {
 							@regenerationsTableRow(r, p.User)
 						}
-					</tbody>
-				</table>
+					}
+				}
 			</figure>
 		}
 	}
@@ -155,9 +161,7 @@ templ cyclesTable(p *CyclesSectionContentProps) {
 			})
 		}
 		@components.Section(nil) {
-			<h6 class={ css.MB }>
-				Gesamtzyklen:
-			</h6>
+			<h6>Gesamtzyklen:</h6>
 			<span>
 				@TotalCycles(p.Tool.Cycles, true)
 			</span>
@@ -165,7 +169,7 @@ templ cyclesTable(p *CyclesSectionContentProps) {
 		if len(p.ToolCycles) == 0 {
 			@components.NotFoundText("Kein Pressenverlauf verfügbar")
 		} else {
-			<figure class={ css.WFull, css.OverflowXScroll }>
+			<figure class="w-full overflow-x-auto">
 				<table
 					name="tool-cycles-table"
 					class={ css.TableBorderless, css.TableCompact }
