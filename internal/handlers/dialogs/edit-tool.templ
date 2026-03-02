@@ -21,17 +21,15 @@ type ToolFormData struct {
 	Code     string      `form:"code"`
 }
 
-type NewToolDialogProps struct {
+type ToolDialogProps struct {
 	ToolFormData
-
 	Open, OOB bool
-
-	Error *errors.InputError
+	Error     *errors.InputError
 }
 
-templ NewToolDialog(props ...NewToolDialogProps) {
+templ NewToolDialog(props ...ToolDialogProps) {
 	{{
-		prop := NewToolDialogProps{}
+		prop := ToolDialogProps{}
 		if len(props) > 0 {
 			prop = props[0]
 		}
@@ -79,19 +77,9 @@ templ NewToolDialog(props ...NewToolDialogProps) {
 	}
 }
 
-type EditToolDialogProps struct {
-	ToolFormData
-
-	ToolID shared.EntityID
-
-	Open, OOB bool
-
-	Error *errors.InputError
-}
-
-templ EditToolDialog(props ...EditToolDialogProps) {
+templ EditToolDialog(toolID shared.EntityID, props ...ToolDialogProps) {
 	{{
-		prop := EditToolDialogProps{}
+		prop := ToolDialogProps{}
 		if len(props) > 0 {
 			prop = props[0]
 		}
@@ -114,7 +102,7 @@ templ EditToolDialog(props ...EditToolDialogProps) {
 			}
 			@dialogFormError(prop.Error)
 			<form
-				hx-post={ urlb.DialogEditTool(prop.ToolID) }
+				hx-post={ urlb.DialogEditTool(toolID) }
 				hx-trigger="submit"
 				enctype="multipart/form-data"
 			>

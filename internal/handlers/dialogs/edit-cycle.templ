@@ -19,6 +19,7 @@ import (
 
 type CycleFormData struct {
 	ToolID shared.EntityID
+	Tools  []*shared.Tool
 
 	PressID shared.EntityID
 	Presses []*shared.Press
@@ -27,17 +28,15 @@ type CycleFormData struct {
 	PressCycles int64
 }
 
-type NewCycleDialogProps struct {
+type CycleDialogProps struct {
 	CycleFormData
-
 	Open, OOB bool
-
-	Error *errors.InputError
+	Error     *errors.InputError
 }
 
-templ NewCycleDialog(props ...NewCycleDialogProps) {
+templ NewCycleDialog(props ...CycleDialogProps) {
 	{{
-		prop := NewCycleDialogProps{}
+		prop := CycleDialogProps{}
 		if len(props) > 0 {
 			prop = props[0]
 		}
@@ -79,13 +78,9 @@ templ NewCycleDialog(props ...NewCycleDialogProps) {
 	}
 }
 
-// TODO: Migrate to templui and tailwind
-templ EditCycleDialog(
-	cycle *shared.Cycle,
-	tool *shared.Tool,
-	availableTools []*shared.Tool,
-	presses []*shared.Press,
-) {
+templ EditCycleDialog(cycleID shared.EntityID, props ...CycleDialogProps) {
+	// TODO: Migrate to templui and tailwind
+	// -------------------------------------------------------------------------
 	{{ toolChangeMode := len(availableTools) > 0 }}
 	@components.FormDialog("cycle-edit-dialog", http.MethodPut, urlb.DialogEditCyclePut()) {
 		<input

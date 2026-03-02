@@ -21,17 +21,15 @@ type CassetteFormData struct {
 	MaxThickness float32 `form:"max-thickness"`
 }
 
-type NewCassetteDialogProps struct {
+type CassetteDialogProps struct {
 	CassetteFormData
-
 	Open, OOB bool
-
-	Error *errors.InputError
+	Error     *errors.InputError
 }
 
-templ NewCassetteDialog(props ...NewCassetteDialogProps) {
+templ NewCassetteDialog(props ...CassetteDialogProps) {
 	{{
-		prop := NewCassetteDialogProps{}
+		prop := CassetteDialogProps{}
 		if len(props) > 0 {
 			prop = props[0]
 		}
@@ -79,21 +77,12 @@ templ NewCassetteDialog(props ...NewCassetteDialogProps) {
 	}
 }
 
-type EditCassetteDialogProps struct {
-	CassetteFormData
-
-	ToolID    shared.EntityID
-	Open, OOB bool
-
-	Error *errors.InputError
-}
-
-templ EditCassetteDialog(props ...EditCassetteDialogProps) {
+templ EditCassetteDialog(toolID shared.EntityID, props ...CassetteDialogProps) {
 	{{
-		if len(props) == 0 {
-			panic("EditCassetteDialog requires one argument of type EditCassetteDialogProps")
+		prop := CassetteDialogProps{}
+		if len(props) > 0 {
+			prop = props[0]
 		}
-		prop := props[0]
 
 		attr := templ.Attributes{}
 		if prop.OOB {
@@ -113,7 +102,7 @@ templ EditCassetteDialog(props ...EditCassetteDialogProps) {
 			}
 			@dialogFormError(prop.Error)
 			<form
-				hx-post={ urlb.DialogEditCassette(prop.ToolID) }
+				hx-post={ urlb.DialogEditCassette(toolID) }
 				hx-trigger="submit"
 				enctype="multipart/form-data"
 			>

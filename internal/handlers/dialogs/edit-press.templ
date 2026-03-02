@@ -20,17 +20,15 @@ type PressFormData struct {
 	CyclesOffset int64              `form:"cycles_offset"`
 }
 
-type NewPressDialogProps struct {
+type PressDialogProps struct {
 	PressFormData
-
 	Open, OOB bool
-
-	Error *errors.InputError
+	Error     *errors.InputError
 }
 
-templ NewPressDialog(props ...NewPressDialogProps) {
+templ NewPressDialog(props ...PressDialogProps) {
 	{{
-		prop := NewPressDialogProps{}
+		prop := PressDialogProps{}
 		if len(props) > 0 {
 			prop = props[0]
 		}
@@ -71,19 +69,9 @@ templ NewPressDialog(props ...NewPressDialogProps) {
 	}
 }
 
-type EditPressDialogProps struct {
-	PressFormData
-
-	PressID shared.EntityID
-
-	Open, OOB bool
-
-	Error *errors.InputError
-}
-
-templ EditPressDialog(props ...EditPressDialogProps) {
+templ EditPressDialog(pressID shared.EntityID, props ...PressDialogProps) {
 	{{
-		prop := EditPressDialogProps{}
+		prop := PressDialogProps{}
 		if len(props) > 0 {
 			prop = props[0]
 		}
@@ -106,7 +94,7 @@ templ EditPressDialog(props ...EditPressDialogProps) {
 			}
 			@dialogFormError(prop.Error)
 			<form
-				hx-post={ urlb.DialogEditPress(prop.PressID) }
+				hx-post={ urlb.DialogEditPress(pressID) }
 				hx-trigger="submit"
 				enctype="multipart/form-data"
 			>
@@ -116,7 +104,7 @@ templ EditPressDialog(props ...EditPressDialogProps) {
 					@button.Button(button.Props{
 						Variant: button.VariantDestructive,
 						Attributes: templ.Attributes{
-							"hx-delete":  urlb.PressDelete(prop.PressID),
+							"hx-delete":  urlb.PressDelete(pressID),
 							"hx-trigger": "click",
 							"hx-confirm": "Möchten Sie diese Presse wirklich entfernen? Diese Aktion kann nicht rückgängig gemacht werden.",
 						},
