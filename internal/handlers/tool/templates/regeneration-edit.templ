@@ -3,9 +3,10 @@ package templates
 import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/button"
+	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"github.com/knackwurstking/ui/pkg/css"
 )
 
 type RegenerationEditProps struct {
@@ -19,7 +20,7 @@ type RegenerationEditProps struct {
 templ RegenerationEdit(p RegenerationEditProps) {
 	<div
 		id={ fmt.Sprintf("regeneration-edit-%d", p.Tool.ID) }
-		class={ css.Flex, css.FlexCol, css.GapSm }
+		class="flex flex-col gap-2"
 	>
 		if p.Editable {
 			@regenerationEditForm(p)
@@ -30,7 +31,7 @@ templ RegenerationEdit(p RegenerationEditProps) {
 }
 
 templ regenerationEditShowcase(p RegenerationEditProps) {
-	<div class={ css.Flex, css.ItemsCenter, css.GapLg }>
+	<div class="flex items-center gap-6">
 		if p.Tool.IsCassette() {
 			@components.CassetteStateBadge(p.Tool, nil, p.IsRegenerating)
 		} else {
@@ -40,32 +41,32 @@ templ regenerationEditShowcase(p RegenerationEditProps) {
 			hxTarget := fmt.Sprintf("#regeneration-edit-%d", p.Tool.ID)
 			hxGet := urlb.ToolRegenerationEdit(p.Tool.ID)
 		}}
-		<button
-			type="button"
-			class={ css.ButtonSmall, css.Ghost, css.Flex, css.Gap }
-			hx-get={ hxGet }
-			hx-target={ hxTarget }
-			hx-swap="outerHTML"
-			title="Status bearbeiten"
-			disabled?={ p.ToolIsActive }
-		>
-			<i class={ "bi", "bi-pencil-square", css.TextSM }></i>
+		@button.Button(button.Props{
+			Disabled: p.ToolIsActive,
+			Attributes: templ.Attributes{
+				"hx-get":    string(hxGet),
+				"hx-target": hxTarget,
+				"hx-swap":   "outerHTML",
+				"title":     "Status bearbeiten",
+			},
+		}) {
+			@icon.Pencil()
 			Regenerierung
-		</button>
+		}
 	</div>
 }
 
 templ regenerationEditForm(p RegenerationEditProps) {
-	<div class={ css.Card, css.PSm, css.Flex, css.FlexCol, css.GapSm }>
-		<div class={ css.Flex, css.ItemsCenter, css.GapSm, css.MB }>
+	<div class="flex flex-col gap-2 p-2">
+		<div class="flex items-center gap-2 mb-2">
 			if p.Tool.IsCassette() {
 				@components.CassetteStateBadge(p.Tool, nil, p.IsRegenerating)
 			} else {
 				@components.ToolStateBadge(p.Tool, nil, p.IsRegenerating)
 			}
-			<span class={ css.TextSM, css.Muted, css.Ghost }>Regenerierung steuern</span>
+			<span class="text-sm">Regenerierung steuern</span>
 		</div>
-		<div class={ css.Flex, css.FlexCol, css.GapSm }>
+		<div class="flex flex-col gap-sm">
 			{{
 				hxTarget := fmt.Sprintf("#regeneration-edit-%d", p.Tool.ID)
 				hxPut := urlb.ToolRegeneration(p.Tool.ID)
@@ -80,24 +81,25 @@ templ regenerationEditForm(p RegenerationEditProps) {
 				} else {
 					<input type="hidden" name="status" value="active"/>
 				}
-				<button
-					type="submit"
-					if p.IsRegenerating {
-						class={ css.ButtonSmall, css.Success, css.WFull, css.M0, css.Flex, css.Gap }
-					} else {
-						class={ css.ButtonSmall, css.Warning, css.WFull, css.M0, css.Flex, css.Gap }
-					}
-					if !p.UserHasPermission {
-						disabled
-					}
-				>
-					<i class="bi bi-arrow-clockwise"></i>
-					if p.IsRegenerating {
+				if p.IsRegenerating {
+					@button.Button(button.Props{
+						Class:    "w-full text-orange-500",
+						Variant:  button.VariantGhost,
+						Type:     button.TypeSubmit,
+						Disabled: !p.UserHasPermission,
+					}) {
 						Regenerierung stoppen
-					} else {
+					}
+				} else {
+					@button.Button(button.Props{
+						Class:    "w-full text-green-500",
+						Variant:  button.VariantGhost,
+						Type:     button.TypeSubmit,
+						Disabled: !p.UserHasPermission,
+					}) {
 						Regenerierung starten
 					}
-				</button>
+				}
 			</form>
 			if p.IsRegenerating {
 				<form
@@ -107,28 +109,27 @@ templ regenerationEditForm(p RegenerationEditProps) {
 				>
 					<input type="hidden" name="tool_id" value={ fmt.Sprintf("%d", p.Tool.ID) }/>
 					<input type="hidden" name="status" value="abort"/>
-					<button
-						type="submit"
-						class={ css.ButtonSmall, css.Destructive, css.WFull, css.M0, css.Flex, css.Gap }
-						if !p.UserHasPermission {
-							disabled
-						}
-					>
-						<i class="bi bi-trash"></i>
+					@button.Button(button.Props{
+						Class:    "w-full",
+						Variant:  button.VariantDestructive,
+						Disabled: !p.UserHasPermission,
+					}) {
+						@icon.Trash()
 						Regenerierung Abbrechen
-					</button>
+					}
 				</form>
 			}
-			<button
-				type="button"
-				class={ css.ButtonSmall, css.Secondary, css.Flex, css.Gap }
-				hx-get={ urlb.ToolRegenerationDisplay(p.Tool.ID) }
-				hx-target={ hxTarget }
-				hx-swap="outerHTML"
-			>
-				<i class="bi bi-x"></i>
+			@button.Button(button.Props{
+				Variant: button.VariantSecondary,
+				Attributes: templ.Attributes{
+					"hx-get":    string(urlb.ToolRegenerationDisplay(p.Tool.ID)),
+					"hx-target": hxTarget,
+					"hx-swap":   "outerHTML",
+				},
+			}) {
+				@icon.X()
 				Abbrechen
-			</button>
+			}
 		</div>
 	</div>
 }
