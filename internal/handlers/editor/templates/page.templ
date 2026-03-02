@@ -239,7 +239,7 @@ templ existingAttachmentItem(attachment string, index int) {
 				Variant: button.VariantGhost,
 				Size:    button.SizeSm,
 				Attributes: templ.Attributes{
-					"onclick": fmt.Sprintf(`openImageViewer(%s)`, urlb.Attachment(attachment)),
+					"onclick": fmt.Sprintf(`openImageViewer("%s")`, urlb.Attachment(attachment)),
 				},
 			}) {
 				@icon.Eye()
@@ -249,7 +249,7 @@ templ existingAttachmentItem(attachment string, index int) {
 				Variant: button.VariantDestructive,
 				Size:    button.SizeSm,
 				Attributes: templ.Attributes{
-					"onclick": fmt.Sprintf(`deleteAttachment(%s)`, attachment),
+					"onclick": fmt.Sprintf(`deleteAttachment("%s")`, attachment),
 				},
 			}) {
 				@icon.Trash()
