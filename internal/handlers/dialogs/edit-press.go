@@ -144,7 +144,7 @@ func parseEditPressForm(c echo.Context) (data PressFormData, ierr *errors.InputE
 func ReRenderNewPressDialog(c echo.Context, open bool, data PressFormData, ierr *errors.InputError) *echo.HTTPError {
 	t := NewPressDialog(NewPressDialogProps{
 		PressFormData: data,
-		Open:          true,
+		Open:          open,
 		OOB:           true,
 		Error:         ierr,
 	})
