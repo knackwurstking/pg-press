@@ -1,4 +1,5 @@
 async function downloadPDF(event, url, fallbackFilename) {
+	console.debug("Download button clicked:", event.target, "URL:", url);
 	var button = event.target.closest('button') || event.target;
 
 	try {
