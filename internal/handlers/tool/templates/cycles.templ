@@ -9,7 +9,6 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components/table"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"github.com/knackwurstking/ui/pkg/css"
 )
 
 templ CyclesSection(oob bool, id shared.EntityID) {
@@ -126,21 +125,21 @@ templ regenerations(p *CyclesSectionContentProps) {
 }
 
 templ regenerationsTableRow(r *shared.ToolRegeneration, u *shared.User) {
-	<tr>
-		<td>
+	@table.Row() {
+		@table.Cell() {
 			<span>{ r.Start.FormatDate() }</span>
-		</td>
-		<td>
+		}
+		@table.Cell() {
 			<span>{ r.Stop.FormatDate() }</span>
-		</td>
-		<td>
+		}
+		@table.Cell() {
 			@components.TableActions(components.TableActionsOptions{
 				DeleteHref:      urlb.ToolDeleteRegeneration(r.ToolID, r.ID),
 				DeleteAdminOnly: true,
 				User:            u,
 			})
-		</td>
-	</tr>
+		}
+	}
 }
 
 templ cyclesTable(p *CyclesSectionContentProps) {
@@ -170,54 +169,64 @@ templ cyclesTable(p *CyclesSectionContentProps) {
 			@components.NotFoundText("Kein Pressenverlauf verfügbar")
 		} else {
 			<figure class="w-full overflow-x-auto">
-				<table
-					name="tool-cycles-table"
-					class={ css.TableBorderless, css.TableCompact }
-					title="Zyklusverlauf"
-				>
-					<thead>
-						<tr>
-							<th name="press">Presse</th>
-							<th name="start">Start</th>
-							<th name="stop">Stop</th>
-							<th name="press_cycles">Zyklen</th>
-							<th name="partial_cycles">Zyklen (Teil)</th>
-							<th></th>
-						</tr>
-					</thead>
-					<tbody>
+				@table.Table() {
+					@table.Header() {
+						@table.Row() {
+							@table.Head() {
+								Presse
+							}
+							@table.Head() {
+								Start
+							}
+							@table.Head() {
+								Stop
+							}
+							@table.Head() {
+								Zyklen
+							}
+							@table.Head() {
+								Zyklen (Teil)
+							}
+							@table.Head()
+						}
+					}
+					@table.Body() {
 						for _, cycle := range p.ToolCycles {
 							@cycleTableRow(cycle, p.PressMap[cycle.PressID], lastRegeneration, p.User)
 						}
-					</tbody>
-				</table>
+					}
+				}
 			</figure>
 		}
 	}
 }
 
 templ cycleTableRow(cycle *shared.Cycle, press *shared.Press, lastRegeneration *shared.ToolRegeneration, user *shared.User) {
-	<tr
+	{{
+		class := ""
 		if lastRegeneration != nil && lastRegeneration.Start >= cycle.Stop {
-			style={ fmt.Sprintf("color: %s", css.VarMuted) }
+			class = "bg-muted text-muted-foreground"
 		}
-	>
-		<td>
+	}}
+	@table.Cell(table.CellProps{
+		Class: class,
+	}) {
+		@table.Cell() {
 			<span>{ press.German() }</span>
-		</td>
-		<td>
-			<span class={ css.TextSM }>{ cycle.Start.FormatDate() }</span>
-		</td>
-		<td>
-			<span class={ css.TextSM }>{ cycle.Stop.FormatDate() }</span>
-		</td>
-		<td>
+		}
+		@table.Cell() {
+			<span class="text-sm">{ cycle.Start.FormatDate() }</span>
+		}
+		@table.Cell() {
+			<span class="text-sm">{ cycle.Stop.FormatDate() }</span>
+		}
+		@table.Cell() {
 			{ fmt.Sprintf("%d", cycle.PressCycles) }
-		</td>
-		<td>
+		}
+		@table.Cell() {
 			{ fmt.Sprintf("%d", cycle.PartialCycles) }
-		</td>
-		<td>
+		}
+		@table.Cell() {
 			@components.TableActions(components.TableActionsOptions{
 				EditHref:        urlb.DialogEditCycleGet(cycle.ID, cycle.ToolID, false),
 				EditAdminOnly:   true,
@@ -225,6 +234,6 @@ templ cycleTableRow(cycle *shared.Cycle, press *shared.Press, lastRegeneration *
 				DeleteAdminOnly: true,
 				User:            user,
 			})
-		</td>
-	</tr>
+		}
+	}
 }
