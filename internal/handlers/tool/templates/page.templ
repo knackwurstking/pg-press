@@ -54,9 +54,9 @@ templ Page(p *PageProps) {
 			}
 			// Dialogs
 			if p.Tool.IsCassette() {
-				@dialogs.EditCassetteDialog()
+				@dialogs.EditCassetteDialog(0)
 			} else {
-				@dialogs.EditToolDialog()
+				@dialogs.EditToolDialog(0)
 			}
 		</main>
 	}

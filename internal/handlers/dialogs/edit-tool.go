@@ -26,7 +26,7 @@ func GetToolDialog(c echo.Context) *echo.HTTPError {
 
 	if tool != nil {
 		log.Debug("Rendering edit tool dialog: %#v", tool)
-		t := EditToolDialog(EditToolDialogProps{
+		t := EditToolDialog(tool.ID, ToolDialogProps{
 			ToolFormData: ToolFormData{
 				Type:     tool.Type,
 				Code:     tool.Code,
@@ -34,9 +34,8 @@ func GetToolDialog(c echo.Context) *echo.HTTPError {
 				Width:    tool.Width,
 				Height:   tool.Height,
 			},
-			ToolID: tool.ID,
-			OOB:    true,
-			Open:   true,
+			OOB:  true,
+			Open: true,
 		})
 		err := t.Render(c.Request().Context(), c.Response())
 		if err != nil {
@@ -46,7 +45,7 @@ func GetToolDialog(c echo.Context) *echo.HTTPError {
 	}
 
 	log.Debug("Rendering new tool dialog...")
-	t := NewToolDialog(NewToolDialogProps{
+	t := NewToolDialog(ToolDialogProps{
 		Open: true,
 		OOB:  true,
 	})
@@ -156,7 +155,7 @@ func parseToolForm(c echo.Context) (data ToolFormData, ierr *errors.InputError) 
 }
 
 func ReRenderNewToolDialog(c echo.Context, open bool, data ToolFormData, ierr *errors.InputError) *echo.HTTPError {
-	t := NewToolDialog(NewToolDialogProps{
+	t := NewToolDialog(ToolDialogProps{
 		ToolFormData: data,
 		Open:         open,
 		OOB:          true,
@@ -172,9 +171,8 @@ func ReRenderNewToolDialog(c echo.Context, open bool, data ToolFormData, ierr *e
 }
 
 func ReRenderEditToolDialog(c echo.Context, toolID shared.EntityID, open bool, data ToolFormData, ierr *errors.InputError) *echo.HTTPError {
-	t := EditToolDialog(EditToolDialogProps{
+	t := EditToolDialog(toolID, ToolDialogProps{
 		ToolFormData: data,
-		ToolID:       toolID,
 		Open:         open,
 		OOB:          true,
 		Error:        ierr,

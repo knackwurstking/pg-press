@@ -25,16 +25,15 @@ func GetEditPress(c echo.Context) *echo.HTTPError {
 			return merr.Echo()
 		}
 
-		t := EditPressDialog(EditPressDialogProps{
+		t := EditPressDialog(press.ID, PressDialogProps{
 			PressFormData: PressFormData{
 				Number:       press.Number,
 				Type:         press.Type,
 				Code:         press.Code,
 				CyclesOffset: press.CyclesOffset,
 			},
-			PressID: press.ID,
-			OOB:     true,
-			Open:    true,
+			OOB:  true,
+			Open: true,
 		})
 		err := t.Render(c.Request().Context(), c.Response())
 		if err != nil {
@@ -43,7 +42,7 @@ func GetEditPress(c echo.Context) *echo.HTTPError {
 		return nil
 	}
 
-	t := NewPressDialog(NewPressDialogProps{
+	t := NewPressDialog(PressDialogProps{
 		OOB:  true,
 		Open: true,
 	})
@@ -143,7 +142,7 @@ func parseEditPressForm(c echo.Context) (data PressFormData, ierr *errors.InputE
 }
 
 func ReRenderNewPressDialog(c echo.Context, open bool, data PressFormData, ierr *errors.InputError) *echo.HTTPError {
-	t := NewPressDialog(NewPressDialogProps{
+	t := NewPressDialog(PressDialogProps{
 		PressFormData: data,
 		Open:          open,
 		OOB:           true,
@@ -159,9 +158,8 @@ func ReRenderNewPressDialog(c echo.Context, open bool, data PressFormData, ierr 
 }
 
 func ReRenderEditPressDialog(c echo.Context, pressID shared.EntityID, open bool, data PressFormData, ierr *errors.InputError) *echo.HTTPError {
-	t := EditPressDialog(EditPressDialogProps{
+	t := EditPressDialog(pressID, PressDialogProps{
 		PressFormData: data,
-		PressID:       pressID,
 		Open:          open,
 		OOB:           true,
 		Error:         ierr,

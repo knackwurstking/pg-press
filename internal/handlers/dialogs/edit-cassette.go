@@ -29,7 +29,7 @@ func GetCassetteDialog(c echo.Context) *echo.HTTPError {
 
 	if tool != nil {
 		log.Debug("Rendering edit cassette dialog: %#v", tool.String())
-		t := EditCassetteDialog(EditCassetteDialogProps{
+		t := EditCassetteDialog(tool.ID, CassetteDialogProps{
 			CassetteFormData: CassetteFormData{
 				Type:         tool.Type,
 				Code:         tool.Code,
@@ -38,9 +38,8 @@ func GetCassetteDialog(c echo.Context) *echo.HTTPError {
 				MinThickness: tool.MinThickness,
 				MaxThickness: tool.MaxThickness,
 			},
-			ToolID: tool.ID,
-			OOB:    true,
-			Open:   true,
+			OOB:  true,
+			Open: true,
 		})
 		if err := t.Render(c.Request().Context(), c.Response()); err != nil {
 			return errors.NewRenderError(err, "EditCassetteDialog")
@@ -49,7 +48,7 @@ func GetCassetteDialog(c echo.Context) *echo.HTTPError {
 	}
 
 	log.Debug("Rendering new cassette dialog...")
-	t := NewCassetteDialog(NewCassetteDialogProps{
+	t := NewCassetteDialog(CassetteDialogProps{
 		OOB:  true,
 		Open: true,
 	})
@@ -161,21 +160,8 @@ func parseCassetteForm(c echo.Context) (data CassetteFormData, ierr *errors.Inpu
 	return
 }
 
-func ReRenderCassetteDialog(c echo.Context, open bool, data CassetteFormData, ierr *errors.InputError) *echo.HTTPError {
-	t := EditCassetteDialog(EditCassetteDialogProps{
-		CassetteFormData: data,
-		Open:             open,
-		OOB:              true,
-		Error:            ierr,
-	})
-	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
-		return errors.NewRenderError(err, "EditCassetteDialog")
-	}
-	return nil
-}
-
 func ReRenderNewCassetteDialog(c echo.Context, open bool, data CassetteFormData, ierr *errors.InputError) *echo.HTTPError {
-	t := NewCassetteDialog(NewCassetteDialogProps{
+	t := NewCassetteDialog(CassetteDialogProps{
 		CassetteFormData: data,
 		Open:             open,
 		OOB:              true,
@@ -191,9 +177,8 @@ func ReRenderNewCassetteDialog(c echo.Context, open bool, data CassetteFormData,
 }
 
 func ReRenderEditCassetteDialog(c echo.Context, toolID shared.EntityID, open bool, data CassetteFormData, ierr *errors.InputError) *echo.HTTPError {
-	t := EditCassetteDialog(EditCassetteDialogProps{
+	t := EditCassetteDialog(toolID, CassetteDialogProps{
 		CassetteFormData: data,
-		ToolID:           toolID,
 		Open:             open,
 		OOB:              true,
 		Error:            ierr,
