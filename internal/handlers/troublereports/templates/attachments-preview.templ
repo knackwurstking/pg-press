@@ -3,7 +3,6 @@ package templates
 import (
 	"fmt"
 
-	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 )
@@ -28,7 +27,7 @@ templ attachmentPreviewItem(attachment string) {
 	{{ src := urlb.Attachment(attachment) }}
 	<div
 		class="attachment-preview-item cursor-pointer"
-		onclick={ components.OpenImageViewer(src) }
+		onclick={ openImageViewer(src) }
 		tabindex="0"
 		role="button"
 		aria-label={ fmt.Sprintf("Bild \"%s\" anzeigen", attachment) }
@@ -42,4 +41,8 @@ templ attachmentPreviewItem(attachment string) {
 			/>
 		</div>
 	</div>
+}
+
+script openImageViewer(url templ.SafeURL) {
+	openImageViewer(url);
 }
