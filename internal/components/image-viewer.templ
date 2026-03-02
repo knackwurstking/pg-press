@@ -1,23 +1,34 @@
 package components
 
-import "github.com/knackwurstking/ui/pkg/css"
+import (
+	"github.com/knackwurstking/pg-press/internal/components/button"
+	"github.com/knackwurstking/pg-press/internal/components/icon"
+)
 
-// TODO: Migrate to templui & tailwindcss
 templ ImageViewerTemplate() {
 	<template name="image-viewer">
 		<dialog
 			name="image-viewer"
-			class={ "image-viewer", css.DialogFullscreen, css.DialogClean, css.Flex, css.JustifyCenter, css.ItemsCenter }
+			class={
+				"image-viewer",
+				"w-full h-full max-w-screen max-h-screen",
+				"flex justify-center items-center",
+				"bg-transparent backdrop-blur-sm border-0 rounded-none",
+				"p-0 m-0",
+			}
 		>
-			<img alt="Attachment" class="attachment"/>
-			<button
-				type="button"
-				class={ "close", css.ButtonIcon, css.Secondary, css.Ghost }
-				onclick="this.closest('dialog').close()"
-				title="Schließen"
-			>
-				<i class="bi bi-x-lg"></i>
-			</button>
+			<img loading="lazy" alt="Attachment" class="attachment object-contain"/>
+			@button.Button(button.Props{
+				Class:   "fixed top-2 right-2",
+				Variant: button.VariantSecondary,
+				Size:    button.SizeIcon,
+				Attributes: templ.Attributes{
+					"onclick": `this.closest('dialog').close()`,
+					"title":   "Schließen",
+				},
+			}) {
+				@icon.X()
+			}
 		</dialog>
 	</template>
 }
