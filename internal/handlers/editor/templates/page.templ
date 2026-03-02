@@ -87,8 +87,7 @@ templ pageNavContent(props *PageProps) {
 }
 
 templ pageAdditionalHead() {
-	@uicomponents.MarkdownStyles()
-	<script defer src={ ui.AssetURL(env.ServerPathPrefix, "/js/editor.js") }></script>
+	<script defer src={ ui.AssetURL(env.ServerPathPrefix, "/js/editor/main.js") }></script>
 }
 
 templ hiddenFields(options *PageProps) {
@@ -227,7 +226,6 @@ templ existingAttachments(attachments []string) {
 	}
 }
 
-// TODO: Migrate to tailwindcss
 templ existingAttachmentItem(attachment string, index int) {
 	<div
 		class="p border flex gap-4 justify-between items-center rounded"
@@ -238,22 +236,26 @@ templ existingAttachmentItem(attachment string, index int) {
 			<span class="bg-muted text-muted-foreground text-sm">({ attachment })</span>
 		</div>
 		<div class="flex gap-2">
-			<button
-				type="button"
-				class={ css.Secondary, css.ButtonSmall }
-				onclick={ components.OpenImageViewer(urlb.Attachment(attachment)) }
-			>
+			@button.Button(button.Props{
+				Variant: button.VariantSecondary,
+				Size:    button.SizeSm,
+				Attributes: templ.Attributes{
+					"onclick": fmt.Sprintf(`openImageViewer(%s)`, urlb.Attachment(attachment)),
+				},
+			}) {
 				@icon.Eye()
 				Anzeigen
-			</button>
-			<button
-				type="button"
-				class={ css.Destructive, css.ButtonSmall }
-				onclick={ deleteAttachment(attachment) }
-			>
+			}
+			@button.Button(button.Props{
+				Variant: button.VariantDestructive,
+				Size:    button.SizeSm,
+				Attributes: templ.Attributes{
+					"onclick": fmt.Sprintf(`deleteAttachment(%s)`, attachment),
+				},
+			}) {
 				@icon.Trash()
 				Löschen
-			</button>
+			}
 		</div>
 	</div>
 }
@@ -341,8 +343,4 @@ func getTypeName(editorType shared.EditorType) string {
 
 func supportsAttachments(editorType shared.EditorType) bool {
 	return editorType == shared.EditorTypeTroubleReport
-}
-
-script deleteAttachment(attachment string) {
-	deleteAttachment(attachment);
 }

@@ -51,19 +51,26 @@ templ links() {
 	<link rel="apple-touch-icon" href={ ui.AssetURL(env.ServerPathPrefix, "/apple-touch-icon-180x180.png") }/>
 	<link rel="mask-icon" href={ ui.AssetURL(env.ServerPathPrefix, "/maskable-icon-512x512.png") } color="#b8bb26"/>
 	<link rel="manifest" href={ ui.AssetURL(env.ServerPathPrefix, "/manifest.json") }/>
-	<link rel="stylesheet" href={ ui.AssetURL(env.ServerPathPrefix, "/css/output.css") }/>
 }
 
 templ scripts() {
-	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/htmx-v2.0.7.min.js") }></script>
-	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/layout.js") }></script>
-	// Import component scripts
-	<script defer nonce={ templ.GetNonce(ctx) } src={ ui.AssetURL(env.ServerPathPrefix, "/js/dialog.min.js") }></script>
-	<script defer nonce={ templ.GetNonce(ctx) } src={ ui.AssetURL(env.ServerPathPrefix, "/js/input.min.js") }></script>
-	<script defer nonce={ templ.GetNonce(ctx) } src={ ui.AssetURL(env.ServerPathPrefix, "/js/label.min.js") }></script>
-	<script defer nonce={ templ.GetNonce(ctx) } src={ ui.AssetURL(env.ServerPathPrefix, "/js/tabs.min.js") }></script>
-	<script defer nonce={ templ.GetNonce(ctx) } src={ ui.AssetURL(env.ServerPathPrefix, "/js/selectbox.min.js") }></script>
-	<script defer nonce={ templ.GetNonce(ctx) } src={ ui.AssetURL(env.ServerPathPrefix, "/js/popover.min.js") }></script>
+	// HTMX
+	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/layout/htmx-v2.0.7.min.js") }></script>
+	// Layout
+	<script defer src={ ui.AssetURL(env.ServerPathPrefix, "/js/layout/main.js") }></script>
+	// Image Viewer
+	<script defer src={ ui.AssetURL(env.ServerPathPrefix, "/js/layout/image-viewer.js") }></script>
+	// PDF
+	<script defer src={ ui.AssetURL(env.ServerPathPrefix, "/js/layout/pdf.js") }></script>
+	// Component Scripts
+	<script defer nonce={ templ.GetNonce(ctx) } src={ ui.AssetURL(env.ServerPathPrefix, "/js/components/checkbox.min.js") }></script>
+	<script defer nonce={ templ.GetNonce(ctx) } src={ ui.AssetURL(env.ServerPathPrefix, "/js/components/dialog.min.js") }></script>
+	<script defer nonce={ templ.GetNonce(ctx) } src={ ui.AssetURL(env.ServerPathPrefix, "/js/components/input.min.js") }></script>
+	<script defer nonce={ templ.GetNonce(ctx) } src={ ui.AssetURL(env.ServerPathPrefix, "/js/components/label.min.js") }></script>
+	<script defer nonce={ templ.GetNonce(ctx) } src={ ui.AssetURL(env.ServerPathPrefix, "/js/components/popover.min.js") }></script>
+	<script defer nonce={ templ.GetNonce(ctx) } src={ ui.AssetURL(env.ServerPathPrefix, "/js/components/selectbox.min.js") }></script>
+	<script defer nonce={ templ.GetNonce(ctx) } src={ ui.AssetURL(env.ServerPathPrefix, "/js/components/tabs.min.js") }></script>
+	// Markdown
 	// TODO: Remove after updating to the current ui version
 	<script name="markdown">
 		function escapeHTML(text) {
@@ -187,6 +194,7 @@ templ scripts() {
 }
 
 templ styles() {
+	<link rel="stylesheet" href={ ui.AssetURL(env.ServerPathPrefix, "/css/output.css") }/>
 	<style name="image-viewer">
 		.image-viewer button.close {
 			position: fixed;

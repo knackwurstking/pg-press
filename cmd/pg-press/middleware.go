@@ -49,32 +49,32 @@ func init() {
 		env.ServerPathPrefix + "/login",
 
 		// CSS
-		env.ServerPathPrefix + "/css/bootstrap-icons.min.css", // TODO: Remove
 		env.ServerPathPrefix + "/css/output.css",
-		env.ServerPathPrefix + "/css/main-layout.css",
 
 		// JS
-		env.ServerPathPrefix + "/js/htmx-v2.0.7.min.js",
-		env.ServerPathPrefix + "/js/layout.js",
+		env.ServerPathPrefix + "/js/layout/htmx-v2.0.7.min.js",
+		env.ServerPathPrefix + "/js/layout/main.js",
 
 		// TemplUI Component Scripts
-		env.ServerPathPrefix + "/js/dialog.min.js",
-		env.ServerPathPrefix + "/js/input.min.js",
-		env.ServerPathPrefix + "/js/label.min.js",
-		env.ServerPathPrefix + "/js/tabs.min.js",
-
-		// Fonts
-		env.ServerPathPrefix + "/bootstrap-icons.woff",  // TODO: Remove
-		env.ServerPathPrefix + "/bootstrap-icons.woff2", // TODO: Remove
+		env.ServerPathPrefix + "/js/components/checkbox.min.js",
+		env.ServerPathPrefix + "/js/components/dialog.min.js",
+		env.ServerPathPrefix + "/js/components/image-viewer.js",
+		env.ServerPathPrefix + "/js/components/input.min.js",
+		env.ServerPathPrefix + "/js/components/label.min.js",
+		env.ServerPathPrefix + "/js/components/popover.min.js",
+		env.ServerPathPrefix + "/js/components/selectbox.min.js",
+		env.ServerPathPrefix + "/js/components/tabs.min.js",
+		env.ServerPathPrefix + "/js/components/textarea.min.js",
 
 		// Icons
 		env.ServerPathPrefix + "/apple-touch-icon-180x180.png",
 		env.ServerPathPrefix + "/favicon.ico",
 		env.ServerPathPrefix + "/icon.png",
 		env.ServerPathPrefix + "/manifest.json",
+		env.ServerPathPrefix + "/maskable-icon-512x512.png",
+		env.ServerPathPrefix + "/pwa-64x64.png",
 		env.ServerPathPrefix + "/pwa-192x192.png",
 		env.ServerPathPrefix + "/pwa-512x512.png",
-		env.ServerPathPrefix + "/pwa-64x64.png",
 	}
 }
 
