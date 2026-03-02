@@ -56,14 +56,13 @@ templ NewToolDialog(props ...ToolDialogProps) {
 				hx-trigger="submit"
 				enctype="multipart/form-data"
 			>
-				{{ tool := &shared.Tool{} }}
-				@toolPosition(tool.Position, prop.Error...)
+				@toolPosition(prop.Position, prop.Error...)
 				<br/>
-				@toolFormat(tool.Width, tool.Height, prop.Error...)
+				@toolFormat(prop.Width, prop.Height, prop.Error...)
 				<br/>
-				@toolType(tool.Type, prop.Error...)
+				@toolType(prop.Type, prop.Error...)
 				<br/>
-				@toolCode(tool.Code, true, prop.Error...)
+				@toolCode(prop.Code, true, prop.Error...)
 				<br/>
 				@dialog.Footer() {
 					@button.Button(button.Props{
@@ -106,14 +105,13 @@ templ EditToolDialog(toolID shared.EntityID, props ...ToolDialogProps) {
 				hx-trigger="submit"
 				enctype="multipart/form-data"
 			>
-				{{ tool := &shared.Tool{} }}
-				@toolPosition(tool.Position, prop.Error...)
+				@toolPosition(prop.Position, prop.Error...)
 				<br/>
-				@toolFormat(tool.Width, tool.Height, prop.Error...)
+				@toolFormat(prop.Width, prop.Height, prop.Error...)
 				<br/>
-				@toolType(tool.Type, prop.Error...)
+				@toolType(prop.Type, prop.Error...)
 				<br/>
-				@toolCode(tool.Code, true, prop.Error...)
+				@toolCode(prop.Code, true, prop.Error...)
 				<br/>
 				@dialog.Footer() {
 					@button.Button(button.Props{
