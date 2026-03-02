@@ -68,7 +68,7 @@ function updateURLHash(event) {
 	var target = event.currentTarget;
 	if (target) {
 		console.debug("Accordion toggled:", target);
-		history.replaceState(null, "", "#" + details.id);
+		history.replaceState(null, "", "#" + target.id);
 
 		// TODO: Clear hash when accordion is closed
 		//history.replaceState(
