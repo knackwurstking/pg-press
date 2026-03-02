@@ -2,7 +2,9 @@ package dialogs
 
 import (
 	"github.com/knackwurstking/pg-press/internal/components/dialog"
+	"github.com/knackwurstking/pg-press/internal/components/form"
 	"github.com/knackwurstking/pg-press/internal/errors"
+	"slices"
 )
 
 // Dialog IDs used for dialog triggers `dialog.Trigger`
@@ -20,12 +22,33 @@ const (
 	EditCycleDialogID = "cycle-edit-dialog"
 )
 
-templ dialogFormError(err ...*errors.InputError) {
+templ renderDialogError(err []*errors.InputError, inputIDs ...string) {
 	for _, e := range err {
-		if e != nil && e.InputID == "form" {
+		if e != nil && slices.Contains(inputIDs, e.InputID) {
 			@dialog.Description() {
 				<span class="text-destructive">{ e.Error() }</span>
 			}
 		}
 	}
+}
+
+templ renderFormError(ierrs []*errors.InputError, inputIDs ...string) {
+	for _, e := range ierrs {
+		if e != nil && slices.Contains(inputIDs, e.InputID) {
+			@form.Message(form.MessageProps{
+				Variant: form.MessageVariantError,
+			}) {
+				{ e.Error() }
+			}
+		}
+	}
+}
+
+func hasInputError(ierrs []*errors.InputError, inputID ...string) bool {
+	for _, e := range ierrs {
+		if e != nil && slices.Contains(inputID, e.InputID) {
+			return true
+		}
+	}
+	return false
 }

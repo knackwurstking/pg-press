@@ -24,7 +24,7 @@ type CassetteFormData struct {
 type CassetteDialogProps struct {
 	CassetteFormData
 	Open, OOB bool
-	Error     *errors.InputError // TODO: Handle multiple errors for different fields
+	Error     []*errors.InputError
 }
 
 templ NewCassetteDialog(props ...CassetteDialogProps) {
@@ -50,20 +50,19 @@ templ NewCassetteDialog(props ...CassetteDialogProps) {
 			@dialog.Header() {
 				Neue Kassette
 			}
-			@dialogFormError(prop.Error)
+			@renderDialogError(prop.Error, "form")
 			<form
 				hx-post={ urlb.DialogEditCassette(0) }
 				hx-trigger="submit"
 				enctype="multipart/form-data"
 			>
-				{{ cassette := &shared.Tool{} }}
-				@toolFormat(cassette.Width, cassette.Height, prop.Error)
+				@toolFormat(prop.Width, prop.Height, prop.Error...)
 				<br/>
-				@toolType(cassette.Type, prop.Error)
+				@toolType(prop.Type, prop.Error...)
 				<br/>
-				@toolCode(cassette.Code, false, prop.Error)
+				@toolCode(prop.Code, false, prop.Error...)
 				<br/>
-				@cassetteThickness(cassette.MinThickness, cassette.MaxThickness, prop.Error)
+				@cassetteThickness(prop.MinThickness, prop.MaxThickness, prop.Error...)
 				<br/>
 				@dialog.Footer() {
 					@button.Button(button.Props{
@@ -100,19 +99,19 @@ templ EditCassetteDialog(toolID shared.EntityID, props ...CassetteDialogProps) {
 			@dialog.Header() {
 				Kassette Bearbeiten
 			}
-			@dialogFormError(prop.Error)
+			@renderDialogError(prop.Error, "form")
 			<form
 				hx-post={ urlb.DialogEditCassette(toolID) }
 				hx-trigger="submit"
 				enctype="multipart/form-data"
 			>
-				@toolFormat(prop.Width, prop.Height, prop.Error)
+				@toolFormat(prop.Width, prop.Height, prop.Error...)
 				<br/>
-				@toolType(prop.Type, prop.Error)
+				@toolType(prop.Type, prop.Error...)
 				<br/>
-				@toolCode(prop.Code, false, prop.Error)
+				@toolCode(prop.Code, false, prop.Error...)
 				<br/>
-				@cassetteThickness(prop.MinThickness, prop.MaxThickness, prop.Error)
+				@cassetteThickness(prop.MinThickness, prop.MaxThickness, prop.Error...)
 				<br/>
 				@dialog.Footer() {
 					@button.Button(button.Props{
@@ -131,7 +130,15 @@ templ EditCassetteDialog(toolID shared.EntityID, props ...CassetteDialogProps) {
 	}
 }
 
-templ cassetteThickness(inputMinThickness float32, inputMaxThickness float32, ierr *errors.InputError) {
+templ cassetteThickness(inputMinThickness float32, inputMaxThickness float32, ierrs ...*errors.InputError) {
+	{{
+		var filteredErrors []*errors.InputError
+		for _, err := range ierrs {
+			if err.InputID == "min-thickness" || err.InputID == "max-thickness" {
+				filteredErrors = append(filteredErrors, err)
+			}
+		}
+	}}
 	@form.Item() {
 		@form.Label() {
 			Dicke (mm)
@@ -155,7 +162,7 @@ templ cassetteThickness(inputMinThickness float32, inputMaxThickness float32, ie
 					"step":     "0.1",
 					"required": false,
 				},
-				HasError: ierr != nil && ierr.InputID == "min-thickness",
+				HasError: hasInputError(filteredErrors, "min-thickness"),
 			})
 			// Separator
 			<span class="text-xl" style="margin: auto 0;">-</span>
@@ -171,16 +178,9 @@ templ cassetteThickness(inputMinThickness float32, inputMaxThickness float32, ie
 					"step":     "0.1",
 					"required": true,
 				},
-				HasError: ierr != nil && ierr.InputID == "max-thickness",
+				HasError: hasInputError(filteredErrors, "max-thickness"),
 			})
 		</div>
-		// Error Messages
-		if ierr != nil && (ierr.InputID == "min-thickness" || ierr.InputID == "max-thickness") {
-			@form.Message(form.MessageProps{
-				Variant: form.MessageVariantError,
-			}) {
-				{ ierr.Error() }
-			}
-		}
+		@renderFormError(filteredErrors, "min-thickness", "max-thickness")
 	}
 }

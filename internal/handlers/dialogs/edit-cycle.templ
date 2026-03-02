@@ -56,7 +56,7 @@ templ NewCycleDialog(props ...CycleDialogProps) {
 			@dialog.Header() {
 				Neuer Zyklus
 			}
-			@dialogFormError(prop.Error...)
+			@renderDialogError(prop.Error, "form")
 			<form
 				hx-post={ urlb.DialogEditCycle(0, prop.ToolID, false) }
 				hx-trigger="submit"
@@ -103,7 +103,7 @@ templ EditCycleDialog(cycleID shared.EntityID, props ...CycleDialogProps) {
 			@dialog.Header() {
 				Zyklus bearbeiten
 			}
-			@dialogFormError(prop.Error...)
+			@renderDialogError(prop.Error, "form")
 			<form
 				hx-post={ urlb.DialogEditCycle(cycleID, prop.ToolID, toolChangeMode) }
 				hx-trigger="submit"
@@ -175,15 +175,7 @@ templ formCycleToolChange(toolID shared.EntityID, tools []*shared.Tool, ierrs ..
 				}
 			}
 		}
-		if len(filteredErrors) > 0 {
-			for _, e := range filteredErrors {
-				@form.Message(form.MessageProps{
-					Variant: form.MessageVariantError,
-				}) {
-					{ e.Error() }
-				}
-			}
-		}
+		@renderFormError(filteredErrors, "tool_id")
 	}
 }
 
@@ -236,15 +228,7 @@ templ formPressSelection(pressID shared.EntityID, presses []*shared.Press, ierrs
 					}
 				}
 			}
-			if len(filteredErrors) > 0 {
-				for _, e := range filteredErrors {
-					@form.Message(form.MessageProps{
-						Variant: form.MessageVariantError,
-					}) {
-						{ e.Error() }
-					}
-				}
-			}
+			@renderFormError(filteredErrors, "press_id")
 		}
 	}
 }
@@ -281,15 +265,7 @@ templ formDate(date shared.UnixMilli, ierrs ...*errors.InputError) {
 				},
 				HasError: len(filteredErrors) > 0,
 			})
-			if len(filteredErrors) > 0 {
-				for _, e := range filteredErrors {
-					@form.Message(form.MessageProps{
-						Variant: form.MessageVariantError,
-					}) {
-						{ e.Error() }
-					}
-				}
-			}
+			@renderFormError(filteredErrors, "stop")
 		}
 	}
 }
@@ -325,15 +301,7 @@ templ formPressCycles(value int64, ierrs ...*errors.InputError) {
 				},
 				HasError: len(filteredErrors) > 0,
 			})
-			if len(filteredErrors) > 0 {
-				for _, e := range filteredErrors {
-					@form.Message(form.MessageProps{
-						Variant: form.MessageVariantError,
-					}) {
-						{ e.Error() }
-					}
-				}
-			}
+			@renderFormError(filteredErrors, "press_cycles")
 		}
 	}
 }

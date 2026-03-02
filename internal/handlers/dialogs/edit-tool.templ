@@ -24,7 +24,7 @@ type ToolFormData struct {
 type ToolDialogProps struct {
 	ToolFormData
 	Open, OOB bool
-	Error     *errors.InputError // TODO: Handle multiple errors for different fields
+	Error     []*errors.InputError
 }
 
 templ NewToolDialog(props ...ToolDialogProps) {
@@ -50,20 +50,20 @@ templ NewToolDialog(props ...ToolDialogProps) {
 			@dialog.Header() {
 				Neues Werkzeug
 			}
-			@dialogFormError(prop.Error)
+			@renderDialogError(prop.Error, "form")
 			<form
 				hx-post={ urlb.DialogEditTool(0) }
 				hx-trigger="submit"
 				enctype="multipart/form-data"
 			>
 				{{ tool := &shared.Tool{} }}
-				@toolPosition(tool.Position, prop.Error)
+				@toolPosition(tool.Position, prop.Error...)
 				<br/>
-				@toolFormat(tool.Width, tool.Height, prop.Error)
+				@toolFormat(tool.Width, tool.Height, prop.Error...)
 				<br/>
-				@toolType(tool.Type, prop.Error)
+				@toolType(tool.Type, prop.Error...)
 				<br/>
-				@toolCode(tool.Code, true, prop.Error)
+				@toolCode(tool.Code, true, prop.Error...)
 				<br/>
 				@dialog.Footer() {
 					@button.Button(button.Props{
@@ -100,20 +100,20 @@ templ EditToolDialog(toolID shared.EntityID, props ...ToolDialogProps) {
 			@dialog.Header() {
 				Werkzeug Bearbeiten
 			}
-			@dialogFormError(prop.Error)
+			@renderDialogError(prop.Error, "form")
 			<form
 				hx-post={ urlb.DialogEditTool(toolID) }
 				hx-trigger="submit"
 				enctype="multipart/form-data"
 			>
 				{{ tool := &shared.Tool{} }}
-				@toolPosition(tool.Position, prop.Error)
+				@toolPosition(tool.Position, prop.Error...)
 				<br/>
-				@toolFormat(tool.Width, tool.Height, prop.Error)
+				@toolFormat(tool.Width, tool.Height, prop.Error...)
 				<br/>
-				@toolType(tool.Type, prop.Error)
+				@toolType(tool.Type, prop.Error...)
 				<br/>
-				@toolCode(tool.Code, true, prop.Error)
+				@toolCode(tool.Code, true, prop.Error...)
 				<br/>
 				@dialog.Footer() {
 					@dialog.Close() {
@@ -129,7 +129,15 @@ templ EditToolDialog(toolID shared.EntityID, props ...ToolDialogProps) {
 	}
 }
 
-templ toolPosition(inputPosition shared.Slot, ierr *errors.InputError) {
+templ toolPosition(inputPosition shared.Slot, ierrs ...*errors.InputError) {
+	{{
+		var filteredErrors []*errors.InputError
+		for _, e := range ierrs {
+			if e != nil && e.InputID == "position" {
+				filteredErrors = append(filteredErrors, e)
+			}
+		}
+	}}
 	@form.Item() {
 		@form.Label(form.LabelProps{
 			For: "position",
@@ -143,7 +151,7 @@ templ toolPosition(inputPosition shared.Slot, ierr *errors.InputError) {
 				Attributes: templ.Attributes{
 					"required": true,
 				},
-				HasError: ierr != nil && ierr.InputID == "position",
+				HasError: len(filteredErrors) > 0,
 			}) {
 				@selectbox.Value(selectbox.ValueProps{
 					Placeholder: "Position auswählen",
@@ -166,18 +174,19 @@ templ toolPosition(inputPosition shared.Slot, ierr *errors.InputError) {
 				}
 			}
 		}
-		// Error Messages
-		if ierr != nil && (ierr.InputID == "position") {
-			@form.Message(form.MessageProps{
-				Variant: form.MessageVariantError,
-			}) {
-				{ ierr.Error() }
-			}
-		}
+		@renderFormError(filteredErrors, "position")
 	}
 }
 
-templ toolFormat(inputWidth int, inputHeight int, ierr *errors.InputError) {
+templ toolFormat(inputWidth int, inputHeight int, ierrs ...*errors.InputError) {
+	{{
+		var filteredErrors []*errors.InputError
+		for _, e := range ierrs {
+			if e != nil && (e.InputID == "width" || e.InputID == "height") {
+				filteredErrors = append(filteredErrors, e)
+			}
+		}
+	}}
 	@form.Item() {
 		@form.Label() {
 			Format
@@ -198,7 +207,7 @@ templ toolFormat(inputWidth int, inputHeight int, ierr *errors.InputError) {
 				Attributes: templ.Attributes{
 					"required": true,
 				},
-				HasError: ierr != nil && ierr.InputID == "width",
+				HasError: hasInputError(filteredErrors, "width"),
 			})
 			<span class="text-xl" style="margin: auto 0;">x</span>
 			{{
@@ -215,21 +224,22 @@ templ toolFormat(inputWidth int, inputHeight int, ierr *errors.InputError) {
 				Attributes: templ.Attributes{
 					"required": true,
 				},
-				HasError: ierr != nil && ierr.InputID == "height",
+				HasError: hasInputError(filteredErrors, "height"),
 			})
 		</div>
-		// Error Messages
-		if ierr != nil && (ierr.InputID == "width" || ierr.InputID == "height") {
-			@form.Message(form.MessageProps{
-				Variant: form.MessageVariantError,
-			}) {
-				{ ierr.Error() }
-			}
-		}
+		@renderFormError(filteredErrors, "width", "height")
 	}
 }
 
-templ toolType(inputType string, ierr *errors.InputError) {
+templ toolType(inputType string, ierrs ...*errors.InputError) {
+	{{
+		var filteredErrors []*errors.InputError
+		for _, e := range ierrs {
+			if e != nil && e.InputID == "type" {
+				filteredErrors = append(filteredErrors, e)
+			}
+		}
+	}}
 	@form.Item() {
 		@form.Label() {
 			Type
@@ -243,19 +253,21 @@ templ toolType(inputType string, ierr *errors.InputError) {
 			Attributes: templ.Attributes{
 				"required": true,
 			},
-			HasError: ierr != nil && ierr.InputID == "type",
+			HasError: len(filteredErrors) > 0,
 		})
-		if ierr != nil && ierr.InputID == "type" {
-			@form.Message(form.MessageProps{
-				Variant: form.MessageVariantError,
-			}) {
-				{ ierr.Error() }
-			}
-		}
+		@renderFormError(filteredErrors, "type")
 	}
 }
 
-templ toolCode(inputCode string, required bool, ierr *errors.InputError) {
+templ toolCode(inputCode string, required bool, ierr ...*errors.InputError) {
+	{{
+		var filteredErrors []*errors.InputError
+		for _, e := range ierr {
+			if e != nil && e.InputID == "code" {
+				filteredErrors = append(filteredErrors, e)
+			}
+		}
+	}}
 	@form.Item() {
 		@form.Label() {
 			Code
@@ -268,17 +280,11 @@ templ toolCode(inputCode string, required bool, ierr *errors.InputError) {
 			Name:        "code",
 			Placeholder: "z.B. 3573",
 			Value:       inputCode,
-			HasError:    ierr != nil && ierr.InputID == "code",
+			HasError:    len(filteredErrors) > 0,
 			Attributes: templ.Attributes{
 				"required": required,
 			},
 		})
-		if ierr != nil && ierr.InputID == "code" {
-			@form.Message(form.MessageProps{
-				Variant: form.MessageVariantError,
-			}) {
-				{ ierr.Error() }
-			}
-		}
+		@renderFormError(filteredErrors, "code")
 	}
 }

@@ -23,7 +23,7 @@ type PressFormData struct {
 type PressDialogProps struct {
 	PressFormData
 	Open, OOB bool
-	Error     *errors.InputError // TODO: Handle multiple errors for different fields
+	Error     []*errors.InputError
 }
 
 templ NewPressDialog(props ...PressDialogProps) {
@@ -49,13 +49,13 @@ templ NewPressDialog(props ...PressDialogProps) {
 			@dialog.Header() {
 				Neue Presse
 			}
-			@dialogFormError(prop.Error)
+			@renderDialogError(prop.Error, "form")
 			<form
 				hx-post={ urlb.DialogEditPress(-1) }
 				hx-trigger="submit"
 				enctype="multipart/form-data"
 			>
-				@pressContent(prop.PressFormData, prop.Error)
+				@pressContent(prop.PressFormData, prop.Error...)
 				<br/>
 				@dialog.Footer() {
 					@button.Button(button.Props{
@@ -92,13 +92,13 @@ templ EditPressDialog(pressID shared.EntityID, props ...PressDialogProps) {
 			@dialog.Header() {
 				Presse Bearbeiten
 			}
-			@dialogFormError(prop.Error)
+			@renderDialogError(prop.Error, "form")
 			<form
 				hx-post={ urlb.DialogEditPress(pressID) }
 				hx-trigger="submit"
 				enctype="multipart/form-data"
 			>
-				@pressContent(prop.PressFormData, prop.Error)
+				@pressContent(prop.PressFormData, prop.Error...)
 				<br/>
 				@dialog.Footer() {
 					@button.Button(button.Props{
@@ -106,7 +106,7 @@ templ EditPressDialog(pressID shared.EntityID, props ...PressDialogProps) {
 						Attributes: templ.Attributes{
 							"hx-delete":  urlb.PressDelete(pressID),
 							"hx-trigger": "click",
-							"hx-confirm": "Möchten Sie diese Presse wirklich entfernen? Diese Aktion kann nicht rückgängig gemacht werden.",
+							"hx-confirm": "Mchten Sie diese Presse wirklich entfernen? Diese Aktion kann nicht rckgngig gemacht werden.",
 						},
 					}) {
 						Entfernen
@@ -122,15 +122,23 @@ templ EditPressDialog(pressID shared.EntityID, props ...PressDialogProps) {
 	}
 }
 
-templ pressContent(props PressFormData, ierr *errors.InputError) {
-	@pressNumberAndType(props.Number, props.Type, ierr)
+templ pressContent(props PressFormData, ierrs ...*errors.InputError) {
+	@pressNumberAndType(props.Number, props.Type, ierrs...)
 	<br/>
-	@pressCode(props.Code, ierr)
+	@pressCode(props.Code, ierrs...)
 	<br/>
-	@pressCyclesOffset(props.CyclesOffset, ierr)
+	@pressCyclesOffset(props.CyclesOffset, ierrs...)
 }
 
-templ pressNumberAndType(number shared.PressNumber, machineType shared.MachineType, ierr *errors.InputError) {
+templ pressNumberAndType(number shared.PressNumber, machineType shared.MachineType, ierrs ...*errors.InputError) {
+	{{
+		var filteredErrors []*errors.InputError
+		for _, err := range ierrs {
+			if err.InputID == "press_number" || err.InputID == "machine_type" {
+				filteredErrors = append(filteredErrors, err)
+			}
+		}
+	}}
 	@form.ItemFlex(form.ItemProps{
 		Class: "justify-between",
 	}) {
@@ -151,7 +159,7 @@ templ pressNumberAndType(number shared.PressNumber, machineType shared.MachineTy
 					"required": "true",
 				},
 				Value:    fmt.Sprintf("%d", number),
-				HasError: ierr != nil && ierr.InputID == "press_number",
+				HasError: hasInputError(ierrs, "press_number"),
 			})
 		}
 		@form.Item() {
@@ -167,10 +175,10 @@ templ pressNumberAndType(number shared.PressNumber, machineType shared.MachineTy
 					Attributes: templ.Attributes{
 						"required": true,
 					},
-					HasError: ierr != nil && ierr.InputID == "machine_type",
+					HasError: hasInputError(ierrs, "machine_type"),
 				}) {
 					@selectbox.Value(selectbox.ValueProps{
-						Placeholder: "Bitte Wählen",
+						Placeholder: "Bitte Whlen",
 					})
 				}
 				@selectbox.Content(selectbox.ContentProps{
@@ -191,17 +199,19 @@ templ pressNumberAndType(number shared.PressNumber, machineType shared.MachineTy
 				}
 			}
 		}
-		if ierr != nil && (ierr.InputID == "press_number" || ierr.InputID == "machine_type") {
-			@form.Message(form.MessageProps{
-				Variant: form.MessageVariantError,
-			}) {
-				{ ierr.Error() }
-			}
-		}
+		@renderFormError(ierrs, "press_number", "machine_type")
 	}
 }
 
-templ pressCode(code string, ierr *errors.InputError) {
+templ pressCode(code string, ierrs ...*errors.InputError) {
+	{{
+		var filteredErrors []*errors.InputError
+		for _, err := range ierrs {
+			if err.InputID == "code" {
+				filteredErrors = append(filteredErrors, err)
+			}
+		}
+	}}
 	@form.Item() {
 		@form.Label(form.LabelProps{
 			For: "code",
@@ -216,19 +226,21 @@ templ pressCode(code string, ierr *errors.InputError) {
 			Attributes: templ.Attributes{
 				"required": true,
 			},
-			HasError: ierr != nil && ierr.InputID == "code",
+			HasError: len(filteredErrors) > 0,
 		})
-		if ierr != nil && ierr.InputID == "code" {
-			@form.Message(form.MessageProps{
-				Variant: form.MessageVariantError,
-			}) {
-				{ ierr.Error() }
-			}
-		}
+		@renderFormError(ierrs, "code")
 	}
 }
 
-templ pressCyclesOffset(cyclesOffset int64, ierr *errors.InputError) {
+templ pressCyclesOffset(cyclesOffset int64, ierrs ...*errors.InputError) {
+	{{
+		var filteredErrors []*errors.InputError
+		for _, err := range ierrs {
+			if err.InputID == "cycles_offset" {
+				filteredErrors = append(filteredErrors, err)
+			}
+		}
+	}}
 	@form.Item() {
 		@form.Label(form.LabelProps{
 			For: "cycles_offset",
@@ -244,14 +256,8 @@ templ pressCyclesOffset(cyclesOffset int64, ierr *errors.InputError) {
 				"required": true,
 			},
 			Value:    fmt.Sprintf("%d", cyclesOffset),
-			HasError: ierr != nil && ierr.InputID == "cycles_offset",
+			HasError: len(filteredErrors) > 0,
 		})
-		if ierr != nil && ierr.InputID == "cycles_offset" {
-			@form.Message(form.MessageProps{
-				Variant: form.MessageVariantError,
-			}) {
-				{ ierr.Error() }
-			}
-		}
+		@renderFormError(ierrs, "cycles_offset")
 	}
 }

@@ -54,15 +54,14 @@ func GetEditPress(c echo.Context) *echo.HTTPError {
 }
 
 func PostPress(c echo.Context) *echo.HTTPError {
-	// Get press number from query first
 	id, _ := utils.GetQueryInt64(c, "id")
 	if id > 0 {
 		return updatePress(c, shared.EntityID(id))
 	}
 
-	data, ierr := parseEditPressForm(c)
-	if ierr != nil {
-		return reRenderNewPressDialog(c, true, data, ierr)
+	data, ierrs := parseEditPressForm(c)
+	if len(ierrs) > 0 {
+		return reRenderNewPressDialog(c, true, data, ierrs...)
 	}
 
 	merr := db.AddPress(&shared.Press{
@@ -72,24 +71,24 @@ func PostPress(c echo.Context) *echo.HTTPError {
 		CyclesOffset: data.CyclesOffset,
 	})
 	if merr != nil {
-		ierr = errors.NewInputError("form", fmt.Sprintf("failed to add press: %v", merr))
+		ierr := errors.NewInputError("form", fmt.Sprintf("failed to add press: %v", merr))
 		return reRenderNewPressDialog(c, true, data, ierr)
 	}
 
 	utils.SetHXTrigger(c, "press-tab-content")
 
-	return reRenderNewPressDialog(c, false, data, nil)
+	return reRenderNewPressDialog(c, false, data)
 }
 
 func updatePress(c echo.Context, id shared.EntityID) *echo.HTTPError {
-	data, ierr := parseEditPressForm(c)
-	if ierr != nil {
-		return reRenderEditPressDialog(c, id, true, data, ierr)
+	data, ierrs := parseEditPressForm(c)
+	if len(ierrs) > 0 {
+		return reRenderEditPressDialog(c, id, true, data, ierrs...)
 	}
 
 	press, herr := db.GetPress(id)
 	if herr != nil {
-		ierr = errors.NewInputError("form", fmt.Sprintf("failed to get press: %v", herr))
+		ierr := errors.NewInputError("form", fmt.Sprintf("failed to get press: %v", herr))
 		return reRenderEditPressDialog(c, id, true, data, ierr)
 	}
 
@@ -103,37 +102,36 @@ func updatePress(c echo.Context, id shared.EntityID) *echo.HTTPError {
 		SlotDown:     press.SlotDown,
 	})
 	if merr != nil {
-		ierr = errors.NewInputError("form", fmt.Sprintf("failed to update press: %v", merr))
-		return reRenderEditPressDialog(c, id, true, data, nil)
+		ierr := errors.NewInputError("form", fmt.Sprintf("failed to update press: %v", merr))
+		return reRenderEditPressDialog(c, id, true, data, ierr)
 	}
 
 	utils.SetHXRedirect(c, urlb.Press(press.ID))
 
-	return reRenderEditPressDialog(c, id, false, data, nil)
+	return reRenderEditPressDialog(c, id, false, data)
 }
 
-// TODO: Return multiple `[]*errors.InputError`
-func parseEditPressForm(c echo.Context) (data PressFormData, ierr *errors.InputError) {
+func parseEditPressForm(c echo.Context) (data PressFormData, ierrs []*errors.InputError) {
 	// Press Number
 	vPressNumber, err := utils.SanitizeInt8(c.FormValue("press_number"))
 	if err != nil {
-		ierr = errors.NewInputError("press_number", fmt.Sprintf("invalid press number: %v", err))
-		return
+		ierr := errors.NewInputError("press_number", fmt.Sprintf("invalid press number: %v", err))
+		ierrs = append(ierrs, ierr)
 	}
 	data.Number = shared.PressNumber(vPressNumber)
 
 	// Code
 	data.Code = utils.SanitizeText(c.FormValue("code"))
 	if data.Code == "" {
-		ierr = errors.NewInputError("code", "code cannot be empty")
-		return
+		ierr := errors.NewInputError("code", "code cannot be empty")
+		ierrs = append(ierrs, ierr)
 	}
 
 	// Cycles Offset
 	data.CyclesOffset, err = utils.SanitizeInt64(c.FormValue("cycles_offset"))
 	if err != nil {
-		ierr = errors.NewInputError("cycles_offset", fmt.Sprintf("invalid cycles offset: %v", err))
-		return
+		ierr := errors.NewInputError("cycles_offset", fmt.Sprintf("invalid cycles offset: %v", err))
+		ierrs = append(ierrs, ierr)
 	}
 
 	// Machine Type
@@ -142,34 +140,34 @@ func parseEditPressForm(c echo.Context) (data PressFormData, ierr *errors.InputE
 	return
 }
 
-func reRenderNewPressDialog(c echo.Context, open bool, data PressFormData, ierr *errors.InputError) *echo.HTTPError {
+func reRenderNewPressDialog(c echo.Context, open bool, data PressFormData, ierrs ...*errors.InputError) *echo.HTTPError {
 	t := NewPressDialog(PressDialogProps{
 		PressFormData: data,
 		Open:          open,
 		OOB:           true,
-		Error:         ierr,
+		Error:         ierrs,
 	})
 	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.NewRenderError(err, "NewPressDialog")
 	}
-	if ierr != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid input: %v", ierr))
+	if len(ierrs) > 0 {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid input")
 	}
 	return nil
 }
 
-func reRenderEditPressDialog(c echo.Context, pressID shared.EntityID, open bool, data PressFormData, ierr *errors.InputError) *echo.HTTPError {
+func reRenderEditPressDialog(c echo.Context, pressID shared.EntityID, open bool, data PressFormData, ierrs ...*errors.InputError) *echo.HTTPError {
 	t := EditPressDialog(pressID, PressDialogProps{
 		PressFormData: data,
 		Open:          open,
 		OOB:           true,
-		Error:         ierr,
+		Error:         ierrs,
 	})
 	if err := t.Render(c.Request().Context(), c.Response()); err != nil {
 		return errors.NewRenderError(err, "EditPressDialog")
 	}
-	if ierr != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid input: %v", ierr))
+	if len(ierrs) > 0 {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid input")
 	}
 	return nil
 }
