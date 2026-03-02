@@ -23,7 +23,7 @@ templ Page(p *PageProps) {
 			AdditionalHead: additionalHead(),
 		},
 	) {
-		<main class={ css.Container, css.ContainerFluid, css.Flex, css.FlexCol, css.Gap }>
+		<main class="mt-8 p-8">
 			@actionBarContent(p)
 			@components.Section(templ.Attributes{
 				"id":                    "notes-section",
