@@ -3,10 +3,12 @@ function updateDataTheme() {
 	if (matchMedia("(prefers-color-scheme: dark)").matches) {
 		document.querySelector("html").classList.add("dark");
 		// Dark theme background color
+		// TODO: Update theme color to fit the output.css
 		if (themeColorMeta) themeColorMeta.setAttribute("content", "#1d2021");
 	} else {
-		document.querySelector("html").classList.add("dark");
+		document.querySelector("html").classList.add("light");
 		// Light theme background color
+		// TODO: Update theme color to fit the output.css
 		if (themeColorMeta) themeColorMeta.setAttribute("content", "#f9f5d7");
 	}
 }

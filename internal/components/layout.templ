@@ -43,6 +43,7 @@ templ metaTags() {
 	<meta name="apple-mobile-web-app-title" content="pgpress"/>
 	<meta name="application-name" content="pgpress"/>
 	<meta name="msapplication-TileColor" content="#b8bb26"/>
+	// TODO: Update theme color to fit the output.css
 	<meta name="theme-color" content="#f9f5d7" id="theme-color-meta"/>
 }
 
@@ -57,11 +58,11 @@ templ scripts() {
 	// HTMX
 	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/layout/htmx-v2.0.7.min.js") }></script>
 	// Layout
-	<script defer src={ ui.AssetURL(env.ServerPathPrefix, "/js/layout/main.js") }></script>
+	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/layout/main.js") }></script>
 	// Image Viewer
-	<script defer src={ ui.AssetURL(env.ServerPathPrefix, "/js/layout/image-viewer.js") }></script>
+	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/layout/image-viewer.js") }></script>
 	// PDF
-	<script defer src={ ui.AssetURL(env.ServerPathPrefix, "/js/layout/pdf.js") }></script>
+	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/layout/pdf.js") }></script>
 	// Component Scripts
 	<script defer nonce={ templ.GetNonce(ctx) } src={ ui.AssetURL(env.ServerPathPrefix, "/js/components/checkbox.min.js") }></script>
 	<script defer nonce={ templ.GetNonce(ctx) } src={ ui.AssetURL(env.ServerPathPrefix, "/js/components/dialog.min.js") }></script>

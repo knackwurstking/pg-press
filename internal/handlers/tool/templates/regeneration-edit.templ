@@ -42,6 +42,8 @@ templ regenerationEditShowcase(p RegenerationEditProps) {
 			hxGet := urlb.ToolRegenerationEdit(p.Tool.ID)
 		}}
 		@button.Button(button.Props{
+			Variant:  button.VariantGhost,
+			Size:     button.SizeIcon,
 			Disabled: p.ToolIsActive,
 			Attributes: templ.Attributes{
 				"hx-get":    string(hxGet),
@@ -51,22 +53,16 @@ templ regenerationEditShowcase(p RegenerationEditProps) {
 			},
 		}) {
 			@icon.Pencil()
-			Regenerierung
 		}
 	</div>
 }
 
 templ regenerationEditForm(p RegenerationEditProps) {
-	<div class="flex flex-col gap-2 p-2">
-		<div class="flex items-center gap-2 mb-2">
-			if p.Tool.IsCassette() {
-				@components.CassetteStateBadge(p.Tool, nil, p.IsRegenerating)
-			} else {
-				@components.ToolStateBadge(p.Tool, nil, p.IsRegenerating)
-			}
+	<div class="flex flex-col gap-2 p-2 border rounded">
+		<div class="mb-2 text-right">
 			<span class="text-sm">Regenerierung steuern</span>
 		</div>
-		<div class="flex flex-col gap-sm">
+		<div class="flex flex-col gap-2">
 			{{
 				hxTarget := fmt.Sprintf("#regeneration-edit-%d", p.Tool.ID)
 				hxPut := urlb.ToolRegeneration(p.Tool.ID)
@@ -83,7 +79,7 @@ templ regenerationEditForm(p RegenerationEditProps) {
 				}
 				if p.IsRegenerating {
 					@button.Button(button.Props{
-						Class:    "w-full text-orange-500",
+						Class:    "w-full text-orange-500 hover:text-orange-600",
 						Variant:  button.VariantGhost,
 						Type:     button.TypeSubmit,
 						Disabled: !p.UserHasPermission,
@@ -92,7 +88,7 @@ templ regenerationEditForm(p RegenerationEditProps) {
 					}
 				} else {
 					@button.Button(button.Props{
-						Class:    "w-full text-green-500",
+						Class:    "w-full text-green-500 hover:text-green-600",
 						Variant:  button.VariantGhost,
 						Type:     button.TypeSubmit,
 						Disabled: !p.UserHasPermission,
@@ -112,10 +108,11 @@ templ regenerationEditForm(p RegenerationEditProps) {
 					@button.Button(button.Props{
 						Class:    "w-full",
 						Variant:  button.VariantDestructive,
+						Type:     button.TypeSubmit,
 						Disabled: !p.UserHasPermission,
 					}) {
 						@icon.Trash()
-						Regenerierung Abbrechen
+						Regenerierung Zurücksetzen
 					}
 				</form>
 			}
