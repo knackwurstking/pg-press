@@ -115,7 +115,8 @@ templ EditCassetteDialog(toolID shared.EntityID, props ...CassetteDialogProps) {
 				<br/>
 				@dialog.Footer() {
 					@button.Button(button.Props{
-						Type: button.TypeReset,
+						Variant: button.VariantDestructive,
+						Type:    button.TypeReset,
 					}) {
 						Reset
 					}
