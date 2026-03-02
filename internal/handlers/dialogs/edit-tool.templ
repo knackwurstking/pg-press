@@ -116,12 +116,16 @@ templ EditToolDialog(toolID shared.EntityID, props ...ToolDialogProps) {
 				@toolCode(tool.Code, true, prop.Error...)
 				<br/>
 				@dialog.Footer() {
-					@dialog.Close() {
-						@button.Button(button.Props{
-							Type: button.TypeSubmit,
-						}) {
-							Aktualisieren
-						}
+					@button.Button(button.Props{
+						Variant: button.VariantDestructive,
+						Type:    button.TypeReset,
+					}) {
+						Reset
+					}
+					@button.Button(button.Props{
+						Type: button.TypeSubmit,
+					}) {
+						Aktualisieren
 					}
 				}
 			</form>
