@@ -284,31 +284,30 @@ templ fileUploadArea() {
 	</div>
 }
 
-// TODO: Migrate to tailwindcss
 templ filePreviewArea() {
 	<div
 		id="file-preview"
-		class={ css.Border, css.P }
-		style={ fmt.Sprintf("display: none; border-radius: %s", css.VarRadius) }
+		class="border rounded p-2"
 	>
-		<div class={ css.MB, css.TextMedium }>
-			<span>Neue Bilder:</span>
+		<div>
+			<span class="text-lg">Neue Bilder:</span>
 		</div>
-		<div id="new-attachments" class={ css.Flex, css.FlexCol, css.Gap }></div>
+		<div id="new-attachments" class="flex flex-col"></div>
 		<template name="attachment-item">
-			<div
-				class={ css.P, css.Border, css.Flex, css.Gap, css.JustifyBetween, css.ItemsCenter }
-				style={ fmt.Sprintf("border-radius: %s", css.VarRadius) }
-			>
-				<div class={ css.Flex, css.Gap, css.ItemsCenter }>
-					<span class={ "attachment-name", "name", css.TextMedium }></span>
-					<span class={ "attachment-size", "size-text", css.TextSM, css.Muted }></span>
+			<div class="p-2 my-2 border rounded flex gap-4 justify-between items-center">
+				<div class="flex gap-4 items-center">
+					<span class="attachment-name name text-base"></span>
+					<span class="attachment-size size-text text-sm"></span>
 				</div>
 				<div>
-					<button type="button" class={ css.Destructive, css.ButtonSmall, css.Flex, css.Gap }>
-						<i class="bi bi-trash"></i>
+					@button.Button(button.Props{
+						Class:   "delete",
+						Variant: button.VariantDestructive,
+						Size:    button.SizeSm,
+					}) {
+						@icon.Trash()
 						Entfernen
-					</button>
+					}
 				</div>
 			</div>
 		</template>
