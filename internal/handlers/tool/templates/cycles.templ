@@ -155,7 +155,7 @@ templ cyclesTable(p *CyclesSectionContentProps) {
 		@components.SectionTitle(components.TitleLevel5, "Pressennutzungsverlauf") {
 			@components.SectionTitleAction(components.SectionTitleActionProps{
 				Icon:  icon.Plus(),
-				Url:   urlb.DialogEditCycleGet(0, p.Tool.ID, false),
+				Url:   urlb.DialogEditCycle(0, p.Tool.ID, false),
 				Title: "Neuen Eintrag hinzufügen",
 			})
 		}
@@ -228,7 +228,7 @@ templ cycleTableRow(cycle *shared.Cycle, press *shared.Press, lastRegeneration *
 		}
 		@table.Cell() {
 			@components.TableActions(components.TableActionsOptions{
-				EditHref:        urlb.DialogEditCycleGet(cycle.ID, cycle.ToolID, false),
+				EditHref:        urlb.DialogEditCycle(cycle.ID, cycle.ToolID, false),
 				EditAdminOnly:   true,
 				DeleteHref:      urlb.ToolCycleDelete(cycle.ID),
 				DeleteAdminOnly: true,

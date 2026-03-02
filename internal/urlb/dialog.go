@@ -33,7 +33,7 @@ func DialogEditToolRegenerationPut(toolRegenerationID shared.EntityID) templ.Saf
 }
 
 // DialogEditCycleGet constructs edit cycle dialog GET URL
-func DialogEditCycleGet(cycleID shared.EntityID, toolID shared.EntityID, toolChangeMode bool) templ.SafeURL {
+func DialogEditCycle(cycleID shared.EntityID, toolID shared.EntityID, toolChangeMode bool) templ.SafeURL {
 	params := map[string]string{}
 	if cycleID != 0 {
 		params["id"] = fmt.Sprintf("%d", cycleID)
@@ -45,16 +45,6 @@ func DialogEditCycleGet(cycleID shared.EntityID, toolID shared.EntityID, toolCha
 		params["tool_change_mode"] = "true"
 	}
 	return BuildURLWithParams("/dialog/edit-cycle", params)
-}
-
-// DialogEditCyclePost constructs edit cycle dialog POST URL
-func DialogEditCyclePost() templ.SafeURL {
-	return BuildURL("/dialog/edit-cycle")
-}
-
-// DialogEditCyclePut constructs edit cycle dialog PUT URL
-func DialogEditCyclePut() templ.SafeURL {
-	return BuildURL("/dialog/edit-cycle")
 }
 
 // DialogEditPressGet constructs edit press dialog GET URL

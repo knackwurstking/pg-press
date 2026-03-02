@@ -6,39 +6,78 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/button"
+	"github.com/knackwurstking/pg-press/internal/components/dialog"
+	"github.com/knackwurstking/pg-press/internal/components/form"
+	"github.com/knackwurstking/pg-press/internal/components/selectbox"
+	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/knackwurstking/ui/pkg/css"
 )
 
-templ NewCycleDialog(
-	tool *shared.Tool,
-	currentPress *shared.Press,
-	presses []*shared.Press,
-) {
-	@components.FormDialog("cycle-dialog", http.MethodPost, urlb.DialogEditCyclePost()) {
-		<input
-			type="hidden"
-			name="original_tool_id"
-			value={ fmt.Sprintf("%d", tool.ID) }
-		/>
-		@components.Section(templ.Attributes{
-			"class": templ.CSSClasses{"tool-info", css.Flex, css.FlexCol, css.GapSm}.String(),
-		}) {
-			<label>Aktives Werkzeug</label>
-			<div class={ css.Flex, css.FlexCol, css.GapSm }>
-				<div class={ css.TextSM }>
-					<strong>Werkzeug:</strong> { tool.German() }
-				</div>
-				<div class={ css.TextSM }>
-					<strong>Position:</strong> { tool.Position.German() }
-				</div>
-			</div>
+type CycleFormData struct {
+	ToolID shared.EntityID
+
+	PressID shared.EntityID
+	Presses []*shared.Press
+
+	Stop        shared.UnixMilli
+	PressCycles int64
+}
+
+type NewCycleDialogProps struct {
+	CycleFormData
+
+	Open, OOB bool
+
+	Error *errors.InputError
+}
+
+// tool *shared.Tool,
+// currentPress *shared.Press,
+// presses []*shared.Press,
+templ NewCycleDialog(props ...NewCycleDialogProps) {
+	{{
+		prop := NewCycleDialogProps{}
+		if len(props) > 0 {
+			prop = props[0]
 		}
-		@cyclePressNumber(currentPress, presses)
-		@cycleStop(0)
-		@cycleTotalCycles(0)
-		@components.FormDialogFooter("Abbrechen", "Erstellen")
+
+		attr := templ.Attributes{}
+		if prop.OOB {
+			attr["hx-swap-oob"] = "true"
+		}
+	}}
+	@dialog.Dialog(dialog.Props{
+		ID:               NewCycleDialogID,
+		DisableClickAway: true,
+		DisableESC:       true,
+		Open:             prop.Open,
+		Attributes:       attr,
+	}) {
+		@dialog.Content() {
+			@dialog.Header() {
+				Neuer Zyklus
+			}
+			<form
+				hx-post={ urlb.DialogEditCycle(0, prop.ToolID, false) }
+				hx-trigger="submit"
+				enctype="multipart/form-data"
+			>
+				@dialogFormError(prop.Error)
+				@formPressSelection(prop.PressID, prop.Presses, prop.Error)
+				@formDate(prop.Stop, prop.Error)
+				@formPressCycles(prop.PressCycles, prop.Error)
+				@dialog.Footer() {
+					@button.Button(button.Props{
+						Type: button.TypeSubmit,
+					}) {
+						Erstellen
+					}
+				}
+			</form>
+		}
 	}
 }
 
@@ -105,47 +144,65 @@ templ EditCycleDialog(
 	}
 }
 
-templ cyclePressNumber(current *shared.Press, presses []*shared.Press) {
-	@components.Section(templ.Attributes{
-		"class": templ.CSSClasses{
-			"press",
-			css.Flex,
-			css.FlexCol,
-			css.GapSm,
-		}.String(),
-	}) {
-		<label for="press_id">Presse</label>
-		<select id="press_id" name="press_id" required>
-			<option
-				value=""
-				disabled
-				selected?={ current == nil }
-			>
-				Presse auswählen
-			</option>
-			for _, p := range presses {
-				<option
-					value={ p.ID }
-					selected?={ current.ID == p.ID }
-				>
-					{ p.German() }
-				</option>
+templ formPressSelection(pressID shared.EntityID, presses []*shared.Press, ierr *errors.InputError) {
+	{{
+		var currentPress *shared.Press
+		for _, p := range presses {
+			if p.ID == pressID {
+				currentPress = p
+				break
 			}
-		</select>
+		}
+	}}
+	@components.Section(nil) {
+		@form.Item() {
+			@form.Label() {
+				Presse
+			}
+			@selectbox.SelectBox() {
+				@selectbox.Trigger(selectbox.TriggerProps{
+					ID:   "press_id",
+					Name: "press_id",
+					Attributes: templ.Attributes{
+						"required": true,
+					},
+					HasError: ierr != nil && ierr.InputID == "press_id",
+				}) {
+					@selectbox.Value(selectbox.ValueProps{
+						Placeholder: "Presse auswählen",
+					})
+				}
+				@selectbox.Content() {
+					for _, p := range presses {
+						@selectbox.Item(selectbox.ItemProps{
+							Value:    fmt.Sprintf("%d", p.ID),
+							Selected: currentPress != nil && currentPress.ID == p.ID,
+						}) {
+							{ p.German() }
+						}
+					}
+				}
+			}
+			if ierr != nil && ierr.InputID == "press_id" {
+				@form.Message(form.MessageProps{
+					Variant: form.MessageVariantError,
+				}) {
+					{ ierr.Error() }
+				}
+			}
+		}
 	}
 }
 
-templ cycleStop(date shared.UnixMilli) {
+// TODO: Migrate to templui & tailwind
+templ formDate(date shared.UnixMilli, ierr *errors.InputError) {
 	{{
 		if date == 0 {
 			date = shared.NewUnixMilli(time.Now())
 		}
 	}}
-	@components.Section(templ.Attributes{
-		"class": templ.CSSClasses{
-			"original-date", css.Flex, css.Gap,
-		}.String(),
-	}) {
+	@components.Section(nil) {
+		// TOOD: Form component with label, date input and the optional error message
 		<span class={ css.Flex, css.FlexCol }>
 			<label for="stop">Ablesedatum</label>
 			<input
@@ -159,7 +216,8 @@ templ cycleStop(date shared.UnixMilli) {
 	}
 }
 
-templ cycleTotalCycles(value int64) {
+// TODO: Migrate to templui & tailwind
+templ formPressCycles(value int64, ierr *errors.InputError) {
 	@components.Section(templ.Attributes{
 		"class": templ.CSSClasses{
 			"total-cycles", css.Flex, css.FlexCol, css.GapSm,
