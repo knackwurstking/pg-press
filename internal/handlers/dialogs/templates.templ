@@ -16,15 +16,16 @@ const (
 	NewPressDialogID  = "press-dialog"
 	EditPressDialogID = "press-edit-dialog"
 
-	NewCycleDialogID = "cycle-dialog"
+	NewCycleDialogID  = "cycle-dialog"
+	EditCycleDialogID = "cycle-edit-dialog"
 )
 
-templ dialogFormError(err *errors.InputError) {
-	if err != nil && err.InputID == "form" {
-		@dialog.Description() {
-			<span class="text-destructive">{ err.Error() }</span>
-			<br/>
-			Bitte korrigieren Sie die Fehler im Formular und versuchen Sie es erneut.
+templ dialogFormError(err ...*errors.InputError) {
+	for _, e := range err {
+		if e != nil && e.InputID == "form" {
+			@dialog.Description() {
+				<span class="text-destructive">{ e.Error() }</span>
+			}
 		}
 	}
 }

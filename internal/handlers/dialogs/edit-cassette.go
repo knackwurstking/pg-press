@@ -67,7 +67,7 @@ func PostCassette(c echo.Context) *echo.HTTPError {
 
 	formData, ierr := parseCassetteForm(c)
 	if ierr != nil {
-		return ReRenderNewCassetteDialog(c, true, formData, ierr)
+		return reRenderNewCassetteDialog(c, true, formData, ierr)
 	}
 
 	tool := &shared.Tool{
@@ -84,24 +84,24 @@ func PostCassette(c echo.Context) *echo.HTTPError {
 
 	if merr := db.AddTool(tool); merr != nil {
 		ierr = errors.NewInputError("form", fmt.Sprintf("Failed to create cassette: %s", merr.Error()))
-		return ReRenderNewCassetteDialog(c, true, formData, ierr)
+		return reRenderNewCassetteDialog(c, true, formData, ierr)
 	}
 
 	utils.SetHXTrigger(c, "tool-tab-content")
 
-	return ReRenderNewCassetteDialog(c, false, formData, nil)
+	return reRenderNewCassetteDialog(c, false, formData, nil)
 }
 
 func updateCassette(c echo.Context, toolID shared.EntityID) *echo.HTTPError {
 	formData, ierr := parseCassetteForm(c)
 	if ierr != nil {
-		return ReRenderEditCassetteDialog(c, toolID, true, formData, ierr)
+		return reRenderEditCassetteDialog(c, toolID, true, formData, ierr)
 	}
 
 	tool, merr := db.GetTool(shared.EntityID(toolID))
 	if merr != nil {
 		ierr := errors.NewInputError("form", fmt.Sprintf("Cassette with ID %d not found", toolID))
-		return ReRenderEditCassetteDialog(c, toolID, true, formData, ierr)
+		return reRenderEditCassetteDialog(c, toolID, true, formData, ierr)
 	}
 	tool.Type = formData.Type
 	tool.Code = formData.Code
@@ -113,15 +113,16 @@ func updateCassette(c echo.Context, toolID shared.EntityID) *echo.HTTPError {
 	log.Debug("Updating cassette: %#v", tool)
 
 	if merr = db.UpdateTool(tool); merr != nil {
-		return ReRenderEditCassetteDialog(c, toolID, true, formData, ierr)
+		return reRenderEditCassetteDialog(c, toolID, true, formData, ierr)
 	}
 
 	// Set HX headers
 	utils.SetHXRedirect(c, urlb.Tool(tool.ID))
 
-	return ReRenderEditCassetteDialog(c, toolID, false, formData, nil)
+	return reRenderEditCassetteDialog(c, toolID, false, formData, nil)
 }
 
+// TODO: Return multiple `[]*errors.InputError`
 func parseCassetteForm(c echo.Context) (data CassetteFormData, ierr *errors.InputError) {
 	// Sanitize inputs by trimming whitespace
 	data.Type = utils.SanitizeText(c.FormValue("type"))
@@ -160,7 +161,7 @@ func parseCassetteForm(c echo.Context) (data CassetteFormData, ierr *errors.Inpu
 	return
 }
 
-func ReRenderNewCassetteDialog(c echo.Context, open bool, data CassetteFormData, ierr *errors.InputError) *echo.HTTPError {
+func reRenderNewCassetteDialog(c echo.Context, open bool, data CassetteFormData, ierr *errors.InputError) *echo.HTTPError {
 	t := NewCassetteDialog(CassetteDialogProps{
 		CassetteFormData: data,
 		Open:             open,
@@ -176,7 +177,7 @@ func ReRenderNewCassetteDialog(c echo.Context, open bool, data CassetteFormData,
 	return nil
 }
 
-func ReRenderEditCassetteDialog(c echo.Context, toolID shared.EntityID, open bool, data CassetteFormData, ierr *errors.InputError) *echo.HTTPError {
+func reRenderEditCassetteDialog(c echo.Context, toolID shared.EntityID, open bool, data CassetteFormData, ierr *errors.InputError) *echo.HTTPError {
 	t := EditCassetteDialog(toolID, CassetteDialogProps{
 		CassetteFormData: data,
 		Open:             open,

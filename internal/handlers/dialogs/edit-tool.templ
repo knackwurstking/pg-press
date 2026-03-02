@@ -24,7 +24,7 @@ type ToolFormData struct {
 type ToolDialogProps struct {
 	ToolFormData
 	Open, OOB bool
-	Error     *errors.InputError
+	Error     *errors.InputError // TODO: Handle multiple errors for different fields
 }
 
 templ NewToolDialog(props ...ToolDialogProps) {

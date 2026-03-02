@@ -2,7 +2,6 @@ package dialogs
 
 import (
 	"fmt"
-	"net/http"
 	"time"
 
 	"github.com/knackwurstking/pg-press/internal/components"
@@ -31,7 +30,7 @@ type CycleFormData struct {
 type CycleDialogProps struct {
 	CycleFormData
 	Open, OOB bool
-	Error     *errors.InputError
+	Error     []*errors.InputError
 }
 
 templ NewCycleDialog(props ...CycleDialogProps) {
@@ -57,15 +56,16 @@ templ NewCycleDialog(props ...CycleDialogProps) {
 			@dialog.Header() {
 				Neuer Zyklus
 			}
+			@dialogFormError(prop.Error...)
 			<form
 				hx-post={ urlb.DialogEditCycle(0, prop.ToolID, false) }
 				hx-trigger="submit"
 				enctype="multipart/form-data"
 			>
-				@dialogFormError(prop.Error)
-				@formPressSelection(prop.PressID, prop.Presses, prop.Error)
-				@formDate(prop.Stop, prop.Error)
-				@formPressCycles(prop.PressCycles, prop.Error)
+				@formCycleToolChange(prop.ToolID, prop.Tools, prop.Error...)
+				@formPressSelection(prop.PressID, prop.Presses, prop.Error...)
+				@formDate(prop.Stop, prop.Error...)
+				@formPressCycles(prop.PressCycles, prop.Error...)
 				@dialog.Footer() {
 					@button.Button(button.Props{
 						Type: button.TypeSubmit,
@@ -79,67 +79,124 @@ templ NewCycleDialog(props ...CycleDialogProps) {
 }
 
 templ EditCycleDialog(cycleID shared.EntityID, props ...CycleDialogProps) {
-	// TODO: Migrate to templui and tailwind
-	// -------------------------------------------------------------------------
-	{{ toolChangeMode := len(availableTools) > 0 }}
-	@components.FormDialog("cycle-edit-dialog", http.MethodPut, urlb.DialogEditCyclePut()) {
-		<input
-			type="hidden"
-			name="original_tool_id"
-			value={ fmt.Sprintf("%d", tool.ID) }
-		/>
-		if toolChangeMode {
-			@components.Section(templ.Attributes{
-				"class": templ.CSSClasses{
-					"tool-selection",
-					css.Flex, css.FlexCol, css.GapSm,
-					css.MinW0,
-				}.String(),
-			}) {
-				<label for="tool_id">Werkzeug auswählen</label>
-				<select
-					id="tool_id"
-					name="tool_id"
-					required
-					class={
-						css.WFull, css.MaxWFull, css.MinW0,
-						css.TextSM,
-						css.OverflowHidden,
-						css.Ellipsis,
-					}
-				>
-					for _, t := range availableTools {
-						<option
-							value={ fmt.Sprintf("%d", t.ID) }
-							selected?={ t.ID == tool.ID }
-						>
-							{ t.German() }
-							if t.IsDead {
-								&nbsp;[Removed]
-							}
-						</option>
-					}
-				</select>
-			}
+	{{
+		prop := CycleDialogProps{}
+		if len(props) > 0 {
+			prop = props[0]
 		}
-		{{
-			var currentPress *shared.Press
-			for _, p := range presses {
-				if p.ID == cycle.PressID {
-					currentPress = p
-					break
-				}
+
+		attr := templ.Attributes{}
+		if prop.OOB {
+			attr["hx-swap-oob"] = "true"
+		}
+
+		toolChangeMode := len(prop.Tools) > 0
+	}}
+	@dialog.Dialog(dialog.Props{
+		ID:               EditCycleDialogID,
+		DisableClickAway: true,
+		DisableESC:       true,
+		Open:             prop.Open,
+		Attributes:       attr,
+	}) {
+		@dialog.Content() {
+			@dialog.Header() {
+				Zyklus bearbeiten
 			}
-		}}
-		@cyclePressNumber(currentPress, presses)
-		@cycleStop(cycle.Stop)
-		@cycleTotalCycles(cycle.PressCycles)
-		@components.FormDialogFooter("Abbrechen", "Aktualisieren")
+			@dialogFormError(prop.Error...)
+			<form
+				hx-post={ urlb.DialogEditCycle(cycleID, prop.ToolID, toolChangeMode) }
+				hx-trigger="submit"
+				enctype="multipart/form-data"
+			>
+				if toolChangeMode {
+					@formCycleToolChange(prop.ToolID, prop.Tools, prop.Error...)
+				}
+				@formPressSelection(prop.PressID, prop.Presses, prop.Error...)
+				@formDate(prop.Stop, prop.Error...)
+				@formPressCycles(prop.PressCycles, prop.Error...)
+				@dialog.Footer() {
+					@button.Button(button.Props{
+						Type: button.TypeSubmit,
+					}) {
+						Aktualisieren
+					}
+				}
+			</form>
+		}
 	}
 }
 
-templ formPressSelection(pressID shared.EntityID, presses []*shared.Press, ierr *errors.InputError) {
+templ formCycleToolChange(toolID shared.EntityID, tools []*shared.Tool, ierrs ...*errors.InputError) {
 	{{
+		// Filter out errors for "tool_id" input
+		var filteredErrors []*errors.InputError
+		for _, e := range ierrs {
+			if e != nil && e.InputID == "tool_id" {
+				filteredErrors = append(filteredErrors, e)
+			}
+		}
+	}}
+	@form.Item() {
+		@form.Label(form.LabelProps{
+			For: "tool_id",
+		}) {
+			Werkzeug ändern
+		}
+		@selectbox.SelectBox(selectbox.Props{
+			Class: "w-full",
+		}) {
+			@selectbox.Trigger(selectbox.TriggerProps{
+				ID:   "tool_id",
+				Name: "tool_id",
+				Attributes: templ.Attributes{
+					"required": true,
+				},
+				HasError: len(filteredErrors) > 0,
+				Disabled: len(tools) == 0,
+			}) {
+				@selectbox.Value(selectbox.ValueProps{
+					Placeholder: "Werkzeug auswählen",
+				})
+			}
+			@selectbox.Content(selectbox.ContentProps{
+				NoSearch: true,
+			}) {
+				for _, t := range tools {
+					@selectbox.Item(selectbox.ItemProps{
+						Value:    fmt.Sprintf("%d", t.ID),
+						Selected: t.ID == toolID,
+					}) {
+						{ t.German() }
+						if t.IsDead {
+							&nbsp;[Removed]
+						}
+					}
+				}
+			}
+		}
+		if len(filteredErrors) > 0 {
+			for _, e := range filteredErrors {
+				@form.Message(form.MessageProps{
+					Variant: form.MessageVariantError,
+				}) {
+					{ e.Error() }
+				}
+			}
+		}
+	}
+}
+
+templ formPressSelection(pressID shared.EntityID, presses []*shared.Press, ierrs ...*errors.InputError) {
+	{{
+		// Filter out errors for "press_id" input
+		var filteredErrors []*errors.InputError
+		for _, e := range filteredErrors {
+			if e != nil && e.InputID == "press_id" {
+				filteredErrors = append(filteredErrors, e)
+			}
+		}
+
 		var currentPress *shared.Press
 		for _, p := range presses {
 			if p.ID == pressID {
@@ -162,7 +219,7 @@ templ formPressSelection(pressID shared.EntityID, presses []*shared.Press, ierr 
 					Attributes: templ.Attributes{
 						"required": true,
 					},
-					HasError: ierr != nil && ierr.InputID == "press_id",
+					HasError: len(filteredErrors) > 0,
 				}) {
 					@selectbox.Value(selectbox.ValueProps{
 						Placeholder: "Presse auswählen",
@@ -179,19 +236,29 @@ templ formPressSelection(pressID shared.EntityID, presses []*shared.Press, ierr 
 					}
 				}
 			}
-			if ierr != nil && ierr.InputID == "press_id" {
-				@form.Message(form.MessageProps{
-					Variant: form.MessageVariantError,
-				}) {
-					{ ierr.Error() }
+			if len(filteredErrors) > 0 {
+				for _, e := range filteredErrors {
+					@form.Message(form.MessageProps{
+						Variant: form.MessageVariantError,
+					}) {
+						{ e.Error() }
+					}
 				}
 			}
 		}
 	}
 }
 
-templ formDate(date shared.UnixMilli, ierr *errors.InputError) {
+templ formDate(date shared.UnixMilli, ierrs ...*errors.InputError) {
 	{{
+		// Filter out errors for "stop" input
+		var filteredErrors []*errors.InputError
+		for _, e := range ierrs {
+			if e != nil && e.InputID == "stop" {
+				filteredErrors = append(filteredErrors, e)
+			}
+		}
+
 		if date == 0 {
 			date = shared.NewUnixMilli(time.Now())
 		}
@@ -212,20 +279,31 @@ templ formDate(date shared.UnixMilli, ierr *errors.InputError) {
 				Attributes: templ.Attributes{
 					"required": true,
 				},
-				HasError: ierr != nil && ierr.InputID == "stop",
+				HasError: len(filteredErrors) > 0,
 			})
-			if ierr != nil && ierr.InputID == "stop" {
-				@form.Message(form.MessageProps{
-					Variant: form.MessageVariantError,
-				}) {
-					{ ierr.Error() }
+			if len(filteredErrors) > 0 {
+				for _, e := range filteredErrors {
+					@form.Message(form.MessageProps{
+						Variant: form.MessageVariantError,
+					}) {
+						{ e.Error() }
+					}
 				}
 			}
 		}
 	}
 }
 
-templ formPressCycles(value int64, ierr *errors.InputError) {
+templ formPressCycles(value int64, ierrs ...*errors.InputError) {
+	{{
+		// Filter out errors for "press_cycles" input
+		var filteredErrors []*errors.InputError
+		for _, e := range ierrs {
+			if e != nil && e.InputID == "press_cycles" {
+				filteredErrors = append(filteredErrors, e)
+			}
+		}
+	}}
 	@components.Section(templ.Attributes{
 		"class": templ.CSSClasses{
 			"total-cycles", css.Flex, css.FlexCol, css.GapSm,
@@ -245,12 +323,15 @@ templ formPressCycles(value int64, ierr *errors.InputError) {
 					"step":     "1",
 					"required": true,
 				},
+				HasError: len(filteredErrors) > 0,
 			})
-			if ierr != nil && ierr.InputID == "press_cycles" {
-				@form.Message(form.MessageProps{
-					Variant: form.MessageVariantError,
-				}) {
-					{ ierr.Error() }
+			if len(filteredErrors) > 0 {
+				for _, e := range filteredErrors {
+					@form.Message(form.MessageProps{
+						Variant: form.MessageVariantError,
+					}) {
+						{ e.Error() }
+					}
 				}
 			}
 		}

@@ -62,7 +62,7 @@ func PostPress(c echo.Context) *echo.HTTPError {
 
 	data, ierr := parseEditPressForm(c)
 	if ierr != nil {
-		return ReRenderNewPressDialog(c, true, data, ierr)
+		return reRenderNewPressDialog(c, true, data, ierr)
 	}
 
 	merr := db.AddPress(&shared.Press{
@@ -73,24 +73,24 @@ func PostPress(c echo.Context) *echo.HTTPError {
 	})
 	if merr != nil {
 		ierr = errors.NewInputError("form", fmt.Sprintf("failed to add press: %v", merr))
-		return ReRenderNewPressDialog(c, true, data, ierr)
+		return reRenderNewPressDialog(c, true, data, ierr)
 	}
 
 	utils.SetHXTrigger(c, "press-tab-content")
 
-	return ReRenderNewPressDialog(c, false, data, nil)
+	return reRenderNewPressDialog(c, false, data, nil)
 }
 
 func updatePress(c echo.Context, id shared.EntityID) *echo.HTTPError {
 	data, ierr := parseEditPressForm(c)
 	if ierr != nil {
-		return ReRenderEditPressDialog(c, id, true, data, ierr)
+		return reRenderEditPressDialog(c, id, true, data, ierr)
 	}
 
 	press, herr := db.GetPress(id)
 	if herr != nil {
 		ierr = errors.NewInputError("form", fmt.Sprintf("failed to get press: %v", herr))
-		return ReRenderEditPressDialog(c, id, true, data, ierr)
+		return reRenderEditPressDialog(c, id, true, data, ierr)
 	}
 
 	merr := db.UpdatePress(&shared.Press{
@@ -104,14 +104,15 @@ func updatePress(c echo.Context, id shared.EntityID) *echo.HTTPError {
 	})
 	if merr != nil {
 		ierr = errors.NewInputError("form", fmt.Sprintf("failed to update press: %v", merr))
-		return ReRenderEditPressDialog(c, id, true, data, nil)
+		return reRenderEditPressDialog(c, id, true, data, nil)
 	}
 
 	utils.SetHXRedirect(c, urlb.Press(press.ID))
 
-	return ReRenderEditPressDialog(c, id, false, data, nil)
+	return reRenderEditPressDialog(c, id, false, data, nil)
 }
 
+// TODO: Return multiple `[]*errors.InputError`
 func parseEditPressForm(c echo.Context) (data PressFormData, ierr *errors.InputError) {
 	// Press Number
 	vPressNumber, err := utils.SanitizeInt8(c.FormValue("press_number"))
@@ -141,7 +142,7 @@ func parseEditPressForm(c echo.Context) (data PressFormData, ierr *errors.InputE
 	return
 }
 
-func ReRenderNewPressDialog(c echo.Context, open bool, data PressFormData, ierr *errors.InputError) *echo.HTTPError {
+func reRenderNewPressDialog(c echo.Context, open bool, data PressFormData, ierr *errors.InputError) *echo.HTTPError {
 	t := NewPressDialog(PressDialogProps{
 		PressFormData: data,
 		Open:          open,
@@ -157,7 +158,7 @@ func ReRenderNewPressDialog(c echo.Context, open bool, data PressFormData, ierr 
 	return nil
 }
 
-func ReRenderEditPressDialog(c echo.Context, pressID shared.EntityID, open bool, data PressFormData, ierr *errors.InputError) *echo.HTTPError {
+func reRenderEditPressDialog(c echo.Context, pressID shared.EntityID, open bool, data PressFormData, ierr *errors.InputError) *echo.HTTPError {
 	t := EditPressDialog(pressID, PressDialogProps{
 		PressFormData: data,
 		Open:          open,

@@ -23,7 +23,7 @@ type PressFormData struct {
 type PressDialogProps struct {
 	PressFormData
 	Open, OOB bool
-	Error     *errors.InputError
+	Error     *errors.InputError // TODO: Handle multiple errors for different fields
 }
 
 templ NewPressDialog(props ...PressDialogProps) {

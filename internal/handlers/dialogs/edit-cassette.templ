@@ -24,7 +24,7 @@ type CassetteFormData struct {
 type CassetteDialogProps struct {
 	CassetteFormData
 	Open, OOB bool
-	Error     *errors.InputError
+	Error     *errors.InputError // TODO: Handle multiple errors for different fields
 }
 
 templ NewCassetteDialog(props ...CassetteDialogProps) {

@@ -1,6 +1,7 @@
 package dialogs
 
 import (
+	"fmt"
 	"net/http"
 	"sort"
 	"time"
@@ -24,30 +25,30 @@ func GetEditCycle(c echo.Context) *echo.HTTPError {
 
 	// Edit Cycle Dialog
 	if c.QueryParam("id") != "" {
-		cycleIDQuery, merr := utils.GetQueryInt64(c, "id")
-		if merr != nil {
-			return merr.Echo()
+		cycleIDQuery, herr := utils.GetQueryInt64(c, "id")
+		if herr != nil {
+			return herr.Echo()
 		}
 
 		// Get cycle data from the database
-		cycle, merr := db.GetCycle(shared.EntityID(cycleIDQuery))
-		if merr != nil {
-			return merr.Echo()
+		cycle, herr := db.GetCycle(shared.EntityID(cycleIDQuery))
+		if herr != nil {
+			return herr.Echo()
 		}
 
 		// Set the cycles (original) tool to props
-		tool, merr := db.GetTool(cycle.ToolID)
-		if merr != nil {
-			return merr.Echo()
+		tool, herr := db.GetTool(cycle.ToolID)
+		if herr != nil {
+			return herr.Echo()
 		}
 
 		// If in tool change mode, load all available tools for this press
 		var tools []*shared.Tool
 		if toolChangeMode {
 			// Get all tools
-			tools, merr = db.ListTools()
-			if merr != nil {
-				return merr.Echo()
+			tools, herr = db.ListTools()
+			if herr != nil {
+				return herr.Echo()
 			}
 
 			// Filter out tools not matching the original tools position
@@ -64,7 +65,18 @@ func GetEditCycle(c echo.Context) *echo.HTTPError {
 			})
 		}
 
-		t := EditCycleDialog(cycle, tool, tools, presses)
+		t := EditCycleDialog(cycle.ID, CycleDialogProps{
+			CycleFormData: CycleFormData{
+				ToolID:      cycle.ToolID,
+				Tools:       tools,
+				PressID:     cycle.PressID,
+				Presses:     presses,
+				Stop:        cycle.Stop,
+				PressCycles: cycle.PressCycles,
+			},
+			Open: true,
+			OOB:  true,
+		})
 		err := t.Render(c.Request().Context(), c.Response())
 		if err != nil {
 			return errors.NewRenderError(err, "EditCycleDialog")
@@ -92,7 +104,14 @@ func GetEditCycle(c echo.Context) *echo.HTTPError {
 		return herr.Echo()
 	}
 
-	t := NewCycleDialog(tool, currentPress, presses)
+	t := NewCycleDialog(CycleDialogProps{
+		CycleFormData: CycleFormData{
+			ToolID:  tool.ID,
+			PressID: currentPress.ID,
+		},
+		Open: true,
+		OOB:  true,
+	})
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "NewCycleDialog")
@@ -102,76 +121,131 @@ func GetEditCycle(c echo.Context) *echo.HTTPError {
 }
 
 func PostCycle(c echo.Context) *echo.HTTPError {
-	cycle, verr := parseCycleForm(c)
-	if verr != nil {
-		return verr.HTTPError().Echo()
+	if id, _ := utils.GetQueryInt64(c, "id"); id != 0 {
+		return updateCycle(c, shared.EntityID(id))
 	}
 
-	log.Debug("Create a new press cycles entry. [cycle=%v]", cycle)
-
-	if merr := db.AddCycle(cycle); merr != nil {
-		return merr.Echo()
+	data, ierrs := parseCycleForm(c, 0)
+	if len(ierrs) > 0 {
+		return reRenderNewCycleDialog(c, true, data, ierrs...)
 	}
 
-	utils.SetHXTrigger(c, "reload-cycles")
+	log.Debug("Create a new press cycles entry. [data=%#v]", data)
 
-	return nil
-}
-
-func PutCycle(c echo.Context) *echo.HTTPError {
-	cycle, verr := parseCycleForm(c)
-	if verr != nil {
-		return verr.HTTPError().Echo()
-	}
-
-	log.Debug("Update existing cycle with ID %d. [cycle=%v]", cycle.ID, cycle)
-
-	if merr := db.UpdateCycle(cycle); merr != nil {
-		return merr.Echo()
+	cycle := shared.NewCycle(data.ToolID, data.PressID, data.PressCycles, data.Stop)
+	if herr := db.AddCycle(cycle); herr != nil {
+		ierr := errors.NewInputError("form", fmt.Sprintf("failed to create cycle: %v", herr))
+		return reRenderNewCycleDialog(c, true, data, ierr)
 	}
 
 	utils.SetHXTrigger(c, "reload-cycles")
 
-	return nil
+	return reRenderNewCycleDialog(c, false, data)
 }
 
-func parseCycleForm(c echo.Context) (*shared.Cycle, *errors.ValidationError) {
+func updateCycle(c echo.Context, cycleID shared.EntityID) *echo.HTTPError {
+	cycle, herr := db.GetCycle(cycleID)
+	if herr != nil {
+		ierr := errors.NewInputError("form", fmt.Sprintf("failed to load cycle with ID %d: %v", cycleID, herr))
+		return reRenderEditCycleDialog(c, cycleID, true, CycleFormData{}, ierr)
+	}
+
+	data, ierrs := parseCycleForm(c, cycle.ToolID)
+	if len(ierrs) > 0 {
+		return reRenderEditCycleDialog(c, cycleID, true, data, ierrs...)
+	}
+	cycle.ToolID = data.ToolID
+	cycle.PressID = data.PressID
+	cycle.Stop = data.Stop
+	cycle.PressCycles = data.PressCycles
+
+	log.Debug("Update existing cycle with ID %d. [data=%#v]", cycle.ID, data)
+
+	if herr := db.UpdateCycle(cycle); herr != nil {
+		ierr := errors.NewInputError("form", fmt.Sprintf("failed to update cycle: %v", herr))
+		return reRenderEditCycleDialog(c, cycleID, true, data, ierr)
+	}
+
+	utils.SetHXTrigger(c, "reload-cycles")
+
+	return reRenderEditCycleDialog(c, cycleID, false, data)
+}
+
+func parseCycleForm(c echo.Context, toolID shared.EntityID) (data CycleFormData, ierrs []*errors.InputError) {
 	// Tool ID
-	var toolID shared.EntityID
-	originalToolID, err := utils.SanitizeInt64(c.FormValue("original_tool_id"))
-	if err != nil {
-		return nil, errors.NewValidationError("original_tool_id: %v", err)
-	}
 	if c.FormValue("tool_id") != "" {
 		newToolID, err := utils.SanitizeInt64(c.FormValue("tool_id"))
 		if err != nil {
-			return nil, errors.NewValidationError("tool_id: %v", err)
+			ierr := errors.NewInputError("tool_id", fmt.Sprintf("invalid tool ID: %v", err))
+			ierrs = append(ierrs, ierr)
 		}
 		toolID = shared.EntityID(newToolID)
-	} else {
-		toolID = shared.EntityID(originalToolID)
 	}
+	if toolID == 0 {
+		ierr := errors.NewInputError("tool_id", "tool ID is required")
+		ierrs = append(ierrs, ierr)
+	}
+	data.ToolID = toolID
 
 	// Press Number
 	id, err := utils.SanitizeInt8(c.FormValue("press_id"))
 	if err != nil {
-		return nil, errors.NewValidationError("press_id: %v", err)
+		ierr := errors.NewInputError("press_id", fmt.Sprintf("invalid press ID: %v", err))
+		ierrs = append(ierrs, ierr)
 	}
-	pressID := shared.EntityID(id)
+	data.PressID = shared.EntityID(id)
 
 	// Press Cycles
 	pc, err := utils.SanitizeInt64(c.FormValue("press_cycles"))
 	if err != nil {
-		return nil, errors.NewValidationError("press_cycles: %v", err)
+		ierr := errors.NewInputError("press_cycles", fmt.Sprintf("invalid press cycles: %v", err))
+		ierrs = append(ierrs, ierr)
 	}
-	pressCycles := pc
+	data.PressCycles = pc
 
 	// Stop
 	stopTime, err := time.Parse("2006-01-02", c.FormValue("stop"))
 	if err != nil {
-		return nil, errors.NewValidationError("stop: %v", err)
+		ierr := errors.NewInputError("stop", fmt.Sprintf("invalid stop time: %v", err))
+		ierrs = append(ierrs, ierr)
 	}
-	stop := shared.NewUnixMilli(stopTime)
+	data.Stop = shared.NewUnixMilli(stopTime)
 
-	return shared.NewCycle(toolID, pressID, pressCycles, stop), nil
+	return
+}
+
+func reRenderNewCycleDialog(c echo.Context, open bool, formData CycleFormData, ierrs ...*errors.InputError) *echo.HTTPError {
+	t := NewCycleDialog(CycleDialogProps{
+		CycleFormData: formData,
+		Open:          open,
+		OOB:           true,
+	})
+	err := t.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "NewCycleDialog")
+	}
+
+	if len(ierrs) > 0 {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid input")
+	}
+
+	return nil
+}
+
+func reRenderEditCycleDialog(c echo.Context, cycleID shared.EntityID, open bool, formData CycleFormData, ierrs ...*errors.InputError) *echo.HTTPError {
+	t := EditCycleDialog(cycleID, CycleDialogProps{
+		CycleFormData: formData,
+		Open:          open,
+		OOB:           true,
+	})
+	err := t.Render(c.Request().Context(), c.Response())
+	if err != nil {
+		return errors.NewRenderError(err, "EditCycleDialog")
+	}
+
+	if len(ierrs) > 0 {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid input")
+	}
+
+	return nil
 }

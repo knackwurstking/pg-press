@@ -65,7 +65,7 @@ func PostTool(c echo.Context) *echo.HTTPError {
 
 	formData, ierr := parseToolForm(c)
 	if ierr != nil {
-		return ReRenderNewToolDialog(c, true, formData, ierr)
+		return reRenderNewToolDialog(c, true, formData, ierr)
 	}
 	log.Debug("Creating new tool: %#v", formData)
 
@@ -78,24 +78,24 @@ func PostTool(c echo.Context) *echo.HTTPError {
 	}
 	if merr := db.AddTool(tool); merr != nil {
 		ierr = errors.NewInputError("form", fmt.Sprintf("Failed to create tool: %s", merr.Error()))
-		return ReRenderNewToolDialog(c, true, formData, ierr)
+		return reRenderNewToolDialog(c, true, formData, ierr)
 	}
 
 	utils.SetHXTrigger(c, "tool-tab-content")
 
-	return ReRenderNewToolDialog(c, false, formData, nil)
+	return reRenderNewToolDialog(c, false, formData, nil)
 }
 
 func updateTool(c echo.Context, toolID shared.EntityID) *echo.HTTPError {
 	formData, ierr := parseToolForm(c)
 	if ierr != nil {
-		return ReRenderEditToolDialog(c, toolID, true, formData, ierr)
+		return reRenderEditToolDialog(c, toolID, true, formData, ierr)
 	}
 
 	tool, merr := db.GetTool(toolID)
 	if merr != nil {
 		ierr = errors.NewInputError("form", fmt.Sprintf("Failed to load tool: %s", merr.Error()))
-		return ReRenderEditToolDialog(c, toolID, true, formData, ierr)
+		return reRenderEditToolDialog(c, toolID, true, formData, ierr)
 	}
 	tool.Type = formData.Type
 	tool.Code = formData.Code
@@ -107,16 +107,17 @@ func updateTool(c echo.Context, toolID shared.EntityID) *echo.HTTPError {
 
 	if merr = db.UpdateTool(tool); merr != nil {
 		ierr = errors.NewInputError("form", fmt.Sprintf("Failed to update tool: %s", merr.Error()))
-		return ReRenderEditToolDialog(c, toolID, true, formData, ierr)
+		return reRenderEditToolDialog(c, toolID, true, formData, ierr)
 	}
 
 	// Set HX headers
 	utils.SetHXRedirect(c, urlb.Tool(tool.ID))
 
 	// Close dialog
-	return ReRenderEditToolDialog(c, toolID, false, formData, nil)
+	return reRenderEditToolDialog(c, toolID, false, formData, nil)
 }
 
+// TODO: Return multiple `[]*errors.InputError`
 func parseToolForm(c echo.Context) (data ToolFormData, ierr *errors.InputError) {
 	// Sanitize inputs by trimming whitespace
 	data.Type = utils.SanitizeText(c.FormValue("type"))
@@ -154,7 +155,7 @@ func parseToolForm(c echo.Context) (data ToolFormData, ierr *errors.InputError) 
 	return
 }
 
-func ReRenderNewToolDialog(c echo.Context, open bool, data ToolFormData, ierr *errors.InputError) *echo.HTTPError {
+func reRenderNewToolDialog(c echo.Context, open bool, data ToolFormData, ierr *errors.InputError) *echo.HTTPError {
 	t := NewToolDialog(ToolDialogProps{
 		ToolFormData: data,
 		Open:         open,
@@ -170,7 +171,7 @@ func ReRenderNewToolDialog(c echo.Context, open bool, data ToolFormData, ierr *e
 	return nil
 }
 
-func ReRenderEditToolDialog(c echo.Context, toolID shared.EntityID, open bool, data ToolFormData, ierr *errors.InputError) *echo.HTTPError {
+func reRenderEditToolDialog(c echo.Context, toolID shared.EntityID, open bool, data ToolFormData, ierr *errors.InputError) *echo.HTTPError {
 	t := EditToolDialog(toolID, ToolDialogProps{
 		ToolFormData: data,
 		Open:         open,
