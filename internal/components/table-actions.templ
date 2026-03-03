@@ -1,8 +1,9 @@
 package components
 
 import (
+	"github.com/knackwurstking/pg-press/internal/components/button"
+	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/ui/pkg/css"
 )
 
 type TableActionsOptions struct {
@@ -14,36 +15,38 @@ type TableActionsOptions struct {
 }
 
 templ TableActions(options TableActionsOptions) {
-	<span class={ css.ButtonGroup, css.Flex, css.JustifyEnd, css.ItemsCenter }>
+	<span class="flex justify-end items-center">
 		if options.EditHref != "" {
-			<button
-				class={ css.ButtonIcon, css.ButtonSmall, css.Ghost }
-				hx-get={ options.EditHref }
-				hx-trigger="click"
-				hx-target="body"
-				hx-swap="beforeend"
-				title="Bearbeiten"
-				if options.EditAdminOnly && !options.User.IsAdmin() {
-					disabled
-				}
-			>
-				<i class="bi bi-pencil"></i>
-			</button>
+			@button.Button(button.Props{
+				Variant:  button.VariantOutline,
+				Size:     button.SizeIcon,
+				Disabled: options.EditAdminOnly && !options.User.IsAdmin(),
+				Attributes: templ.Attributes{
+					"hx-get":     string(options.EditHref),
+					"hx-trigger": "click",
+					"hx-target":  "body",
+					"hx-swap":    "beforeend",
+					"title":      "Bearbeiten",
+				},
+			}) {
+				@icon.Pencil()
+			}
 		}
 		if options.DeleteHref != "" {
-			<button
-				class={ css.ButtonIcon, css.ButtonSmall, css.Destructive, css.Ghost }
-				hx-delete={ options.DeleteHref }
-				hx-trigger="click"
-				hx-confirm="Diesen Eintrag löschen?"
-				hx-swap="none"
-				title="Löschen"
-				if options.DeleteAdminOnly && !options.User.IsAdmin() {
-					disabled
-				}
-			>
-				<i class="bi bi-trash"></i>
-			</button>
+			@button.Button(button.Props{
+				Variant:  button.VariantDestructive,
+				Size:     button.SizeIcon,
+				Disabled: options.DeleteAdminOnly && !options.User.IsAdmin(),
+				Attributes: templ.Attributes{
+					"hx-delete":  string(options.DeleteHref),
+					"hx-trigger": "click",
+					"hx-confirm": "Diesen Eintrag löschen?",
+					"hx-swap":    "none",
+					"title":      "Löschen",
+				},
+			}) {
+				@icon.Trash()
+			}
 		}
 	</span>
 }
