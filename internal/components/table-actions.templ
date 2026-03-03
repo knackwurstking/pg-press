@@ -15,7 +15,7 @@ type TableActionsOptions struct {
 }
 
 templ TableActions(options TableActionsOptions) {
-	<span class="flex justify-end items-center">
+	<span class="flex justify-end items-center gap-2">
 		if options.EditHref != "" {
 			@button.Button(button.Props{
 				Variant:  button.VariantOutline,
