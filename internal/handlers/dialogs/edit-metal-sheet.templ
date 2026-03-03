@@ -11,24 +11,53 @@ import (
 	"github.com/knackwurstking/ui/pkg/css"
 )
 
-type MetalSheetFormData struct {
+type UpperMetalSheetFormData struct {
+	TileHeight float64
+	Value      float64
+}
+
+type LowerMetalSheetFormData struct {
 	TileHeight  float64
-	Value       float64
-	Identifier  string
 	STF         float64
 	STFMax      float64
 	MarkeHeight int
+	Value       float64
 }
 
-type MetalSheetDialogProps struct {
-	MetalSheetFormData
+type UpperMetalSheetDialogProps struct {
+	UpperMetalSheetFormData
+
+	ToolID       shared.EntityID
+	ToolPosition shared.Slot
+
+	Open, OOB bool
+	Error     []*errors.InputError
 }
 
-// TODO: Migrate...
-templ NewUpperMetalSheetDialog(
-	tool *shared.Tool,
-) {
-	@components.FormDialog("upper-metal-sheet-dialog", http.MethodPost, urlb.DialogEditMetalSheet(0, tool.ID, tool.Position)) {
+type LowerMetalSheetDialogProps struct {
+	LowerMetalSheetFormData
+
+	ToolID       shared.EntityID
+	ToolPosition shared.Slot
+
+	Open, OOB bool
+	Error     []*errors.InputError
+}
+
+templ NewUpperMetalSheetDialog(props ...UpperMetalSheetDialogProps) {
+	{{
+		prop := UpperMetalSheetDialogProps{}
+		if len(props) > 0 {
+			prop = props[0]
+		}
+
+		attr := templ.Attributes{}
+		if prop.OOB {
+			attr["hx-swap-oob"] = "true"
+		}
+	}}
+	// TODO: Migrate
+	@components.FormDialog("upper-metal-sheet-dialog", http.MethodPost, urlb.DialogEditMetalSheet(0, prop.ToolID, prop.ToolPosition)) {
 		@metalSheetContentPositionTop(nil)
 	}
 }
