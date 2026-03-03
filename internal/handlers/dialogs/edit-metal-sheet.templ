@@ -5,10 +5,13 @@ import (
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/button"
+	"github.com/knackwurstking/pg-press/internal/components/dialog"
+	"github.com/knackwurstking/pg-press/internal/components/form"
+	"github.com/knackwurstking/pg-press/internal/components/input"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"github.com/knackwurstking/ui/pkg/css"
 )
 
 type UpperMetalSheetFormData struct {
@@ -17,6 +20,7 @@ type UpperMetalSheetFormData struct {
 }
 
 type LowerMetalSheetFormData struct {
+	Identifier  shared.MachineType
 	TileHeight  float64
 	STF         float64
 	STFMax      float64
@@ -56,20 +60,79 @@ templ NewUpperMetalSheetDialog(props ...UpperMetalSheetDialogProps) {
 			attr["hx-swap-oob"] = "true"
 		}
 	}}
-	// TODO: Migrate
-	@components.FormDialog("upper-metal-sheet-dialog", http.MethodPost, urlb.DialogEditMetalSheet(0, prop.ToolID, prop.ToolPosition)) {
-		@metalSheetContentPositionTop(nil)
+	@dialog.Dialog(dialog.Props{
+		ID:               NewUpperMetalSheetDialogID,
+		DisableClickAway: true,
+		DisableESC:       true,
+		Open:             prop.Open,
+		Attributes:       attr,
+	}) {
+		@dialog.Content() {
+			@dialog.Header() {
+				Obere Blechliste
+			}
+			@renderDialogError(prop.Error)
+			<form
+				hx-post={ urlb.DialogEditMetalSheet(0, prop.ToolID, prop.ToolPosition) }
+				hx-trigger="submit"
+				enctype="multipart/form-data"
+			>
+				@metalSheetContentPositionTop(prop.UpperMetalSheetFormData, prop.Error...)
+				@dialog.Footer() {
+					@button.Button(button.Props{
+						Type: button.TypeSubmit,
+					}) {
+						Erstellen
+					}
+				}
+			</form>
+		}
 	}
 }
 
-templ NewLowerMetalSheetDialog(
-	tool *shared.Tool,
-) {
-	@components.FormDialog("lower-metal-sheet-dialog", http.MethodPost, urlb.DialogEditMetalSheet(0, tool.ID, tool.Position)) {
-		@metalSheetContentPositionBottom(nil)
+templ NewLowerMetalSheetDialog(props ...LowerMetalSheetDialogProps) {
+	{{
+		prop := LowerMetalSheetDialogProps{}
+		if len(props) > 0 {
+			prop = props[0]
+		}
+
+		attr := templ.Attributes{}
+		if prop.OOB {
+			attr["hx-swap-oob"] = "true"
+		}
+	}}
+	@dialog.Dialog(dialog.Props{
+		ID:               NewLowerMetalSheetDialogID,
+		DisableClickAway: true,
+		DisableESC:       true,
+		Open:             prop.Open,
+		Attributes:       attr,
+	}) {
+		@dialog.Content() {
+			@dialog.Header() {
+				Untere Blechliste
+			}
+			@renderDialogError(prop.Error)
+			<form
+				hx-post={ urlb.DialogEditMetalSheet(0, prop.ToolID, prop.ToolPosition) }
+				hx-trigger="submit"
+				enctype="multipart/form-data"
+			>
+				@metalSheetContentPositionBottom(prop.LowerMetalSheetFormData, prop.Error...)
+				@dialog.Footer() {
+					@button.Button(button.Props{
+						Type: button.TypeSubmit,
+					}) {
+						Erstellen
+					}
+				}
+			</form>
+		}
 	}
 }
 
+// TODO: ...
 templ EditUpperMetalSheetDialog(
 	metalSheet *shared.UpperMetalSheet,
 	tool *shared.Tool,
@@ -79,6 +142,7 @@ templ EditUpperMetalSheetDialog(
 	}
 }
 
+// TODO: ...
 templ EditLowerMetalSheetDialog(
 	metalSheet *shared.LowerMetalSheet,
 	tool *shared.Tool,
@@ -88,131 +152,126 @@ templ EditLowerMetalSheetDialog(
 	}
 }
 
-templ metalSheetContentPositionTop(metalSheet *shared.UpperMetalSheet) {
-	<div class={ css.Flex, css.Gap, css.WFull }>
-		<div
-			class={ css.Flex, css.FlexCol, css.WFull }
-		>
-			<label for="tile-height">Stärke (mm)</label>
-			<input
-				class={ css.WFull }
-				type="number"
-				id="tile-height"
-				name="tile_height"
-				step="0.1"
-				required
-				if metalSheet != nil {
-					value={ fmt.Sprintf("%.1f", metalSheet.TileHeight) }
-				}
-			/>
-		</div>
-		<div
-			class={ css.Flex, css.FlexCol, css.WFull }
-		>
-			<label for="value">Blech (mm)</label>
-			<input
-				class={ css.WFull }
-				type="number"
-				id="value"
-				name="value"
-				step="0.1"
-				required
-				if metalSheet != nil {
-					value={ fmt.Sprintf("%.1f", metalSheet.Value) }
-				}
-			/>
-		</div>
-	</div>
+templ metalSheetContentPositionTop(data UpperMetalSheetFormData, ierrs ...*errors.InputError) {
+	@formTileHeight(data.TileHeight, ierrs...)
+	@formSheets(data.Value, ierrs...)
 }
 
-templ metalSheetContentPositionBottom(metalSheet *shared.LowerMetalSheet, ierrs ...*errors.InputError) {
-	@formMachineType(metalSheet.Identifier, ierrs...)
-	// TODO: -------------------------------------------------------------------
-	<span
-		class={ css.Flex, css.Gap, css.WFull }
-	>
-		<div
-			class={ css.Flex, css.FlexCol, css.WFull }
-		>
-			<label for="tile-height">Stärke (mm)</label>
-			<input
-				class={ css.WFull }
-				id="tile-height"
-				name="tile_height"
-				type="number"
-				step="0.1"
-				required
-				if metalSheet != nil {
-					value={ fmt.Sprintf("%.1f", metalSheet.TileHeight) }
-				}
-			/>
-		</div>
-		<div
-			class={ css.Flex, css.FlexCol, css.WFull }
-		>
-			<label for="stf">Stf.</label>
-			<input
-				class={ css.WFull }
-				id="stf"
-				name="stf"
-				type="number"
-				step="0.1"
-				required
-				if metalSheet != nil {
-					value={ fmt.Sprintf("%.1f", metalSheet.STF) }
-				}
-			/>
-		</div>
-		<div
-			class={ css.Flex, css.FlexCol, css.WFull }
-		>
-			<label for="stf-max">Hubende</label>
-			<input
-				class={ css.WFull }
-				id="stf-max"
-				name="stf_max"
-				type="number"
-				step="0.1"
-				required
-				if metalSheet != nil {
-					value={ fmt.Sprintf("%.1f", metalSheet.STFMax) }
-				}
-			/>
-		</div>
-	</span>
-	<span
-		class={ css.Flex, css.Gap, css.WFull }
-	>
-		<div
-			class={ css.Flex, css.FlexCol, css.WFull }
-		>
-			<label for="marke-height">Marke (mm)</label>
-			<input
-				class={ css.WFull }
-				id="marke-height"
-				name="marke_height"
-				type="number"
-				required
-				if metalSheet != nil {
-					value={ fmt.Sprintf("%d", metalSheet.MarkeHeight) }
-				}
-			/>
-		</div>
-		<div
-			class={ css.Flex, css.FlexCol, css.WFull }
-		>
-			<label for="value">Blech (mm)</label>
-			<input
-				class={ css.WFull }
-				id="value"
-				name="value"
-				type="number"
-				step="0.1"
-				required
-				if metalSheet != nil {
-					value={ fmt.Sprintf("%.1f", metalSheet.Value) }
-				}
-			/>
-		</div>
-	</span>
+templ metalSheetContentPositionBottom(data LowerMetalSheetFormData, ierrs ...*errors.InputError) {
+	@formMachineType(data.Identifier, ierrs...)
+	@formTileHeight(data.TileHeight, ierrs...)
+	@formStf(data.STF, ierrs...)
+	@formStfMax(data.STFMax, ierrs...)
+	@formMarkeHeight(data.MarkeHeight, ierrs...)
+	@formSheets(data.Value, ierrs...)
+}
+
+templ formTileHeight(tileHeight float64, ierrs ...*errors.InputError) {
+	@form.Item() {
+		@form.Label(form.LabelProps{
+			For: "tile_height",
+		}) {
+			Stärke (mm)
+		}
+		@input.Input(input.Props{
+			ID:   "tile_height",
+			Name: "tile_height",
+			Type: input.TypeNumber,
+			Attributes: templ.Attributes{
+				"step":     "0.1",
+				"required": true,
+			},
+			Value:    fmt.Sprintf("%.1f", tileHeight),
+			HasError: hasInputError(ierrs, "tile_height"),
+		})
+		@renderFormError(ierrs, "tile_height")
+	}
+}
+
+templ formSheets(value float64, ierrs ...*errors.InputError) {
+	@form.Item() {
+		@form.Label(form.LabelProps{
+			For: "value",
+		}) {
+			Blech (mm)	
+		}
+		@input.Input(input.Props{
+			ID:   "value",
+			Name: "value",
+			Type: input.TypeNumber,
+			Attributes: templ.Attributes{
+				"step":     "0.1",
+				"required": true,
+			},
+			Value:    fmt.Sprintf("%.1f", value),
+			HasError: hasInputError(ierrs, "value"),
+		})
+		@renderFormError(ierrs, "value")
+	}
+}
+
+templ formStf(value float64, ierrs ...*errors.InputError) {
+	@form.Item() {
+		@form.Label(form.LabelProps{
+			For: "stf",
+		}) {
+			STF
+		}
+		@input.Input(input.Props{
+			ID:   "stf",
+			Name: "stf",
+			Type: input.TypeNumber,
+			Attributes: templ.Attributes{
+				"step":     "0.1",
+				"required": true,
+			},
+			Value:    fmt.Sprintf("%.1f", value),
+			HasError: hasInputError(ierrs, "stf"),
+		})
+		@renderFormError(ierrs, "stf")
+	}
+}
+
+templ formStfMax(value float64, ierrs ...*errors.InputError) {
+	@form.Item() {
+		@form.Label(form.LabelProps{
+			For: "stf_max",
+		}) {
+			STF Max
+		}
+		@input.Input(input.Props{
+			ID:   "stf_max",
+			Name: "stf_max",
+			Type: input.TypeNumber,
+			Attributes: templ.Attributes{
+				"step":     "0.1",
+				"required": true,
+			},
+			Value:    fmt.Sprintf("%.1f", value),
+			HasError: hasInputError(ierrs, "stf_max"),
+		})
+		@renderFormError(ierrs, "stf_max")
+	}
+}
+
+templ formMarkeHeight(value int, ierrs ...*errors.InputError) {
+	@form.Item() {
+		@form.Label(form.LabelProps{
+			For: "marke_height",
+		}) {
+			Marke (mm)
+		}
+		@input.Input(input.Props{
+			ID:   "marke_height",
+			Name: "marke_height",
+			Type: input.TypeNumber,
+			Attributes: templ.Attributes{
+				"step":     "1",
+				"required": true,
+			},
+			Value:    fmt.Sprintf("%d", value),
+			HasError: hasInputError(ierrs, "marke_height"),
+		})
+		@renderFormError(ierrs, "marke_height")
+	}
 }

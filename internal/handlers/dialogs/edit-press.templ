@@ -1,9 +1,12 @@
 package dialogs
 
 import (
+	"fmt"
 	"github.com/knackwurstking/pg-press/internal/components/button"
 	"github.com/knackwurstking/pg-press/internal/components/dialog"
 	"github.com/knackwurstking/pg-press/internal/components/form"
+	"github.com/knackwurstking/pg-press/internal/components/input"
+	"github.com/knackwurstking/pg-press/internal/components/selectbox"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
@@ -129,4 +132,69 @@ templ pressContent(props PressFormData, ierrs ...*errors.InputError) {
 	@formCode(props.Code, ierrs...)
 	<br/>
 	@formCyclesOffset(props.CyclesOffset, ierrs...)
+}
+
+templ formPressNumber(number shared.PressNumber, ierrs ...*errors.InputError) {
+	@form.Item() {
+		@form.Label(form.LabelProps{
+			For: "press_number",
+		}) {
+			Number
+		}
+		@input.Input(input.Props{
+			ID:   "press_number",
+			Name: "press_number",
+			Type: input.TypeNumber,
+			Attributes: templ.Attributes{
+				"step":     "1",
+				"min":      "0",
+				"max":      "100",
+				"required": "true",
+			},
+			Value:    fmt.Sprintf("%d", number),
+			HasError: hasInputError(ierrs, "press_number"),
+		})
+		@renderFormError(ierrs, "press_number")
+	}
+}
+
+templ formMachineType(machineType shared.MachineType, ierrs ...*errors.InputError) {
+	@form.Item() {
+		@form.Label(form.LabelProps{
+			For: "machine_type",
+		}) {
+			Type
+		}
+		@selectbox.SelectBox() {
+			@selectbox.Trigger(selectbox.TriggerProps{
+				ID:   "machine_type",
+				Name: "machine_type",
+				Attributes: templ.Attributes{
+					"required": true,
+				},
+				HasError: hasInputError(ierrs, "machine_type"),
+			}) {
+				@selectbox.Value(selectbox.ValueProps{
+					Placeholder: "Bitte Whlen",
+				})
+			}
+			@selectbox.Content(selectbox.ContentProps{
+				NoSearch: true,
+			}) {
+				@selectbox.Item(selectbox.ItemProps{
+					Value:    fmt.Sprintf("%v", shared.MachineTypeSACMI),
+					Selected: machineType == shared.MachineTypeSACMI,
+				}) {
+					{ shared.MachineTypeSACMI.String() }
+				}
+				@selectbox.Item(selectbox.ItemProps{
+					Value:    fmt.Sprintf("%v", shared.MachineTypeSITI),
+					Selected: machineType == shared.MachineTypeSITI,
+				}) {
+					{ shared.MachineTypeSITI.String() }
+				}
+			}
+		}
+		@renderFormError(ierrs, "machine_type")
+	}
 }
