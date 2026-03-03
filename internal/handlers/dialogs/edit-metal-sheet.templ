@@ -5,11 +5,26 @@ import (
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/knackwurstking/ui/pkg/css"
 )
 
+type MetalSheetFormData struct {
+	TileHeight  float64
+	Value       float64
+	Identifier  string
+	STF         float64
+	STFMax      float64
+	MarkeHeight int
+}
+
+type MetalSheetDialogProps struct {
+	MetalSheetFormData
+}
+
+// TODO: Migrate...
 templ NewUpperMetalSheetDialog(
 	tool *shared.Tool,
 ) {
@@ -45,9 +60,7 @@ templ EditLowerMetalSheetDialog(
 }
 
 templ metalSheetContentPositionTop(metalSheet *shared.UpperMetalSheet) {
-	<div
-		class={ css.Flex, css.Gap, css.WFull }
-	>
+	<div class={ css.Flex, css.Gap, css.WFull }>
 		<div
 			class={ css.Flex, css.FlexCol, css.WFull }
 		>
@@ -83,33 +96,9 @@ templ metalSheetContentPositionTop(metalSheet *shared.UpperMetalSheet) {
 	</div>
 }
 
-templ metalSheetContentPositionBottom(metalSheet *shared.LowerMetalSheet) {
-	<div
-		class={ css.Flex, css.FlexCol }
-	>
-		<label for="identifier">Maschinentyp</label>
-		<select
-			id="identifier"
-			name="identifier"
-			required
-		>
-			if metalSheet == nil {
-				<option value="" disabled selected>Pressen Typ</option>
-			}
-			<option
-				value="SACMI"
-				if metalSheet != nil && metalSheet.Identifier == "SACMI" {
-					selected
-				}
-			>SACMI</option>
-			<option
-				value="SITI"
-				if metalSheet != nil && metalSheet.Identifier == "SITI" {
-					selected
-				}
-			>SITI</option>
-		</select>
-	</div>
+templ metalSheetContentPositionBottom(metalSheet *shared.LowerMetalSheet, ierrs ...*errors.InputError) {
+	@formMachineType(metalSheet.Identifier, ierrs...)
+	// TODO: -------------------------------------------------------------------
 	<span
 		class={ css.Flex, css.Gap, css.WFull }
 	>

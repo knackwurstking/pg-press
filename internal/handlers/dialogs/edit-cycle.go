@@ -196,9 +196,9 @@ func parseCycleForm(c echo.Context, toolID shared.EntityID) (data CycleFormData,
 	data.PressID = shared.EntityID(id)
 
 	// Press Cycles
-	pc, err := utils.SanitizeInt64(c.FormValue("press_cycles"))
+	pc, err := utils.SanitizeInt64(c.FormValue("cycles"))
 	if err != nil {
-		ierr := errors.NewInputError("press_cycles", fmt.Sprintf("invalid press cycles: %v", err))
+		ierr := errors.NewInputError("cycles", fmt.Sprintf("invalid press cycles: %v", err))
 		ierrs = append(ierrs, ierr)
 	}
 	data.PressCycles = pc

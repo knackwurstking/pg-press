@@ -1,13 +1,9 @@
 package dialogs
 
 import (
-	"fmt"
-
 	"github.com/knackwurstking/pg-press/internal/components/button"
 	"github.com/knackwurstking/pg-press/internal/components/dialog"
 	"github.com/knackwurstking/pg-press/internal/components/form"
-	"github.com/knackwurstking/pg-press/internal/components/input"
-	"github.com/knackwurstking/pg-press/internal/components/selectbox"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
@@ -123,141 +119,14 @@ templ EditPressDialog(pressID shared.EntityID, props ...PressDialogProps) {
 }
 
 templ pressContent(props PressFormData, ierrs ...*errors.InputError) {
-	@pressNumberAndType(props.Number, props.Type, ierrs...)
-	<br/>
-	@pressCode(props.Code, ierrs...)
-	<br/>
-	@pressCyclesOffset(props.CyclesOffset, ierrs...)
-}
-
-templ pressNumberAndType(number shared.PressNumber, machineType shared.MachineType, ierrs ...*errors.InputError) {
-	{{
-		var filteredErrors []*errors.InputError
-		for _, err := range ierrs {
-			if err.InputID == "press_number" || err.InputID == "machine_type" {
-				filteredErrors = append(filteredErrors, err)
-			}
-		}
-	}}
 	@form.ItemFlex(form.ItemProps{
 		Class: "justify-between",
 	}) {
-		@form.Item() {
-			@form.Label(form.LabelProps{
-				For: "press_number",
-			}) {
-				Number
-			}
-			@input.Input(input.Props{
-				ID:   "press_number",
-				Name: "press_number",
-				Type: input.TypeNumber,
-				Attributes: templ.Attributes{
-					"step":     "1",
-					"min":      "0",
-					"max":      "100",
-					"required": "true",
-				},
-				Value:    fmt.Sprintf("%d", number),
-				HasError: hasInputError(ierrs, "press_number"),
-			})
-		}
-		@form.Item() {
-			@form.Label(form.LabelProps{
-				For: "machine_type",
-			}) {
-				Type
-			}
-			@selectbox.SelectBox() {
-				@selectbox.Trigger(selectbox.TriggerProps{
-					ID:   "machine_type",
-					Name: "machine_type",
-					Attributes: templ.Attributes{
-						"required": true,
-					},
-					HasError: hasInputError(ierrs, "machine_type"),
-				}) {
-					@selectbox.Value(selectbox.ValueProps{
-						Placeholder: "Bitte Whlen",
-					})
-				}
-				@selectbox.Content(selectbox.ContentProps{
-					NoSearch: true,
-				}) {
-					@selectbox.Item(selectbox.ItemProps{
-						Value:    fmt.Sprintf("%v", shared.MachineTypeSACMI),
-						Selected: machineType == shared.MachineTypeSACMI,
-					}) {
-						{ shared.MachineTypeSACMI.String() }
-					}
-					@selectbox.Item(selectbox.ItemProps{
-						Value:    fmt.Sprintf("%v", shared.MachineTypeSITI),
-						Selected: machineType == shared.MachineTypeSITI,
-					}) {
-						{ shared.MachineTypeSITI.String() }
-					}
-				}
-			}
-		}
-		@renderFormError(ierrs, "press_number", "machine_type")
+		@formPressNumber(props.Number, ierrs...)
+		@formMachineType(props.Type, ierrs...)
 	}
-}
-
-templ pressCode(code string, ierrs ...*errors.InputError) {
-	{{
-		var filteredErrors []*errors.InputError
-		for _, err := range ierrs {
-			if err.InputID == "code" {
-				filteredErrors = append(filteredErrors, err)
-			}
-		}
-	}}
-	@form.Item() {
-		@form.Label(form.LabelProps{
-			For: "code",
-		}) {
-			Code
-		}
-		@input.Input(input.Props{
-			ID:    "code",
-			Name:  "code",
-			Type:  input.TypeText,
-			Value: code,
-			Attributes: templ.Attributes{
-				"required": true,
-			},
-			HasError: len(filteredErrors) > 0,
-		})
-		@renderFormError(ierrs, "code")
-	}
-}
-
-templ pressCyclesOffset(cyclesOffset int64, ierrs ...*errors.InputError) {
-	{{
-		var filteredErrors []*errors.InputError
-		for _, err := range ierrs {
-			if err.InputID == "cycles_offset" {
-				filteredErrors = append(filteredErrors, err)
-			}
-		}
-	}}
-	@form.Item() {
-		@form.Label(form.LabelProps{
-			For: "cycles_offset",
-		}) {
-			Zyklen Offset
-		}
-		@input.Input(input.Props{
-			ID:   "cycles_offset",
-			Name: "cycles_offset",
-			Type: input.TypeNumber,
-			Attributes: templ.Attributes{
-				"step":     "1",
-				"required": true,
-			},
-			Value:    fmt.Sprintf("%d", cyclesOffset),
-			HasError: len(filteredErrors) > 0,
-		})
-		@renderFormError(ierrs, "cycles_offset")
-	}
+	<br/>
+	@formCode(props.Code, ierrs...)
+	<br/>
+	@formCyclesOffset(props.CyclesOffset, ierrs...)
 }

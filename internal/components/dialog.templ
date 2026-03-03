@@ -8,6 +8,7 @@ import (
 	"github.com/knackwurstking/ui/pkg/css"
 )
 
+// TODO: Remove this dialog component after all dialogs are updated
 templ FormDialog(id, method string, href templ.SafeURL) {
 	@components.Dialog(&components.DialogProps{
 		Props: components.NewProps(
