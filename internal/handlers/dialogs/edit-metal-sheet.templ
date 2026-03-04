@@ -2,9 +2,7 @@ package dialogs
 
 import (
 	"fmt"
-	"net/http"
 
-	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/components/button"
 	"github.com/knackwurstking/pg-press/internal/components/dialog"
 	"github.com/knackwurstking/pg-press/internal/components/form"
@@ -69,7 +67,7 @@ templ NewUpperMetalSheetDialog(props ...UpperMetalSheetDialogProps) {
 	}) {
 		@dialog.Content() {
 			@dialog.Header() {
-				Obere Blechliste
+				Obere Blechliste Erstellen
 			}
 			@renderDialogError(prop.Error)
 			<form
@@ -111,7 +109,7 @@ templ NewLowerMetalSheetDialog(props ...LowerMetalSheetDialogProps) {
 	}) {
 		@dialog.Content() {
 			@dialog.Header() {
-				Untere Blechliste
+				Untere Blechliste Erstellen
 			}
 			@renderDialogError(prop.Error)
 			<form
@@ -132,23 +130,87 @@ templ NewLowerMetalSheetDialog(props ...LowerMetalSheetDialogProps) {
 	}
 }
 
-// TODO: ...
-templ EditUpperMetalSheetDialog(
-	metalSheet *shared.UpperMetalSheet,
-	tool *shared.Tool,
-) {
-	@components.FormDialog("upper-metal-sheet-edit-dialog", http.MethodPut, urlb.DialogEditMetalSheet(metalSheet.ID, 0, tool.Position)) {
-		@metalSheetContentPositionTop(metalSheet)
+templ EditUpperMetalSheetDialog(metalSheetID shared.EntityID, props ...UpperMetalSheetDialogProps) {
+	{{
+		prop := UpperMetalSheetDialogProps{}
+		if len(props) > 0 {
+			prop = props[0]
+		}
+
+		attr := templ.Attributes{}
+		if prop.OOB {
+			attr["hx-swap-oob"] = "true"
+		}
+	}}
+	@dialog.Dialog(dialog.Props{
+		ID:               EditUpperMetalSheetDialogID,
+		DisableClickAway: true,
+		DisableESC:       true,
+		Open:             prop.Open,
+		Attributes:       attr,
+	}) {
+		@dialog.Content() {
+			@dialog.Header() {
+				Obere Blechliste bearbeiten
+			}
+			@renderDialogError(prop.Error)
+			<form
+				hx-post={ urlb.DialogEditMetalSheet(metalSheetID, prop.ToolID, prop.ToolPosition) }
+				hx-trigger="submit"
+				enctype="multipart/form-data"
+			>
+				@metalSheetContentPositionTop(prop.UpperMetalSheetFormData, prop.Error...)
+				@dialog.Footer() {
+					@button.Button(button.Props{
+						Type: button.TypeSubmit,
+					}) {
+						Aktualisieren
+					}
+				}
+			</form>
+		}
 	}
 }
 
-// TODO: ...
-templ EditLowerMetalSheetDialog(
-	metalSheet *shared.LowerMetalSheet,
-	tool *shared.Tool,
-) {
-	@components.FormDialog("lower-metal-sheet-edit-dialog", http.MethodPut, urlb.DialogEditMetalSheet(metalSheet.ID, 0, tool.Position)) {
-		@metalSheetContentPositionBottom(metalSheet)
+templ EditLowerMetalSheetDialog(metalSheetID shared.EntityID, props ...LowerMetalSheetDialogProps) {
+	{{
+		prop := LowerMetalSheetDialogProps{}
+		if len(props) > 0 {
+			prop = props[0]
+		}
+
+		attr := templ.Attributes{}
+		if prop.OOB {
+			attr["hx-swap-oob"] = "true"
+		}
+	}}
+	@dialog.Dialog(dialog.Props{
+		ID:               EditLowerMetalSheetDialogID,
+		DisableClickAway: true,
+		DisableESC:       true,
+		Open:             prop.Open,
+		Attributes:       attr,
+	}) {
+		@dialog.Content() {
+			@dialog.Header() {
+				Untere Blechliste bearbeiten
+			}
+			@renderDialogError(prop.Error)
+			<form
+				hx-post={ urlb.DialogEditMetalSheet(metalSheetID, prop.ToolID, prop.ToolPosition) }
+				hx-trigger="submit"
+				enctype="multipart/form-data"
+			>
+				@metalSheetContentPositionBottom(prop.LowerMetalSheetFormData, prop.Error...)
+				@dialog.Footer() {
+					@button.Button(button.Props{
+						Type: button.TypeSubmit,
+					}) {
+						Aktualisieren
+					}
+				}
+			</form>
+		}
 	}
 }
 

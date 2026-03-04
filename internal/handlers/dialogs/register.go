@@ -35,7 +35,6 @@ func Register(e *echo.Echo, path string) {
 		// Edit metal sheet dialog
 		ui.NewEchoRoute(http.MethodGet, path+"/edit-metal-sheet", GetEditMetalSheet),
 		ui.NewEchoRoute(http.MethodPost, path+"/edit-metal-sheet", PostMetalSheet),
-		ui.NewEchoRoute(http.MethodPut, path+"/edit-metal-sheet", PutMetalSheet),
 
 		// New/Edit a Press
 		ui.NewEchoRoute(http.MethodGet, path+"/edit-press", GetEditPress),
