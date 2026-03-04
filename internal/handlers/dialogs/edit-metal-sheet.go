@@ -2,6 +2,7 @@ package dialogs
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
@@ -11,7 +12,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// TODO: ...
 func GetEditMetalSheet(c echo.Context) *echo.HTTPError {
 	// Check if we're editing an existing metal sheet (has ID) or creating new one
 	idQuery, _ := utils.GetQueryInt64(c, "id")
@@ -31,7 +31,16 @@ func GetEditMetalSheet(c echo.Context) *echo.HTTPError {
 				return merr.Echo()
 			}
 
-			t := EditUpperMetalSheetDialog(metalSheet, tool)
+			t := EditUpperMetalSheetDialog(metalSheet.ID, UpperMetalSheetDialogProps{
+				UpperMetalSheetFormData: UpperMetalSheetFormData{
+					TileHeight: metalSheet.TileHeight,
+					Value:      metalSheet.Value,
+				},
+				ToolID:       metalSheet.ToolID,
+				ToolPosition: tool.Position,
+				Open:         true,
+				OOB:          true,
+			})
 			err := t.Render(c.Request().Context(), c.Response())
 			if err != nil {
 				return errors.NewRenderError(err, "EditUpperMetalSheetDialog")
@@ -48,7 +57,20 @@ func GetEditMetalSheet(c echo.Context) *echo.HTTPError {
 				return merr.Echo()
 			}
 
-			t := EditLowerMetalSheetDialog(metalSheet, tool)
+			t := EditLowerMetalSheetDialog(metalSheet.ID, LowerMetalSheetDialogProps{
+				LowerMetalSheetFormData: LowerMetalSheetFormData{
+					Identifier:  metalSheet.Identifier,
+					TileHeight:  metalSheet.TileHeight,
+					Value:       metalSheet.Value,
+					MarkeHeight: metalSheet.MarkeHeight,
+					STF:         metalSheet.STF,
+					STFMax:      metalSheet.STFMax,
+				},
+				ToolID:       metalSheet.ToolID,
+				ToolPosition: tool.Position,
+				Open:         true,
+				OOB:          true,
+			})
 			err := t.Render(c.Request().Context(), c.Response())
 			if err != nil {
 				return errors.NewRenderError(err, "EditLowerMetalSheetDialog")
@@ -73,7 +95,12 @@ func GetEditMetalSheet(c echo.Context) *echo.HTTPError {
 
 	switch tool.Position {
 	case shared.SlotUpper:
-		t := NewUpperMetalSheetDialog(tool)
+		t := NewUpperMetalSheetDialog(UpperMetalSheetDialogProps{
+			ToolID:       tool.ID,
+			ToolPosition: tool.Position,
+			Open:         true,
+			OOB:          true,
+		})
 		err := t.Render(c.Request().Context(), c.Response())
 		if err != nil {
 			return errors.NewRenderError(err, "NewUpperMetalSheetDialog")
@@ -81,7 +108,12 @@ func GetEditMetalSheet(c echo.Context) *echo.HTTPError {
 		return nil
 
 	case shared.SlotLower:
-		t := NewLowerMetalSheetDialog(tool)
+		t := NewLowerMetalSheetDialog(LowerMetalSheetDialogProps{
+			ToolID:       tool.ID,
+			ToolPosition: tool.Position,
+			Open:         true,
+			OOB:          true,
+		})
 		err := t.Render(c.Request().Context(), c.Response())
 		if err != nil {
 			return errors.NewRenderError(err, "NewLowerMetalSheetDialog")
@@ -100,8 +132,6 @@ func PostMetalSheet(c echo.Context) *echo.HTTPError {
 		return updateMetalSheet(c, shared.EntityID(id))
 	}
 
-	// TODO: ...
-
 	// Extract tool ID from query parameters
 	id, merr := utils.GetQueryInt64(c, "tool_id")
 	if merr != nil {
@@ -115,25 +145,41 @@ func PostMetalSheet(c echo.Context) *echo.HTTPError {
 
 	switch tool.Position {
 	case shared.SlotUpper:
-		ums, verr := parseUpperMetalSheetForm(c, nil)
-		if verr != nil {
-			return verr.HTTPError().Echo()
+		data, ierrs := parseUpperMetalSheetForm(c)
+		if len(ierrs) > 0 {
+			return reRenderNewUpperMetalSheetDialog(tool.ID, data, renderProps{c, true, ierrs})
 		}
-		ums.ToolID = tool.ID
-		merr = db.AddUpperMetalSheet(ums)
-		if merr != nil {
-			return merr.Wrap("could not add upper metal sheet to database").Echo()
+		ums := &shared.UpperMetalSheet{
+			BaseMetalSheet: shared.BaseMetalSheet{
+				ToolID:     tool.ID,
+				TileHeight: data.TileHeight,
+				Value:      data.Value,
+			},
+		}
+		if merr = db.AddUpperMetalSheet(ums); merr != nil {
+			ierr := errors.NewInputError("", fmt.Sprintf("could not add upper metal sheet to database: %v", merr))
+			return reRenderNewUpperMetalSheetDialog(tool.ID, data, renderProps{c, true, []*errors.InputError{ierr}})
 		}
 
 	case shared.SlotLower:
-		lms, verr := parseLowerMetalSheetForm(c, nil)
-		if verr != nil {
-			return verr.HTTPError().Echo()
+		data, ierrs := parseLowerMetalSheetForm(c)
+		if len(ierrs) > 0 {
+			return reRenderNewLowerMetalSheetDialog(tool.ID, data, renderProps{c, true, ierrs})
 		}
-		lms.ToolID = tool.ID
-		merr = db.AddLowerMetalSheet(lms)
-		if merr != nil {
-			return merr.Wrap("could not add lower metal sheet to database").Echo()
+		lms := &shared.LowerMetalSheet{
+			BaseMetalSheet: shared.BaseMetalSheet{
+				ToolID:     tool.ID,
+				TileHeight: data.TileHeight,
+				Value:      data.Value,
+			},
+			MarkeHeight: data.MarkeHeight,
+			STF:         data.STF,
+			STFMax:      data.STFMax,
+			Identifier:  data.Identifier,
+		}
+		if merr = db.AddLowerMetalSheet(lms); merr != nil {
+			ierr := errors.NewInputError("", fmt.Sprintf("could not add lower metal sheet to database: %v", merr))
+			return reRenderNewLowerMetalSheetDialog(tool.ID, data, renderProps{c, true, []*errors.InputError{ierr}})
 		}
 
 	default:
@@ -141,6 +187,14 @@ func PostMetalSheet(c echo.Context) *echo.HTTPError {
 	}
 
 	utils.SetHXTrigger(c, "reload-metal-sheets")
+
+	// Close dialog
+	switch tool.Position {
+	case shared.SlotUpper:
+		return reRenderNewUpperMetalSheetDialog(tool.ID, UpperMetalSheetFormData{}, renderProps{c, false, nil})
+	case shared.SlotLower:
+		return reRenderNewLowerMetalSheetDialog(tool.ID, LowerMetalSheetFormData{}, renderProps{c, false, nil})
+	}
 
 	return nil
 }
@@ -150,33 +204,39 @@ func updateMetalSheet(c echo.Context, id shared.EntityID) *echo.HTTPError {
 	if merr != nil {
 		return merr.Echo()
 	}
+
 	switch shared.Slot(position) {
 	case shared.SlotUpper:
 		ums, merr := db.GetUpperMetalSheet(shared.EntityID(id))
 		if merr != nil {
-			return merr.Wrap("could not fetch existing upper metal sheet").Echo()
+			return merr.WrapEcho("could not fetch existing upper metal sheet with ID %d", id)
 		}
-		ums, verr := parseUpperMetalSheetForm(c, ums)
-		if verr != nil {
-			return verr.HTTPError().Echo()
+
+		data, ierrs := parseUpperMetalSheetForm(c)
+		if len(ierrs) > 0 {
+			return reRenderEditUpperMetalSheetDialog(ums.ToolID, id, data, renderProps{c, true, ierrs})
 		}
-		merr = db.UpdateUpperMetalSheet(ums)
-		if merr != nil {
-			return merr.Wrap("could not update upper metal sheet in database").Echo()
+
+		if merr = db.UpdateUpperMetalSheet(ums); merr != nil {
+			ierr := errors.NewInputError("", fmt.Sprintf("could not update upper metal sheet in database: %v", merr))
+			return reRenderEditUpperMetalSheetDialog(ums.ToolID, id, data, renderProps{c, true, []*errors.InputError{ierr}})
 		}
 
 	case shared.SlotLower:
 		lms, merr := db.GetLowerMetalSheet(shared.EntityID(id))
 		if merr != nil {
-			return merr.Wrap("could not fetch existing upper metal sheet").Echo()
+			return merr.WrapEcho("could not fetch existing lower metal sheet with ID %d", id)
 		}
-		lms, verr := parseLowerMetalSheetForm(c, lms)
-		if verr != nil {
-			return verr.HTTPError().Echo()
+
+		data, ierrs := parseLowerMetalSheetForm(c)
+		if len(ierrs) > 0 {
+			return reRenderEditLowerMetalSheetDialog(lms.ToolID, id, data, renderProps{c, true, ierrs})
 		}
+
 		merr = db.UpdateLowerMetalSheet(lms)
 		if merr != nil {
-			return merr.Wrap("could not update upper metal sheet in database").Echo()
+			ierr := errors.NewInputError("", fmt.Sprintf("could not update lower metal sheet in database: %v", merr))
+			return reRenderEditLowerMetalSheetDialog(lms.ToolID, id, data, renderProps{c, true, []*errors.InputError{ierr}})
 		}
 
 	default:
@@ -185,6 +245,14 @@ func updateMetalSheet(c echo.Context, id shared.EntityID) *echo.HTTPError {
 
 	utils.SetHXTrigger(c, "reload-metal-sheets")
 
+	// Close dialog
+	switch shared.Slot(position) {
+	case shared.SlotUpper:
+		return reRenderEditUpperMetalSheetDialog(0, id, UpperMetalSheetFormData{}, renderProps{c, false, nil})
+	case shared.SlotLower:
+		return reRenderEditLowerMetalSheetDialog(0, id, LowerMetalSheetFormData{}, renderProps{c, false, nil})
+	}
+
 	return nil
 }
 
@@ -192,7 +260,6 @@ func parseUpperMetalSheetForm(c echo.Context) (data UpperMetalSheetFormData, ier
 	var err error
 	data.TileHeight, err = utils.SanitizeFloat(c.FormValue("tile_height"))
 	if err != nil {
-		//return nil, errors.NewValidationError("invalid tile height: %v", err)
 		ierr := errors.NewInputError("tile_height", fmt.Sprintf("invalid tile height: %v", err))
 		ierrs = append(ierrs, ierr)
 	}
@@ -255,18 +322,74 @@ type renderProps struct {
 	Error []*errors.InputError
 }
 
-func reRenderNewUpperMetalSheetDialog(data UpperMetalSheetFormData, prop renderProps) *echo.HTTPError {
-	// TODO: ...
+func reRenderNewUpperMetalSheetDialog(toolID shared.EntityID, data UpperMetalSheetFormData, prop renderProps) *echo.HTTPError {
+	t := NewUpperMetalSheetDialog(UpperMetalSheetDialogProps{
+		UpperMetalSheetFormData: data,
+		ToolID:                  toolID,
+		ToolPosition:            shared.SlotUpper,
+		Open:                    prop.Open,
+		OOB:                     true,
+		Error:                   prop.Error,
+	})
+	if err := t.Render(prop.c.Request().Context(), prop.c.Response()); err != nil {
+		return errors.NewRenderError(err, "NewUpperMetalSheetDialog")
+	}
+	if len(prop.Error) > 0 {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid input"))
+	}
+	return nil
 }
 
-func reRenderNewLowerMetalSheetDialog(data UpperMetalSheetFormData, prop renderProps) *echo.HTTPError {
-	// TODO: ...
+func reRenderNewLowerMetalSheetDialog(toolID shared.EntityID, data LowerMetalSheetFormData, prop renderProps) *echo.HTTPError {
+	t := NewLowerMetalSheetDialog(LowerMetalSheetDialogProps{
+		LowerMetalSheetFormData: data,
+		ToolID:                  toolID,
+		ToolPosition:            shared.SlotLower,
+		Open:                    prop.Open,
+		OOB:                     true,
+		Error:                   prop.Error,
+	})
+	if err := t.Render(prop.c.Request().Context(), prop.c.Response()); err != nil {
+		return errors.NewRenderError(err, "NewLowerMetalSheetDialog")
+	}
+	if len(prop.Error) > 0 {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid input"))
+	}
+	return nil
 }
 
-func reRenderEditUpperMetalSheetDialog(msID shared.EntityID, data UpperMetalSheetFormData, prop renderProps) *echo.HTTPError {
-	// TODO: ...
+func reRenderEditUpperMetalSheetDialog(toolID shared.EntityID, msID shared.EntityID, data UpperMetalSheetFormData, prop renderProps) *echo.HTTPError {
+	t := EditUpperMetalSheetDialog(msID, UpperMetalSheetDialogProps{
+		UpperMetalSheetFormData: data,
+		ToolID:                  toolID,
+		ToolPosition:            shared.SlotUpper,
+		Open:                    prop.Open,
+		OOB:                     true,
+		Error:                   prop.Error,
+	})
+	if err := t.Render(prop.c.Request().Context(), prop.c.Response()); err != nil {
+		return errors.NewRenderError(err, "EditUpperMetalSheetDialog")
+	}
+	if len(prop.Error) > 0 {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid input"))
+	}
+	return nil
 }
 
-func reRenderEditLowerMetalSheetDialog(msID shared.EntityID, data UpperMetalSheetFormData, prop renderProps) *echo.HTTPError {
-	// TODO: ...
+func reRenderEditLowerMetalSheetDialog(toolID shared.EntityID, msID shared.EntityID, data LowerMetalSheetFormData, prop renderProps) *echo.HTTPError {
+	t := EditLowerMetalSheetDialog(msID, LowerMetalSheetDialogProps{
+		LowerMetalSheetFormData: data,
+		ToolID:                  toolID,
+		ToolPosition:            shared.SlotLower,
+		Open:                    prop.Open,
+		OOB:                     true,
+		Error:                   prop.Error,
+	})
+	if err := t.Render(prop.c.Request().Context(), prop.c.Response()); err != nil {
+		return errors.NewRenderError(err, "EditLowerMetalSheetDialog")
+	}
+	if len(prop.Error) > 0 {
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid input"))
+	}
+	return nil
 }

@@ -73,6 +73,7 @@ templ NewUpperMetalSheetDialog(props ...UpperMetalSheetDialogProps) {
 			<form
 				hx-post={ urlb.DialogEditMetalSheet(0, prop.ToolID, prop.ToolPosition) }
 				hx-trigger="submit"
+				hx-on::response-error="alert(event.detail.xhr.responseText)"
 				enctype="multipart/form-data"
 			>
 				@metalSheetContentPositionTop(prop.UpperMetalSheetFormData, prop.Error...)
@@ -115,6 +116,7 @@ templ NewLowerMetalSheetDialog(props ...LowerMetalSheetDialogProps) {
 			<form
 				hx-post={ urlb.DialogEditMetalSheet(0, prop.ToolID, prop.ToolPosition) }
 				hx-trigger="submit"
+				hx-on::response-error="alert(event.detail.xhr.responseText)"
 				enctype="multipart/form-data"
 			>
 				@metalSheetContentPositionBottom(prop.LowerMetalSheetFormData, prop.Error...)
@@ -157,6 +159,7 @@ templ EditUpperMetalSheetDialog(metalSheetID shared.EntityID, props ...UpperMeta
 			<form
 				hx-post={ urlb.DialogEditMetalSheet(metalSheetID, prop.ToolID, prop.ToolPosition) }
 				hx-trigger="submit"
+				hx-on::response-error="alert(event.detail.xhr.responseText)"
 				enctype="multipart/form-data"
 			>
 				@metalSheetContentPositionTop(prop.UpperMetalSheetFormData, prop.Error...)
@@ -199,6 +202,7 @@ templ EditLowerMetalSheetDialog(metalSheetID shared.EntityID, props ...LowerMeta
 			<form
 				hx-post={ urlb.DialogEditMetalSheet(metalSheetID, prop.ToolID, prop.ToolPosition) }
 				hx-trigger="submit"
+				hx-on::response-error="alert(event.detail.xhr.responseText)"
 				enctype="multipart/form-data"
 			>
 				@metalSheetContentPositionBottom(prop.LowerMetalSheetFormData, prop.Error...)
