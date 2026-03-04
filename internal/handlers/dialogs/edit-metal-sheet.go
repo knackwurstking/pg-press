@@ -1,6 +1,8 @@
 package dialogs
 
 import (
+	"fmt"
+
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -9,6 +11,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// TODO: ...
 func GetEditMetalSheet(c echo.Context) *echo.HTTPError {
 	// Check if we're editing an existing metal sheet (has ID) or creating new one
 	idQuery, _ := utils.GetQueryInt64(c, "id")
@@ -91,6 +94,14 @@ func GetEditMetalSheet(c echo.Context) *echo.HTTPError {
 }
 
 func PostMetalSheet(c echo.Context) *echo.HTTPError {
+	// Extract metal sheet ID from query parameters
+	id, _ := utils.GetQueryInt64(c, "id")
+	if id > 0 {
+		return updateMetalSheet(c, shared.EntityID(id))
+	}
+
+	// TODO: ...
+
 	// Extract tool ID from query parameters
 	id, merr := utils.GetQueryInt64(c, "tool_id")
 	if merr != nil {
@@ -134,12 +145,7 @@ func PostMetalSheet(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func PutMetalSheet(c echo.Context) *echo.HTTPError {
-	// Extract metal sheet ID from query parameters
-	id, merr := utils.GetQueryInt64(c, "id")
-	if merr != nil {
-		return merr.Echo()
-	}
+func updateMetalSheet(c echo.Context, id shared.EntityID) *echo.HTTPError {
 	position, merr := utils.GetQueryInt(c, "position")
 	if merr != nil {
 		return merr.Echo()
@@ -182,62 +188,85 @@ func PutMetalSheet(c echo.Context) *echo.HTTPError {
 	return nil
 }
 
-func parseUpperMetalSheetForm(c echo.Context, ums *shared.UpperMetalSheet) (*shared.UpperMetalSheet, *errors.ValidationError) {
-	if ums == nil {
-		ums = &shared.UpperMetalSheet{}
-	}
-
+func parseUpperMetalSheetForm(c echo.Context) (data UpperMetalSheetFormData, ierrs []*errors.InputError) {
 	var err error
-	ums.TileHeight, err = utils.SanitizeFloat(c.FormValue("tile_height"))
+	data.TileHeight, err = utils.SanitizeFloat(c.FormValue("tile_height"))
 	if err != nil {
-		return nil, errors.NewValidationError("invalid tile height: %v", err)
+		//return nil, errors.NewValidationError("invalid tile height: %v", err)
+		ierr := errors.NewInputError("tile_height", fmt.Sprintf("invalid tile height: %v", err))
+		ierrs = append(ierrs, ierr)
 	}
 
-	ums.Value, err = utils.SanitizeFloat(c.FormValue("value"))
+	data.Value, err = utils.SanitizeFloat(c.FormValue("value"))
 	if err != nil {
-		return nil, errors.NewValidationError("invalid value: %v", err)
+		ierr := errors.NewInputError("value", fmt.Sprintf("invalid value: %v", err))
+		ierrs = append(ierrs, ierr)
 	}
 
-	return ums, nil
+	return
 }
 
-func parseLowerMetalSheetForm(c echo.Context, lms *shared.LowerMetalSheet) (*shared.LowerMetalSheet, *errors.ValidationError) {
-	if lms == nil {
-		lms = &shared.LowerMetalSheet{}
-	}
-
+func parseLowerMetalSheetForm(c echo.Context) (data LowerMetalSheetFormData, ierrs []*errors.InputError) {
 	var err error
-	lms.TileHeight, err = utils.SanitizeFloat(c.FormValue("tile_height"))
+	data.TileHeight, err = utils.SanitizeFloat(c.FormValue("tile_height"))
 	if err != nil {
-		return nil, errors.NewValidationError("invalid tile height: %v", err)
+		ierr := errors.NewInputError("tile_height", fmt.Sprintf("invalid tile height: %v", err))
+		ierrs = append(ierrs, ierr)
 	}
 
-	lms.Value, err = utils.SanitizeFloat(c.FormValue("value"))
+	data.Value, err = utils.SanitizeFloat(c.FormValue("value"))
 	if err != nil {
-		return nil, errors.NewValidationError("invalid value: %v", err)
+		ierr := errors.NewInputError("value", fmt.Sprintf("invalid value: %v", err))
+		ierrs = append(ierrs, ierr)
 	}
 
-	lms.MarkeHeight, err = utils.SanitizeInt(c.FormValue("marke_height"))
+	data.MarkeHeight, err = utils.SanitizeInt(c.FormValue("marke_height"))
 	if err != nil {
-		return nil, errors.NewValidationError("invalid marke height: %v", err)
+		ierr := errors.NewInputError("marke_height", fmt.Sprintf("invalid marke height: %v", err))
+		ierrs = append(ierrs, ierr)
 	}
 
-	lms.STF, err = utils.SanitizeFloat(c.FormValue("stf"))
+	data.STF, err = utils.SanitizeFloat(c.FormValue("stf"))
 	if err != nil {
-		return nil, errors.NewValidationError("invalid STF value: %v", err)
+		ierr := errors.NewInputError("stf", fmt.Sprintf("invalid STF value: %v", err))
+		ierrs = append(ierrs, ierr)
 	}
 
-	lms.STFMax, err = utils.SanitizeFloat(c.FormValue("stf_max"))
+	data.STFMax, err = utils.SanitizeFloat(c.FormValue("stf_max"))
 	if err != nil {
-		return nil, errors.NewValidationError("invalid STF max value: %v", err)
+		ierr := errors.NewInputError("stf_max", fmt.Sprintf("invalid STF max value: %v", err))
+		ierrs = append(ierrs, ierr)
 	}
 
-	switch v := shared.MachineType(utils.SanitizeText(c.FormValue("identifier"))); v {
+	switch v := shared.MachineType(utils.SanitizeText(c.FormValue("machine_type"))); v {
 	case shared.MachineTypeSACMI, shared.MachineTypeSITI:
-		lms.Identifier = v
+		data.Identifier = v
 	default:
-		return nil, errors.NewValidationError("identifier must be either 'SACMI' or 'SITI'")
+		ierr := errors.NewInputError("machine_type", fmt.Sprintf("invalid machine type machine_type: %v", v))
+		ierrs = append(ierrs, ierr)
 	}
 
-	return lms, nil
+	return
+}
+
+type renderProps struct {
+	c     echo.Context
+	Open  bool
+	Error []*errors.InputError
+}
+
+func reRenderNewUpperMetalSheetDialog(data UpperMetalSheetFormData, prop renderProps) *echo.HTTPError {
+	// TODO: ...
+}
+
+func reRenderNewLowerMetalSheetDialog(data UpperMetalSheetFormData, prop renderProps) *echo.HTTPError {
+	// TODO: ...
+}
+
+func reRenderEditUpperMetalSheetDialog(msID shared.EntityID, data UpperMetalSheetFormData, prop renderProps) *echo.HTTPError {
+	// TODO: ...
+}
+
+func reRenderEditLowerMetalSheetDialog(msID shared.EntityID, data UpperMetalSheetFormData, prop renderProps) *echo.HTTPError {
+	// TODO: ...
 }
