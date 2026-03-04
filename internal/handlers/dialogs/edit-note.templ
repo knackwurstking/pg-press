@@ -4,21 +4,75 @@ import (
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/button"
+	"github.com/knackwurstking/pg-press/internal/components/dialog"
+	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/knackwurstking/ui/pkg/css"
 )
 
-templ NewNoteDialog(linked string, user *shared.User) {
-	@components.FormDialog("notes-dialog", http.MethodPost, urlb.DialogEditNote(0, linked)) {
-		@noteLevelSelect(0)
-		@noteContent("")
-		@displayLinkedTables(linked, user)
-		@components.FormDialogFooter("Abbrechen", "Erstellen")
+type NoteFormData struct {
+	Level   shared.NoteLevel
+	Content string
+	Linked  string
+}
+
+type NoteDialogProps struct {
+	NoteFormData
+	User      *shared.User
+	Open, OOB bool
+	Error     []*errors.InputError
+}
+
+templ NewNoteDialog(props ...NoteDialogProps) {
+	{{
+		prop := NoteDialogProps{}
+		if len(props) > 0 {
+			prop = props[0]
+		}
+
+		attr := templ.Attributes{}
+		if prop.OOB {
+			attr["hx-swap-oob"] = "true"
+		}
+	}}
+	@dialog.Dialog(dialog.Props{
+		ID:               NewNoteDialogID,
+		DisableClickAway: true,
+		DisableESC:       true,
+		Open:             prop.Open,
+		Attributes:       attr,
+	}) {
+		@dialog.Content() {
+			@dialog.Header() {
+				Neue Notiz
+			}
+			@renderDialogError(prop.Error)
+			<form
+				hx-post={ urlb.DialogEditNote(0, prop.Linked) }
+				hx-trigger="submit"
+				hx-on::response-error="alert(event.detail.xhr.responseText)"
+				enctype="multipart/form-data"
+			>
+				@noteLevelSelect(0)
+				@noteContent("")
+				@displayLinkedTables(prop.Linked, prop.User)
+				@dialog.Footer() {
+					@button.Button(button.Props{
+						Type: button.TypeSubmit,
+					}) {
+						Erstellen
+					}
+				}
+			</form>
+		}
 	}
 }
 
+// TODO: Migrate...
 templ EditNoteDialog(note *shared.Note, linked string, user *shared.User) {
+	// -------------------------------------------------------------------------
 	@components.FormDialog("notes-edit-dialog", http.MethodPut, urlb.DialogEditNote(note.ID, linked)) {
 		@noteLevelSelect(note.Level)
 		@noteContent(note.Content)
