@@ -57,6 +57,7 @@ templ NewNoteDialog(props ...NoteDialogProps) {
 				hx-trigger="submit"
 				hx-on::response-error="alert(event.detail.xhr.responseText)"
 				enctype="multipart/form-data"
+				class="space-y-4"
 			>
 				@noteLevelSelect(prop.Level)
 				@noteContent(prop.Content)
@@ -102,6 +103,7 @@ templ EditNoteDialog(noteID shared.EntityID, props ...NoteDialogProps) {
 				hx-trigger="submit"
 				hx-on::response-error="alert(event.detail.xhr.responseText)"
 				enctype="multipart/form-data"
+				class="space-y-4"
 			>
 				@noteLevelSelect(prop.Level)
 				@noteContent(prop.Content)
@@ -192,7 +194,7 @@ templ displayLinkedTables(linked string, user *shared.User) {
 		{{ return }}
 	}
 	@form.Item() {
-		@components.Title(components.TitleLevel3, "Verknüpfte Tabellen")
+		@components.Title(components.TitleLevel6, "Verknüpfte Tabellen")
 		@checkbox.Checkbox(checkbox.Props{
 			ID:      "linked",
 			Name:    "linked",

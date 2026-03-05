@@ -52,13 +52,21 @@ templ Page(p *PageProps) {
 			} else {
 				@CyclesSection(false, p.Tool.ID)
 			}
-			// Dialogs
-			if p.Tool.IsCassette() {
-				@dialogs.EditCassetteDialog(0)
-			} else {
-				@dialogs.EditToolDialog(0)
-			}
 		</main>
+		@dialogs.NewNoteDialog()
+		@dialogs.EditNoteDialog(0)
+		@dialogs.NewUpperMetalSheetDialog()
+		@dialogs.NewLowerMetalSheetDialog()
+		@dialogs.EditUpperMetalSheetDialog(0)
+		@dialogs.EditLowerMetalSheetDialog(0)
+		@dialogs.NewCycleDialog()
+		@dialogs.EditCycleDialog(0)
+		// Dialogs
+		if p.Tool.IsCassette() {
+			@dialogs.EditCassetteDialog(0)
+		} else {
+			@dialogs.EditToolDialog(0)
+		}
 	}
 }
 

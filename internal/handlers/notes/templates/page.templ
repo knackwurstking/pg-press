@@ -2,6 +2,7 @@ package templates
 
 import (
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/handlers/dialogs"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 )
@@ -25,6 +26,7 @@ templ Page(notes []*shared.Note, tools []*shared.Tool) {
 				@NotesGrid(notes, tools)
 			}
 		</main>
+		@dialogs.EditNoteDialog(0)
 	}
 }
 

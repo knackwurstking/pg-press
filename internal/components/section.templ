@@ -27,7 +27,7 @@ templ SectionTitleAction(p SectionTitleActionProps) {
 	@button.Button(button.Props{
 		Variant: button.VariantGhost,
 		Attributes: templ.Attributes{
-			"hx-get":                p.Url,
+			"hx-get":                string(p.Url),
 			"hx-trigger":            "click",
 			"hx-target":             "body",
 			"hx-swap":               "beforeend",
