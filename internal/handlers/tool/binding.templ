@@ -1,6 +1,7 @@
 package tool
 
 import (
+	"fmt"
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/components/button"
 	"github.com/knackwurstking/pg-press/internal/components/selectbox"
@@ -76,12 +77,20 @@ templ BindingSection(props BindingSectionProps) {
 					}
 				}}
 				if bindingTool != nil {
-					@components.CassetteAnchor(
-						components.CassetteAnchorProps{
-							Cassette:    bindingTool,
-							BindingTool: props.Tool,
-						},
-					)
+					@button.Button(button.Props{
+						ID:      fmt.Sprintf("cassette-%d-link", bindingTool.ID),
+						Class:   "tool-item w-full h-fit relative",
+						Variant: button.VariantOutline,
+						Href:    string(urlb.Tool(bindingTool.ID)),
+					}) {
+						@components.CassetteAnchor(
+							components.CassetteAnchorProps{
+								Cassette:     bindingTool,
+								BindingTool:  props.Tool,
+								EnableBadges: true,
+							},
+						)
+					}
 				} else {
 					@components.NotFoundText("Binding tool not available")
 				}
