@@ -1,9 +1,6 @@
 package dialogs
 
 import (
-	"net/http"
-
-	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/components/button"
 	"github.com/knackwurstking/pg-press/internal/components/dialog"
 	"github.com/knackwurstking/pg-press/internal/errors"
@@ -55,8 +52,8 @@ templ NewNoteDialog(props ...NoteDialogProps) {
 				hx-on::response-error="alert(event.detail.xhr.responseText)"
 				enctype="multipart/form-data"
 			>
-				@noteLevelSelect(0)
-				@noteContent("")
+				@noteLevelSelect(prop.Level)
+				@noteContent(prop.Content)
 				@displayLinkedTables(prop.Linked, prop.User)
 				@dialog.Footer() {
 					@button.Button(button.Props{
@@ -70,17 +67,52 @@ templ NewNoteDialog(props ...NoteDialogProps) {
 	}
 }
 
-// TODO: Migrate...
-templ EditNoteDialog(note *shared.Note, linked string, user *shared.User) {
-	// -------------------------------------------------------------------------
-	@components.FormDialog("notes-edit-dialog", http.MethodPut, urlb.DialogEditNote(note.ID, linked)) {
-		@noteLevelSelect(note.Level)
-		@noteContent(note.Content)
-		@displayLinkedTables(linked, user)
-		@components.FormDialogFooter("Abbrechen", "Aktualisieren")
+templ EditNoteDialog(noteID shared.EntityID, props ...NoteDialogProps) {
+	{{
+		prop := NoteDialogProps{}
+		if len(props) > 0 {
+			prop = props[0]
+		}
+
+		attr := templ.Attributes{}
+		if prop.OOB {
+			attr["hx-swap-oob"] = "true"
+		}
+	}}
+	@dialog.Dialog(dialog.Props{
+		ID:               NewEditNoteDialogID,
+		DisableClickAway: true,
+		DisableESC:       true,
+		Open:             prop.Open,
+		Attributes:       attr,
+	}) {
+		@dialog.Content() {
+			@dialog.Header() {
+				Notiz bearbeiten
+			}
+			@renderDialogError(prop.Error)
+			<form
+				hx-post={ urlb.DialogEditNote(noteID, prop.Linked) }
+				hx-trigger="submit"
+				hx-on::response-error="alert(event.detail.xhr.responseText)"
+				enctype="multipart/form-data"
+			>
+				@noteLevelSelect(prop.Level)
+				@noteContent(prop.Content)
+				@displayLinkedTables(prop.Linked, prop.User)
+				@dialog.Footer() {
+					@button.Button(button.Props{
+						Type: button.TypeSubmit,
+					}) {
+						Aktualisieren
+					}
+				}
+			</form>
+		}
 	}
 }
 
+// TODO: Migrate
 templ noteLevelSelect(level shared.NoteLevel) {
 	<label
 		for="level"
@@ -104,6 +136,7 @@ templ noteLevelSelect(level shared.NoteLevel) {
 	</label>
 }
 
+// TODO: Migrate
 templ noteContent(content string) {
 	<label
 		for="content"
@@ -120,6 +153,7 @@ templ noteContent(content string) {
 	</label>
 }
 
+// TODO: Migrate
 templ displayLinkedTables(linked string, user *shared.User) {
 	if linked != "" {
 		<div
