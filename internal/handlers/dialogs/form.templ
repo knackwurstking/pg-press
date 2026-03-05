@@ -12,6 +12,76 @@ import (
 	"time"
 )
 
+type formProps struct {
+	Title, ID string
+	Required  bool
+}
+
+templ formDate(date shared.UnixMilli, fp formProps, ierrs ...*errors.InputError) {
+	{{
+		var filteredErrors []*errors.InputError
+		for _, e := range ierrs {
+			if e != nil && e.InputID == fp.ID {
+				filteredErrors = append(filteredErrors, e)
+			}
+		}
+
+		if date == 0 {
+			date = shared.NewUnixMilli(time.Now())
+		}
+	}}
+	@components.Section(nil) {
+		@form.Item() {
+			@form.Label(form.LabelProps{
+				For: fp.ID,
+			}) {
+				{ fp.Title }
+			}
+			@input.Input(input.Props{
+				ID:    fp.ID,
+				Class: "w-fit",
+				Name:  fp.ID,
+				Type:  input.TypeDate,
+				Value: fmt.Sprintf("%s", date),
+				Attributes: templ.Attributes{
+					"required": fp.Required,
+				},
+				HasError: len(filteredErrors) > 0,
+			})
+			@renderFormError(filteredErrors, fp.ID)
+		}
+	}
+}
+
+templ formString(value string, fp formProps, ierrs ...*errors.InputError) {
+	{{
+		var filteredErrors []*errors.InputError
+		for _, err := range ierrs {
+			if err.InputID == fp.ID {
+				filteredErrors = append(filteredErrors, err)
+			}
+		}
+	}}
+	@form.Item() {
+		@form.Label(form.LabelProps{
+			For: fp.ID,
+		}) {
+			{ fp.Title }
+		}
+		@input.Input(input.Props{
+			ID:    fp.ID,
+			Name:  fp.ID,
+			Type:  input.TypeText,
+			Value: value,
+			Attributes: templ.Attributes{
+				"required": fp.Required,
+			},
+			HasError: len(filteredErrors) > 0,
+		})
+		@renderFormError(ierrs, fp.ID)
+	}
+}
+
 templ formCycleToolChange(toolID shared.EntityID, tools []*shared.Tool, ierrs ...*errors.InputError) {
 	{{
 		// Filter out errors for "tool_id" input
@@ -115,75 +185,6 @@ templ formPressSelection(pressID shared.EntityID, presses []*shared.Press, ierrs
 			}
 			@renderFormError(filteredErrors, "press_id")
 		}
-	}
-}
-
-type formProps struct {
-	Title, ID string
-}
-
-templ formDate(fp formProps, date shared.UnixMilli, ierrs ...*errors.InputError) {
-	{{
-		var filteredErrors []*errors.InputError
-		for _, e := range ierrs {
-			if e != nil && e.InputID == fp.ID {
-				filteredErrors = append(filteredErrors, e)
-			}
-		}
-
-		if date == 0 {
-			date = shared.NewUnixMilli(time.Now())
-		}
-	}}
-	@components.Section(nil) {
-		@form.Item() {
-			@form.Label(form.LabelProps{
-				For: fp.ID,
-			}) {
-				{ fp.Title }
-			}
-			@input.Input(input.Props{
-				ID:    fp.ID,
-				Class: "w-fit",
-				Name:  fp.ID,
-				Type:  input.TypeDate,
-				Value: fmt.Sprintf("%s", date),
-				Attributes: templ.Attributes{
-					"required": true,
-				},
-				HasError: len(filteredErrors) > 0,
-			})
-			@renderFormError(filteredErrors, fp.ID)
-		}
-	}
-}
-
-templ formCode(code string, ierrs ...*errors.InputError) {
-	{{
-		var filteredErrors []*errors.InputError
-		for _, err := range ierrs {
-			if err.InputID == "code" {
-				filteredErrors = append(filteredErrors, err)
-			}
-		}
-	}}
-	@form.Item() {
-		@form.Label(form.LabelProps{
-			For: "code",
-		}) {
-			Code
-		}
-		@input.Input(input.Props{
-			ID:    "code",
-			Name:  "code",
-			Type:  input.TypeText,
-			Value: code,
-			Attributes: templ.Attributes{
-				"required": true,
-			},
-			HasError: len(filteredErrors) > 0,
-		})
-		@renderFormError(ierrs, "code")
 	}
 }
 

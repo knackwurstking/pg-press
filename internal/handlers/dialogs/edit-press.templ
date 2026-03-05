@@ -129,7 +129,7 @@ templ pressContent(props PressFormData, ierrs ...*errors.InputError) {
 		@formMachineType(props.Type, ierrs...)
 	}
 	<br/>
-	@formCode(props.Code, ierrs...)
+	@formString(props.Code, formProps{"Code", "code", true}, ierrs...)
 	<br/>
 	@formCyclesOffset(props.CyclesOffset, ierrs...)
 }
