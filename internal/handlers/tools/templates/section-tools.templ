@@ -30,6 +30,64 @@ templ SectionTools(p SectionToolsProps) {
 		hx-target="#tool-tab-content"
 	></span>
 	@inputFilterTools(p.Tools)
+	<script name="tools-filter">
+		function filterToolsList(event, skipHistory) {
+			console.debug("Filtering tools list...", event, { skipHistory });
+
+			var target = event
+				? event.currentTarget
+				: document.querySelector(`#tools-filter`);
+			if (!target) return;
+
+			var query = target.value
+				.toLowerCase()
+				.split(" ")
+				.filter((v) => !!v);
+			var targets = document.querySelectorAll(
+				`#tools-container .tool-item`,
+			);
+
+			if (!skipHistory) {
+				var urlParams = new URLSearchParams(window.location.search);
+				urlParams.set("tools_filter", query.join(" "));
+				window.history.replaceState({}, "", `?${urlParams.toString()}`);
+			}
+
+			if (query.length === 0) {
+				console.debug("Empty query, showing all tools", { targets });
+				targets.forEach((child) => {
+					child.classList.remove("hidden");
+				});
+				return;
+			}
+
+			console.debug("Filtering with query:", query, { targets: targets.length });
+			targets.forEach((child) => {
+				var match = query.every((value) =>
+					child.textContent.toLowerCase().includes(value),
+				);
+				if (match) {
+					child.classList.remove("hidden");
+					return;
+				}
+				child.classList.add("hidden");
+			});
+		}
+
+		(() => {
+			var urlParams = new URLSearchParams(window.location.search);
+
+			var query = urlParams.get("tools_filter");
+			if (query) {
+				console.debug("Restoring tools filter from URL:", query);
+
+				var el = document.querySelector(`input#tools-filter`);
+				if (el) {
+					el.value = query;
+				}
+			}
+		})();
+	</script>
 	@components.ActionBar() {
 		@button.Button(button.Props{
 			Size: button.SizeSm,
@@ -63,60 +121,6 @@ templ SectionTools(p SectionToolsProps) {
 	</div>
 	@dialogs.NewCassetteDialog()
 	@dialogs.NewToolDialog()
-	<script name="tools-filter">
-		function filterToolsList(event, skipHistory) {
-			var target = event
-				? event.currentTarget
-				: document.querySelector(`#tools-filter`);
-			if (!target) return;
-
-			var query = target.value
-				.toLowerCase()
-				.split(" ")
-				.filter((v) => !!v);
-			var targets = document.querySelectorAll(
-				`#tools-container .tool-item`,
-			);
-
-			if (!skipHistory) {
-				var urlParams = new URLSearchParams(window.location.search);
-				urlParams.set("tools_filter", query.join(" "));
-				window.history.replaceState({}, "", `?${urlParams.toString()}`);
-			}
-
-			if (query.length === 0) {
-				targets.forEach((child) => {
-					child.classList.remove("hidden");
-				});
-				return;
-			}
-
-			targets.forEach((child) => {
-				var match = query.every((value) =>
-					child.textContent.toLowerCase().includes(value),
-				);
-				if (match) {
-					child.classList.remove("hidden");
-					return;
-				}
-				child.classList.add("hidden");
-			});
-		}
-
-		(() => {
-			var urlParams = new URLSearchParams(window.location.search);
-
-			var query = urlParams.get("tools_filter");
-			if (query) {
-				console.debug("Restoring tools filter from URL:", query);
-
-				var el = document.querySelector(`input#tools-filter`);
-				if (el) {
-					el.value = query;
-				}
-			}
-		})();
-	</script>
 }
 
 templ ToolsList(p SectionToolsProps) {
@@ -130,7 +134,7 @@ templ ToolsList(p SectionToolsProps) {
 				}
 				@button.Button(button.Props{
 					ID:      fmt.Sprintf("tool-%d-link", t.ID),
-					Class:   "tool-item h-fit relative",
+					Class:   "tool-item h-fit relative hidden",
 					Variant: button.VariantOutline,
 					Href:    string(urlb.Tool(t.ID)),
 				}) {
@@ -175,7 +179,7 @@ templ ToolsList(p SectionToolsProps) {
 			for _, c := range p.Cassettes {
 				@button.Button(button.Props{
 					ID:      fmt.Sprintf("cassette-%d-link", c.ID),
-					Class:   "tool-item h-fit relative",
+					Class:   "tool-item h-fit relative hidden",
 					Variant: button.VariantOutline,
 					Href:    string(urlb.Tool(c.ID)),
 				}) {
@@ -206,6 +210,15 @@ templ ToolsList(p SectionToolsProps) {
 			}
 		</div>
 	}
+	<script>
+		// Get value from filter input
+		var el = document.querySelector(`input#tools-filter`);
+		if (el) {
+			setTimeout(() => {
+				filterToolsList({ currentTarget: el }, true);
+			}, 50)
+		}
+	</script>
 }
 
 templ inputFilterTools(tools []*shared.Tool) {
@@ -218,7 +231,7 @@ templ inputFilterTools(tools []*shared.Tool) {
 		@input.Input(input.Props{
 			ID:          "tools-filter",
 			Name:        "tools-filter",
-			Type:        "search",
+			Type:        input.TypeSearch,
 			Placeholder: "Ex.: 100x g01",
 			Attributes: templ.Attributes{
 				"hx-preserve": "true",
