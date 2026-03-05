@@ -1,8 +1,11 @@
 package dialogs
 
 import (
+	"fmt"
 	"github.com/knackwurstking/pg-press/internal/components/button"
 	"github.com/knackwurstking/pg-press/internal/components/dialog"
+	"github.com/knackwurstking/pg-press/internal/components/form"
+	"github.com/knackwurstking/pg-press/internal/components/selectbox"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
@@ -112,28 +115,45 @@ templ EditNoteDialog(noteID shared.EntityID, props ...NoteDialogProps) {
 	}
 }
 
-// TODO: Migrate
 templ noteLevelSelect(level shared.NoteLevel) {
-	<label
-		for="level"
-		class={ css.Flex, css.FlexCol }
-	>
-		Priorität
-		<select id="level" name="level" required>
-			<option value="0" selected?={ level == 0 }>
-				Normal
-			</option>
-			<option value="1" selected?={ level == 1 }>
-				Info
-			</option>
-			<option value="2" selected?={ level == 2 }>
-				Achtung
-			</option>
-			<option value="3" selected?={ level == 3 }>
-				Defekt
-			</option>
-		</select>
-	</label>
+	@form.Item() {
+		@form.Label() {
+			Priorität
+		}
+		@selectbox.SelectBox(selectbox.Props{}) {
+			@selectbox.Trigger() {
+				@selectbox.Value(selectbox.ValueProps{
+					Placeholder: "Priorität auswählen",
+				})
+			}
+			@selectbox.Content(selectbox.ContentProps{
+				NoSearch: true,
+			}) {
+				{{
+					levels := []shared.NoteLevel{
+						shared.LevelNormal, shared.LevelInfo, shared.LevelAttention, shared.LevelBroken,
+					}
+				}}
+				for _, l := range levels {
+					@selectbox.Item(selectbox.ItemProps{
+						Value:    fmt.Sprintf("%d", l),
+						Selected: level == l,
+					}) {
+						switch l {
+							case shared.LevelNormal:
+								Normal
+							case shared.LevelInfo:
+								Info
+							case shared.LevelAttention:
+								Achtung
+							case shared.LevelBroken:
+								Defekt
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 // TODO: Migrate
