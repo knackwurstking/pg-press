@@ -6,6 +6,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components/dialog"
 	"github.com/knackwurstking/pg-press/internal/components/form"
 	"github.com/knackwurstking/pg-press/internal/components/selectbox"
+	"github.com/knackwurstking/pg-press/internal/components/textarea"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
@@ -117,11 +118,19 @@ templ EditNoteDialog(noteID shared.EntityID, props ...NoteDialogProps) {
 
 templ noteLevelSelect(level shared.NoteLevel) {
 	@form.Item() {
-		@form.Label() {
+		@form.Label(form.LabelProps{
+			For: "level",
+		}) {
 			Priorität
 		}
 		@selectbox.SelectBox(selectbox.Props{}) {
-			@selectbox.Trigger() {
+			@selectbox.Trigger(selectbox.TriggerProps{
+				ID:   "level",
+				Name: "level",
+				Attributes: templ.Attributes{
+					"required": true,
+				},
+			}) {
 				@selectbox.Value(selectbox.ValueProps{
 					Placeholder: "Priorität auswählen",
 				})
@@ -156,21 +165,24 @@ templ noteLevelSelect(level shared.NoteLevel) {
 	}
 }
 
-// TODO: Migrate
 templ noteContent(content string) {
-	<label
-		for="content"
-		class={ css.Flex, css.FlexCol }
-	>
-		Inhalt
-		<textarea
-			name="content"
-			id="content"
-			placeholder="Notiz-Inhalt eingeben..."
-			rows="5"
-			required
-		>{ content }</textarea>
-	</label>
+	@form.Item() {
+		@form.Label(form.LabelProps{
+			For: "content",
+		}) {
+			Inhalt
+		}
+		@textarea.Textarea(textarea.Props{
+			ID:          "content",
+			Name:        "content",
+			Rows:        5,
+			Placeholder: "Notiz-Inhalt eingeben...",
+			Value:       content,
+			Attributes: templ.Attributes{
+				"required": true,
+			},
+		})
+	}
 }
 
 // TODO: Migrate
