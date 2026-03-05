@@ -3,7 +3,6 @@ package tool
 import (
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
-	"github.com/knackwurstking/pg-press/internal/handlers/tool/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/utils"
 
@@ -26,7 +25,7 @@ func GetToolPage(c echo.Context) *echo.HTTPError {
 		return merr.WrapEcho("could not get tool by ID")
 	}
 
-	t := templates.Page(&templates.PageProps{
+	t := Page(&PageProps{
 		Tool: tool,
 		User: user,
 	})

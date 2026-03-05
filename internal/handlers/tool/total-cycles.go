@@ -3,7 +3,6 @@ package tool
 import (
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
-	"github.com/knackwurstking/pg-press/internal/handlers/tool/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/utils"
 
@@ -20,7 +19,7 @@ func GetToolTotalCycles(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	t := templates.TotalCycles(totalCycles, utils.GetQueryBool(c, "input"))
+	t := TotalCycles(totalCycles, utils.GetQueryBool(c, "input"))
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "TotalCycles")

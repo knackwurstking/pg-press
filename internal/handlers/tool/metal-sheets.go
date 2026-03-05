@@ -5,7 +5,6 @@ import (
 
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
-	"github.com/knackwurstking/pg-press/internal/handlers/tool/templates"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/utils"
 
@@ -40,7 +39,7 @@ func GetToolMetalSheets(c echo.Context) *echo.HTTPError {
 			return merr.Echo()
 		}
 
-		t = templates.LowerMetalSheets(metalSheets, tool, user)
+		t = LowerMetalSheets(metalSheets, tool, user)
 		err := t.Render(c.Request().Context(), c.Response())
 		if err != nil {
 			return errors.NewRenderError(err, "LowerMetalSheets")
@@ -54,7 +53,7 @@ func GetToolMetalSheets(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	t = templates.UppperMetalSheets(metalSheets, tool, user)
+	t = UppperMetalSheets(metalSheets, tool, user)
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "LowerMetalSheets")
