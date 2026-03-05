@@ -26,7 +26,6 @@ func Register(e *echo.Echo, path string) {
 		// Edit note dialog
 		ui.NewEchoRoute(http.MethodGet, path+"/edit-note", GetEditNote),
 		ui.NewEchoRoute(http.MethodPost, path+"/edit-note", PostNote),
-		ui.NewEchoRoute(http.MethodPut, path+"/edit-note", PutNote),
 
 		// Edit cycle dialog
 		ui.NewEchoRoute(http.MethodGet, path+"/edit-cycle", GetEditCycle),
