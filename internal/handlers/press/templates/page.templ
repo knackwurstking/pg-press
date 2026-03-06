@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/components/icon"
+	"github.com/knackwurstking/pg-press/internal/handlers/dialogs"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/knackwurstking/ui/pkg/css"
@@ -31,6 +32,7 @@ templ Page(p PageProps) {
 			@sectionMetalSheets(p)
 			@sectionCycles(p)
 		</main>
+		@dialogs.EditCycleDialog(0)
 	}
 }
 

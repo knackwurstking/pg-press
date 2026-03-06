@@ -75,6 +75,7 @@ templ NewUpperMetalSheetDialog(props ...UpperMetalSheetDialogProps) {
 				hx-trigger="submit"
 				hx-on::response-error="alert(event.detail.xhr.responseText)"
 				enctype="multipart/form-data"
+				class="space-y-4"
 			>
 				@metalSheetContentPositionTop(prop.UpperMetalSheetFormData, prop.Error...)
 				@dialog.Footer() {
@@ -118,6 +119,7 @@ templ NewLowerMetalSheetDialog(props ...LowerMetalSheetDialogProps) {
 				hx-trigger="submit"
 				hx-on::response-error="alert(event.detail.xhr.responseText)"
 				enctype="multipart/form-data"
+				class="space-y-4"
 			>
 				@metalSheetContentPositionBottom(prop.LowerMetalSheetFormData, prop.Error...)
 				@dialog.Footer() {
@@ -161,6 +163,7 @@ templ EditUpperMetalSheetDialog(metalSheetID shared.EntityID, props ...UpperMeta
 				hx-trigger="submit"
 				hx-on::response-error="alert(event.detail.xhr.responseText)"
 				enctype="multipart/form-data"
+				class="space-y-4"
 			>
 				@metalSheetContentPositionTop(prop.UpperMetalSheetFormData, prop.Error...)
 				@dialog.Footer() {
@@ -204,6 +207,7 @@ templ EditLowerMetalSheetDialog(metalSheetID shared.EntityID, props ...LowerMeta
 				hx-trigger="submit"
 				hx-on::response-error="alert(event.detail.xhr.responseText)"
 				enctype="multipart/form-data"
+				class="space-y-4"
 			>
 				@metalSheetContentPositionBottom(prop.LowerMetalSheetFormData, prop.Error...)
 				@dialog.Footer() {

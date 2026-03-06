@@ -52,7 +52,9 @@ templ NewCycleDialog(props ...CycleDialogProps) {
 			<form
 				hx-post={ urlb.DialogEditCycle(0, prop.ToolID, false) }
 				hx-trigger="submit"
+				hx-on::response-error="alert(event.detail.xhr.responseText)"
 				enctype="multipart/form-data"
+				class="space-y-4"
 			>
 				@formCycleToolChange(prop.ToolID, prop.Tools, prop.Error...)
 				@formPressSelection(prop.PressID, prop.Presses, prop.Error...)
@@ -99,7 +101,9 @@ templ EditCycleDialog(cycleID shared.EntityID, props ...CycleDialogProps) {
 			<form
 				hx-post={ urlb.DialogEditCycle(cycleID, prop.ToolID, toolChangeMode) }
 				hx-trigger="submit"
+				hx-on::response-error="alert(event.detail.xhr.responseText)"
 				enctype="multipart/form-data"
+				class="space-y-4"
 			>
 				if toolChangeMode {
 					@formCycleToolChange(prop.ToolID, prop.Tools, prop.Error...)

@@ -54,7 +54,9 @@ templ NewCassetteDialog(props ...CassetteDialogProps) {
 			<form
 				hx-post={ urlb.DialogEditCassette(0) }
 				hx-trigger="submit"
+				hx-on::response-error="alert(event.detail.xhr.responseText)"
 				enctype="multipart/form-data"
+				class="space-y-4"
 			>
 				@toolFormat(prop.Width, prop.Height, prop.Error...)
 				<br/>
@@ -103,7 +105,9 @@ templ EditCassetteDialog(toolID shared.EntityID, props ...CassetteDialogProps) {
 			<form
 				hx-post={ urlb.DialogEditCassette(toolID) }
 				hx-trigger="submit"
+				hx-on::response-error="alert(event.detail.xhr.responseText)"
 				enctype="multipart/form-data"
+				class="space-y-4"
 			>
 				@toolFormat(prop.Width, prop.Height, prop.Error...)
 				<br/>

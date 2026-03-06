@@ -52,8 +52,10 @@ templ NewToolDialog(props ...ToolDialogProps) {
 			}
 			@renderDialogError(prop.Error)
 			<form
+				class="space-y-4"
 				hx-post={ urlb.DialogEditTool(0) }
 				hx-trigger="submit"
+				hx-on::response-error="alert(event.detail.xhr.responseText)"
 				enctype="multipart/form-data"
 			>
 				@toolPosition(prop.Position, prop.Error...)
@@ -101,8 +103,10 @@ templ EditToolDialog(toolID shared.EntityID, props ...ToolDialogProps) {
 			}
 			@renderDialogError(prop.Error)
 			<form
+				class="space-y-4"
 				hx-post={ urlb.DialogEditTool(toolID) }
 				hx-trigger="submit"
+				hx-on::response-error="alert(event.detail.xhr.responseText)"
 				enctype="multipart/form-data"
 			>
 				@toolPosition(prop.Position, prop.Error...)

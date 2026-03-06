@@ -50,8 +50,10 @@ templ NewPressDialog(props ...PressDialogProps) {
 			}
 			@renderDialogError(prop.Error)
 			<form
+				class="space-y-4"
 				hx-post={ urlb.DialogEditPress(-1) }
 				hx-trigger="submit"
+				hx-on::response-error="alert(event.detail.xhr.responseText)"
 				enctype="multipart/form-data"
 			>
 				@pressContent(prop.PressFormData, prop.Error...)
@@ -93,8 +95,10 @@ templ EditPressDialog(pressID shared.EntityID, props ...PressDialogProps) {
 			}
 			@renderDialogError(prop.Error)
 			<form
+				class="space-y-4"
 				hx-post={ urlb.DialogEditPress(pressID) }
 				hx-trigger="submit"
+				hx-on::response-error="alert(event.detail.xhr.responseText)"
 				enctype="multipart/form-data"
 			>
 				@pressContent(prop.PressFormData, prop.Error...)

@@ -53,11 +53,11 @@ templ NewNoteDialog(props ...NoteDialogProps) {
 			}
 			@renderDialogError(prop.Error)
 			<form
+				class="space-y-4"
 				hx-post={ urlb.DialogEditNote(0, prop.Linked) }
 				hx-trigger="submit"
 				hx-on::response-error="alert(event.detail.xhr.responseText)"
 				enctype="multipart/form-data"
-				class="space-y-4"
 			>
 				@noteLevelSelect(prop.Level)
 				@noteContent(prop.Content)
@@ -99,11 +99,11 @@ templ EditNoteDialog(noteID shared.EntityID, props ...NoteDialogProps) {
 			}
 			@renderDialogError(prop.Error)
 			<form
+				class="space-y-4"
 				hx-post={ urlb.DialogEditNote(noteID, prop.Linked) }
 				hx-trigger="submit"
 				hx-on::response-error="alert(event.detail.xhr.responseText)"
 				enctype="multipart/form-data"
-				class="space-y-4"
 			>
 				@noteLevelSelect(prop.Level)
 				@noteContent(prop.Content)
