@@ -1,7 +1,7 @@
 package dialogs
 
 import (
-	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/button"
 	"github.com/knackwurstking/pg-press/internal/components/dialog"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -54,7 +54,9 @@ templ NewToolRegenerationDialog(props ...ToolRegenerationDialogProps) {
 				@formDate(prop.Start, formProps{"Start", "start", true}, prop.Error...)
 				@formDate(prop.Stop, formProps{"Stop", "stop", true}, prop.Error...)
 				@dialog.Footer() {
-					@components.Button() {
+					@button.Button(button.Props{
+						Type: button.TypeSubmit,
+					}) {
 						Erstellen
 					}
 				}
@@ -97,7 +99,9 @@ templ EditToolRegenerationDialog(trID shared.EntityID, props ...ToolRegeneration
 				@formDate(prop.Start, formProps{"Start", "start", true}, prop.Error...)
 				@formDate(prop.Stop, formProps{"Stop", "stop", true}, prop.Error...)
 				@dialog.Footer() {
-					@components.Button() {
+					@button.Button(button.Props{
+						Type: button.TypeSubmit,
+					}) {
 						Aktualisieren
 					}
 				}
