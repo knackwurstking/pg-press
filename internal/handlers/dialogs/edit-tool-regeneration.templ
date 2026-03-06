@@ -1,53 +1,107 @@
 package dialogs
 
 import (
-	"net/http"
-
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/dialog"
+	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
-	"github.com/knackwurstking/ui/pkg/css"
 )
 
-templ NewToolRegenerationDialog(toolID shared.EntityID) {
-	@components.FormDialog("tool-regeneration-dialog", http.MethodPost, urlb.DialogEditToolRegenerationPost(toolID)) {
-		@toolRegenerationContent(0, 0)
-		@components.FormDialogFooter("Abbrechen", "Erstellen")
+type ToolRegenerationFormData struct {
+	ToolID shared.EntityID
+	Start  shared.UnixMilli
+	Stop   shared.UnixMilli
+}
+
+type ToolRegenerationDialogProps struct {
+	ToolRegenerationFormData
+	Open, OOB bool
+	Error     []*errors.InputError
+}
+
+templ NewToolRegenerationDialog(props ...ToolRegenerationDialogProps) {
+	{{
+		prop := ToolRegenerationDialogProps{}
+		if len(props) > 0 {
+			prop = props[0]
+		}
+
+		attr := templ.Attributes{}
+		if prop.OOB {
+			attr["hx-swap-oob"] = "true"
+		}
+	}}
+	@dialog.Dialog(dialog.Props{
+		ID:               NewToolRegenerationDialogID,
+		DisableClickAway: true,
+		DisableESC:       true,
+		Open:             prop.Open,
+		Attributes:       attr,
+	}) {
+		@dialog.Content() {
+			@dialog.Header() {
+				Neuer Werkzeug Regenerierung
+			}
+			@renderDialogError(prop.Error)
+			<form
+				hx-post={ urlb.DialogEditToolRegenerationPost(prop.ToolID) }
+				hx-trigger="submit"
+				hx-on::response-error="alert(event.detail.xhr.responseText)"
+				enctype="multipart/form-data"
+				class="space-y-4"
+			>
+				@formDate(prop.Start, formProps{"Start", "start", true}, prop.Error...)
+				@formDate(prop.Stop, formProps{"Stop", "stop", true}, prop.Error...)
+				@dialog.Footer() {
+					@components.Button() {
+						Erstellen
+					}
+				}
+			</form>
+		}
 	}
 }
 
-templ EditToolRegenerationDialog(tr *shared.ToolRegeneration) {
-	@components.FormDialog("tool-regeneration-dialog", http.MethodPut, urlb.DialogEditToolRegenerationPut(tr.ID)) {
-		@toolRegenerationContent(tr.Start, tr.Stop)
-		@components.FormDialogFooter("Abbrechen", "Aktualisieren")
-	}
-}
+templ EditToolRegenerationDialog(trID shared.EntityID, props ...ToolRegenerationDialogProps) {
+	{{
+		prop := ToolRegenerationDialogProps{}
+		if len(props) > 0 {
+			prop = props[0]
+		}
 
-templ toolRegenerationContent(start, stop shared.UnixMilli) {
-	<span
-		class={ css.Flex, css.FlexRow, css.Gap, css.JustifyEvenly, css.ItemsStart }
-	>
-		<span class={ css.Flex, css.FlexCol }>
-			<label for="start">Start</label>
-			<input
-				id="start"
-				name="start"
-				class={ css.WFit }
-				type="date"
-				value={ start }
-				required
-			/>
-		</span>
-		<span class={ css.Flex, css.FlexCol }>
-			<label for="start">Stop</label>
-			<input
-				id="start"
-				name="start"
-				class={ css.WFit }
-				type="date"
-				value={ stop }
-				required
-			/>
-		</span>
-	</span>
+		attr := templ.Attributes{}
+		if prop.OOB {
+			attr["hx-swap-oob"] = "true"
+		}
+	}}
+	@dialog.Dialog(dialog.Props{
+		ID:               EditToolRegenerationDialogID,
+		DisableClickAway: true,
+		DisableESC:       true,
+		Open:             prop.Open,
+		Attributes:       attr,
+	}) {
+		@dialog.Content() {
+			@dialog.Header() {
+				Werkzeug Regenerierung bearbeiten
+			}
+			@renderDialogError(prop.Error)
+			<form
+				hx-post={ urlb.DialogEditToolRegenerationPut(trID) }
+				hx-trigger="submit"
+				hx-on::response-error="alert(event.detail.xhr.responseText)"
+				enctype="multipart/form-data"
+				class="space-y-4"
+			>
+				@formDate(prop.Start, formProps{"Start", "start", true}, prop.Error...)
+				@formDate(prop.Stop, formProps{"Stop", "stop", true}, prop.Error...)
+				@dialog.Footer() {
+					@components.Button() {
+						Aktualisieren
+					}
+				}
+			</form>
+		}
+	}
 }
