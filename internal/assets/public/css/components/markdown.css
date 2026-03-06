@@ -1,0 +1,133 @@
+.markdown-content {
+	line-height: 1.6;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6 {
+	margin: 0.8em 0 0.4em 0;
+	font-weight: bold;
+	line-height: 1.3;
+}
+
+.markdown-content h1 {
+	font-size: 1.4em;
+}
+
+.markdown-content h2 {
+	font-size: 1.2em;
+}
+
+.markdown-content h3 {
+	font-size: 1.1em;
+}
+
+.markdown-content p {
+	margin: 0.5em 0 1em 0;
+}
+
+.markdown-content ul,
+.markdown-content li {
+	list-style: unset !important;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+	margin: 0.5em 0;
+	padding-left: 1.5em;
+	list-style: inherit;
+}
+
+.markdown-content ul {
+	list-style-type: disc;
+}
+
+.markdown-content ol {
+	list-style-type: decimal;
+}
+
+.markdown-content li {
+	margin: 0.25em 0;
+	display: list-item;
+}
+
+.markdown-content code {
+	font-size: 0.85em;
+	padding: 0.125em 0.25em;
+	border-radius: 2px;
+}
+
+.markdown-content pre {
+	margin: 1em 0;
+	padding: 1em;
+	border-radius: 4px;
+	overflow-x: auto;
+}
+
+.markdown-content strong {
+	font-weight: bold;
+}
+
+.markdown-content em {
+	font-style: italic;
+}
+
+.markdown-content u {
+	text-decoration: underline;
+}
+
+.markdown-content blockquote {
+	margin: 1em 0;
+	padding: 0.5em 1em;
+	border-left: 4px solid var(--markdown-border, #e5e7eb);
+}
+
+.markdown-content pre code {
+	display: block;
+	padding: 1em;
+	background: var(--markdown-muted, #f3f4f6);
+	color: var(--markdown-foreground, #6b7280);
+	border-radius: 4px;
+	overflow-x: auto;
+}
+
+.markdown-content del {
+	text-decoration: line-through;
+	color: var(--markdown-muted, #6b7280);
+}
+
+.markdown-content table {
+	width: 100%;
+	border-collapse: collapse;
+	margin: 1em 0;
+}
+
+.markdown-content th,
+.markdown-content td {
+	padding: 0.5em;
+	border: 1px solid var(--markdown-border, #e5e7eb);
+	text-align: left;
+}
+
+.markdown-content th {
+	background: var(--markdown-muted, #f3f4f6);
+	font-weight: 600;
+}
+
+.markdown-content ul.task-list {
+	list-style: none;
+	padding-left: 0;
+}
+
+.markdown-content ul.task-list li {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.5em;
+}
+
+.markdown-content ul.task-list input[type="checkbox"] {
+	margin-top: 0.25em;
+}

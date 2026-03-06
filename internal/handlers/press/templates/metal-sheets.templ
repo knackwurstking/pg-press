@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/shared"
-	"github.com/knackwurstking/ui/pkg/css"
 )
 
 type MetalSheetsProps struct {
@@ -25,17 +24,18 @@ templ metalSheetTables(p MetalSheetsProps) {
 
 templ metalSheetTableUpper(ums []*shared.UpperMetalSheet) {
 	<details
-		class={ css.MB }
 		if len(ums) > 0 {
 			open
 		}
 	>
-		<summary class={ css.CursorPointer, css.UserSelectNone }>
-			<h6 class={ css.Inline }>Oberteil / Kassette ({ fmt.Sprintf("%d", len(ums)) } Einträge)</h6>
+		<summary class="cursor-pointer select-none">
+			// TODO: Migrate
+			<h6>Oberteil / Kassette ({ fmt.Sprintf("%d", len(ums)) } Einträge)</h6>
 		</summary>
-		<div class={ css.MT }>
-			<figure class={ css.WFull, css.OverflowXScroll }>
-				<table class={ css.TableBorderless, css.TableCompact }>
+		<div>
+			<figure class="w-full overflow-x-auto">
+				// TODO: Migrate
+				<table>
 					<thead>
 						<tr>
 							<th>Stärke (mm)</th>
@@ -45,7 +45,7 @@ templ metalSheetTableUpper(ums []*shared.UpperMetalSheet) {
 					<tbody>
 						if len(ums) == 0 {
 							<tr>
-								<td colspan="2" class={ css.TextCenter }>
+								<td colspan="2" class="text-center">
 									@components.NotFoundText("Keine Bleche für Oberteil gefunden")
 								</td>
 							</tr>
@@ -66,17 +66,18 @@ templ metalSheetTableUpper(ums []*shared.UpperMetalSheet) {
 
 templ metalSheetTableBottom(lms []*shared.LowerMetalSheet) {
 	<details
-		class={ css.MB }
 		if len(lms) > 0 {
 			open
 		}
 	>
-		<summary class={ css.CursorPointer, css.UserSelectNone }>
-			<h6 class={ css.Inline }>Unterteil ({ fmt.Sprintf("%d", len(lms)) } Einträge)</h6>
+		<summary class="cursor-pointer select-none">
+			// TODO: Migrate...
+			<h6>Unterteil ({ fmt.Sprintf("%d", len(lms)) } Einträge)</h6>
 		</summary>
-		<div class={ css.MT }>
-			<figure class={ css.WFull, css.OverflowXScroll }>
-				<table class={ css.TableBorderless, css.TableCompact }>
+		<div>
+			<figure class="w-full overflow-x-auto">
+				// TODO: Migrate
+				<table>
 					<thead>
 						<tr>
 							<th>Stärke (mm)</th>
@@ -89,7 +90,7 @@ templ metalSheetTableBottom(lms []*shared.LowerMetalSheet) {
 					<tbody>
 						if len(lms) == 0 {
 							<tr>
-								<td colspan="5" class={ css.TextCenter }>
+								<td colspan="5" class="text-center">
 									@components.NotFoundText("Keine Bleche für Unterteil gefunden")
 								</td>
 							</tr>
@@ -102,21 +103,21 @@ templ metalSheetTableBottom(lms []*shared.LowerMetalSheet) {
 										if sheet.MarkeHeight > 0 {
 											{ fmt.Sprintf("%d", sheet.MarkeHeight) }
 										} else {
-											<span class={ css.Muted, css.Ghost }>-</span>
+											<span class="bg-muted text-muted-foreground">-</span>
 										}
 									</td>
 									<td>
 										if sheet.STF > 0 {
 											{ fmt.Sprintf("%.1f", sheet.STF) }
 										} else {
-											<span class={ css.Muted, css.Ghost }>-</span>
+											<span class="bg-muted text-muted-foreground">-</span>
 										}
 									</td>
 									<td>
 										if sheet.STFMax > 0 {
 											{ fmt.Sprintf("%.1f", sheet.STFMax) }
 										} else {
-											<span class={ css.Muted, css.Ghost }>-</span>
+											<span class="bg-muted text-muted-foreground">-</span>
 										}
 									</td>
 								</tr>

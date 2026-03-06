@@ -15,8 +15,6 @@ import (
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/knackwurstking/ui"
-	uicomponents "github.com/knackwurstking/ui/pkg/components"
-	"github.com/knackwurstking/ui/pkg/css"
 )
 
 type PageProps struct {
@@ -69,7 +67,6 @@ templ Page(props *PageProps) {
 				</form>
 			</div>
 		</main>
-		@uicomponents.MarkdownScript()
 	}
 }
 
@@ -86,7 +83,9 @@ templ pageNavContent(props *PageProps) {
 }
 
 templ pageAdditionalHead() {
+	<link rel="stylesheet" href={ ui.AssetURL(env.ServerPathPrefix, "/css/components/markdown.css") }/>
 	<script defer src={ ui.AssetURL(env.ServerPathPrefix, "/js/editor/main.js") }></script>
+	<script defer src={ ui.AssetURL(env.ServerPathPrefix, "/js/components/markdown.js") }></script>
 }
 
 templ hiddenFields(options *PageProps) {
@@ -268,7 +267,7 @@ templ fileUploadArea() {
 		ondragleave="handleDragLeave(event)"
 	>
 		@icon.CloudUpload()
-		<div class={ css.TextMedium, css.MB }>Bilder hochladen</div>
+		<div class="text-base">Bilder hochladen</div>
 		<div class="text-sm opacity-75">Klicken oder Dateien hierher ziehen</div>
 		@input.Input(input.Props{
 			ID:    "attachments",
