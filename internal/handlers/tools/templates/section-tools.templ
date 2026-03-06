@@ -8,7 +8,6 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/components/input"
 	"github.com/knackwurstking/pg-press/internal/components/label"
-	"github.com/knackwurstking/pg-press/internal/handlers/dialogs"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 )
@@ -119,8 +118,6 @@ templ SectionTools(p SectionToolsProps) {
 	<div id="tools-container" class="flex flex-col gap-4">
 		@ToolsList(p)
 	</div>
-	@dialogs.NewCassetteDialog()
-	@dialogs.NewToolDialog()
 }
 
 templ ToolsList(p SectionToolsProps) {
