@@ -53,16 +53,21 @@ templ Page(p *PageProps) {
 				@CyclesSection(false, p.Tool.ID)
 			}
 		</main>
+		// Notes
 		@dialogs.NewNoteDialog()
 		@dialogs.EditNoteDialog(0)
+		// Metal Sheets
 		@dialogs.NewUpperMetalSheetDialog()
 		@dialogs.NewLowerMetalSheetDialog()
 		@dialogs.EditUpperMetalSheetDialog(0)
 		@dialogs.EditLowerMetalSheetDialog(0)
-		// TODO: new/edit tool regeneration dialog(s)
+		// Tool Regenration
+		@dialogs.NewToolRegenerationDialog()
+		@dialogs.EditToolRegenerationDialog(0)
+		// Cycles
 		@dialogs.NewCycleDialog()
 		@dialogs.EditCycleDialog(0)
-		// Dialogs
+		// Tool/Cassette
 		if p.Tool.IsCassette() {
 			@dialogs.EditCassetteDialog(0)
 		} else {
