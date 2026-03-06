@@ -1,8 +1,21 @@
 package components
 
-import "github.com/knackwurstking/pg-press/internal/components/button"
+import (
+	"fmt"
+	"github.com/knackwurstking/pg-press/internal/components/button"
+)
 
 templ Section(attr templ.Attributes) {
+	{{
+		if attr == nil {
+			attr = templ.Attributes{}
+		}
+		if _, ok := attr["class"]; !ok {
+			attr["class"] = "space-y-4"
+		} else {
+			attr["class"] = fmt.Sprintf("%s space-y-4", attr["class"])
+		}
+	}}
 	<section { attr... }>
 		{ children... }
 	</section>
