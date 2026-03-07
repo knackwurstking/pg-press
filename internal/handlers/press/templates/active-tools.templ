@@ -56,11 +56,17 @@ templ toolSelection(
 		enctype="multipart/form-data"
 	>
 		@form.Item() {
-			@form.Label() {
+			{{ id := fmt.Sprintf("%s-tool-select", position) }}
+			@form.Label(form.LabelProps{
+				For: id,
+			}) {
 				{ position.German() }
 			}
 			@selectbox.SelectBox() {
-				@selectbox.Trigger() {
+				@selectbox.Trigger(selectbox.TriggerProps{
+					ID:   id,
+					Name: id,
+				}) {
 					@selectbox.Value(selectbox.ValueProps{
 						Placeholder: fmt.Sprintf("Wählen Sie ein %s", position.German()),
 					})

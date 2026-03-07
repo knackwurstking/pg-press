@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/form"
+	"github.com/knackwurstking/pg-press/internal/components/input"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
@@ -52,23 +54,28 @@ templ additionalHead() {
 	<script defer src={ ui.AssetURL(env.ServerPathPrefix, "/js/umbau/main.js") }></script>
 }
 
-// TODO: Migrate...
 templ cyclesSection() {
 	@components.Section() {
-		<span class="flex flex-col">
-			<label for="press-total-cycles">Gesamtzyklen:</label>
-			<input
-				type="number"
-				id="press-total-cycles"
-				name="press-total-cycles"
-				placeholder="Gesamtzyklen"
-				required
-			/>
-		</span>
+		@form.Item() {
+			{{ id := "press-total-cycles" }}
+			@form.Label(form.LabelProps{
+				For: id,
+			}) {
+				Gesamtzyklen:
+			}
+			@input.Input(input.Props{
+				ID:          id,
+				Name:        id,
+				Type:        input.TypeNumber,
+				Placeholder: "Gesamtzyklen",
+				Attributes: templ.Attributes{
+					"required": true,
+				},
+			})
+		}
 	}
 }
 
-// TODO: Migrate...
 templ toolSelection(position shared.Slot, current *shared.Tool, tools []*shared.Tool) {
 	@components.Section() {
 		@components.SectionTitle(components.TitleLevel5, fmt.Sprintf("%s", position.German()))
@@ -86,6 +93,7 @@ templ toolSelection(position shared.Slot, current *shared.Tool, tools []*shared.
 				id = "bottom"
 			}
 		}}
+		// TODO: Migrate...
 		<label for={ id } class="flex flex-col">
 			<span>Neues Werkzeug:</span>
 			<select

@@ -194,7 +194,9 @@ templ toolFormat(inputWidth int, inputHeight int, ierrs ...*errors.InputError) {
 		}
 	}}
 	@form.Item() {
-		@form.Label() {
+		@form.Label(form.LabelProps{
+			For: "width",
+		}) {
 			Format
 		}
 		<div class="flex gap-2 items-center w-full">
@@ -247,7 +249,9 @@ templ toolType(inputType string, ierrs ...*errors.InputError) {
 		}
 	}}
 	@form.Item() {
-		@form.Label() {
+		@form.Label(form.LabelProps{
+			For: "type",
+		}) {
 			Type
 		}
 		@input.Input(input.Props{
@@ -275,7 +279,9 @@ templ toolCode(inputCode string, required bool, ierr ...*errors.InputError) {
 		}
 	}}
 	@form.Item() {
-		@form.Label() {
+		@form.Label(form.LabelProps{
+			For: "code",
+		}) {
 			Code
 			<span class="text-sm text-gray-500 ml-1">(optional)</span>
 		}
