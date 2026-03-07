@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/table"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 )
@@ -16,33 +17,49 @@ type CyclesProps struct {
 
 templ Cycles(p CyclesProps) {
 	<figure class="w-full overflow-x-auto">
-		// TODO: Migrate to templui table component
-		<table name="additional-cycles-table">
-			<thead>
-				<tr>
-					<th>Start</th>
-					<th>Stop</th>
-					<th>Werkzeug</th>
-					<th>Position</th>
-					<th>Gesamtzyklen</th>
-					<th>Teilzyklen (berechnet)</th>
-					<th></th>
-				</tr>
-			</thead>
-			<tbody>
+		@table.Table() {
+			@table.Header() {
+				@table.Row() {
+					@table.Head() {
+						Start
+					}
+					@table.Head() {
+						Stop
+					}
+					@table.Head() {
+						Werkzeug
+					}
+					@table.Head() {
+						Position
+					}
+					@table.Head() {
+						Gesamtzyklen
+					}
+					@table.Head() {
+						Teilzyklen (berechnet)
+					}
+					@table.Head()
+				}
+			}
+			@table.Body() {
 				@renderPressCyclesRows(p)
-			</tbody>
-		</table>
+			}
+		}
 	</figure>
 }
 
 templ renderPressCyclesRows(p CyclesProps) {
 	if len(p.Cycles) == 0 {
-		<tr>
-			<td colspan="7" class="text-center">
+		@table.Row() {
+			@table.Cell(table.CellProps{
+				Class: "text-center",
+				Attributes: templ.Attributes{
+					"colspan": "7",
+				},
+			}) {
 				@components.NotFoundText("Kein Pressenverlauf verfügbar")
-			</td>
-		</tr>
+			}
+		}
 	} else {
 		for _, cycle := range p.Cycles {
 			{{ tool, _ := p.Tools[cycle.ToolID] }}
@@ -55,53 +72,63 @@ templ renderPressCyclesRows(p CyclesProps) {
 }
 
 templ renderPressCycleRow(cycle *shared.Cycle, tool *shared.Tool, user *shared.User) {
-	<tr>
+	@table.Row() {
 		// Cycle Start
-		<td>
-			<span class="text-sm">{ cycle.Start.FormatDate() }</span>
-		</td>
+		@table.Cell(table.CellProps{
+			Class: "text-sm",
+		}) {
+			{ cycle.Start.FormatDate() }
+		}
 		// Cycle Stop
-		<td>
-			<span class="text-sm">{ cycle.Stop.FormatDate() }</span>
-		</td>
+		@table.Cell(table.CellProps{
+			Class: "text-sm",
+		}) {
+			{ cycle.Stop.FormatDate() }
+		}
 		// Cycle Tool
-		<td>
+		@table.Cell(table.CellProps{
+			Class: "text-sm",
+		}) {
 			if tool != nil {
-				<span class="text-xs">{ tool.German() }</span>
+				{ tool.German() }
 			} else {
-				<span class="text-xs">{ cycle.ToolID }</span>
+				{ cycle.ToolID }
 			}
-		</td>
+		}
 		// Cycle Position
-		<td>
+		@table.Cell(table.CellProps{
+			Class: "text-sm",
+		}) {
 			if tool != nil {
-				<span class="text-xs">{ tool.Position.German() }</span>
+				{ tool.Position.German() }
 			} else {
-				<span class="text-xs">?</span>
+				?
 			}
-		</td>
+		}
 		// Total Cycles
-		<td>
+		@table.Cell(table.CellProps{
+			Class: "text-sm",
+		}) {
 			{ fmt.Sprintf("%d", cycle.PressCycles) }
-		</td>
+		}
 		// Partial Cycles
-		<td>
-			<span title="Berechnet: Gesamtzyklen - Gesamtzyklen des letzten Eintrags">
-				{ fmt.Sprintf("%d", cycle.PartialCycles) }
-			</span>
-		</td>
+		@table.Cell(table.CellProps{
+			Class: "text-sm",
+		}) {
+			{ fmt.Sprintf("%d", cycle.PartialCycles) }
+		}
 		// Actions
-		<td>
-			<span class="flex justify-end items-center gap-2">
-				{{ toolChangeMode := true }}
-				@components.TableActions(components.TableActionsOptions{
-					EditHref:        urlb.DialogEditCycle(cycle.ID, cycle.ToolID, toolChangeMode),
-					EditAdminOnly:   true,
-					DeleteHref:      urlb.ToolCycleDelete(cycle.ID),
-					DeleteAdminOnly: true,
-					User:            user,
-				})
-			</span>
-		</td>
-	</tr>
+		@table.Cell(table.CellProps{
+			Class: "text-sm flex justify-end items-center gap-2",
+		}) {
+			{{ toolChangeMode := true }}
+			@components.TableActions(components.TableActionsOptions{
+				EditHref:        urlb.DialogEditCycle(cycle.ID, cycle.ToolID, toolChangeMode),
+				EditAdminOnly:   true,
+				DeleteHref:      urlb.ToolCycleDelete(cycle.ID),
+				DeleteAdminOnly: true,
+				User:            user,
+			})
+		}
+	}
 }
