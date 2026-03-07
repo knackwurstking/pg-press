@@ -20,11 +20,11 @@ templ Page() {
 			NavContent:     components.StandardNavContent(),
 		},
 	) {
-		<main class="mt-8 p-8">
+		@components.Page() {
 			@searchBar()
 			@actionBar()
 			@troubleReportEntries()
-		</main>
+		}
 	}
 }
 

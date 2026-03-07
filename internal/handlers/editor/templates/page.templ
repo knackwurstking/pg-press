@@ -46,7 +46,7 @@ templ Page(props *PageProps) {
 		AdditionalHead: pageAdditionalHead(),
 		NavContent:     pageNavContent(props),
 	}) {
-		<main class="mt-8 p-8">
+		@components.Page() {
 			<div class="editor-container">
 				<form
 					class="editor-form flex flex-col gap-6 px-4"
@@ -66,7 +66,7 @@ templ Page(props *PageProps) {
 					@formActions(props)
 				</form>
 			</div>
-		</main>
+		}
 	}
 }
 

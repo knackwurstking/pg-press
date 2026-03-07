@@ -25,7 +25,7 @@ templ Page(props *PageProps) {
 			NavContent:  components.StandardNavContent(),
 		},
 	) {
-		<main class="mt-8 p-8">
+		@components.Page() {
 			<h2>Werkzeugumbau an Presse { fmt.Sprintf("%d", props.Press.Number) }</h2>
 			<form
 				hx-post={ urlb.Umbau(props.Press.ID) }
@@ -37,7 +37,7 @@ templ Page(props *PageProps) {
 				@toolSelection(shared.SlotLower, props.CurrentLowerTool, props.LowerTools)
 				@formActions(props.User)
 			</form>
-		</main>
+		}
 	}
 }
 

@@ -18,12 +18,12 @@ templ Page(p PageProps) {
 		PageTitle:   "PG Presse | Login",
 		AppBarTitle: "Login",
 	}) {
-		<main class="mt-8 p-8">
+		@components.Page() {
 			@apiKeyDialog(p.FormData["api-key"], p.FormData["invalid-api-key"])
 			<script>
 				document.querySelector("#login-dialog").showModal();
 			</script>
-		</main>
+		}
 	}
 }
 

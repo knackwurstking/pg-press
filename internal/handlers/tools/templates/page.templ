@@ -16,7 +16,7 @@ templ Page() {
 			AdditionalHead: additionalHead(),
 		},
 	) {
-		<main class="mt-8 p-8">
+		@components.Page() {
 			@tabs.Tabs() {
 				@tabs.List() {
 					@tabs.Trigger(tabs.TriggerProps{
@@ -53,7 +53,7 @@ templ Page() {
 					</div>
 				}
 			}
-		</main>
+		}
 		@dialogs.NewPressDialog()
 		@dialogs.NewCassetteDialog()
 		@dialogs.NewToolDialog()

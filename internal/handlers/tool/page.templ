@@ -25,7 +25,7 @@ templ Page(p *PageProps) {
 			AdditionalHead: additionalHead(),
 		},
 	) {
-		<main class="mt-8 p-8">
+		@components.Page() {
 			@actionBarContent(p)
 			@components.Section(templ.Attributes{
 				"id":                    "notes-section",
@@ -52,7 +52,7 @@ templ Page(p *PageProps) {
 			} else {
 				@CyclesSection(false, p.Tool.ID)
 			}
-		</main>
+		}
 		// Notes
 		@dialogs.NewNoteDialog()
 		@dialogs.EditNoteDialog(0)

@@ -20,7 +20,9 @@ templ HomePage() {
 }
 
 templ homePageContent() {
-	<main class="flex flex-col gap-4 justify-center mt-8 p-8">
+	@components.Page(components.PageProps{
+		Class: "flex flex-col gap-4 justify-center",
+	}) {
 		@homeNavigationItem(
 			string(urlb.TroubleReports()),
 			icon.Triangle(),
@@ -39,7 +41,7 @@ templ homePageContent() {
 			"Notizen Verwaltung",
 			"Verwalten Sie Notizen für Werkzeuge und Pressen",
 		)
-	</main>
+	}
 }
 
 templ homeNavigationItem(href string, navIcon templ.Component, title, description string) {

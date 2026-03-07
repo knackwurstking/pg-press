@@ -1,0 +1,20 @@
+package components
+
+type PageProps struct {
+	ID         string
+	Class      string
+	Attributes templ.Attributes
+}
+
+// Page contains all defaults like padding and margin to fit below the app bar
+templ Page(props ...PageProps) {
+	{{
+		prop := PageProps{}
+		if len(props) > 0 {
+			prop = props[0]
+		}
+	}}
+	<main id={ prop.ID } class={ "mt-8 py-8 px-4 " + prop.Class } { prop.Attributes... }>
+		{ children... }
+	</main>
+}

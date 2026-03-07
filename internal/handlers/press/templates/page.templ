@@ -24,13 +24,13 @@ templ Page(p PageProps) {
 			AdditionalHead: additionalHead(),
 		},
 	) {
-		<main class="mt-8 p-8 space-y-4">
+		@components.Page() {
 			@sectionActions(p)
 			@sectionNotes(p)
 			@sectionActiveTools(p)
 			@sectionMetalSheets(p)
 			@sectionCycles(p)
-		</main>
+		}
 		@dialogs.EditCycleDialog(0)
 	}
 }
