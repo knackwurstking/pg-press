@@ -1,7 +1,10 @@
 package templates
 
 import (
+	"fmt"
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/form"
+	"github.com/knackwurstking/pg-press/internal/components/selectbox"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 )
@@ -50,23 +53,29 @@ templ toolSelection(
 		hx-post={ urlb.PressReplaceTool(pressID, position) }
 		hx-trigger="change"
 		disabled?={ !user.IsAdmin() }
+		enctype="multipart/form-data"
 	>
-		<select name="tool_id">
-			<option value="" disabled>
-				Wählen Sie
-				switch position {
-					case shared.SlotUpper:
-						ein Oberteil
-					case shared.SlotLower:
-						ein Unterteil
-				}
-			</option>
-			<option value="0" selected?={ currentToolID <= 0 }>Kein Tool</option>
-			for _, tool := range tools {
-				<option value={ tool.ID } selected?={ currentToolID == tool.ID }>
-					{ tool.German() }
-				</option>
+		@form.Item() {
+			@form.Label() {
+				{ position.German() }
 			}
-		</select>
+			@selectbox.SelectBox() {
+				@selectbox.Trigger() {
+					@selectbox.Value(selectbox.ValueProps{
+						Placeholder: fmt.Sprintf("Wählen Sie ein %s", position.German()),
+					})
+				}
+				@selectbox.Content() {
+					for _, tool := range tools {
+						@selectbox.Item(selectbox.ItemProps{
+							Value:    fmt.Sprintf("%d", tool.ID),
+							Selected: tool.ID == currentToolID,
+						}) {
+							{ tool.German() }
+						}
+					}
+				}
+			}
+		}
 	</form>
 }

@@ -3,6 +3,7 @@ package templates
 import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/button"
 	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/handlers/dialogs"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -54,24 +55,22 @@ templ sectionActions(p PageProps) {
 		{{ return }}
 	}
 	@components.ActionBar() {
-		// TODO: Secondary templui button
-		<button
-			class="secondary"
-			hx-get={ urlb.DialogEditPress(p.Press.ID) }
-			hx-trigger="click"
-			hx-target="body"
-			hx-swap="beforeend"
-		>
+		@button.Button(button.Props{
+			Variant: button.VariantSecondary,
+			Attributes: templ.Attributes{
+				"hx-get":     string(urlb.DialogEditPress(p.Press.ID)),
+				"hx-trigger": "click",
+				"hx-target":  "body",
+				"hx-swap":    "beforeend",
+			},
+		}) {
 			Bearbeiten
-		</button>
-		// TODO: primary templui button
-		<a
-			role="button"
-			class="primary"
-			href={ urlb.Umbau(p.Press.ID) }
-		>
+		}
+		@button.Button(button.Props{
+			Href: string(urlb.Umbau(p.Press.ID)),
+		}) {
 			Umbau
-		</a>
+		}
 	}
 }
 
@@ -142,11 +141,9 @@ templ sectionCycles(p PageProps) {
 		"id": "cycle-table-section",
 	}) {
 	}
-	<section>
-		<div class="flex justify-between items-center">
-			<h5>Pressennutzungsverlauf</h5>
-		</div>
-		// TODO: PDF Stuff disabled for now
+	@components.Section() {
+		@components.SectionTitle(components.TitleLevel5, "Pressennutzungsverlauf")
+		// TODO: PDF Stuff disabled for now (Use a `SectionTitleAction` component)
 		//<div class="mx w-full flex justify-end align-center">
 		//	<!-- Request a summary in PDF form from the server -->
 		//	<button
@@ -163,5 +160,5 @@ templ sectionCycles(p PageProps) {
 		>
 			@components.Spinner()
 		</div>
-	</section>
+	}
 }

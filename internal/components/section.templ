@@ -5,11 +5,13 @@ import (
 	"github.com/knackwurstking/pg-press/internal/components/button"
 )
 
-templ Section(attr templ.Attributes) {
+templ Section(attrs ...templ.Attributes) {
 	{{
-		if attr == nil {
-			attr = templ.Attributes{}
+		attr := templ.Attributes{}
+		if len(attrs) > 0 {
+			attr = attrs[0]
 		}
+
 		if _, ok := attr["class"]; !ok {
 			attr["class"] = "space-y-4"
 		} else {
@@ -23,7 +25,9 @@ templ Section(attr templ.Attributes) {
 
 templ SectionTitle(level TitleLevel, text string) {
 	<div class="flex justify-between items-center my-4">
-		@Title(level, text)
+		@Title(TitleProps{Level: level}) {
+			{ text }
+		}
 		<span>
 			{ children... }
 		</span>

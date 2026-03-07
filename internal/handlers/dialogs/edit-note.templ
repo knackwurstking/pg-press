@@ -194,7 +194,9 @@ templ displayLinkedTables(linked string, user *shared.User) {
 		{{ return }}
 	}
 	@form.Item() {
-		@components.Title(components.TitleLevel6, "Verknüpfte Tabellen")
+		@components.Title(components.TitleProps{Level: components.TitleLevel6}) {
+			Verknüpfte Tabellen
+		}
 		@checkbox.Checkbox(checkbox.Props{
 			ID:      "linked",
 			Name:    "linked",

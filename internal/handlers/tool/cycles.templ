@@ -159,7 +159,7 @@ templ cyclesTable(p *CyclesSectionContentProps) {
 				Title: "Neuen Eintrag hinzufügen",
 			})
 		}
-		@components.Section(nil) {
+		@components.Section() {
 			<h6 class="mb-4">Gesamtzyklen:</h6>
 			<span>
 				@TotalCycles(p.Tool.Cycles, true)

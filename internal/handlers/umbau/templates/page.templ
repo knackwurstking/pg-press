@@ -4,8 +4,10 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
+	"github.com/knackwurstking/ui"
 )
 
 type PageProps struct {
@@ -20,13 +22,18 @@ type PageProps struct {
 templ Page(props *PageProps) {
 	@components.Layout(
 		components.LayoutProps{
-			PageTitle:   fmt.Sprintf("PG Presse | Umbau Presse %d", props.Press.Number),
-			AppBarTitle: fmt.Sprintf("Umbau Presse %d", props.Press.Number),
-			NavContent:  components.StandardNavContent(),
+			PageTitle:      fmt.Sprintf("PG Presse | Umbau Presse %d", props.Press.Number),
+			AppBarTitle:    fmt.Sprintf("Umbau Presse %d", props.Press.Number),
+			NavContent:     components.StandardNavContent(),
+			AdditionalHead: additionalHead(),
 		},
 	) {
 		@components.Page() {
-			<h2>Werkzeugumbau an Presse { fmt.Sprintf("%d", props.Press.Number) }</h2>
+			@components.Title(components.TitleProps{
+				Level: components.TitleLevel2,
+			}) {
+				Werkzeugumbau an Presse { fmt.Sprintf("%d", props.Press.Number) }
+			}
 			<form
 				hx-post={ urlb.Umbau(props.Press.ID) }
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
@@ -41,8 +48,13 @@ templ Page(props *PageProps) {
 	}
 }
 
+templ additionalHead() {
+	<script defer src={ ui.AssetURL(env.ServerPathPrefix, "/js/umbau/main.js") }></script>
+}
+
+// TODO: Migrate...
 templ cyclesSection() {
-	@components.Section(nil) {
+	@components.Section() {
 		<span class="flex flex-col">
 			<label for="press-total-cycles">Gesamtzyklen:</label>
 			<input
@@ -56,8 +68,9 @@ templ cyclesSection() {
 	}
 }
 
+// TODO: Migrate...
 templ toolSelection(position shared.Slot, current *shared.Tool, tools []*shared.Tool) {
-	@components.Section(nil) {
+	@components.Section() {
 		@components.SectionTitle(components.TitleLevel5, fmt.Sprintf("%s", position.German()))
 		if current != nil {
 			<p>Aktuelles Werkzeug: { current.German() }</p>
@@ -78,7 +91,7 @@ templ toolSelection(position shared.Slot, current *shared.Tool, tools []*shared.
 			<select
 				id={ id }
 				name={ id }
-				onchange={ onToolChange(templ.JSExpression("event")) }
+				onchange="onToolChange(event)"
 			>
 				<option value="" selected>{ position.German() } wählen</option>
 				for _, t := range tools {
@@ -91,6 +104,7 @@ templ toolSelection(position shared.Slot, current *shared.Tool, tools []*shared.
 	}
 }
 
+// TODO: Migrate...
 templ formActions(user *shared.User) {
 	<footer class="flex justify-end items-center">
 		<button
@@ -98,32 +112,4 @@ templ formActions(user *shared.User) {
 			disabled?={ !user.IsAdmin() }
 		>Umbau speichern</button>
 	</footer>
-}
-
-script onToolChange(event templ.JSExpression) {
-	var target = event.currentTarget;
-
-	// Get the tool id from the target element
-	var toolID = target.value;
-
-	// Get the format from the current selected option
-	var format = "";
-	var selectedOption = target.children[target.selectedIndex];
-	if (selectedOption) {
-		format = selectedOption.dataset.format;
-	}
-
-	// Get all the options, besides the first one for each select element (#top, #bottom)
-	options = [
-		...[...document.querySelectorAll("select#bottom > option")].slice(1),
-		...[...document.querySelectorAll("select#top > option")].slice(1),
-	]
-
-	// Disable all options that are not compatible with the selected format
-	var optionsLoopHandler = function(option) {
-		option.disabled = !!format && !option.textContent.includes(format)
-	};
-
-	// Loop through all options
-	options.forEach(optionsLoopHandler);
 }

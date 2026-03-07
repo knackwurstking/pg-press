@@ -137,7 +137,9 @@ templ appBar(title string, navContent templ.Component) {
 		}
 	>
 		<span class="px-4 py-2">
-			@Title(TitleLevel6, title)
+			@Title(TitleProps{Level: TitleLevel6}) {
+				{ title }
+			}
 		</span>
 		if navContent != nil {
 			<span class="px-4 py-2 flex gap-1">

@@ -29,7 +29,7 @@ templ formDate(date shared.UnixMilli, fp formProps, ierrs ...*errors.InputError)
 			date = shared.NewUnixMilli(time.Now())
 		}
 	}}
-	@components.Section(nil) {
+	@components.Section() {
 		@form.Item() {
 			@form.Label(form.LabelProps{
 				For: fp.ID,
@@ -151,7 +151,7 @@ templ formPressSelection(pressID shared.EntityID, presses []*shared.Press, ierrs
 			}
 		}
 	}}
-	@components.Section(nil) {
+	@components.Section() {
 		@form.Item() {
 			@form.Label(form.LabelProps{
 				For: "press_id",
