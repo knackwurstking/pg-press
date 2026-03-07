@@ -4,8 +4,10 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/button"
 	"github.com/knackwurstking/pg-press/internal/components/form"
 	"github.com/knackwurstking/pg-press/internal/components/input"
+	"github.com/knackwurstking/pg-press/internal/components/selectbox"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
@@ -37,6 +39,7 @@ templ Page(props *PageProps) {
 				Werkzeugumbau an Presse { fmt.Sprintf("%d", props.Press.Number) }
 			}
 			<form
+				class="space-y-4"
 				hx-post={ urlb.Umbau(props.Press.ID) }
 				hx-on:htmx:response-error="alert(event.detail.xhr.responseText)"
 				hx-on:htmx:after-request="if(event.detail.successful) history.back()"
@@ -84,40 +87,57 @@ templ toolSelection(position shared.Slot, current *shared.Tool, tools []*shared.
 		} else {
 			<p>Aktuelles Werkzeug: -</p>
 		}
-		{{
-			var id string
-			switch position {
-			case shared.SlotUpper:
-				id = "top"
-			case shared.SlotLower:
-				id = "bottom"
-			}
-		}}
-		// TODO: Migrate...
-		<label for={ id } class="flex flex-col">
-			<span>Neues Werkzeug:</span>
-			<select
-				id={ id }
-				name={ id }
-				onchange="onToolChange(event)"
-			>
-				<option value="" selected>{ position.German() } wählen</option>
-				for _, t := range tools {
-					<option value={ t.ID } data-format={ fmt.Sprintf("%dx%d", t.Width, t.Height) }>
-						{ t.German() }
-					</option>
+		@form.Item() {
+			{{
+				var id string
+				switch position {
+				case shared.SlotUpper:
+					id = "top"
+				case shared.SlotLower:
+					id = "bottom"
 				}
-			</select>
-		</label>
+			}}
+			@form.Label(form.LabelProps{
+				For: id,
+			}) {
+				Neues Werkzeug:
+			}
+			@selectbox.SelectBox() {
+				@selectbox.Trigger(selectbox.TriggerProps{
+					ID:   id,
+					Name: id,
+					Attributes: templ.Attributes{
+						"onchange": "onToolChange(event)",
+					},
+				}) {
+					@selectbox.Value(selectbox.ValueProps{
+						Placeholder: fmt.Sprintf("%s wählen", position.German()),
+					})
+				}
+				@selectbox.Content() {
+					for _, t := range tools {
+						@selectbox.Item(selectbox.ItemProps{
+							Value: fmt.Sprintf("%d", t.ID),
+							Attributes: templ.Attributes{
+								"data-format": fmt.Sprintf("%dx%d", t.Width, t.Height),
+							},
+						}) {
+							{ t.German() }
+						}
+					}
+				}
+			}
+		}
 	}
 }
 
-// TODO: Migrate...
 templ formActions(user *shared.User) {
-	<footer class="flex justify-end items-center">
-		<button
-			type="submit"
-			disabled?={ !user.IsAdmin() }
-		>Umbau speichern</button>
-	</footer>
+	<div class="flex justify-end items-center">
+		@button.Button(button.Props{
+			Type:     button.TypeSubmit,
+			Disabled: !user.IsAdmin(),
+		}) {
+			Umbau speichern
+		}
+	</div>
 }
