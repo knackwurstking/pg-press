@@ -38,7 +38,6 @@ templ metalSheetTableUpper(ums []*shared.UpperMetalSheet) {
 			}
 			@accordion.Content() {
 				<figure class="w-full overflow-x-auto">
-					// TODO: Migrate
 					@table.Table() {
 						@table.Header() {
 							@table.Row() {
@@ -83,68 +82,88 @@ templ metalSheetTableUpper(ums []*shared.UpperMetalSheet) {
 }
 
 templ metalSheetTableBottom(lms []*shared.LowerMetalSheet) {
-	// TODO: Migrate to accordion component
-	<details
-		if len(lms) > 0 {
-			open
-		}
-	>
-		<summary class="cursor-pointer select-none">
-			// TODO: Migrate...
-			<h6>Unterteil ({ fmt.Sprintf("%d", len(lms)) } Einträge)</h6>
-		</summary>
-		<div>
-			<figure class="w-full overflow-x-auto">
-				// TODO: Migrate
-				<table>
-					<thead>
-						<tr>
-							<th>Stärke (mm)</th>
-							<th>Blech (mm)</th>
-							<th>Marke (mm)</th>
-							<th>Stf.</th>
-							<th>Hubende</th>
-						</tr>
-					</thead>
-					<tbody>
-						if len(lms) == 0 {
-							<tr>
-								<td colspan="5" class="text-center">
-									@components.NotFoundText("Keine Bleche für Unterteil gefunden")
-								</td>
-							</tr>
-						} else {
-							for _, sheet := range lms {
-								<tr>
-									<td>{ fmt.Sprintf("%.1f", sheet.TileHeight) }</td>
-									<td>{ fmt.Sprintf("%.1f", sheet.Value) }</td>
-									<td>
-										if sheet.MarkeHeight > 0 {
-											{ fmt.Sprintf("%d", sheet.MarkeHeight) }
-										} else {
-											<span class="bg-muted text-muted-foreground">-</span>
-										}
-									</td>
-									<td>
-										if sheet.STF > 0 {
-											{ fmt.Sprintf("%.1f", sheet.STF) }
-										} else {
-											<span class="bg-muted text-muted-foreground">-</span>
-										}
-									</td>
-									<td>
-										if sheet.STFMax > 0 {
-											{ fmt.Sprintf("%.1f", sheet.STFMax) }
-										} else {
-											<span class="bg-muted text-muted-foreground">-</span>
-										}
-									</td>
-								</tr>
+	@accordion.Accordion(accordion.Props{
+		Class: "w-full",
+	}) {
+		@accordion.Item(accordion.ItemProps{
+			Attributes: templ.Attributes{
+				"open": len(lms) > 0,
+			},
+		}) {
+			@accordion.Trigger() {
+				Unterteil ({ fmt.Sprintf("%d", len(lms)) } Einträge)
+			}
+			@accordion.Content() {
+				<figure class="w-full overflow-x-auto">
+					@table.Table() {
+						@table.Header() {
+							@table.Row() {
+								@table.Head() {
+									Stärke (mm)
+								}
+								@table.Head() {
+									Blech (mm)
+								}
+								@table.Head() {
+									Marke (mm)
+								}
+								@table.Head() {
+									Stf.
+								}
+								@table.Head() {
+									Hubende
+								}
 							}
 						}
-					</tbody>
-				</table>
-			</figure>
-		</div>
-	</details>
+						@table.Body() {
+							if len(lms) == 0 {
+								@table.Row() {
+									@table.Cell(table.CellProps{
+										Class: "text-center",
+										Attributes: templ.Attributes{
+											"colspan": "5",
+										},
+									}) {
+										@components.NotFoundText("Keine Bleche für Unterteil gefunden")
+									}
+								}
+							} else {
+								for _, sheet := range lms {
+									@table.Row() {
+										@table.Cell() {
+											{ fmt.Sprintf("%.1f", sheet.TileHeight) }
+										}
+										@table.Cell() {
+											{ fmt.Sprintf("%.1f", sheet.Value) }
+										}
+										@table.Cell() {
+											if sheet.MarkeHeight > 0 {
+												{ fmt.Sprintf("%d", sheet.MarkeHeight) }
+											} else {
+												<span class="bg-muted text-muted-foreground">-</span>
+											}
+										}
+										@table.Cell() {
+											if sheet.STF > 0 {
+												{ fmt.Sprintf("%.1f", sheet.STF) }
+											} else {
+												<span class="bg-muted text-muted-foreground">-</span>
+											}
+										}
+										@table.Cell() {
+											if sheet.STFMax > 0 {
+												{ fmt.Sprintf("%.1f", sheet.STFMax) }
+											} else {
+												<span class="bg-muted text-muted-foreground">-</span>
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				</figure>
+			}
+		}
+	}
 }
