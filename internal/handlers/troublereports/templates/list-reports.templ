@@ -12,12 +12,11 @@ import (
 )
 
 templ ListReports(user *shared.User, troubleReports []*shared.TroubleReport) {
-	for _, tr := range troubleReports {
-		@accordion.Accordion(accordion.Props{
-			Class: "w-full",
-		}) {
+	@accordion.Accordion(accordion.Props{
+		Class: "w-full",
+	}) {
+		for _, tr := range troubleReports {
 			@reportListItem(tr, user)
-			<br/>
 		}
 	}
 }
@@ -25,7 +24,7 @@ templ ListReports(user *shared.User, troubleReports []*shared.TroubleReport) {
 templ reportListItem(tr *shared.TroubleReport, user *shared.User) {
 	@accordion.Item(accordion.ItemProps{
 		ID:    fmt.Sprintf("trouble-report-%d", tr.ID),
-		Class: "trouble-report border rounded px-4",
+		Class: "trouble-report px-4",
 		Attributes: templ.Attributes{
 			"ontoggle": `updateURLHash(event)`,
 		},
