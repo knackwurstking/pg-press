@@ -165,9 +165,9 @@ templ cassetteThickness(inputMinThickness float32, inputMaxThickness float32, ie
 				Placeholder: "z.B. 8.5",
 				Value:       value,
 				Type:        input.TypeNumber,
+				Required:    true,
 				Attributes: templ.Attributes{
-					"step":     "0.1",
-					"required": false,
+					"step": "0.1",
 				},
 				HasError: hasInputError(filteredErrors, "min-thickness"),
 			})
@@ -181,9 +181,9 @@ templ cassetteThickness(inputMinThickness float32, inputMaxThickness float32, ie
 				Placeholder: "z.B. 12.5",
 				Value:       fmt.Sprintf("%.1f", inputMaxThickness),
 				Type:        input.TypeNumber,
+				Required:    true,
 				Attributes: templ.Attributes{
-					"step":     "0.1",
-					"required": true,
+					"step": "0.1",
 				},
 				HasError: hasInputError(filteredErrors, "max-thickness"),
 			})

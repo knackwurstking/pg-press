@@ -55,9 +55,7 @@ templ apiKeyDialog(apiKey, invalidApiKey string) {
 						Placeholder: "API-Schlüssel",
 						Value:       apiKey,
 						HasError:    hasError,
-						Attributes: templ.Attributes{
-							"required": "true",
-						},
+						Required:    true,
 					})
 					if hasError {
 						@form.Message(form.MessageProps{

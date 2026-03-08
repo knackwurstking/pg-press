@@ -107,9 +107,7 @@ templ titleInput(title string) {
 			Type:        input.TypeText,
 			Placeholder: "Titel eingeben...",
 			Value:       title,
-			Attributes: templ.Attributes{
-				"required": true,
-			},
+			Required:    true,
 		})
 	}
 }

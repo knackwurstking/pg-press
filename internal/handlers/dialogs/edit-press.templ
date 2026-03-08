@@ -146,14 +146,14 @@ templ formPressNumber(number shared.PressNumber, ierrs ...*errors.InputError) {
 			Number
 		}
 		@input.Input(input.Props{
-			ID:   "press_number",
-			Name: "press_number",
-			Type: input.TypeNumber,
+			ID:       "press_number",
+			Name:     "press_number",
+			Type:     input.TypeNumber,
+			Required: true,
 			Attributes: templ.Attributes{
-				"step":     "1",
-				"min":      "0",
-				"max":      "100",
-				"required": "true",
+				"step": "1",
+				"min":  "0",
+				"max":  "100",
 			},
 			Value:    fmt.Sprintf("%d", number),
 			HasError: hasInputError(ierrs, "press_number"),

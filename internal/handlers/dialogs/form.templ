@@ -37,14 +37,12 @@ templ formDate(date shared.UnixMilli, fp formProps, ierrs ...*errors.InputError)
 				{ fp.Title }
 			}
 			@input.Input(input.Props{
-				ID:    fp.ID,
-				Class: "w-fit",
-				Name:  fp.ID,
-				Type:  input.TypeDate,
-				Value: fmt.Sprintf("%s", date),
-				Attributes: templ.Attributes{
-					"required": fp.Required,
-				},
+				ID:       fp.ID,
+				Class:    "w-fit",
+				Name:     fp.ID,
+				Type:     input.TypeDate,
+				Value:    fmt.Sprintf("%s", date),
+				Required: fp.Required,
 				HasError: len(filteredErrors) > 0,
 			})
 			@renderFormError(filteredErrors, fp.ID)
@@ -68,13 +66,11 @@ templ formString(value string, fp formProps, ierrs ...*errors.InputError) {
 			{ fp.Title }
 		}
 		@input.Input(input.Props{
-			ID:    fp.ID,
-			Name:  fp.ID,
-			Type:  input.TypeText,
-			Value: value,
-			Attributes: templ.Attributes{
-				"required": fp.Required,
-			},
+			ID:       fp.ID,
+			Name:     fp.ID,
+			Type:     input.TypeText,
+			Value:    value,
+			Required: fp.Required,
 			HasError: len(filteredErrors) > 0,
 		})
 		@renderFormError(ierrs, fp.ID)
@@ -207,12 +203,12 @@ templ formCycles(value int64, ierrs ...*errors.InputError) {
 				Gesamtzyklen
 			}
 			@input.Input(input.Props{
-				ID:   "cycles",
-				Name: "cycles",
+				ID:       "cycles",
+				Name:     "cycles",
+				Required: true,
 				Attributes: templ.Attributes{
-					"min":      "0",
-					"step":     "1",
-					"required": true,
+					"min":  "0",
+					"step": "1",
 				},
 				HasError: len(filteredErrors) > 0,
 			})
@@ -237,12 +233,12 @@ templ formCyclesOffset(cyclesOffset int64, ierrs ...*errors.InputError) {
 			Zyklen Offset
 		}
 		@input.Input(input.Props{
-			ID:   "cycles_offset",
-			Name: "cycles_offset",
-			Type: input.TypeNumber,
+			ID:       "cycles_offset",
+			Name:     "cycles_offset",
+			Type:     input.TypeNumber,
+			Required: true,
 			Attributes: templ.Attributes{
-				"step":     "1",
-				"required": true,
+				"step": "1",
 			},
 			Value:    fmt.Sprintf("%d", cyclesOffset),
 			HasError: len(filteredErrors) > 0,

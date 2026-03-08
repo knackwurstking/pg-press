@@ -103,9 +103,7 @@ templ editUserDialog(user *shared.User) {
 						Value:       user.Name,
 						Placeholder: "Neuer Benutzername",
 						Type:        input.TypeText,
-						Attributes: templ.Attributes{
-							"required": true,
-						},
+						Required:    true,
 					})
 				}
 				<br/>

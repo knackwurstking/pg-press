@@ -244,12 +244,12 @@ templ formTileHeight(tileHeight float64, ierrs ...*errors.InputError) {
 			Stärke (mm)
 		}
 		@input.Input(input.Props{
-			ID:   "tile_height",
-			Name: "tile_height",
-			Type: input.TypeNumber,
+			ID:       "tile_height",
+			Name:     "tile_height",
+			Type:     input.TypeNumber,
+			Required: true,
 			Attributes: templ.Attributes{
-				"step":     "0.1",
-				"required": true,
+				"step": "0.1",
 			},
 			Value:    fmt.Sprintf("%.1f", tileHeight),
 			HasError: hasInputError(ierrs, "tile_height"),
@@ -266,12 +266,12 @@ templ formSheets(value float64, ierrs ...*errors.InputError) {
 			Blech (mm)	
 		}
 		@input.Input(input.Props{
-			ID:   "value",
-			Name: "value",
-			Type: input.TypeNumber,
+			ID:       "value",
+			Name:     "value",
+			Type:     input.TypeNumber,
+			Required: true,
 			Attributes: templ.Attributes{
-				"step":     "0.1",
-				"required": true,
+				"step": "0.1",
 			},
 			Value:    fmt.Sprintf("%.1f", value),
 			HasError: hasInputError(ierrs, "value"),
@@ -288,12 +288,12 @@ templ formStf(value float64, ierrs ...*errors.InputError) {
 			STF
 		}
 		@input.Input(input.Props{
-			ID:   "stf",
-			Name: "stf",
-			Type: input.TypeNumber,
+			ID:       "stf",
+			Name:     "stf",
+			Type:     input.TypeNumber,
+			Required: true,
 			Attributes: templ.Attributes{
-				"step":     "0.1",
-				"required": true,
+				"step": "0.1",
 			},
 			Value:    fmt.Sprintf("%.1f", value),
 			HasError: hasInputError(ierrs, "stf"),
@@ -310,12 +310,12 @@ templ formStfMax(value float64, ierrs ...*errors.InputError) {
 			STF Max
 		}
 		@input.Input(input.Props{
-			ID:   "stf_max",
-			Name: "stf_max",
-			Type: input.TypeNumber,
+			ID:       "stf_max",
+			Name:     "stf_max",
+			Type:     input.TypeNumber,
+			Required: true,
 			Attributes: templ.Attributes{
-				"step":     "0.1",
-				"required": true,
+				"step": "0.1",
 			},
 			Value:    fmt.Sprintf("%.1f", value),
 			HasError: hasInputError(ierrs, "stf_max"),
@@ -332,12 +332,12 @@ templ formMarkeHeight(value int, ierrs ...*errors.InputError) {
 			Marke (mm)
 		}
 		@input.Input(input.Props{
-			ID:   "marke_height",
-			Name: "marke_height",
-			Type: input.TypeNumber,
+			ID:       "marke_height",
+			Name:     "marke_height",
+			Type:     input.TypeNumber,
+			Required: true,
 			Attributes: templ.Attributes{
-				"step":     "1",
-				"required": true,
+				"step": "1",
 			},
 			Value:    fmt.Sprintf("%d", value),
 			HasError: hasInputError(ierrs, "marke_height"),

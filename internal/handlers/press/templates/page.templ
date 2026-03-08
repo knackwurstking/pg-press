@@ -35,6 +35,7 @@ templ Page(p PageProps) {
 			<br/>
 			@sectionCycles(p)
 		}
+		@dialogs.EditPressDialog(p.Press.ID)
 		@dialogs.EditCycleDialog(0)
 	}
 }
