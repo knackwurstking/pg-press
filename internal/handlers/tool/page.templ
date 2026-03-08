@@ -25,7 +25,7 @@ templ Page(p *PageProps) {
 			AdditionalHead: additionalHead(),
 		},
 	) {
-		@components.Page() {
+		@components.Page(components.PageProps{Class: "debug"}) {
 			@actionBarContent(p)
 			@components.Section(templ.Attributes{
 				"id":                    "notes-section",
@@ -39,6 +39,7 @@ templ Page(p *PageProps) {
 			if !p.Tool.IsCassette() {
 				@components.Section(templ.Attributes{
 					"id":                    "metal-sheets-section",
+					"class":                 "mt-8",
 					"hx-get":                string(urlb.ToolMetalSheets(p.Tool.ID)),
 					"hx-trigger":            "load, reload-metal-sheets from:body",
 					"hx-swap":               "innerHTML",

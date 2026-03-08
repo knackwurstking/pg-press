@@ -126,6 +126,12 @@ templ styles() {
 			--markdown-foreground: var(--muted-foreground);
 		}
 	</style>
+	<style>
+		.debug,
+		.debug * {
+			border: 0.5px solid red;
+		}
+	</style>
 }
 
 templ appBar(title string, navContent templ.Component) {

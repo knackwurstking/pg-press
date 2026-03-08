@@ -18,6 +18,7 @@ templ CyclesSection(oob bool, id shared.EntityID) {
 	}}
 	@components.Section(templ.Attributes{
 		"id":                    "cycles-section",
+		"class":                 "mt-8",
 		"hx-get":                hxGet,
 		"hx-trigger":            "load, reload-cycles from:body",
 		"hx-swap":               "innerHTML",
@@ -90,7 +91,7 @@ templ regenerations(p *CyclesSectionContentProps) {
 	@components.Section(templ.Attributes{
 		"id": "regenerations-section",
 	}) {
-		@components.SectionTitle(components.TitleLevel5, "Regenerationen") {
+		@components.SectionTitle(components.TitleLevel4, "Regenerationen") {
 			@components.SectionTitleAction(components.SectionTitleActionProps{
 				Icon:  icon.Plus(),
 				Url:   urlb.DialogEditToolRegenerationGet(p.Tool.ID),
@@ -152,7 +153,7 @@ templ cyclesTable(p *CyclesSectionContentProps) {
 	@components.Section(templ.Attributes{
 		"id": "cycles-section",
 	}) {
-		@components.SectionTitle(components.TitleLevel5, "Pressennutzungsverlauf") {
+		@components.SectionTitle(components.TitleLevel4, "Pressennutzungsverlauf") {
 			@components.SectionTitleAction(components.SectionTitleActionProps{
 				Icon:  icon.Plus(),
 				Url:   urlb.DialogEditCycle(0, p.Tool.ID, false),
@@ -160,43 +161,46 @@ templ cyclesTable(p *CyclesSectionContentProps) {
 			})
 		}
 		@components.Section() {
-			<h6 class="mb-4">Gesamtzyklen:</h6>
-			<span>
-				@TotalCycles(p.Tool.Cycles, true)
-			</span>
+			@components.SectionTitle(components.TitleLevel6, "Gesamtzyklen:")
+			@TotalCycles(p.Tool.Cycles, true)
 		}
-		if len(p.ToolCycles) == 0 {
-			@components.NotFoundText("Kein Pressenverlauf verfügbar")
-		} else {
-			<figure class="w-full overflow-x-auto">
-				@table.Table() {
-					@table.Header() {
-						@table.Row() {
-							@table.Head() {
-								Presse
+		@components.Section(templ.Attributes{
+			"class": "mt-8",
+		}) {
+			@components.SectionTitle(components.TitleLevel6, "Teilzyklen:")
+			if len(p.ToolCycles) == 0 {
+				@components.NotFoundText("Kein Pressenverlauf verfügbar")
+			} else {
+				<figure class="w-full overflow-x-auto">
+					@table.Table() {
+						@table.Header() {
+							@table.Row() {
+								@table.Head() {
+									Presse
+								}
+								@table.Head() {
+									Start
+								}
+								@table.Head() {
+									Stop
+								}
+								@table.Head() {
+									Zyklen
+								}
+								@table.Head() {
+									Zyklen (Teil)
+								}
+								@table.Head()
 							}
-							@table.Head() {
-								Start
+						}
+						@table.Body() {
+							for _, cycle := range p.ToolCycles {
+								@cycleTableRow(cycle, p.PressMap[cycle.PressID], lastRegeneration, p.User)
 							}
-							@table.Head() {
-								Stop
-							}
-							@table.Head() {
-								Zyklen
-							}
-							@table.Head() {
-								Zyklen (Teil)
-							}
-							@table.Head()
 						}
 					}
-					@table.Body() {
-						for _, cycle := range p.ToolCycles {
-							@cycleTableRow(cycle, p.PressMap[cycle.PressID], lastRegeneration, p.User)
-						}
-					}
-				}
-			</figure>
+				</figure>
+			}
 		}
 	}
 }
