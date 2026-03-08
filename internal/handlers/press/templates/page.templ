@@ -25,11 +25,14 @@ templ Page(p PageProps) {
 			AdditionalHead: additionalHead(),
 		},
 	) {
-		@components.Page() {
+		@components.Page(components.PageProps{Class: "debug"}) {
 			@sectionActions(p)
 			@sectionNotes(p)
+			<br/>
 			@sectionActiveTools(p)
+			<br/>
 			@sectionMetalSheets(p)
+			<br/>
 			@sectionCycles(p)
 		}
 		@dialogs.EditCycleDialog(0)

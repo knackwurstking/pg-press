@@ -18,62 +18,55 @@ templ Notes(p NotesProps) {
 	@pressNotes(p.PressNotes)
 	if len(p.ToolNotes) > 0 {
 		@toolNotes(p.ToolNotes, p.Tools)
+	} else {
+		@components.NotFoundText("Keine Notizen zu Werkzeugen vorhanden.")
 	}
 }
 
 templ pressNotes(notes []*shared.Note) {
-	// Press Notes
-	@components.Section(templ.Attributes{
-		"class": "notes-list flex flex-col gap-6 p-4",
-	}) {
-		for _, note := range notes {
-			@components.NoteCard(note, nil)
-		}
+	for _, note := range notes {
+		@components.NoteCard(note, nil)
 	}
 }
 
 templ toolNotes(notes []*shared.Note, tools map[shared.EntityID]*shared.Tool) {
-	@components.Section(templ.Attributes{
-		"class": "notes-list flex flex-col gap-6 p-4",
-	}) {
-		{{
-			// Organize tool notes by position
-			upper := make([]*shared.Note, 0)
-			upperCassette := make([]*shared.Note, 0)
-			lower := make([]*shared.Note, 0)
+	{{
+		// Organize tool notes by position
+		upper := make([]*shared.Note, 0)
+		upperCassette := make([]*shared.Note, 0)
+		lower := make([]*shared.Note, 0)
 
-			for _, n := range notes {
-				sID, _ := strings.CutPrefix(n.Linked, "tool_")
-				id, _ := strconv.ParseInt(sID, 10, 64)
-				if t, ok := tools[shared.EntityID(id)]; ok {
-					switch t.Position {
-					case shared.SlotUpper:
-						upper = append(upper, n)
-					case shared.SlotUpperCassette:
-						upperCassette = append(upperCassette, n)
-					case shared.SlotLower:
-						lower = append(lower, n)
-					}
+		for _, n := range notes {
+			sID, _ := strings.CutPrefix(n.Linked, "tool_")
+			id, _ := strconv.ParseInt(sID, 10, 64)
+			if t, ok := tools[shared.EntityID(id)]; ok {
+				switch t.Position {
+				case shared.SlotUpper:
+					upper = append(upper, n)
+				case shared.SlotUpperCassette:
+					upperCassette = append(upperCassette, n)
+				case shared.SlotLower:
+					lower = append(lower, n)
 				}
 			}
-		}}
-		if len(upper) > 0 {
-			<h4>{ shared.SlotUpper.German() }</h4>
-			for _, n := range upper {
-				@components.NoteCard(n, nil)
-			}
 		}
-		if len(upperCassette) > 0 {
-			<h4>{ shared.SlotUpperCassette.German() }</h4>
-			for _, n := range upperCassette {
-				@components.NoteCard(n, nil)
-			}
+	}}
+	if len(upper) > 0 {
+		<h4>{ shared.SlotUpper.German() }</h4>
+		for _, n := range upper {
+			@components.NoteCard(n, nil)
 		}
-		if len(lower) > 0 {
-			<h4>{ shared.SlotLower.German() }</h4>
-			for _, n := range lower {
-				@components.NoteCard(n, nil)
-			}
+	}
+	if len(upperCassette) > 0 {
+		<h4>{ shared.SlotUpperCassette.German() }</h4>
+		for _, n := range upperCassette {
+			@components.NoteCard(n, nil)
+		}
+	}
+	if len(lower) > 0 {
+		<h4>{ shared.SlotLower.German() }</h4>
+		for _, n := range lower {
+			@components.NoteCard(n, nil)
 		}
 	}
 }
