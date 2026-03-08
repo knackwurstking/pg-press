@@ -39,12 +39,14 @@ type CyclesSectionContentProps struct {
 }
 
 templ CyclesSectionContent(p *CyclesSectionContentProps) {
-	@components.Section(templ.Attributes{
-		"id": "tool-status-section",
-	}) {
-		@components.SectionTitle(components.TitleLevel4, "Tool Status")
+	<div id="tool-status-section">
+		@components.Title(components.TitleProps{
+			Level: components.TitleLevel4,
+		}) {
+			Tool Status
+		}
 		@toolStatus(p)
-	}
+	</div>
 	<br/>
 	@regenerations(p)
 	<br/>
@@ -52,7 +54,7 @@ templ CyclesSectionContent(p *CyclesSectionContentProps) {
 }
 
 templ toolStatus(p *CyclesSectionContentProps) {
-	<span class="flex gap-4">
+	<div class="flex gap-4">
 		@RegenerationEdit(RegenerationEditProps{
 			Tool:              p.Tool,
 			ToolIsActive:      p.ActivePress != nil,
@@ -71,7 +73,7 @@ templ toolStatus(p *CyclesSectionContentProps) {
 				{ p.ActivePress.German() }
 			}
 		}
-	</span>
+	</div>
 	// Skip the binding section for cassette type tools and for lower slot tools
 	if !p.Tool.IsCassette() && p.Tool.IsUpperTool() {
 		<br/>

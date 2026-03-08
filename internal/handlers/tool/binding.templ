@@ -16,13 +16,12 @@ type BindingSectionProps struct {
 }
 
 templ BindingSection(props BindingSectionProps) {
-	@components.SectionTitle(components.TitleLevel4, "Werkzeuge Binden")
-	<span
-		class="flex flex-row gap-4 flex-wrap"
-		if !props.IsAdmin {
-			disabled
+	<div class="space-y-4">
+		@components.Title(components.TitleProps{
+			Level: components.TitleLevel4,
+		}) {
+			Werkzeuge Binden
 		}
-	>
 		@selectbox.SelectBox() {
 			@selectbox.Trigger(selectbox.TriggerProps{
 				Disabled: props.Tool.Cassette > 0,
@@ -50,21 +49,21 @@ templ BindingSection(props BindingSectionProps) {
 				}
 			}
 		}
-		@button.Button(button.Props{
-			Variant:  button.VariantDestructive,
-			Disabled: props.Tool.Cassette <= 0,
-			Attributes: templ.Attributes{
-				"hx-patch":   string(urlb.ToolUnbind(props.Tool.ID)),
-				"hx-trigger": "click",
-				"hx-target":  "#binding-section",
-				"hx-swap":    "outerHTML",
-			},
-		}) {
-			Entbinden
-		}
-	</span>
-	if props.Tool.Cassette > 0 {
-		<span>
+		<div>
+			@button.Button(button.Props{
+				Variant:  button.VariantDestructive,
+				Disabled: props.Tool.Cassette <= 0,
+				Attributes: templ.Attributes{
+					"hx-patch":   string(urlb.ToolUnbind(props.Tool.ID)),
+					"hx-trigger": "click",
+					"hx-target":  "#binding-section",
+					"hx-swap":    "outerHTML",
+				},
+			}) {
+				Entbinden
+			}
+		</div>
+		if props.Tool.Cassette > 0 {
 			// Display the binding tool
 			{{
 				var bindingTool *shared.Tool // Cassette tool
@@ -76,23 +75,25 @@ templ BindingSection(props BindingSectionProps) {
 				}
 			}}
 			if bindingTool != nil {
-				@button.Button(button.Props{
-					ID:      fmt.Sprintf("cassette-%d-link", bindingTool.ID),
-					Class:   "tool-item w-full h-fit relative",
-					Variant: button.VariantOutline,
-					Href:    string(urlb.Tool(bindingTool.ID)),
-				}) {
-					@components.CassetteAnchor(
-						components.CassetteAnchorProps{
-							Cassette:     bindingTool,
-							BindingTool:  props.Tool,
-							EnableBadges: true,
-						},
-					)
-				}
+				<div>
+					@button.Button(button.Props{
+						ID:      fmt.Sprintf("cassette-%d-link", bindingTool.ID),
+						Class:   "tool-item w-full h-fit relative",
+						Variant: button.VariantOutline,
+						Href:    string(urlb.Tool(bindingTool.ID)),
+					}) {
+						@components.CassetteAnchor(
+							components.CassetteAnchorProps{
+								Cassette:     bindingTool,
+								BindingTool:  props.Tool,
+								EnableBadges: true,
+							},
+						)
+					}
+				</div>
 			} else {
 				@components.NotFoundText("Binding tool not available")
 			}
-		</span>
-	}
+		}
+	</div>
 }

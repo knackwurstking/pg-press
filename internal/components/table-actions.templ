@@ -18,8 +18,8 @@ templ TableActions(options TableActionsOptions) {
 	<span class="flex justify-end items-center gap-2">
 		if options.EditHref != "" {
 			@button.Button(button.Props{
-				Variant:  button.VariantOutline,
-				Size:     button.SizeIcon,
+				Variant:  button.VariantGhost,
+				Size:     button.SizeSm,
 				Disabled: options.EditAdminOnly && !options.User.IsAdmin(),
 				Attributes: templ.Attributes{
 					"hx-get":     string(options.EditHref),
@@ -29,13 +29,15 @@ templ TableActions(options TableActionsOptions) {
 					"title":      "Bearbeiten",
 				},
 			}) {
-				@icon.Pencil()
+				@icon.Pencil(icon.Props{
+					Color: "var(--primary)",
+				})
 			}
 		}
 		if options.DeleteHref != "" {
 			@button.Button(button.Props{
-				Variant:  button.VariantDestructive,
-				Size:     button.SizeIcon,
+				Variant:  button.VariantGhost,
+				Size:     button.SizeSm,
 				Disabled: options.DeleteAdminOnly && !options.User.IsAdmin(),
 				Attributes: templ.Attributes{
 					"hx-delete":  string(options.DeleteHref),
@@ -45,7 +47,9 @@ templ TableActions(options TableActionsOptions) {
 					"title":      "Löschen",
 				},
 			}) {
-				@icon.Trash()
+				@icon.Trash(icon.Props{
+					Color: "var(--destructive)",
+				})
 			}
 		}
 	</span>

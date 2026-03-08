@@ -52,7 +52,9 @@ templ regenerationEditShowcase(p RegenerationEditProps) {
 				"title":     "Status bearbeiten",
 			},
 		}) {
-			@icon.Pencil()
+			@icon.Pencil(icon.Props{
+				Color: "var(--primary)",
+			})
 		}
 	</div>
 }
