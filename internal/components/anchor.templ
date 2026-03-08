@@ -18,13 +18,20 @@ type ToolAnchorProps struct {
 	NotesCount         int
 	EnableBadges       bool
 	EnableCounts       bool
+	IsLink             bool
 }
 
 templ ToolAnchor(p ToolAnchorProps) {
+	{{
+		variant := button.VariantOutline
+		if p.IsLink {
+			variant = button.VariantLink
+		}
+	}}
 	@button.Button(button.Props{
 		ID:      fmt.Sprintf("tool-%d-link", p.Tool.ID),
 		Class:   "tool-item w-full h-fit relative",
-		Variant: button.VariantOutline,
+		Variant: variant,
 		Href:    string(urlb.Tool(p.Tool.ID)),
 	}) {
 		{{
@@ -83,13 +90,21 @@ type CassetteAnchorProps struct {
 	EnableCounts       bool
 	RegenerationsCount int
 	NotesCount         int
+
+	IsLink bool
 }
 
 templ CassetteAnchor(p CassetteAnchorProps) {
+	{{
+		variant := button.VariantOutline
+		if p.IsLink {
+			variant = button.VariantLink
+		}
+	}}
 	@button.Button(button.Props{
 		ID:      fmt.Sprintf("cassette-%d-link", p.Cassette.ID),
 		Class:   "tool-item w-full h-fit relative",
-		Variant: button.VariantOutline,
+		Variant: variant,
 		Href:    string(urlb.Tool(p.Cassette.ID)),
 	}) {
 		{{
@@ -153,7 +168,7 @@ templ toolAnchorCounts(notesCount, regenerationsCount int) {
 }
 
 templ toolAnchorTotalCycles(toolID shared.EntityID) {
-	<span
+	<div
 		class={
 			"total-cycles-container",
 			"absolute",
@@ -161,9 +176,13 @@ templ toolAnchorTotalCycles(toolID shared.EntityID) {
 			"w-fit",
 			"text-sm",
 		}
-		style="bottom: var(--spacing); right: calc(var(--spacing) * 2);"
+		style={
+			"bottom: var(--spacing)",
+			"right: calc(var(--spacing) * 2)",
+			"max-height: calc(100% - var(--spacing) * 2);",
+		}
 		hx-get={ urlb.ToolTotalCycles(toolID) }
 		hx-trigger="load"
 		hx-swap="innerHTML"
-	></span>
+	></div>
 }

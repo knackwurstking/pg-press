@@ -11,8 +11,10 @@ import (
 
 // Active tools section component
 templ ActiveToolsSection(pu *shared.PressUtilization, toolsForSelection map[shared.Slot][]*shared.Tool, user *shared.User) {
-	@upperToolSelection(pu, toolsForSelection, user)
-	@lowerToolSelection(pu, toolsForSelection, user)
+	<div class="space-y-4">
+		@upperToolSelection(pu, toolsForSelection, user)
+		@lowerToolSelection(pu, toolsForSelection, user)
+	</div>
 }
 
 templ upperToolSelection(pu *shared.PressUtilization, toolsForSelection map[shared.Slot][]*shared.Tool, user *shared.User) {
@@ -22,13 +24,18 @@ templ upperToolSelection(pu *shared.PressUtilization, toolsForSelection map[shar
 			tool = pu.SlotUpper
 		}
 	}}
-	@toolSelection(pu.PressID, shared.SlotUpper, tool.ID, toolsForSelection[shared.SlotUpper], user)
-	if pu.SlotUpper != nil {
-		@components.ToolAnchor(components.ToolAnchorProps{
-			Tool:            tool,
-			BindingCassette: pu.SlotUpperCassette,
-		})
-	}
+	<div class="space-y-2">
+		@toolSelection(pu.PressID, shared.SlotUpper, tool.ID, toolsForSelection[shared.SlotUpper], user)
+		if pu.SlotUpper != nil {
+			<div class="w-full p-4">
+				@components.ToolAnchor(components.ToolAnchorProps{
+					Tool:            tool,
+					BindingCassette: pu.SlotUpperCassette,
+					IsLink:          true,
+				})
+			</div>
+		}
+	</div>
 }
 
 templ lowerToolSelection(pu *shared.PressUtilization, toolsForSelection map[shared.Slot][]*shared.Tool, user *shared.User) {
@@ -38,12 +45,17 @@ templ lowerToolSelection(pu *shared.PressUtilization, toolsForSelection map[shar
 			tool = pu.SlotLower
 		}
 	}}
-	@toolSelection(pu.PressID, shared.SlotLower, tool.ID, toolsForSelection[shared.SlotLower], user)
-	if pu.SlotLower != nil {
-		@components.ToolAnchor(components.ToolAnchorProps{
-			Tool: tool,
-		})
-	}
+	<div class="space-y-2">
+		@toolSelection(pu.PressID, shared.SlotLower, tool.ID, toolsForSelection[shared.SlotLower], user)
+		if pu.SlotLower != nil {
+			<div class="w-full p-4">
+				@components.ToolAnchor(components.ToolAnchorProps{
+					Tool:   tool,
+					IsLink: true,
+				})
+			</div>
+		}
+	</div>
 }
 
 templ toolSelection(
