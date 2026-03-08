@@ -25,7 +25,7 @@ templ ToolAnchor(p ToolAnchorProps) {
 	{{
 		variant := button.VariantOutline
 		if p.IsLink {
-			variant = button.VariantLink
+			variant = button.VariantSecondary
 		}
 	}}
 	@button.Button(button.Props{
@@ -48,8 +48,20 @@ templ ToolAnchor(p ToolAnchorProps) {
 				templ.KV("justify-between", p.BindingCassette != nil),
 			}
 		>
-			<div class="font-semibold pb-1">
-				{ p.Tool.German() }
+			<div class="font-semibold pb-1 flex items-center justify-between gap-2 w-full">
+				<span>
+					{ p.Tool.German() }
+				</span>
+				<span class="flex gap-2 items-center">
+					<span>
+						@toolAnchorTotalCycles(p.Tool.ID)
+					</span>
+					<span>
+						if p.EnableCounts {
+							@toolAnchorCounts(p.NotesCount, p.RegenerationsCount)
+						}
+					</span>
+				</span>
 			</div>
 			if p.EnableBadges {
 				<div class="flex gap-4 justify-start items-center w-full">
@@ -73,10 +85,6 @@ templ ToolAnchor(p ToolAnchorProps) {
 				</div>
 			}
 		</div>
-		@toolAnchorTotalCycles(p.Tool.ID)
-		if p.EnableCounts {
-			@toolAnchorCounts(p.NotesCount, p.RegenerationsCount)
-		}
 	}
 }
 
@@ -116,8 +124,20 @@ templ CassetteAnchor(p CassetteAnchorProps) {
 			}
 		}}
 		<div class="flex flex-col gap-2 justify-between w-full">
-			<div class="font-semibold pb-1">
-				{ p.Cassette.German() }
+			<div class="font-semibold pb-1 flex items-center justify-between w-full gap-2">
+				<span>{ p.Cassette.German() }</span>
+				<span class="flex gap-2 items-center flex-0">
+					<span>
+						if p.Cassette.Code != "" {
+							@toolAnchorTotalCycles(p.Cassette.ID)
+						}
+					</span>
+					<span>
+						if p.EnableCounts {
+							@toolAnchorCounts(p.NotesCount, p.RegenerationsCount)
+						}
+					</span>
+				</span>
 			</div>
 			if p.EnableBadges {
 				<div class="flex gap-4 justify-start items-center w-full">
@@ -130,20 +150,14 @@ templ CassetteAnchor(p CassetteAnchorProps) {
 				</div>
 			}
 		</div>
-		if p.Cassette.Code != "" {
-			@toolAnchorTotalCycles(p.Cassette.ID)
-		}
-		if p.EnableCounts {
-			@toolAnchorCounts(p.NotesCount, p.RegenerationsCount)
-		}
 	}
 }
 
 templ toolAnchorCounts(notesCount, regenerationsCount int) {
-	<span
-		class="flex justify-end items-center gap-3 text-xs absolute"
-		style="top: var(--spacing); right: calc(var(--spacing) * 2);"
-	>
+	if notesCount == 0 && regenerationsCount == 0 {
+		{{ return }}
+	}
+	<span class="flex justify-end items-center gap-3">
 		if notesCount > 0 {
 			<span class="flex flex-row flex-nowrap gap-1">
 				@icon.Info(icon.Props{
@@ -171,15 +185,8 @@ templ toolAnchorTotalCycles(toolID shared.EntityID) {
 	<div
 		class={
 			"total-cycles-container",
-			"absolute",
 			"flex justify-end items-center",
 			"w-fit",
-			"text-sm",
-		}
-		style={
-			"bottom: var(--spacing)",
-			"right: calc(var(--spacing) * 2)",
-			"max-height: calc(100% - var(--spacing) * 2);",
 		}
 		hx-get={ urlb.ToolTotalCycles(toolID) }
 		hx-trigger="load"
