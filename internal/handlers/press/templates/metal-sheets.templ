@@ -15,150 +15,152 @@ type MetalSheetsProps struct {
 }
 
 templ MetalSheets(p MetalSheetsProps) {
-	@metalSheetTableUpper(p.UpperMetalSheets)
-	@metalSheetTableBottom(p.LowerMetalSheets)
-}
-
-templ metalSheetTableUpper(ums []*shared.UpperMetalSheet) {
 	@accordion.Accordion(accordion.Props{
 		Class: "w-full",
 	}) {
-		@accordion.Item(accordion.ItemProps{
-			Attributes: templ.Attributes{
-				"open": len(ums) > 0,
-			},
-		}) {
-			@accordion.Trigger() {
-				Oberteil / Kassette ({ fmt.Sprintf("%d", len(ums)) } Einträge)
-			}
-			@accordion.Content() {
-				<figure class="w-full overflow-x-auto">
-					@table.Table() {
-						@table.Header() {
-							@table.Row() {
-								@table.Head() {
-									Stärke (mm)
-								}
-								@table.Head() {
-									Blech (mm)
-								}
+		@metalSheetTableUpper(p.UpperMetalSheets)
+		@metalSheetTableBottom(p.LowerMetalSheets)
+	}
+}
+
+templ metalSheetTableUpper(ums []*shared.UpperMetalSheet) {
+	@accordion.Item(accordion.ItemProps{
+		Attributes: templ.Attributes{
+			"open": len(ums) > 0,
+		},
+	}) {
+		@accordion.Trigger() {
+			<span class="flex items-center justify-between gap-2 w-full">
+				<span>Oberteil / Kassette</span>
+				<span>{ fmt.Sprintf("%d", len(ums)) } Einträge</span>
+			</span>
+		}
+		@accordion.Content() {
+			<figure class="w-full overflow-x-auto">
+				@table.Table() {
+					@table.Header() {
+						@table.Row() {
+							@table.Head() {
+								Stärke (mm)
+							}
+							@table.Head() {
+								Blech (mm)
 							}
 						}
-						@table.Body() {
-							if len(ums) == 0 {
-								@table.Row() {
-									@table.Cell(table.CellProps{
-										Class: "text-center",
-										Attributes: templ.Attributes{
-											"colspan": "2",
-										},
-									}) {
-										@components.NotFoundText("Keine Bleche für Oberteil gefunden")
-									}
+					}
+					@table.Body() {
+						if len(ums) == 0 {
+							@table.Row() {
+								@table.Cell(table.CellProps{
+									Class: "text-center",
+									Attributes: templ.Attributes{
+										"colspan": "2",
+									},
+								}) {
+									@components.NotFoundText("Keine Bleche für Oberteil gefunden")
 								}
-							} else {
-								for _, um := range ums {
-									@table.Row() {
-										@table.Cell() {
-											{ fmt.Sprintf("%.1f", um.TileHeight) }
-										}
-										@table.Cell() {
-											{ fmt.Sprintf("%.1f", um.Value) }
-										}
+							}
+						} else {
+							for _, um := range ums {
+								@table.Row() {
+									@table.Cell() {
+										{ fmt.Sprintf("%.1f", um.TileHeight) }
+									}
+									@table.Cell() {
+										{ fmt.Sprintf("%.1f", um.Value) }
 									}
 								}
 							}
 						}
 					}
-				</figure>
-			}
+				}
+			</figure>
 		}
 	}
 }
 
 templ metalSheetTableBottom(lms []*shared.LowerMetalSheet) {
-	@accordion.Accordion(accordion.Props{
-		Class: "w-full",
+	@accordion.Item(accordion.ItemProps{
+		Attributes: templ.Attributes{
+			"open": len(lms) > 0,
+		},
 	}) {
-		@accordion.Item(accordion.ItemProps{
-			Attributes: templ.Attributes{
-				"open": len(lms) > 0,
-			},
-		}) {
-			@accordion.Trigger() {
-				Unterteil ({ fmt.Sprintf("%d", len(lms)) } Einträge)
-			}
-			@accordion.Content() {
-				<figure class="w-full overflow-x-auto">
-					@table.Table() {
-						@table.Header() {
-							@table.Row() {
-								@table.Head() {
-									Stärke (mm)
-								}
-								@table.Head() {
-									Blech (mm)
-								}
-								@table.Head() {
-									Marke (mm)
-								}
-								@table.Head() {
-									Stf.
-								}
-								@table.Head() {
-									Hubende
-								}
+		@accordion.Trigger() {
+			<span class="flex items-center justify-between gap-2 w-full">
+				<span>Unterteil</span>
+				<span>{ fmt.Sprintf("%d", len(lms)) } Einträge</span>
+			</span>
+		}
+		@accordion.Content() {
+			<figure class="w-full overflow-x-auto">
+				@table.Table() {
+					@table.Header() {
+						@table.Row() {
+							@table.Head() {
+								Stärke (mm)
+							}
+							@table.Head() {
+								Blech (mm)
+							}
+							@table.Head() {
+								Marke (mm)
+							}
+							@table.Head() {
+								Stf.
+							}
+							@table.Head() {
+								Hubende
 							}
 						}
-						@table.Body() {
-							if len(lms) == 0 {
-								@table.Row() {
-									@table.Cell(table.CellProps{
-										Class: "text-center",
-										Attributes: templ.Attributes{
-											"colspan": "5",
-										},
-									}) {
-										@components.NotFoundText("Keine Bleche für Unterteil gefunden")
-									}
+					}
+					@table.Body() {
+						if len(lms) == 0 {
+							@table.Row() {
+								@table.Cell(table.CellProps{
+									Class: "text-center",
+									Attributes: templ.Attributes{
+										"colspan": "5",
+									},
+								}) {
+									@components.NotFoundText("Keine Bleche für Unterteil gefunden")
 								}
-							} else {
-								for _, sheet := range lms {
-									@table.Row() {
-										@table.Cell() {
-											{ fmt.Sprintf("%.1f", sheet.TileHeight) }
+							}
+						} else {
+							for _, sheet := range lms {
+								@table.Row() {
+									@table.Cell() {
+										{ fmt.Sprintf("%.1f", sheet.TileHeight) }
+									}
+									@table.Cell() {
+										{ fmt.Sprintf("%.1f", sheet.Value) }
+									}
+									@table.Cell() {
+										if sheet.MarkeHeight > 0 {
+											{ fmt.Sprintf("%d", sheet.MarkeHeight) }
+										} else {
+											<span class="bg-muted text-muted-foreground">-</span>
 										}
-										@table.Cell() {
-											{ fmt.Sprintf("%.1f", sheet.Value) }
+									}
+									@table.Cell() {
+										if sheet.STF > 0 {
+											{ fmt.Sprintf("%.1f", sheet.STF) }
+										} else {
+											<span class="bg-muted text-muted-foreground">-</span>
 										}
-										@table.Cell() {
-											if sheet.MarkeHeight > 0 {
-												{ fmt.Sprintf("%d", sheet.MarkeHeight) }
-											} else {
-												<span class="bg-muted text-muted-foreground">-</span>
-											}
-										}
-										@table.Cell() {
-											if sheet.STF > 0 {
-												{ fmt.Sprintf("%.1f", sheet.STF) }
-											} else {
-												<span class="bg-muted text-muted-foreground">-</span>
-											}
-										}
-										@table.Cell() {
-											if sheet.STFMax > 0 {
-												{ fmt.Sprintf("%.1f", sheet.STFMax) }
-											} else {
-												<span class="bg-muted text-muted-foreground">-</span>
-											}
+									}
+									@table.Cell() {
+										if sheet.STFMax > 0 {
+											{ fmt.Sprintf("%.1f", sheet.STFMax) }
+										} else {
+											<span class="bg-muted text-muted-foreground">-</span>
 										}
 									}
 								}
 							}
 						}
 					}
-				</figure>
-			}
+				}
+			</figure>
 		}
 	}
 }

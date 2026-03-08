@@ -42,33 +42,29 @@ templ Cycles(p CyclesProps) {
 				}
 			}
 			@table.Body() {
-				@renderPressCyclesRows(p)
+				if len(p.Cycles) == 0 {
+					@table.Row() {
+						@table.Cell(table.CellProps{
+							Class: "text-center",
+							Attributes: templ.Attributes{
+								"colspan": "7",
+							},
+						}) {
+							@components.NotFoundText("Kein Pressenverlauf verfügbar")
+						}
+					}
+				} else {
+					for _, cycle := range p.Cycles {
+						{{ tool, _ := p.Tools[cycle.ToolID] }}
+						if !tool.IsTrackable() {
+							{{ continue }}
+						}
+						@renderPressCycleRow(cycle, tool, p.User)
+					}
+				}
 			}
 		}
 	</figure>
-}
-
-templ renderPressCyclesRows(p CyclesProps) {
-	if len(p.Cycles) == 0 {
-		@table.Row() {
-			@table.Cell(table.CellProps{
-				Class: "text-center",
-				Attributes: templ.Attributes{
-					"colspan": "7",
-				},
-			}) {
-				@components.NotFoundText("Kein Pressenverlauf verfügbar")
-			}
-		}
-	} else {
-		for _, cycle := range p.Cycles {
-			{{ tool, _ := p.Tools[cycle.ToolID] }}
-			if !tool.IsTrackable() {
-				{{ continue }}
-			}
-			@renderPressCycleRow(cycle, tool, p.User)
-		}
-	}
 }
 
 templ renderPressCycleRow(cycle *shared.Cycle, tool *shared.Tool, user *shared.User) {
