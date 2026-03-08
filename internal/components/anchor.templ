@@ -3,6 +3,7 @@ package components
 import (
 	"fmt"
 	"github.com/knackwurstking/pg-press/internal/components/badge"
+	"github.com/knackwurstking/pg-press/internal/components/button"
 	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
@@ -20,48 +21,55 @@ type ToolAnchorProps struct {
 }
 
 templ ToolAnchor(p ToolAnchorProps) {
-	{{
-		if p.Tool.IsCassette() {
-			panic(fmt.Sprintf("tool is required, got %s", p.Tool.Position.German()))
-		}
-		if p.BindingCassette != nil && !p.BindingCassette.IsCassette() {
-			panic(fmt.Sprintf("cassette is required, got %s", p.BindingCassette.Position.German()))
-		}
-	}}
-	<div
-		class={
-			"flex flex-col gap-2 w-full",
-			templ.KV("justify-between", p.BindingCassette != nil),
-		}
-	>
-		<div class="font-semibold pb-1">
-			{ p.Tool.German() }
-		</div>
-		if p.EnableBadges {
-			<div class="flex gap-4 justify-start items-center w-full">
-				@badge.Badge(badge.Props{
-					Variant: badge.VariantDefault,
-				}) {
-					{ p.Tool.Position.German() }
-				}
-				@ToolStateBadge(p.Tool, p.Press, p.IsRegenerating)
+	@button.Button(button.Props{
+		ID:      fmt.Sprintf("tool-%d-link", p.Tool.ID),
+		Class:   "tool-item w-full h-fit relative",
+		Variant: button.VariantOutline,
+		Href:    string(urlb.Tool(p.Tool.ID)),
+	}) {
+		{{
+			if p.Tool.IsCassette() {
+				panic(fmt.Sprintf("tool is required, got %s", p.Tool.Position.German()))
+			}
+			if p.BindingCassette != nil && !p.BindingCassette.IsCassette() {
+				panic(fmt.Sprintf("cassette is required, got %s", p.BindingCassette.Position.German()))
+			}
+		}}
+		<div
+			class={
+				"flex flex-col gap-2 w-full",
+				templ.KV("justify-between", p.BindingCassette != nil),
+			}
+		>
+			<div class="font-semibold pb-1">
+				{ p.Tool.German() }
 			</div>
-		}
-		if p.BindingCassette != nil {
-			<div class="text-sm italic text-blue-500 pt-1">
-				<i class="text-xs">
-					if p.BindingCassette.MinThickness == 0 {
-						Kassette: { p.BindingCassette.MaxThickness }mm
-					} else {
-						Kassette: { p.BindingCassette.MinThickness }mm -> { p.BindingCassette.MaxThickness }mm
+			if p.EnableBadges {
+				<div class="flex gap-4 justify-start items-center w-full">
+					@badge.Badge(badge.Props{
+						Variant: badge.VariantDefault,
+					}) {
+						{ p.Tool.Position.German() }
 					}
-				</i>
-			</div>
+					@ToolStateBadge(p.Tool, p.Press, p.IsRegenerating)
+				</div>
+			}
+			if p.BindingCassette != nil {
+				<div class="text-sm italic text-blue-500 pt-1">
+					<i class="text-xs">
+						if p.BindingCassette.MinThickness == 0 {
+							Kassette: { p.BindingCassette.MaxThickness }mm
+						} else {
+							Kassette: { p.BindingCassette.MinThickness }mm -> { p.BindingCassette.MaxThickness }mm
+						}
+					</i>
+				</div>
+			}
+		</div>
+		@toolAnchorTotalCycles(p.Tool.ID)
+		if p.EnableCounts {
+			@toolAnchorCounts(p.NotesCount, p.RegenerationsCount)
 		}
-	</div>
-	@toolAnchorTotalCycles(p.Tool.ID)
-	if p.EnableCounts {
-		@toolAnchorCounts(p.NotesCount, p.RegenerationsCount)
 	}
 }
 
@@ -78,34 +86,41 @@ type CassetteAnchorProps struct {
 }
 
 templ CassetteAnchor(p CassetteAnchorProps) {
-	{{
-		if !p.Cassette.IsCassette() {
-			panic(fmt.Sprintf("cassette is required, got %s", p.Cassette.Position.German()))
-		}
-		if p.Cassette.ID <= 0 {
-			panic("CassetteAnchor: Cassette is required")
-		}
-	}}
-	<div class="flex flex-col gap-2 justify-between w-full">
-		<div class="font-semibold pb-1">
-			{ p.Cassette.German() }
-		</div>
-		if p.EnableBadges {
-			<div class="flex gap-4 justify-start items-center w-full">
-				@badge.Badge(badge.Props{
-					Variant: badge.VariantDefault,
-				}) {
-					{ p.Cassette.Position.German() }
-				}
-				@CassetteStateBadge(p.Cassette, p.BindingTool, p.IsRegenerating)
+	@button.Button(button.Props{
+		ID:      fmt.Sprintf("cassette-%d-link", p.Cassette.ID),
+		Class:   "tool-item w-full h-fit relative",
+		Variant: button.VariantOutline,
+		Href:    string(urlb.Tool(p.Cassette.ID)),
+	}) {
+		{{
+			if !p.Cassette.IsCassette() {
+				panic(fmt.Sprintf("cassette is required, got %s", p.Cassette.Position.German()))
+			}
+			if p.Cassette.ID <= 0 {
+				panic("CassetteAnchor: Cassette is required")
+			}
+		}}
+		<div class="flex flex-col gap-2 justify-between w-full">
+			<div class="font-semibold pb-1">
+				{ p.Cassette.German() }
 			</div>
+			if p.EnableBadges {
+				<div class="flex gap-4 justify-start items-center w-full">
+					@badge.Badge(badge.Props{
+						Variant: badge.VariantDefault,
+					}) {
+						{ p.Cassette.Position.German() }
+					}
+					@CassetteStateBadge(p.Cassette, p.BindingTool, p.IsRegenerating)
+				</div>
+			}
+		</div>
+		if p.Cassette.Code != "" {
+			@toolAnchorTotalCycles(p.Cassette.ID)
 		}
-	</div>
-	if p.Cassette.Code != "" {
-		@toolAnchorTotalCycles(p.Cassette.ID)
-	}
-	if p.EnableCounts {
-		@toolAnchorCounts(p.NotesCount, p.RegenerationsCount)
+		if p.EnableCounts {
+			@toolAnchorCounts(p.NotesCount, p.RegenerationsCount)
+		}
 	}
 }
 

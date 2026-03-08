@@ -29,20 +29,18 @@ type PageProps struct {
 
 templ Page(props *PageProps) {
 	{{
-		var pageTitle, editorTitle string
+		var pageTitle string
 		typeName := getTypeName(props.Type)
 
 		if props.ID > 0 {
 			pageTitle = fmt.Sprintf("Bearbeiten - %s", typeName)
-			editorTitle = fmt.Sprintf("%s bearbeiten", typeName)
 		} else {
 			pageTitle = fmt.Sprintf("Erstellen - %s", typeName)
-			editorTitle = fmt.Sprintf("Neues %s erstellen", typeName)
 		}
 	}}
 	@components.Layout(components.LayoutProps{
 		PageTitle:      pageTitle,
-		AppBarTitle:    editorTitle,
+		AppBarTitle:    "Editor",
 		AdditionalHead: pageAdditionalHead(),
 		NavContent:     pageNavContent(props),
 	}) {

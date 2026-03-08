@@ -1,8 +1,6 @@
 package templates
 
 import (
-	"fmt"
-
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/components/button"
 	"github.com/knackwurstking/pg-press/internal/components/icon"
@@ -129,43 +127,36 @@ templ ToolsList(p SectionToolsProps) {
 				if !p.User.IsAdmin() && t.IsDead {
 					{{ continue }}
 				}
-				@button.Button(button.Props{
-					ID:      fmt.Sprintf("tool-%d-link", t.ID),
-					Class:   "tool-item h-fit relative hidden",
-					Variant: button.VariantOutline,
-					Href:    string(urlb.Tool(t.ID)),
-				}) {
-					{{
-						var cassette *shared.Tool
-						for _, c := range p.Cassettes {
-							if c.ID == t.Cassette {
-								cassette = c
-								break
-							}
+				{{
+					var cassette *shared.Tool
+					for _, c := range p.Cassettes {
+						if c.ID == t.Cassette {
+							cassette = c
+							break
 						}
+					}
 
-						var isRegenerating bool
-						if v, ok := p.IsRegenerating[t.ID]; ok {
-							isRegenerating = v
-						}
-					}}
-					{{
-						var press *shared.Press
-						if p, ok := p.ActiveTools[t.ID]; ok {
-							press = p
-						}
-					}}
-					@components.ToolAnchor(components.ToolAnchorProps{
-						Tool:               t,
-						BindingCassette:    cassette,
-						Press:              press,
-						EnableBadges:       true,
-						IsRegenerating:     isRegenerating,
-						EnableCounts:       true,
-						RegenerationsCount: p.RegenerationsCount[t.ID],
-						NotesCount:         p.NotesCount[t.ID],
-					})
-				}
+					var isRegenerating bool
+					if v, ok := p.IsRegenerating[t.ID]; ok {
+						isRegenerating = v
+					}
+				}}
+				{{
+					var press *shared.Press
+					if p, ok := p.ActiveTools[t.ID]; ok {
+						press = p
+					}
+				}}
+				@components.ToolAnchor(components.ToolAnchorProps{
+					Tool:               t,
+					BindingCassette:    cassette,
+					Press:              press,
+					EnableBadges:       true,
+					IsRegenerating:     isRegenerating,
+					EnableCounts:       true,
+					RegenerationsCount: p.RegenerationsCount[t.ID],
+					NotesCount:         p.NotesCount[t.ID],
+				})
 			}
 		</div>
 	}
@@ -174,36 +165,29 @@ templ ToolsList(p SectionToolsProps) {
 		@components.SectionTitle(components.TitleLevel4, "Kassetten")
 		<div id="cassettes-list" class="flex flex-col gap-4">
 			for _, c := range p.Cassettes {
-				@button.Button(button.Props{
-					ID:      fmt.Sprintf("cassette-%d-link", c.ID),
-					Class:   "tool-item h-fit relative hidden",
-					Variant: button.VariantOutline,
-					Href:    string(urlb.Tool(c.ID)),
-				}) {
-					{{
-						var boundTool *shared.Tool
-						for _, t := range p.Tools {
-							if t.Cassette == c.ID {
-								boundTool = t
-								break
-							}
+				{{
+					var boundTool *shared.Tool
+					for _, t := range p.Tools {
+						if t.Cassette == c.ID {
+							boundTool = t
+							break
 						}
+					}
 
-						var isRegenerating bool
-						if v, ok := p.IsRegenerating[c.ID]; ok {
-							isRegenerating = v
-						}
-					}}
-					@components.CassetteAnchor(components.CassetteAnchorProps{
-						Cassette:           c,
-						BindingTool:        boundTool,
-						EnableBadges:       true,
-						IsRegenerating:     isRegenerating,
-						EnableCounts:       true,
-						RegenerationsCount: p.RegenerationsCount[c.ID],
-						NotesCount:         p.NotesCount[c.ID],
-					})
-				}
+					var isRegenerating bool
+					if v, ok := p.IsRegenerating[c.ID]; ok {
+						isRegenerating = v
+					}
+				}}
+				@components.CassetteAnchor(components.CassetteAnchorProps{
+					Cassette:           c,
+					BindingTool:        boundTool,
+					EnableBadges:       true,
+					IsRegenerating:     isRegenerating,
+					EnableCounts:       true,
+					RegenerationsCount: p.RegenerationsCount[c.ID],
+					NotesCount:         p.NotesCount[c.ID],
+				})
 			}
 		</div>
 	}

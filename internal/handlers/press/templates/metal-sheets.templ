@@ -15,11 +15,6 @@ type MetalSheetsProps struct {
 }
 
 templ MetalSheets(p MetalSheetsProps) {
-	@metalSheetTables(p)
-}
-
-// Metal sheet table components
-templ metalSheetTables(p MetalSheetsProps) {
 	@metalSheetTableUpper(p.UpperMetalSheets)
 	@metalSheetTableBottom(p.LowerMetalSheets)
 }

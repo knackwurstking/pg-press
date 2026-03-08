@@ -82,7 +82,7 @@ templ sectionNotes(p PageProps) {
 	@components.Section(templ.Attributes{
 		"id": "notes-section",
 	}) {
-		@components.SectionTitle(components.TitleLevel5, "Notizen") {
+		@components.SectionTitle(components.TitleLevel4, "Notizen") {
 			@components.SectionTitleAction(components.SectionTitleActionProps{
 				Url:   urlb.DialogEditNote(0, fmt.Sprintf("press_%d", p.Press.Number)),
 				Icon:  icon.Plus(),
@@ -105,9 +105,7 @@ templ sectionActiveTools(p PageProps) {
 	@components.Section(templ.Attributes{
 		"id": "tool-state-section",
 	}) {
-		<div class="flex justify-between items-center">
-			<h5>Aktive Werkzeuge</h5>
-		</div>
+		@components.SectionTitle(components.TitleLevel4, "Aktive Werkzeuge")
 		<div
 			id="active-tools-content"
 			hx-get={ urlb.PressActiveTools(p.Press.ID) }
@@ -124,9 +122,7 @@ templ sectionMetalSheets(p PageProps) {
 	@components.Section(templ.Attributes{
 		"id": "metal-sheets-section",
 	}) {
-		<div class="flex justify-between items-center">
-			<h5>Blech Listen</h5>
-		</div>
+		@components.SectionTitle(components.TitleLevel4, "Blech Listen")
 		<div
 			id="metal-sheets-content"
 			hx-get={ urlb.PressMetalSheets(p.Press.ID) }

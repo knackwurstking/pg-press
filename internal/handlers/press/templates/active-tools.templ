@@ -11,35 +11,39 @@ import (
 
 // Active tools section component
 templ ActiveToolsSection(pu *shared.PressUtilization, toolsForSelection map[shared.Slot][]*shared.Tool, user *shared.User) {
-	<div class="flex flex-col gap-4">
-		// Upper Tool Selection
-		{{
-			currentToolID := shared.EntityID(0)
-			if pu.SlotUpper != nil {
-				currentToolID = pu.SlotUpper.ID
-			}
-		}}
-		@toolSelection(pu.PressID, shared.SlotUpper, currentToolID, toolsForSelection[shared.SlotUpper], user)
+	@upperToolSelection(pu, toolsForSelection, user)
+	@lowerToolSelection(pu, toolsForSelection, user)
+}
+
+templ upperToolSelection(pu *shared.PressUtilization, toolsForSelection map[shared.Slot][]*shared.Tool, user *shared.User) {
+	{{
+		var tool *shared.Tool
 		if pu.SlotUpper != nil {
-			@components.ToolAnchor(components.ToolAnchorProps{
-				Tool:            pu.SlotUpper,
-				BindingCassette: pu.SlotUpperCassette,
-			})
+			tool = pu.SlotUpper
 		}
-		// Lower Tool Selection
-		{{
-			currentToolID = shared.EntityID(0)
-			if pu.SlotLower != nil {
-				currentToolID = pu.SlotLower.ID
-			}
-		}}
-		@toolSelection(pu.PressID, shared.SlotLower, currentToolID, toolsForSelection[shared.SlotLower], user)
+	}}
+	@toolSelection(pu.PressID, shared.SlotUpper, tool.ID, toolsForSelection[shared.SlotUpper], user)
+	if pu.SlotUpper != nil {
+		@components.ToolAnchor(components.ToolAnchorProps{
+			Tool:            tool,
+			BindingCassette: pu.SlotUpperCassette,
+		})
+	}
+}
+
+templ lowerToolSelection(pu *shared.PressUtilization, toolsForSelection map[shared.Slot][]*shared.Tool, user *shared.User) {
+	{{
+		var tool *shared.Tool
 		if pu.SlotLower != nil {
-			@components.ToolAnchor(components.ToolAnchorProps{
-				Tool: pu.SlotLower,
-			})
+			tool = pu.SlotLower
 		}
-	</div>
+	}}
+	@toolSelection(pu.PressID, shared.SlotLower, tool.ID, toolsForSelection[shared.SlotLower], user)
+	if pu.SlotLower != nil {
+		@components.ToolAnchor(components.ToolAnchorProps{
+			Tool: tool,
+		})
+	}
 }
 
 templ toolSelection(
@@ -60,7 +64,11 @@ templ toolSelection(
 			@form.Label(form.LabelProps{
 				For: id,
 			}) {
-				{ position.German() }
+				@components.Title(components.TitleProps{
+					Level: components.TitleLevel5,
+				}) {
+					{ position.German() }
+				}
 			}
 			@selectbox.SelectBox() {
 				@selectbox.Trigger(selectbox.TriggerProps{
