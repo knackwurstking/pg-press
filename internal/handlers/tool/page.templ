@@ -37,9 +37,9 @@ templ Page(p *PageProps) {
 				@components.Spinner()
 			}
 			if !p.Tool.IsCassette() {
+				<br/>
 				@components.Section(templ.Attributes{
 					"id":                    "metal-sheets-section",
-					"class":                 "mt-8",
 					"hx-get":                string(urlb.ToolMetalSheets(p.Tool.ID)),
 					"hx-trigger":            "load, reload-metal-sheets from:body",
 					"hx-swap":               "innerHTML",
@@ -49,8 +49,10 @@ templ Page(p *PageProps) {
 				}
 			}
 			if !p.Tool.IsTrackable() {
+				<br/>
 				@components.NotFoundText("Dies ist ein nicht nachverfolgbares Werkzeug, da keine Code vorhanden ist.")
 			} else {
+				<br/>
 				@CyclesSection(false, p.Tool.ID)
 			}
 		}

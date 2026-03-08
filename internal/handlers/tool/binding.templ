@@ -16,85 +16,83 @@ type BindingSectionProps struct {
 }
 
 templ BindingSection(props BindingSectionProps) {
-	<span id="binding-section" class="flex flex-col gap-4">
-		@components.SectionTitle(components.TitleLevel5, "Werkzeuge Binden")
-		<span
-			class="flex gap-4 flex-wrap"
-			if !props.IsAdmin {
-				disabled
-			}
-		>
-			@selectbox.SelectBox() {
-				@selectbox.Trigger(selectbox.TriggerProps{
-					Disabled: props.Tool.Cassette > 0,
-					Attributes: templ.Attributes{
-						"hx-patch":   string(urlb.ToolBind(props.Tool.ID)),
-						"hx-vals":    "js:{target_id: event.target.value}",
-						"hx-trigger": "change",
-						"hx-target":  "#binding-section",
-						"hx-swap":    "outerHTML",
-					},
-				}) {
-					@selectbox.Value(selectbox.ValueProps{
-						Placeholder: "Werkzeugbindung",
-					})
-				}
-				@selectbox.Content(selectbox.ContentProps{
-					NoSearch: true,
-				}) {
-					for _, c := range props.CassettesForBinding {
-						@selectbox.Item(selectbox.ItemProps{
-							Value: c.ID.String(),
-						}) {
-							{ c.German() }
-						}
-					}
-				}
-			}
-			@button.Button(button.Props{
-				Variant:  button.VariantDestructive,
-				Disabled: props.Tool.Cassette <= 0,
+	@components.SectionTitle(components.TitleLevel4, "Werkzeuge Binden")
+	<span
+		class="flex flex-row gap-4 flex-wrap"
+		if !props.IsAdmin {
+			disabled
+		}
+	>
+		@selectbox.SelectBox() {
+			@selectbox.Trigger(selectbox.TriggerProps{
+				Disabled: props.Tool.Cassette > 0,
 				Attributes: templ.Attributes{
-					"hx-patch":   string(urlb.ToolUnbind(props.Tool.ID)),
-					"hx-trigger": "click",
+					"hx-patch":   string(urlb.ToolBind(props.Tool.ID)),
+					"hx-vals":    "js:{target_id: event.target.value}",
+					"hx-trigger": "change",
 					"hx-target":  "#binding-section",
 					"hx-swap":    "outerHTML",
 				},
 			}) {
-				Entbinden
+				@selectbox.Value(selectbox.ValueProps{
+					Placeholder: "Werkzeugbindung",
+				})
 			}
-		</span>
-		if props.Tool.Cassette > 0 {
-			<span>
-				// Display the binding tool
-				{{
-					var bindingTool *shared.Tool // Cassette tool
-					for _, c := range props.CassettesForBinding {
-						if c.ID == props.Tool.Cassette {
-							bindingTool = c
-							break
-						}
-					}
-				}}
-				if bindingTool != nil {
-					@button.Button(button.Props{
-						ID:      fmt.Sprintf("cassette-%d-link", bindingTool.ID),
-						Class:   "tool-item w-full h-fit relative",
-						Variant: button.VariantOutline,
-						Href:    string(urlb.Tool(bindingTool.ID)),
+			@selectbox.Content(selectbox.ContentProps{
+				NoSearch: true,
+			}) {
+				for _, c := range props.CassettesForBinding {
+					@selectbox.Item(selectbox.ItemProps{
+						Value: c.ID.String(),
 					}) {
-						@components.CassetteAnchor(
-							components.CassetteAnchorProps{
-								Cassette:     bindingTool,
-								BindingTool:  props.Tool,
-								EnableBadges: true,
-							},
-						)
+						{ c.German() }
 					}
-				} else {
-					@components.NotFoundText("Binding tool not available")
 				}
-			</span>
+			}
+		}
+		@button.Button(button.Props{
+			Variant:  button.VariantDestructive,
+			Disabled: props.Tool.Cassette <= 0,
+			Attributes: templ.Attributes{
+				"hx-patch":   string(urlb.ToolUnbind(props.Tool.ID)),
+				"hx-trigger": "click",
+				"hx-target":  "#binding-section",
+				"hx-swap":    "outerHTML",
+			},
+		}) {
+			Entbinden
 		}
 	</span>
+	if props.Tool.Cassette > 0 {
+		<span>
+			// Display the binding tool
+			{{
+				var bindingTool *shared.Tool // Cassette tool
+				for _, c := range props.CassettesForBinding {
+					if c.ID == props.Tool.Cassette {
+						bindingTool = c
+						break
+					}
+				}
+			}}
+			if bindingTool != nil {
+				@button.Button(button.Props{
+					ID:      fmt.Sprintf("cassette-%d-link", bindingTool.ID),
+					Class:   "tool-item w-full h-fit relative",
+					Variant: button.VariantOutline,
+					Href:    string(urlb.Tool(bindingTool.ID)),
+				}) {
+					@components.CassetteAnchor(
+						components.CassetteAnchorProps{
+							Cassette:     bindingTool,
+							BindingTool:  props.Tool,
+							EnableBadges: true,
+						},
+					)
+				}
+			} else {
+				@components.NotFoundText("Binding tool not available")
+			}
+		</span>
+	}
 }
