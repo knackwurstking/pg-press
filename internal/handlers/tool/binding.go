@@ -80,7 +80,7 @@ func renderBindingSection(c echo.Context, tool *shared.Tool) *echo.HTTPError {
 	}
 
 	// Render the template
-	t := BindingSection(BindingSectionProps{
+	t := Binding(BindingProps{
 		Tool:                tool,
 		CassettesForBinding: bindableCassettes,
 		IsAdmin:             user.IsAdmin(),

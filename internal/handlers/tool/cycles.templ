@@ -11,24 +11,7 @@ import (
 	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
-templ CyclesSection(oob bool, id shared.EntityID) {
-	{{
-		hxGet := ""
-		hxGet = string(urlb.ToolCycles(id))
-	}}
-	@components.Section(templ.Attributes{
-		"id":                    "cycles-section",
-		"hx-get":                hxGet,
-		"hx-trigger":            "load, reload-cycles from:body",
-		"hx-swap":               "innerHTML",
-		"hx-swap-oob":           fmt.Sprintf("%t", oob),
-		"hx-on::response-error": "alert(event.detail.xhr.responseText)",
-	}) {
-		@components.Spinner()
-	}
-}
-
-type CyclesSectionContentProps struct {
+type CyclesContentProps struct {
 	Tool                *shared.Tool
 	ToolCycles          []*shared.Cycle
 	PressMap            map[shared.EntityID]*shared.Press
@@ -38,65 +21,82 @@ type CyclesSectionContentProps struct {
 	User                *shared.User
 }
 
-templ CyclesSectionContent(p *CyclesSectionContentProps) {
-	<div id="tool-status-section">
-		@components.Title(components.TitleProps{
-			Level: components.TitleLevel4,
-		}) {
-			Tool Status
+templ Cycles(oob bool, id shared.EntityID) {
+	<div
+		id="cycles-section"
+		hx-get={ urlb.ToolCycles(id) }
+		hx-trigger="load, reload-cycles from:body"
+		hx-swap="innerHTML"
+		if oob {
+			hx-swap-oob="true"
 		}
-		@toolStatus(p)
+		hx-on::response-error="alert(event.detail.xhr.responseText)"
+	>
+		@components.Spinner()
 	</div>
-	<br/>
-	@regenerations(p)
-	<br/>
-	@cyclesTable(p)
 }
 
-templ toolStatus(p *CyclesSectionContentProps) {
-	<div class="flex gap-4">
-		@RegenerationEdit(RegenerationEditProps{
-			Tool:              p.Tool,
-			ToolIsActive:      p.ActivePress != nil,
-			Editable:          false,
-			UserHasPermission: p.User.IsAdmin(),
-		})
-		if p.ActivePress != nil {
-			@button.Button(button.Props{
-				Variant: button.VariantLink,
-				Href:    string(urlb.Press(p.ActivePress.ID)),
-				Attributes: templ.Attributes{
-					"title": "Zur Pressenübersicht",
-				},
-			}) {
-				@icon.ArrowRight()
-				{ p.ActivePress.German() }
-			}
+templ CyclesContent(prop *CyclesContentProps) {
+	@binding(prop)
+	<br/>
+	@regenerationsEdit(prop)
+	<br/>
+	@regenerationsTable(prop)
+	<br/>
+	@totalCycles(prop)
+	<br/>
+	@cyclesTable(prop)
+}
+
+templ binding(prop *CyclesContentProps) {
+	@components.Section() {
+		@components.SectionTitle(components.TitleLevel4, "Werkzeuge Binden")
+		if prop.Tool.IsUpperTool() && !prop.Tool.IsCassette() {
+			@Binding(BindingProps{
+				Tool:                prop.Tool,
+				CassettesForBinding: prop.CassettesForBinding,
+				IsAdmin:             prop.User.IsAdmin(),
+			})
 		}
-	</div>
-	// Skip the binding section for cassette type tools and for lower slot tools
-	if !p.Tool.IsCassette() && p.Tool.IsUpperTool() {
-		<br/>
-		@BindingSection(BindingSectionProps{
-			Tool:                p.Tool,
-			CassettesForBinding: p.CassettesForBinding,
-			IsAdmin:             p.User.IsAdmin(),
-		})
 	}
 }
 
-templ regenerations(p *CyclesSectionContentProps) {
-	@components.Section(templ.Attributes{
-		"id": "regenerations-section",
-	}) {
+templ regenerationsEdit(prop *CyclesContentProps) {
+	@components.Section() {
+		@components.SectionTitle(components.TitleLevel4, "Status bearbeiten")
+		<div class="flex gap-4">
+			@RegenerationEdit(RegenerationEditProps{
+				Tool:              prop.Tool,
+				ToolIsActive:      prop.ActivePress != nil,
+				Editable:          false,
+				UserHasPermission: prop.User.IsAdmin(),
+			})
+			if prop.ActivePress != nil {
+				@button.Button(button.Props{
+					Variant: button.VariantLink,
+					Href:    string(urlb.Press(prop.ActivePress.ID)),
+					Attributes: templ.Attributes{
+						"title": "Zur Pressenübersicht",
+					},
+				}) {
+					@icon.ArrowRight()
+					{ prop.ActivePress.German() }
+				}
+			}
+		</div>
+	}
+}
+
+templ regenerationsTable(prop *CyclesContentProps) {
+	@components.Section() {
 		@components.SectionTitle(components.TitleLevel4, "Regenerationen") {
 			@components.SectionTitleAction(components.SectionTitleActionProps{
 				Icon:  icon.Plus(),
-				Url:   urlb.DialogEditToolRegenerationGet(p.Tool.ID),
+				Url:   urlb.DialogEditToolRegenerationGet(prop.Tool.ID),
 				Title: "Neue Regeneration",
 			})
 		}
-		if len(p.Regenerations) == 0 {
+		if len(prop.Regenerations) == 0 {
 			@components.NotFoundText("Keine Regenerationen verzeichnet für dieses Werkzeug")
 		} else {
 			<figure class="w-full overflow-x-auto">
@@ -113,8 +113,22 @@ templ regenerations(p *CyclesSectionContentProps) {
 						}
 					}
 					@table.Body() {
-						for _, r := range p.Regenerations {
-							@regenerationsTableRow(r, p.User)
+						for _, r := range prop.Regenerations {
+							@table.Row() {
+								@table.Cell() {
+									<span>{ r.Start.FormatDate() }</span>
+								}
+								@table.Cell() {
+									<span>{ r.Stop.FormatDate() }</span>
+								}
+								@table.Cell() {
+									@components.TableActions(components.TableActionsOptions{
+										DeleteHref:      urlb.ToolDeleteRegeneration(r.ToolID, r.ID),
+										DeleteAdminOnly: true,
+										User:            prop.User,
+									})
+								}
+							}
 						}
 					}
 				}
@@ -123,119 +137,89 @@ templ regenerations(p *CyclesSectionContentProps) {
 	}
 }
 
-templ regenerationsTableRow(r *shared.ToolRegeneration, u *shared.User) {
-	@table.Row() {
-		@table.Cell() {
-			<span>{ r.Start.FormatDate() }</span>
-		}
-		@table.Cell() {
-			<span>{ r.Stop.FormatDate() }</span>
-		}
-		@table.Cell() {
-			@components.TableActions(components.TableActionsOptions{
-				DeleteHref:      urlb.ToolDeleteRegeneration(r.ToolID, r.ID),
-				DeleteAdminOnly: true,
-				User:            u,
-			})
-		}
+templ totalCycles(prop *CyclesContentProps) {
+	@components.Section() {
+		@components.SectionTitle(components.TitleLevel4, "Gesamtzyklen")
+		@TotalCycles(prop.Tool.Cycles, true)
 	}
 }
 
-templ cyclesTable(p *CyclesSectionContentProps) {
-	{{
-		var lastRegeneration *shared.ToolRegeneration
-		if len(p.Regenerations) > 0 {
-			lastRegeneration = p.Regenerations[0]
-		}
-	}}
-	@components.Section(templ.Attributes{
-		"id": "cycles-section",
-	}) {
-		@components.SectionTitle(components.TitleLevel4, "Pressennutzungsverlauf") {
-			@components.SectionTitleAction(components.SectionTitleActionProps{
-				Icon:  icon.Plus(),
-				Url:   urlb.DialogEditCycle(0, p.Tool.ID, false),
-				Title: "Neuen Eintrag hinzufügen",
-			})
-		}
-		@components.Section() {
-			@components.SectionTitle(components.TitleLevel6, "Gesamtzyklen:")
-			@TotalCycles(p.Tool.Cycles, true)
-		}
-		@components.Section(templ.Attributes{
-			"class": "mt-8",
-		}) {
-			@components.SectionTitle(components.TitleLevel6, "Teilzyklen:")
-			if len(p.ToolCycles) == 0 {
-				@components.NotFoundText("Kein Pressenverlauf verfügbar")
-			} else {
-				<figure class="w-full overflow-x-auto">
-					@table.Table() {
-						@table.Header() {
-							@table.Row() {
-								@table.Head() {
-									Presse
-								}
-								@table.Head() {
-									Start
-								}
-								@table.Head() {
-									Stop
-								}
-								@table.Head() {
-									Zyklen
-								}
-								@table.Head() {
-									Zyklen (Teil)
-								}
-								@table.Head()
+templ cyclesTable(prop *CyclesContentProps) {
+	@components.Section() {
+		@components.SectionTitle(components.TitleLevel4, "Pressennutzungsverlauf")
+		if len(prop.ToolCycles) == 0 {
+			@components.NotFoundText("Kein Pressenverlauf verfügbar")
+		} else {
+			<figure class="w-full overflow-x-auto">
+				@table.Table() {
+					@table.Header() {
+						@table.Row() {
+							@table.Head() {
+								Presse
 							}
+							@table.Head() {
+								Start
+							}
+							@table.Head() {
+								Stop
+							}
+							@table.Head() {
+								Zyklen
+							}
+							@table.Head() {
+								Zyklen (Teil)
+							}
+							@table.Head()
 						}
-						@table.Body() {
-							for _, cycle := range p.ToolCycles {
-								@cycleTableRow(cycle, p.PressMap[cycle.PressID], lastRegeneration, p.User)
+					}
+					@table.Body() {
+						{{
+							var lastRegeneration *shared.ToolRegeneration
+							if len(prop.Regenerations) > 0 {
+								lastRegeneration = prop.Regenerations[0]
+							}
+						}}
+						for _, cycle := range prop.ToolCycles {
+							{{
+								cycleClass := ""
+								if lastRegeneration != nil && lastRegeneration.Start >= cycle.Stop {
+									cycleClass = "bg-muted text-muted-foreground"
+								}
+
+								press := prop.PressMap[cycle.PressID]
+							}}
+							@table.Row(table.RowProps{
+								Class: cycleClass,
+							}) {
+								@table.Cell() {
+									<span>{ press.German() }</span>
+								}
+								@table.Cell() {
+									<span class="text-sm">{ cycle.Start.FormatDate() }</span>
+								}
+								@table.Cell() {
+									<span class="text-sm">{ cycle.Stop.FormatDate() }</span>
+								}
+								@table.Cell() {
+									{ fmt.Sprintf("%d", cycle.PressCycles) }
+								}
+								@table.Cell() {
+									{ fmt.Sprintf("%d", cycle.PartialCycles) }
+								}
+								@table.Cell() {
+									@components.TableActions(components.TableActionsOptions{
+										EditHref:        urlb.DialogEditCycle(cycle.ID, cycle.ToolID, false),
+										EditAdminOnly:   true,
+										DeleteHref:      urlb.ToolCycleDelete(cycle.ID),
+										DeleteAdminOnly: true,
+										User:            prop.User,
+									})
+								}
 							}
 						}
 					}
-				</figure>
-			}
-		}
-	}
-}
-
-templ cycleTableRow(cycle *shared.Cycle, press *shared.Press, lastRegeneration *shared.ToolRegeneration, user *shared.User) {
-	{{
-		class := ""
-		if lastRegeneration != nil && lastRegeneration.Start >= cycle.Stop {
-			class = "bg-muted text-muted-foreground"
-		}
-	}}
-	@table.Row(table.RowProps{
-		Class: class,
-	}) {
-		@table.Cell() {
-			<span>{ press.German() }</span>
-		}
-		@table.Cell() {
-			<span class="text-sm">{ cycle.Start.FormatDate() }</span>
-		}
-		@table.Cell() {
-			<span class="text-sm">{ cycle.Stop.FormatDate() }</span>
-		}
-		@table.Cell() {
-			{ fmt.Sprintf("%d", cycle.PressCycles) }
-		}
-		@table.Cell() {
-			{ fmt.Sprintf("%d", cycle.PartialCycles) }
-		}
-		@table.Cell() {
-			@components.TableActions(components.TableActionsOptions{
-				EditHref:        urlb.DialogEditCycle(cycle.ID, cycle.ToolID, false),
-				EditAdminOnly:   true,
-				DeleteHref:      urlb.ToolCycleDelete(cycle.ID),
-				DeleteAdminOnly: true,
-				User:            user,
-			})
+				}
+			</figure>
 		}
 	}
 }

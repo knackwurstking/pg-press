@@ -17,7 +17,7 @@ func GetCyclesSectionContent(c echo.Context) *echo.HTTPError {
 // renderCyclesSection renders the cycles section for a tool
 func renderCyclesSection(c echo.Context, tool *shared.Tool) *echo.HTTPError {
 	// Render out-of-band swap for cycles section to trigger reload
-	t := CyclesSection(true, tool.ID)
+	t := Cycles(true, tool.ID)
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "CyclesSection")
@@ -78,7 +78,7 @@ func renderCyclesSectionContent(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	t := CyclesSectionContent(&CyclesSectionContentProps{
+	t := CyclesContent(&CyclesContentProps{
 		Tool:                tool,
 		ToolCycles:          toolCycles,
 		PressMap:            pressMap,

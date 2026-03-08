@@ -9,19 +9,15 @@ import (
 	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
-type BindingSectionProps struct {
+type BindingProps struct {
 	Tool                *shared.Tool
 	CassettesForBinding []*shared.Tool
 	IsAdmin             bool
 }
 
-templ BindingSection(props BindingSectionProps) {
-	<div class="space-y-4">
-		@components.Title(components.TitleProps{
-			Level: components.TitleLevel4,
-		}) {
-			Werkzeuge Binden
-		}
+templ Binding(props BindingProps) {
+	{{ targetID := "binding" }}
+	<div id={ targetID } class="space-y-4">
 		@selectbox.SelectBox() {
 			@selectbox.Trigger(selectbox.TriggerProps{
 				Disabled: props.Tool.Cassette > 0,
@@ -29,7 +25,7 @@ templ BindingSection(props BindingSectionProps) {
 					"hx-patch":   string(urlb.ToolBind(props.Tool.ID)),
 					"hx-vals":    "js:{target_id: event.target.value}",
 					"hx-trigger": "change",
-					"hx-target":  "#binding-section",
+					"hx-target":  "#" + targetID,
 					"hx-swap":    "outerHTML",
 				},
 			}) {
@@ -56,7 +52,7 @@ templ BindingSection(props BindingSectionProps) {
 				Attributes: templ.Attributes{
 					"hx-patch":   string(urlb.ToolUnbind(props.Tool.ID)),
 					"hx-trigger": "click",
-					"hx-target":  "#binding-section",
+					"hx-target":  "#" + targetID,
 					"hx-swap":    "outerHTML",
 				},
 			}) {

@@ -53,7 +53,7 @@ templ Page(p *PageProps) {
 				@components.NotFoundText("Dies ist ein nicht nachverfolgbares Werkzeug, da keine Code vorhanden ist.")
 			} else {
 				<br/>
-				@CyclesSection(false, p.Tool.ID)
+				@Cycles(false, p.Tool.ID)
 			}
 		}
 		// Notes
