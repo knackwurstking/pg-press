@@ -25,7 +25,7 @@ templ Page(p PageProps) {
 			AdditionalHead: additionalHead(),
 		},
 	) {
-		@components.Page(components.PageProps{Class: "debug"}) {
+		@components.Page() {
 			@sectionActions(p)
 			@sectionNotes(p)
 			<br/>
