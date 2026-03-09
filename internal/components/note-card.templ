@@ -55,9 +55,7 @@ templ NoteCard(note *shared.Note, tools []*shared.Tool, props ...card.Props) {
 						"title":      "Notiz bearbeiten",
 					},
 				}) {
-					@icon.Pencil(icon.Props{
-						Color: "var(--primary)",
-					})
+					@icon.Pencil()
 				}
 				@button.Button(button.Props{
 					Variant: button.VariantGhost,

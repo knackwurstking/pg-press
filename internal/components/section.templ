@@ -42,7 +42,7 @@ type SectionTitleActionProps struct {
 
 templ SectionTitleAction(p SectionTitleActionProps) {
 	@button.Button(button.Props{
-		Variant: button.VariantOutline,
+		Variant: button.VariantGhost,
 		Attributes: templ.Attributes{
 			"hx-get":                string(p.Url),
 			"hx-trigger":            "click",

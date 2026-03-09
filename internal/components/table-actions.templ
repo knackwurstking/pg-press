@@ -19,7 +19,7 @@ templ TableActions(options TableActionsOptions) {
 		if options.EditHref != "" {
 			@button.Button(button.Props{
 				Variant:  button.VariantGhost,
-				Size:     button.SizeSm,
+				Size:     button.SizeIcon,
 				Disabled: options.EditAdminOnly && !options.User.IsAdmin(),
 				Attributes: templ.Attributes{
 					"hx-get":     string(options.EditHref),
@@ -29,9 +29,7 @@ templ TableActions(options TableActionsOptions) {
 					"title":      "Bearbeiten",
 				},
 			}) {
-				@icon.Pencil(icon.Props{
-					Color: "var(--primary)",
-				})
+				@icon.Pencil()
 			}
 		}
 		if options.DeleteHref != "" {
