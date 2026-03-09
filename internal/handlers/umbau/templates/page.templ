@@ -115,6 +115,7 @@ templ toolSelection(position shared.Slot, current *shared.Tool, tools []*shared.
 				@selectbox.Content() {
 					for _, t := range tools {
 						@selectbox.Item(selectbox.ItemProps{
+							Class: "tool-select-item",
 							Value: fmt.Sprintf("%d", t.ID),
 							Attributes: templ.Attributes{
 								"data-format": fmt.Sprintf("%dx%d", t.Width, t.Height),

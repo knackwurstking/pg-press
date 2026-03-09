@@ -168,6 +168,7 @@ func getFormData(c echo.Context) (*formData, *echo.HTTPError) {
 		return data, merr.WrapEcho("get (bottom) tool with ID %d", id)
 	}
 
+	// FIXME: Incompatible tools error even if the format is matching
 	if data.upperTool.Width == data.lowerTool.Width && data.upperTool.Height == data.lowerTool.Height {
 		return data, echo.NewHTTPError(http.StatusBadRequest, "incompatible tools format")
 	}
