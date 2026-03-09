@@ -99,15 +99,18 @@ func GetEditCycle(c echo.Context) *echo.HTTPError {
 		return merr.Echo()
 	}
 
-	currentPress, herr := db.GetPressForTool(tool.ID)
-	if herr != nil {
+	currentPressID := shared.EntityID(0)
+	if p, herr := db.GetPressForTool(tool.ID); herr != nil {
 		return herr.Echo()
+	} else if p != nil {
+		currentPressID = p.ID
 	}
 
 	t := NewCycleDialog(CycleDialogProps{
 		CycleFormData: CycleFormData{
 			ToolID:  tool.ID,
-			PressID: currentPress.ID,
+			PressID: currentPressID,
+			Presses: presses,
 		},
 		Open: true,
 		OOB:  true,

@@ -146,7 +146,13 @@ templ totalCycles(prop *CyclesContentProps) {
 
 templ cyclesTable(prop *CyclesContentProps) {
 	@components.Section() {
-		@components.SectionTitle(components.TitleLevel4, "Pressennutzungsverlauf")
+		@components.SectionTitle(components.TitleLevel4, "Pressennutzungsverlauf") {
+			@components.SectionTitleAction(components.SectionTitleActionProps{
+				Icon:  icon.Plus(),
+				Url:   urlb.DialogEditCycle(0, prop.Tool.ID, false),
+				Title: "Neuer Pressenzyklus",
+			})
+		}
 		if len(prop.ToolCycles) == 0 {
 			@components.NotFoundText("Kein Pressenverlauf verfügbar")
 		} else {
