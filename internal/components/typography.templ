@@ -30,27 +30,27 @@ templ Title(props ...TitleProps) {
 	}}
 	switch prop.Level {
 		case TitleLevel1:
-			<h1 class={ "text-5xl font-bold mb-2", class } { prop.Attributes... }>
+			<h1 class={ "text-5xl font-bold", class } { prop.Attributes... }>
 				{ children... }
 			</h1>
 		case TitleLevel2:
-			<h2 class={ "text-4xl font-bold mb-2", class } { prop.Attributes... }>
+			<h2 class={ "text-4xl font-bold", class } { prop.Attributes... }>
 				{ children... }
 			</h2>
 		case TitleLevel3:
-			<h3 class={ "text-3xl font-bold mb-2", class } { prop.Attributes... }>
+			<h3 class={ "text-3xl font-bold", class } { prop.Attributes... }>
 				{ children... }
 			</h3>
 		case TitleLevel4:
-			<h4 class={ "text-2xl font-bold mb-2", class } { prop.Attributes... }>
+			<h4 class={ "text-2xl font-bold", class } { prop.Attributes... }>
 				{ children... }
 			</h4>
 		case TitleLevel5:
-			<h5 class={ "text-1xl font-bold mb-2", class } { prop.Attributes... }>
+			<h5 class={ "text-1xl font-bold", class } { prop.Attributes... }>
 				{ children... }
 			</h5>
 		case TitleLevel6:
-			<h6 class={ "text-lg font-bold mb-2", class } { prop.Attributes... }>
+			<h6 class={ "text-lg font-bold", class } { prop.Attributes... }>
 				{ children... }
 			</h6>
 		default:

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/knackwurstking/pg-press/internal/components"
+	"github.com/knackwurstking/pg-press/internal/components/badge"
 	"github.com/knackwurstking/pg-press/internal/components/button"
 	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/handlers/dialogs"
@@ -20,13 +21,23 @@ templ Page(p *PageProps) {
 	@components.Layout(
 		components.LayoutProps{
 			PageTitle:      fmt.Sprintf("PG Presse | %s %s", p.Tool.German(), p.Tool.Position.German()),
-			AppBarTitle:    fmt.Sprintf("%s %s", p.Tool.German(), p.Tool.Position.German()),
+			AppBarTitle:    fmt.Sprintf("%s", p.Tool.Position.German()),
 			NavContent:     components.StandardNavContent(),
 			AdditionalHead: additionalHead(),
 		},
 	) {
 		@components.Page() {
 			@actionBarContent(p)
+			@components.Section() {
+				<p>
+					{ p.Tool.German() }
+					@badge.Badge(badge.Props{
+						Class: "ml-2",
+					}) {
+						{ p.Tool.Position.German() }
+					}
+				</p>
+			}
 			@components.Section(templ.Attributes{
 				"id":                    "notes-section",
 				"hx-get":                string(urlb.ToolNotes(p.Tool.ID)),
