@@ -53,7 +53,7 @@ templ SectionTools(p SectionToolsProps) {
 			if (query.length === 0) {
 				console.debug("Empty query, showing all tools", { targets });
 				targets.forEach((child) => {
-					child.classList.remove("hidden");
+					child.style.display = "";
 				});
 				return;
 			}
@@ -64,10 +64,10 @@ templ SectionTools(p SectionToolsProps) {
 					child.textContent.toLowerCase().includes(value),
 				);
 				if (match) {
-					child.classList.remove("hidden");
+					child.style.display = "";
 					return;
 				}
-				child.classList.add("hidden");
+				child.style.display = "none";
 			});
 		}
 
