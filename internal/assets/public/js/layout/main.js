@@ -1,12 +1,16 @@
 function updateDataTheme() {
 	const themeColorMeta = document.getElementById("theme-color-meta");
 	if (matchMedia("(prefers-color-scheme: dark)").matches) {
-		document.querySelector("html").classList.add("dark");
+		var html = document.querySelector("html")
+		html.classList.remove("light");
+		html.classList.add("dark");
 		// Dark theme background color
 		// TODO: Update theme color to fit the output.css
 		if (themeColorMeta) themeColorMeta.setAttribute("content", "#1d2021");
 	} else {
-		document.querySelector("html").classList.add("light");
+		var html = document.querySelector("html")
+		html.classList.remove("dark");
+		html.classList.add("light");
 		// Light theme background color
 		// TODO: Update theme color to fit the output.css
 		if (themeColorMeta) themeColorMeta.setAttribute("content", "#f9f5d7");
