@@ -41,7 +41,7 @@ templ formDate(date shared.UnixMilli, fp formProps, ierrs ...*errors.InputError)
 				Class:    "w-fit",
 				Name:     fp.ID,
 				Type:     input.TypeDate,
-				Value:    fmt.Sprintf("%s", date),
+				Value:    date.ToTime().Format("2006-01-02"),
 				Required: fp.Required,
 				HasError: len(filteredErrors) > 0,
 			})
@@ -206,6 +206,7 @@ templ formCycles(value int64, ierrs ...*errors.InputError) {
 				ID:       "cycles",
 				Name:     "cycles",
 				Required: true,
+				Value:    fmt.Sprintf("%d", value),
 				Attributes: templ.Attributes{
 					"min":  "0",
 					"step": "1",
