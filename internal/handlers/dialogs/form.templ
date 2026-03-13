@@ -109,15 +109,13 @@ templ formCycleToolChange(toolID shared.EntityID, tools []*shared.Tool, ierrs ..
 					Placeholder: "Werkzeug auswählen",
 				})
 			}
-			@selectbox.Content(selectbox.ContentProps{
-				NoSearch: true,
-			}) {
+			@selectbox.Content() {
 				for _, t := range tools {
 					@selectbox.Item(selectbox.ItemProps{
 						Value:    fmt.Sprintf("%d", t.ID),
 						Selected: t.ID == toolID,
 					}) {
-						{ t.German() }
+						{ t.German() } ({ t.Position.German() })
 						if t.IsDead {
 							&nbsp;[Removed]
 						}

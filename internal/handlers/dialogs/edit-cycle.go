@@ -3,7 +3,6 @@ package dialogs
 import (
 	"fmt"
 	"net/http"
-	"sort"
 	"time"
 
 	"github.com/knackwurstking/pg-press/internal/db"
@@ -46,23 +45,18 @@ func GetEditCycle(c echo.Context) *echo.HTTPError {
 		var tools []*shared.Tool
 		if toolChangeMode {
 			// Get all tools
-			tools, herr = db.ListTools()
+			allTools, herr := db.ListTools()
 			if herr != nil {
 				return herr.Echo()
 			}
 
 			// Filter out tools not matching the original tools position
-			for _, t := range tools {
+			for _, t := range allTools {
 				if t.Position != tool.Position {
 					continue
 				}
 				tools = append(tools, t)
 			}
-
-			// Sort tools alphabetically by code
-			sort.Slice(tools, func(i, j int) bool {
-				return tools[i].String() < tools[j].String()
-			})
 		}
 
 		t := EditCycleDialog(cycle.ID, CycleDialogProps{
@@ -174,6 +168,7 @@ func updateCycle(c echo.Context, cycleID shared.EntityID) *echo.HTTPError {
 	return reRenderEditCycleDialog(c, cycleID, false, data)
 }
 
+// FIXME: Why is the tool_id form value always wrong after changing?
 func parseCycleForm(c echo.Context, toolID shared.EntityID) (data CycleFormData, ierrs []*errors.InputError) {
 	// Tool ID
 	if c.FormValue("tool_id") != "" {
