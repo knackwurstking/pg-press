@@ -79,17 +79,17 @@ templ formString(value string, fp formProps, ierrs ...*errors.InputError) {
 
 templ formCycleToolChange(toolID shared.EntityID, tools []*shared.Tool, ierrs ...*errors.InputError) {
 	{{
-		// Filter out errors for "tool_id" input
+		// Filter out errors for "cycle_tool_id" input
 		var filteredErrors []*errors.InputError
 		for _, e := range ierrs {
-			if e != nil && e.InputID == "tool_id" {
+			if e != nil && e.InputID == "cycle_tool_id" {
 				filteredErrors = append(filteredErrors, e)
 			}
 		}
 	}}
 	@form.Item() {
 		@form.Label(form.LabelProps{
-			For: "tool_id",
+			For: "cycle_tool_id",
 		}) {
 			Werkzeug ändern
 		}
@@ -97,8 +97,8 @@ templ formCycleToolChange(toolID shared.EntityID, tools []*shared.Tool, ierrs ..
 			Class: "w-full",
 		}) {
 			@selectbox.Trigger(selectbox.TriggerProps{
-				ID:   "tool_id",
-				Name: "tool_id",
+				ID:   "cycle_tool_id",
+				Name: "cycle_tool_id",
 				Attributes: templ.Attributes{
 					"required": true,
 				},
@@ -123,7 +123,7 @@ templ formCycleToolChange(toolID shared.EntityID, tools []*shared.Tool, ierrs ..
 				}
 			}
 		}
-		@renderFormError(filteredErrors, "tool_id")
+		@renderFormError(filteredErrors, "cycle_tool_id")
 	}
 }
 

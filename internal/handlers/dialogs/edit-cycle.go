@@ -168,19 +168,18 @@ func updateCycle(c echo.Context, cycleID shared.EntityID) *echo.HTTPError {
 	return reRenderEditCycleDialog(c, cycleID, false, data)
 }
 
-// FIXME: Why is the tool_id form value always wrong after changing?
 func parseCycleForm(c echo.Context, toolID shared.EntityID) (data CycleFormData, ierrs []*errors.InputError) {
 	// Tool ID
-	if c.FormValue("tool_id") != "" {
-		newToolID, err := utils.SanitizeInt64(c.FormValue("tool_id"))
+	if c.FormValue("cycle_tool_id") != "" {
+		newToolID, err := utils.SanitizeInt64(c.FormValue("cycle_tool_id"))
 		if err != nil {
-			ierr := errors.NewInputError("tool_id", fmt.Sprintf("invalid tool ID: %v", err))
+			ierr := errors.NewInputError("cycle_tool_id", fmt.Sprintf("invalid tool ID: %v", err))
 			ierrs = append(ierrs, ierr)
 		}
 		toolID = shared.EntityID(newToolID)
 	}
 	if toolID == 0 {
-		ierr := errors.NewInputError("tool_id", "tool ID is required")
+		ierr := errors.NewInputError("cycle_tool_id", "tool ID is required")
 		ierrs = append(ierrs, ierr)
 	}
 	data.ToolID = toolID
