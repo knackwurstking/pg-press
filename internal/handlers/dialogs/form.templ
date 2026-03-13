@@ -206,6 +206,7 @@ templ formCycles(value int64, ierrs ...*errors.InputError) {
 				ID:       "cycles",
 				Name:     "cycles",
 				Required: true,
+				Type:     input.TypeNumber,
 				Value:    fmt.Sprintf("%d", value),
 				Attributes: templ.Attributes{
 					"min":  "0",
