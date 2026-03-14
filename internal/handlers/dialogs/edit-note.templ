@@ -197,14 +197,18 @@ templ displayLinkedTables(linked string, user *shared.User) {
 		@components.Title(components.TitleProps{Level: components.TitleLevel6}) {
 			Verknüpfte Tabellen
 		}
-		@checkbox.Checkbox(checkbox.Props{
-			ID:      "linked",
-			Name:    "linked",
-			Value:   linked,
-			Checked: true,
-		})
-		@label.Label(label.Props{
-			For: "linked",
-		})
+		<div class="flex items-center gap-2">
+			@checkbox.Checkbox(checkbox.Props{
+				ID:      "linked",
+				Name:    "linked",
+				Value:   linked,
+				Checked: true,
+			})
+			@label.Label(label.Props{
+				For: "linked",
+			}) {
+				{ linked }
+			}
+		</div>
 	}
 }

@@ -80,6 +80,10 @@ func (n *Note) IsLinked() bool {
 // GetLinked returns the linked entity string
 func (n *Note) GetLinked() Linked {
 	s := strings.Split(n.Linked, "_")
+	if len(s) != 2 {
+		return Linked{}
+	}
+
 	id, _ := strconv.ParseInt(s[1], 10, 64)
 	return Linked{Name: s[0], ID: id}
 }

@@ -53,6 +53,9 @@ func GetEditNote(c echo.Context) *echo.HTTPError {
 	log.Debug("Rendering new note dialog [linked=%v, user_name=%s]", linked, c.Get("user-name"))
 
 	t := NewNoteDialog(NoteDialogProps{
+		NoteFormData: NoteFormData{
+			Linked: linked,
+		},
 		User: user,
 		Open: true,
 		OOB:  true,
@@ -139,6 +142,10 @@ func parseNoteForm(c echo.Context) (data NoteFormData, ierrs []*errors.InputErro
 		ierr := errors.NewInputError("", "content is required")
 		ierrs = append(ierrs, ierr)
 	}
+
+	// Get Linked
+	linked := utils.SanitizeText(c.FormValue("linked"))
+	data.Linked = linked
 
 	return
 }
