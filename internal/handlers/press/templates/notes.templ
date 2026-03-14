@@ -15,11 +15,12 @@ type NotesProps struct {
 }
 
 templ Notes(p NotesProps) {
+	if len(p.PressNotes) == 0 && len(p.ToolNotes) == 0 {
+		@components.NotFoundText("Keine Notizen.")
+	}
 	@pressNotes(p.PressNotes)
 	if len(p.ToolNotes) > 0 {
 		@toolNotes(p.ToolNotes, p.Tools)
-	} else {
-		@components.NotFoundText("Keine Notizen zu Werkzeugen vorhanden.")
 	}
 }
 
