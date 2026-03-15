@@ -32,9 +32,7 @@ templ Binding(props BindingProps) {
 					Placeholder: "Werkzeugbindung",
 				})
 			}
-			@selectbox.Content(selectbox.ContentProps{
-				NoSearch: true,
-			}) {
+			@selectbox.Content() {
 				for _, c := range props.CassettesForBinding {
 					@selectbox.Item(selectbox.ItemProps{
 						Value: c.ID.String(),
