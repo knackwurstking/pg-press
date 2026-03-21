@@ -103,6 +103,7 @@ func GetEditCycle(c echo.Context) *echo.HTTPError {
 	t := NewCycleDialog(CycleDialogProps{
 		CycleFormData: CycleFormData{
 			ToolID:  tool.ID,
+			Tools:   []*shared.Tool{tool},
 			PressID: currentPressID,
 			Presses: presses,
 		},
@@ -216,14 +217,11 @@ func reRenderNewCycleDialog(c echo.Context, open bool, formData CycleFormData, i
 		CycleFormData: formData,
 		Open:          open,
 		OOB:           true,
+		Error:         ierrs,
 	})
 	err := t.Render(c.Request().Context(), c.Response())
 	if err != nil {
 		return errors.NewRenderError(err, "NewCycleDialog")
-	}
-
-	if len(ierrs) > 0 {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid input")
 	}
 
 	return nil

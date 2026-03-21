@@ -103,7 +103,7 @@ templ formCycleToolChange(toolID shared.EntityID, tools []*shared.Tool, ierrs ..
 					"required": true,
 				},
 				HasError: len(filteredErrors) > 0,
-				Disabled: len(tools) == 0,
+				Disabled: len(tools) <= 1,
 			}) {
 				@selectbox.Value(selectbox.ValueProps{
 					Placeholder: "Werkzeug auswählen",
