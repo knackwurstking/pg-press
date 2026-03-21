@@ -7,5 +7,5 @@
 ## FIX
 
 - [ ] Fix the edit press cycles dialog, from the tool page
-- [ ] Fix the "Umbau" page
+- [x] Fix the "Umbau" page
 
