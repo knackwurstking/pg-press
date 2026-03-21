@@ -226,15 +226,33 @@ func ListCyclesByPressID(pressID shared.EntityID) ([]*shared.Cycle, *errors.HTTP
 
 // CycleInject injects "start" and `PartialCycles` into cycle
 func CycleInject(cycle *shared.Cycle) *errors.HTTPError {
-	fetchLastCycle := func() (toolID, lastCycles, lastStop int64, err error) {
-		err = dbPress.QueryRow(sqlGetPrevCycle, cycle.PressID, cycle.Stop).Scan(&toolID, &lastCycles, &lastStop)
+	fetchPosition := func(toolID shared.EntityID) (shared.Slot, *errors.HTTPError) {
+		var position shared.Slot
+		err := dbTool.QueryRow(
+			`SELECT position FROM tools WHERE id = ?;`,
+			toolID,
+		).Scan(&position)
+		if err != nil {
+			return 0, errors.NewHTTPError(fmt.Errorf(
+				"failed to fetch position for tool ID %d: %w",
+				toolID, err,
+			))
+		}
+		return position, nil
+	}
+
+	fetchLastCycle := func(pressID shared.EntityID, stop int64) (toolID shared.EntityID, lastCycles, lastStop int64, herr *errors.HTTPError) {
+		err := dbPress.QueryRow(sqlGetPrevCycle, pressID, stop).Scan(&toolID, &lastCycles, &lastStop)
+		if err != nil {
+			herr = errors.NewHTTPError(err)
+		}
 		return
 	}
 
-	isPosition := func(tool, current *shared.Tool) bool {
-		return tool.Position == current.Position ||
-			(tool.Position == shared.SlotUpperCassette &&
-				(current.Position == shared.SlotUpper || current.Position == shared.SlotUpperCassette))
+	isPosition := func(slot, currentPosition shared.Slot) bool {
+		return slot == currentPosition ||
+			(currentPosition == shared.SlotUpperCassette &&
+				(slot == shared.SlotUpper || slot == shared.SlotUpperCassette))
 	}
 
 	var cycleOffset int64 = 0
@@ -246,33 +264,41 @@ func CycleInject(cycle *shared.Cycle) *errors.HTTPError {
 		cycleOffset = press.CyclesOffset
 	}
 
-	currentTool, err := GetTool(cycle.ToolID)
-	if err != nil {
-		return errors.NewHTTPError(fmt.Errorf(
-			"failed to get current tool ID %d for cycle injection: %w",
-			cycle.ToolID, err,
-		))
+	currentPosition, herr := fetchPosition(cycle.ToolID)
+	if herr != nil {
+		return herr
 	}
 
+	var (
+		pressID = cycle.PressID
+		stop    = int64(cycle.Stop)
+	)
 	for true {
-		toolID, lastCycles, lastStop, err := fetchLastCycle()
-		if err != nil {
-			if err == sql.ErrNoRows {
+		toolID, lastCycles, lastStop, herr := fetchLastCycle(pressID, stop)
+		if herr != nil {
+			if herr.Err() == sql.ErrNoRows {
 				cycle.PartialCycles = cycle.PressCycles - cycleOffset
 				cycle.Start = cycle.Stop
+				return nil
 			}
-			return errors.NewHTTPError(err)
+
+			return errors.NewHTTPError(herr)
 		}
 
 		// Check the tool_id for if the position is matching, only the
 		// upper cassette can match the upper tool too
-		if t, _ := GetTool(shared.EntityID(toolID)); t != nil {
-			if isPosition(t, currentTool) {
-				cycle.PartialCycles = cycle.PressCycles - lastCycles
-				cycle.Start = shared.UnixMilli(lastStop)
-				return nil
-			}
+		slot, herr := fetchPosition(toolID)
+		if herr != nil {
+			return herr
 		}
+
+		if isPosition(slot, currentPosition) {
+			cycle.PartialCycles = cycle.PressCycles - lastCycles
+			cycle.Start = shared.UnixMilli(lastStop)
+			return nil
+		}
+
+		stop = lastStop
 	}
 
 	return nil
