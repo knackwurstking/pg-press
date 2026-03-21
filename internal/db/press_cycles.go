@@ -22,7 +22,9 @@ CREATE TABLE IF NOT EXISTS cycles (
 	stop INTEGER NOT NULL,
 
 	PRIMARY KEY("id" AUTOINCREMENT)
-);`
+);
+
+CREATE INDEX IF NOT EXISTS idx_cycles_press_stop ON cycles(press_id, stop DESC);`
 
 	sqlAddCycle string = `
 INSERT INTO cycles (tool_id, press_id, cycles, stop)
@@ -62,12 +64,11 @@ FROM cycles
 WHERE press_id = :press_id
 ORDER BY stop DESC;`
 
-	sqlGetPrevCycle string = `
+	sqlListPrevCycles string = `
 SELECT tool_id, cycles, stop
 FROM cycles
 WHERE press_id = ? AND stop < ?
-ORDER BY stop DESC
-LIMIT 1;`
+ORDER BY stop DESC;`
 )
 
 // -----------------------------------------------------------------------------
@@ -226,6 +227,8 @@ func ListCyclesByPressID(pressID shared.EntityID) ([]*shared.Cycle, *errors.HTTP
 
 // CycleInject injects "start" and `PartialCycles` into cycle
 func CycleInject(cycle *shared.Cycle) *errors.HTTPError {
+	// Helper to fetch the position of a tool, needed to determine if the cycle
+	// is relevant for the current position
 	fetchPosition := func(toolID shared.EntityID) (shared.Slot, *errors.HTTPError) {
 		var position shared.Slot
 		err := dbTool.QueryRow(
@@ -241,20 +244,41 @@ func CycleInject(cycle *shared.Cycle) *errors.HTTPError {
 		return position, nil
 	}
 
-	fetchLastCycle := func(pressID shared.EntityID, stop int64) (toolID shared.EntityID, lastCycles, lastStop int64, herr *errors.HTTPError) {
-		err := dbPress.QueryRow(sqlGetPrevCycle, pressID, stop).Scan(&toolID, &lastCycles, &lastStop)
+	// Helper to fetch the last cycles for all tools in the same press before
+	// the current stop
+	type prevCycle struct {
+		ToolID     shared.EntityID
+		LastCycles int64
+		LastStop   int64
+	}
+
+	fetchLastCycles := func(pressID shared.EntityID, stop int64) (data []prevCycle, herr *errors.HTTPError) {
+		r, err := dbPress.Query(sqlListPrevCycles, pressID, stop)
 		if err != nil {
 			herr = errors.NewHTTPError(err)
+		}
+		defer r.Close()
+		// Scan rows
+		for r.Next() {
+			pc := prevCycle{}
+			if err = r.Scan(&pc.ToolID, &pc.LastCycles, &pc.LastStop); err != nil {
+				herr = errors.NewHTTPError(err)
+				return
+			}
+			data = append(data, pc)
 		}
 		return
 	}
 
+	// Helper to determine if a slot matches the current position, only the
+	// upper cassette can match the upper tool
 	isPosition := func(slot, currentPosition shared.Slot) bool {
 		return slot == currentPosition ||
 			(currentPosition == shared.SlotUpperCassette &&
 				(slot == shared.SlotUpper || slot == shared.SlotUpperCassette))
 	}
 
+	// Get the cycles offset for the press, needed to calculate the partial cycles
 	var cycleOffset int64 = 0
 	press, herr := GetPress(cycle.PressID)
 	if herr != nil && !herr.IsNotFoundError() {
@@ -264,41 +288,40 @@ func CycleInject(cycle *shared.Cycle) *errors.HTTPError {
 		cycleOffset = press.CyclesOffset
 	}
 
+	// Get the current position of the tool, needed to determine if the cycle
+	// is relevant for the current position
 	currentPosition, herr := fetchPosition(cycle.ToolID)
 	if herr != nil {
 		return herr
 	}
 
-	var (
-		pressID = cycle.PressID
-		stop    = int64(cycle.Stop)
-	)
-	for true {
-		toolID, lastCycles, lastStop, herr := fetchLastCycle(pressID, stop)
-		if herr != nil {
-			if herr.Err() == sql.ErrNoRows {
-				cycle.PartialCycles = cycle.PressCycles - cycleOffset
-				cycle.Start = cycle.Stop
-				return nil
-			}
-
-			return errors.NewHTTPError(herr)
+	// Get the last cycles for all tools in the same press before the current stop
+	prevCycles, herr := fetchLastCycles(cycle.PressID, int64(cycle.Stop))
+	if herr != nil {
+		if herr.Err() == sql.ErrNoRows {
+			cycle.PartialCycles = cycle.PressCycles - cycleOffset
+			cycle.Start = cycle.Stop
+			return nil
 		}
 
+		return errors.NewHTTPError(herr)
+	}
+
+	// Iterate over the previous cycles to find the most recent one that matches
+	// the current position and tool, then calculate the partial cycles.
+	for _, pc := range prevCycles {
 		// Check the tool_id for if the position is matching, only the
 		// upper cassette can match the upper tool too
-		slot, herr := fetchPosition(toolID)
+		slot, herr := fetchPosition(pc.ToolID)
 		if herr != nil {
 			return herr
 		}
 
-		if isPosition(slot, currentPosition) {
-			cycle.PartialCycles = cycle.PressCycles - lastCycles
-			cycle.Start = shared.UnixMilli(lastStop)
-			return nil
+		if isPosition(slot, currentPosition) && (cycle.ToolID != pc.ToolID || int64(cycle.Stop) != pc.LastStop) {
+			cycle.PartialCycles = cycle.PressCycles - pc.LastCycles
+			cycle.Start = shared.UnixMilli(pc.LastStop)
+			break
 		}
-
-		stop = lastStop
 	}
 
 	return nil
