@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
@@ -62,7 +63,7 @@ WHERE press_id = :press_id
 ORDER BY stop DESC;`
 
 	sqlGetPrevCycle string = `
-SELECT cycles, stop
+SELECT tool_id, cycles, stop
 FROM cycles
 WHERE press_id = ? AND stop < ?
 ORDER BY stop DESC
@@ -225,6 +226,17 @@ func ListCyclesByPressID(pressID shared.EntityID) ([]*shared.Cycle, *errors.HTTP
 
 // CycleInject injects "start" and `PartialCycles` into cycle
 func CycleInject(cycle *shared.Cycle) *errors.HTTPError {
+	fetchLastCycle := func() (toolID, lastCycles, lastStop int64, err error) {
+		err = dbPress.QueryRow(sqlGetPrevCycle, cycle.PressID, cycle.Stop).Scan(&toolID, &lastCycles, &lastStop)
+		return
+	}
+
+	isPosition := func(tool, current *shared.Tool) bool {
+		return tool.Position == current.Position ||
+			(tool.Position == shared.SlotUpperCassette &&
+				(current.Position == shared.SlotUpper || current.Position == shared.SlotUpperCassette))
+	}
+
 	var cycleOffset int64 = 0
 	press, herr := GetPress(cycle.PressID)
 	if herr != nil && !herr.IsNotFoundError() {
@@ -234,20 +246,34 @@ func CycleInject(cycle *shared.Cycle) *errors.HTTPError {
 		cycleOffset = press.CyclesOffset
 	}
 
-	// Inject partial cycles (press cycle offset)
-	var lastCycles int64 = 0
-	var lastStop int64 = 0
-	err := dbPress.QueryRow(sqlGetPrevCycle, cycle.PressID, cycle.Stop).Scan(&lastCycles, &lastStop)
-	if err != nil && err == sql.ErrNoRows {
-		cycle.PartialCycles = cycle.PressCycles - cycleOffset
-	} else if err != nil {
-		return errors.NewHTTPError(err)
-	} else {
-		cycle.PartialCycles = cycle.PressCycles - lastCycles
+	currentTool, err := GetTool(cycle.ToolID)
+	if err != nil {
+		return errors.NewHTTPError(fmt.Errorf(
+			"failed to get current tool ID %d for cycle injection: %w",
+			cycle.ToolID, err,
+		))
 	}
 
-	// Inject start time
-	cycle.Start = shared.UnixMilli(lastStop)
+	for true {
+		toolID, lastCycles, lastStop, err := fetchLastCycle()
+		if err != nil {
+			if err == sql.ErrNoRows {
+				cycle.PartialCycles = cycle.PressCycles - cycleOffset
+				cycle.Start = cycle.Stop
+			}
+			return errors.NewHTTPError(err)
+		}
+
+		// Check the tool_id for if the position is matching, only the
+		// upper cassette can match the upper tool too
+		if t, _ := GetTool(shared.EntityID(toolID)); t != nil {
+			if isPosition(t, currentTool) {
+				cycle.PartialCycles = cycle.PressCycles - lastCycles
+				cycle.Start = shared.UnixMilli(lastStop)
+				return nil
+			}
+		}
+	}
 
 	return nil
 }
