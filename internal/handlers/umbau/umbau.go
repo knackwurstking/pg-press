@@ -85,7 +85,7 @@ func PostUmbauPage(c echo.Context) *echo.HTTPError {
 	// Old Tools for setting cycles
 	tools := make([]*shared.Tool, 0)
 	if u.SlotUpper != nil {
-		tools = append(tools, u.SlotLower)
+		tools = append(tools, u.SlotUpper)
 	}
 	if u.SlotUpperCassette != nil {
 		tools = append(tools, u.SlotUpperCassette)
