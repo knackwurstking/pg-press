@@ -44,7 +44,9 @@ templ NewPressDialog(props ...PressDialogProps) {
 		Open:             prop.Open,
 		Attributes:       attr,
 	}) {
-		@dialog.Content() {
+		@dialog.Content(dialog.ContentProps{
+			Class: "overflow-auto max-h-[90vh]", // TODO: For now, this will fix the overflow issue
+		}) {
 			@dialog.Header() {
 				Neue Presse
 			}
@@ -89,7 +91,9 @@ templ EditPressDialog(pressID shared.EntityID, props ...PressDialogProps) {
 		Open:             prop.Open,
 		Attributes:       attr,
 	}) {
-		@dialog.Content() {
+		@dialog.Content(dialog.ContentProps{
+			Class: "overflow-auto max-h-[90vh]", // TODO: For now, this will fix the overflow issue
+		}) {
 			@dialog.Header() {
 				Presse Bearbeiten
 			}

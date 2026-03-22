@@ -14,4 +14,4 @@
 
 ## STYLE
 
-- [ ] Properly center the table actions `items-center`
+- [x] Properly center the table actions, add `text-nowrap` to the third column

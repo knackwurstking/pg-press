@@ -39,7 +39,9 @@ templ NewToolRegenerationDialog(props ...ToolRegenerationDialogProps) {
 		Open:             prop.Open,
 		Attributes:       attr,
 	}) {
-		@dialog.Content() {
+		@dialog.Content(dialog.ContentProps{
+			Class: "overflow-auto max-h-[90vh]", // TODO: For now, this will fix the overflow issue
+		}) {
 			@dialog.Header() {
 				Neue Werkzeug Regenerierung
 			}
@@ -84,7 +86,9 @@ templ EditToolRegenerationDialog(trID shared.EntityID, props ...ToolRegeneration
 		Open:             prop.Open,
 		Attributes:       attr,
 	}) {
-		@dialog.Content() {
+		@dialog.Content(dialog.ContentProps{
+			Class: "overflow-auto max-h-[90vh]", // TODO: For now, this will fix the overflow issue
+		}) {
 			@dialog.Header() {
 				Werkzeug Regenerierung bearbeiten
 			}

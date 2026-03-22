@@ -65,7 +65,9 @@ templ NewUpperMetalSheetDialog(props ...UpperMetalSheetDialogProps) {
 		Open:             prop.Open,
 		Attributes:       attr,
 	}) {
-		@dialog.Content() {
+		@dialog.Content(dialog.ContentProps{
+			Class: "overflow-auto max-h-[90vh]", // TODO: For now, this will fix the overflow issue
+		}) {
 			@dialog.Header() {
 				Obere Blechliste Erstellen
 			}
@@ -109,7 +111,9 @@ templ NewLowerMetalSheetDialog(props ...LowerMetalSheetDialogProps) {
 		Open:             prop.Open,
 		Attributes:       attr,
 	}) {
-		@dialog.Content() {
+		@dialog.Content(dialog.ContentProps{
+			Class: "overflow-auto max-h-[90vh]", // TODO: For now, this will fix the overflow issue
+		}) {
 			@dialog.Header() {
 				Untere Blechliste Erstellen
 			}
@@ -153,7 +157,9 @@ templ EditUpperMetalSheetDialog(metalSheetID shared.EntityID, props ...UpperMeta
 		Open:             prop.Open,
 		Attributes:       attr,
 	}) {
-		@dialog.Content() {
+		@dialog.Content(dialog.ContentProps{
+			Class: "overflow-auto max-h-[90vh]", // TODO: For now, this will fix the overflow issue
+		}) {
 			@dialog.Header() {
 				Obere Blechliste bearbeiten
 			}
@@ -197,7 +203,9 @@ templ EditLowerMetalSheetDialog(metalSheetID shared.EntityID, props ...LowerMeta
 		Open:             prop.Open,
 		Attributes:       attr,
 	}) {
-		@dialog.Content() {
+		@dialog.Content(dialog.ContentProps{
+			Class: "overflow-auto max-h-[90vh]", // TODO: For now, this will fix the overflow issue
+		}) {
 			@dialog.Header() {
 				Untere Blechliste bearbeiten
 			}

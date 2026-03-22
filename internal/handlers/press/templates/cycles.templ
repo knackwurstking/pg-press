@@ -83,7 +83,7 @@ templ renderPressCycleRow(cycle *shared.Cycle, tool *shared.Tool, user *shared.U
 		}
 		// Cycle Tool
 		@table.Cell(table.CellProps{
-			Class: "text-sm",
+			Class: "text-sm text-nowrap",
 		}) {
 			if tool != nil {
 				{ tool.German() }

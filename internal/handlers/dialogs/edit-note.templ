@@ -47,7 +47,9 @@ templ NewNoteDialog(props ...NoteDialogProps) {
 		Open:             prop.Open,
 		Attributes:       attr,
 	}) {
-		@dialog.Content() {
+		@dialog.Content(dialog.ContentProps{
+			Class: "overflow-auto max-h-[90vh]", // TODO: For now, this will fix the overflow issue
+		}) {
 			@dialog.Header() {
 				Neue Notiz
 			}
@@ -93,7 +95,9 @@ templ EditNoteDialog(noteID shared.EntityID, props ...NoteDialogProps) {
 		Open:             prop.Open,
 		Attributes:       attr,
 	}) {
-		@dialog.Content() {
+		@dialog.Content(dialog.ContentProps{
+			Class: "overflow-auto max-h-[90vh]", // TODO: For now, this will fix the overflow issue
+		}) {
 			@dialog.Header() {
 				Notiz bearbeiten
 			}

@@ -88,6 +88,7 @@ templ editUserDialog(user *shared.User) {
 		Open:             false,
 	}) {
 		@dialog.Content(dialog.ContentProps{
+			Class:            "overflow-auto max-h-[90vh]", // TODO: For now, this will fix the overflow issue
 			DisableAutoFocus: true,
 		}) {
 			<form action={ urlb.Profile() } method="POST">
