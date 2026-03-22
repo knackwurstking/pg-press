@@ -297,19 +297,27 @@ func CycleInject(cycle *shared.Cycle) *errors.HTTPError {
 
 	// Get the last cycles for all tools in the same press before the current stop
 	prevCycles, herr := fetchLastCycles(cycle.PressID, int64(cycle.Stop))
-	if herr != nil {
-		if herr.Err() == sql.ErrNoRows {
-			cycle.PartialCycles = cycle.PressCycles - cycleOffset
-			cycle.Start = cycle.Stop
-			return nil
-		}
-
+	if herr != nil && herr.Err() != sql.ErrNoRows {
 		return errors.NewHTTPError(herr)
+	}
+
+	if len(prevCycles) == 0 {
+		cycle.PartialCycles = cycle.PressCycles - cycleOffset
+		cycle.Start = cycle.Stop
+		return nil
 	}
 
 	// Iterate over the previous cycles to find the most recent one that matches
 	// the current position and tool, then calculate the partial cycles.
-	for _, pc := range prevCycles {
+	for i, pc := range prevCycles {
+		if i == len(prevCycles)-1 {
+			// If we are at the last previous cycle, we can calculate the partial cycles
+			// using the cycle offset, as there are no more previous cycles to compare to
+			cycle.PartialCycles = cycle.PressCycles - cycleOffset
+			cycle.Start = cycle.Stop
+			break
+		}
+
 		// Check the tool_id for if the position is matching, only the
 		// upper cassette can match the upper tool too
 		slot, herr := fetchPosition(pc.ToolID)
