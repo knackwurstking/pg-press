@@ -12,7 +12,6 @@
 - [x] Fix the edit press cycles dialog, from the tool page
 - [x] Fix the "Umbau" page
 
-
 ## STYLE
 
 - [x] Properly center the table actions, add `text-nowrap` to the third column
