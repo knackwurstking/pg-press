@@ -1,7 +1,6 @@
 package templates
 
 import (
-	"fmt"
 	"github.com/knackwurstking/pg-press/internal/components"
 	"github.com/knackwurstking/pg-press/internal/components/badge"
 	"github.com/knackwurstking/pg-press/internal/components/button"
@@ -60,13 +59,6 @@ templ listPressItem(p *shared.PressUtilization) {
 						<!-- Upper Tool -->
 						<span class="flex flex-col gap-4">
 							if p.SlotUpper != nil {
-								{{
-									text := fmt.Sprintf("%dx%d %s %s",
-										p.SlotUpper.Width, p.SlotUpper.Height,
-										p.SlotUpper.Code,
-										p.SlotUpper.Type,
-									)
-								}}
 								<span class="flex flex-col justify-center items-start gap-1">
 									@badge.Badge(badge.Props{
 										Class:   "text-bold",
@@ -74,19 +66,10 @@ templ listPressItem(p *shared.PressUtilization) {
 									}) {
 										{ shared.SlotUpper.German() }
 									}
-									<small class="text-sm">{ text }</small>
+									<small class="text-sm">{ p.SlotUpper.German() }</small>
 								</span>
 							}
 							if p.SlotUpperCassette != nil {
-								{{
-									text := fmt.Sprintf("%dx%d %s %s %.1fmm -> %.1fmm",
-										p.SlotUpperCassette.Width, p.SlotUpperCassette.Height,
-										p.SlotUpperCassette.Code,
-										p.SlotUpperCassette.Type,
-										p.SlotUpperCassette.MinThickness,
-										p.SlotUpperCassette.MaxThickness,
-									)
-								}}
 								<span class="flex flex-col justify-center items-start gap-1">
 									@badge.Badge(badge.Props{
 										Class:   "text-bold",
@@ -94,19 +77,12 @@ templ listPressItem(p *shared.PressUtilization) {
 									}) {
 										{ shared.SlotUpperCassette.German() }
 									}
-									<small class="text-sm">{ text }</small>
+									<small class="text-sm">{ p.SlotUpperCassette.German() }</small>
 								</span>
 							}
 						</span>
 					}
 					if p.SlotLower != nil {
-						{{
-							text := fmt.Sprintf("%dx%d %s %s",
-								p.SlotUpper.Width, p.SlotUpper.Height,
-								p.SlotUpper.Code,
-								p.SlotUpper.Type,
-							)
-						}}
 						<!-- Lower Tool -->
 						<span class="flex flex-col justify-center items-start gap-1">
 							@badge.Badge(badge.Props{
@@ -115,7 +91,7 @@ templ listPressItem(p *shared.PressUtilization) {
 							}) {
 								{ shared.SlotLower.German() }
 							}
-							<small class="text-sm">{ text }</small>
+							<small class="text-sm">{ p.SlotLower.German() }</small>
 						</span>
 					}
 				</span>
