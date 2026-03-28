@@ -91,6 +91,8 @@ define LAUNCHCTL_PLIST
 </plist>
 endef
 
+export LAUNCHCTL_PLIST
+
 macos-install: all
 	@echo "Installing $(BINARY_NAME) for macOS..."
 	mkdir -p $(INSTALL_PATH)
