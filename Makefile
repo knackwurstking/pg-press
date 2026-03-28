@@ -63,7 +63,7 @@ define LAUNCHCTL_PLIST
 
 	<key>ProgramArguments</key>
 	<array>
-		<string>/usr/local/bin/$(BINARY_NAME)</string>
+		<string>$(BIN_DIR)/$(BINARY_NAME)</string>
 		<string>server</string>
 	</array>
 
@@ -84,7 +84,7 @@ define LAUNCHCTL_PLIST
 		<key>SERVER_ADDR</key>
 		<string>:9020</string>
 		<key>SERVER_PATH_PREFIX</key>
-		<string>/pg-press</string>
+		<string>/$(BINARY_NAME)</string>
 		<key>ADMINS</key>
 		<string></string>
 	</dict>
