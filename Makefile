@@ -12,9 +12,10 @@ BIN_DIR := ./bin
 
 INSTALL_PATH := /usr/local/bin
 
-APP_DATA := $(HOME)/Library/Application Support/$(BINARY_NAME)
 SERVICE_FILE := $(HOME)/Library/LaunchAgents/com.$(BINARY_NAME).plist
-LOG_FILE := $(APP_DATA)/pg-press.log
+
+APP_DATA := $(HOME)/Library/Application Support/$(BINARY_NAME)
+LOG_FILE := $(APP_DATA)/$(BINARY_NAME).log
 
 clean:
 	git clean -xfd
