@@ -336,7 +336,7 @@ func generatePDFFromHTML(htmlContent template.HTML) (*bytes.Buffer, error) {
 		}),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate PDF: %w", err)
+		return nil, err
 	}
 
 	return bytes.NewBuffer(pdfBuf), nil
