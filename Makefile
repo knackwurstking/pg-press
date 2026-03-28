@@ -105,4 +105,4 @@ macos-install: all
 macos-update: all
 	sudo cp $(BIN_DIR)/$(BINARY_NAME) $(INSTALL_PATH)/$(BINARY_NAME)
 	sudo chmod +x $(INSTALL_PATH)/$(BINARY_NAME)
-	@echo "Using launchctl command for restarting the service..."
+	@echo "Use the launchctl command for restarting the service..."
