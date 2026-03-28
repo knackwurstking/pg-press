@@ -1,8 +1,6 @@
-.PHONY: clean generate init run dev build count macos-install \
-	macos-start-service macos-stop-service macos-restart-service \
-	macos-print-service macos-watch-service macos-update
+.PHONY: clean generate init run dev build count macos-install macos-update
 
-all: init build
+all: generate init build
 
 BINARY_NAME := pg-press
 
@@ -93,8 +91,7 @@ define LAUNCHCTL_PLIST
 </plist>
 endef
 
-export LAUNCHCTL_PLIST
-macos-install:
+macos-install: all
 	@echo "Installing $(BINARY_NAME) for macOS..."
 	mkdir -p $(INSTALL_PATH)
 	sudo cp $(BIN_DIR)/$(BINARY_NAME) $(INSTALL_PATH)/$(BINARY_NAME)
@@ -102,38 +99,7 @@ macos-install:
 	echo "$$LAUNCHCTL_PLIST" > $(SERVICE_FILE)
 	@echo "$(BINARY_NAME) installed successfully"
 
-macos-service-load:
-	@echo "Starting $(BINARY_NAME) service..."
-	launchctl load -w $(SERVICE_FILE)
-	launchctl start com.$(BINARY_NAME)
-
-macos-service-unload:
-	@echo "Stopping $(BINARY_NAME) service..."
-	launchctl stop com.$(BINARY_NAME) || exit 0
-	launchctl unload -w $(SERVICE_FILE)
-
-macos-service-restart:
-	@echo "Restarting $(BINARY_NAME) service..."
-	make macos-stop-service || exit 0
-	make macos-start-service
-
-macos-service-print:
-	@echo "$(BINARY_NAME) service information:"
-	launchctl print gui/$(shell id -u)/com.$(BINARY_NAME) || echo "Service not loaded or running"
-
-macos-service-watch:
-	@echo "$(BINARY_NAME) watch server logs @ \"$(LOG_FILE)\":"
-	if [ -f "$(LOG_FILE)" ]; then \
-		echo "Watching logs... Press Ctrl+C to stop"; \
-		tail -f "$(LOG_FILE)"; \
-	else \
-		echo "Log file not found. Make sure the service is running or has been started."; \
-		echo "Log file path: \"$(LOG_FILE)\""; \
-	fi
-
 macos-update: all
-	make macos-stop-service
 	sudo cp $(BIN_DIR)/$(BINARY_NAME) $(INSTALL_PATH)/$(BINARY_NAME)
 	sudo chmod +x $(INSTALL_PATH)/$(BINARY_NAME)
-	make macos-start-service
-	make macos-watch-service
+	@echo "Using launchctl command for restarting the service..."
