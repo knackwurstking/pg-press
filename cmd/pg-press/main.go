@@ -5,14 +5,13 @@ import (
 	"path/filepath"
 
 	"github.com/knackwurstking/pg-press/internal/logger"
+	"github.com/knackwurstking/pg-press/internal/version"
 
 	"github.com/SuperPaintman/nice/cli"
 	"github.com/knackwurstking/ui"
 )
 
 const (
-	version = "v0.0.1"
-
 	exitCodeGeneric     = 1
 	exitCodeNotFound    = 10
 	exitCodeServerStart = 20
@@ -80,7 +79,7 @@ func main() {
 		},
 		CommandFlags: []cli.CommandFlag{
 			cli.HelpCommandFlag(),
-			cli.VersionCommandFlag(version),
+			cli.VersionCommandFlag(version.Get()),
 		},
 	}
 
