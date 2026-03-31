@@ -23,8 +23,8 @@ Run `pg-press --help` for more information.
 ## TODO
 
 - [ ] Add share for press cycles list, maybe a section action button
-- [ ] Make press cycles list tool entries an anchor for a faster navigation to a specific tool page
-- [ ] Make tool cycles list entries an anchor for a faster navigation to a specific press page
-- [ ] Make the tools tab bar full width
-- [ ] Switch logger to slog (JSON)
-- [ ] Improve project structure, move all templ components and pages to /internal/templates
+- [ ] Make press cycles list tool entries an anchor for a faster navigation to a specific tool page [v0.2.0]
+- [ ] Make tool cycles list entries an anchor for a faster navigation to a specific press page [v0.2.0]
+- [ ] Make the tools tab bar full width [v0.2.0]
+- [ ] Switch logger to slog (JSON) [v0.2.0]
+- [ ] Improve project structure, move all templ components and pages to /internal/templates [v0.2.0]
