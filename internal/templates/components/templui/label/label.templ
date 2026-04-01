@@ -1,4 +1,4 @@
-// templui component label - version: v1.9.3 installed by templui v1.9.3
+// templui component label - version: v1.6.0 installed by templui v1.6.0
 // 📚 Documentation: https://templui.io/docs/components/label
 package label
 
@@ -38,10 +38,6 @@ templ Label(props ...Props) {
 	</label>
 }
 
-var scriptOnce = templ.NewOnceHandle()
-
 templ Script() {
-	@scriptOnce.Once() {
-		@utils.ComponentScript("label")
-	}
+	<script defer nonce={ templ.GetNonce(ctx) } src={ utils.ScriptURL("/pg-press/js/components/label.min.js") }></script>
 }

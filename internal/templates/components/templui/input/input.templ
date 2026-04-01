@@ -1,4 +1,4 @@
-// templui component input - version: v1.9.3 installed by templui v1.9.3
+// templui component input - version: v1.6.0 installed by templui v1.6.0
 // 📚 Documentation: https://templui.io/docs/components/input
 package input
 
@@ -113,20 +113,20 @@ templ Input(props ...Props) {
 				Attributes: templ.Attributes{"data-tui-input-toggle-password": p.ID},
 			}) {
 				<span class="icon-open block">
-					@icon.Eye(icon.Props{Class: "size-[18px]"})
+					@icon.Eye(icon.Props{
+						Size: 18,
+					})
 				</span>
 				<span class="icon-closed hidden">
-					@icon.EyeOff(icon.Props{Class: "size-[18px]"})
+					@icon.EyeOff(icon.Props{
+						Size: 18,
+					})
 				</span>
 			}
 		}
 	</div>
 }
 
-var scriptOnce = templ.NewOnceHandle()
-
 templ Script() {
-	@scriptOnce.Once() {
-		@utils.ComponentScript("input")
-	}
+	<script defer nonce={ templ.GetNonce(ctx) } src={ utils.ScriptURL("/pg-press/js/components/input.min.js") }></script>
 }

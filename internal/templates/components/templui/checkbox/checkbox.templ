@@ -1,4 +1,4 @@
-// templui component checkbox - version: v1.9.3 installed by templui v1.9.3
+// templui component checkbox - version: v1.6.0 installed by templui v1.6.0
 // 📚 Documentation: https://templui.io/docs/components/checkbox
 package checkbox
 
@@ -71,21 +71,17 @@ templ Checkbox(props ...Props) {
 			if p.Icon != nil {
 				@p.Icon
 			} else {
-				@icon.Check(icon.Props{Class: "size-3.5"})
+				@icon.Check(icon.Props{Size: 14})
 			}
 		</div>
 		<div
 			class="absolute inset-0 pointer-events-none flex items-center justify-center text-primary-foreground opacity-0 peer-indeterminate:opacity-100"
 		>
-			@icon.Minus(icon.Props{Class: "size-3.5"})
+			@icon.Minus(icon.Props{Size: 14})
 		</div>
 	</div>
 }
 
-var scriptOnce = templ.NewOnceHandle()
-
 templ Script() {
-	@scriptOnce.Once() {
-		@utils.ComponentScript("checkbox")
-	}
+	<script defer nonce={ templ.GetNonce(ctx) } src={ utils.ScriptURL("/pg-press/js/components/checkbox.min.js") }></script>
 }
