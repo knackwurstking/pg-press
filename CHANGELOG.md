@@ -6,11 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [v0.2.0] - 2026-04-02
+
 ### Changed
 
 - Set tools page tab bar to full width
 - Make press cycles list tool entries an anchor for a faster navigation to a specific tool page
 - Make tool cycles list entries an anchor for a faster navigation to a specific press page
+- Components path changed to "/internal/templates/components/PACKAGE_NAME/"
+- Switch logger to slog (JSON)
 
 ## [v0.1.0] - 2026-03-29
 
