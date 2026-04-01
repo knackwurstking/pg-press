@@ -2,6 +2,13 @@ package components
 
 import (
 	"github.com/knackwurstking/pg-press/internal/env"
+	"github.com/knackwurstking/pg-press/internal/templates/components/templui/checkbox"
+	"github.com/knackwurstking/pg-press/internal/templates/components/templui/dialog"
+	"github.com/knackwurstking/pg-press/internal/templates/components/templui/input"
+	"github.com/knackwurstking/pg-press/internal/templates/components/templui/label"
+	"github.com/knackwurstking/pg-press/internal/templates/components/templui/selectbox"
+	"github.com/knackwurstking/pg-press/internal/templates/components/templui/tabs"
+	"github.com/knackwurstking/pg-press/internal/templates/components/templui/textarea"
 
 	"github.com/knackwurstking/ui"
 )
@@ -63,14 +70,13 @@ templ scripts() {
 	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/layout/image-viewer.js") }></script>
 	// PDF
 	<script src={ ui.AssetURL(env.ServerPathPrefix, "/js/layout/pdf.js") }></script>
-	// Component Scripts
-	<script defer nonce={ templ.GetNonce(ctx) } src={ ui.AssetURL(env.ServerPathPrefix, "/js/components/checkbox.min.js") }></script>
-	<script defer nonce={ templ.GetNonce(ctx) } src={ ui.AssetURL(env.ServerPathPrefix, "/js/components/dialog.min.js") }></script>
-	<script defer nonce={ templ.GetNonce(ctx) } src={ ui.AssetURL(env.ServerPathPrefix, "/js/components/input.min.js") }></script>
-	<script defer nonce={ templ.GetNonce(ctx) } src={ ui.AssetURL(env.ServerPathPrefix, "/js/components/label.min.js") }></script>
-	<script defer nonce={ templ.GetNonce(ctx) } src={ ui.AssetURL(env.ServerPathPrefix, "/js/components/popover.min.js") }></script>
-	<script defer nonce={ templ.GetNonce(ctx) } src={ ui.AssetURL(env.ServerPathPrefix, "/js/components/selectbox.min.js") }></script>
-	<script defer nonce={ templ.GetNonce(ctx) } src={ ui.AssetURL(env.ServerPathPrefix, "/js/components/tabs.min.js") }></script>
+	@dialog.Script()
+	@label.Script()
+	@input.Script()
+	@checkbox.Script()
+	@selectbox.Script()
+	@tabs.Script()
+	@textarea.Script()
 }
 
 templ styles() {

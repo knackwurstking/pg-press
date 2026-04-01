@@ -1,7 +1,7 @@
 {
-	"componentsDir": "internal/templates/components",
+	"componentsDir": "internal/templates/components/templui",
 	"utilsDir": "internal/utils",
 	"moduleName": "github.com/knackwurstking/pg-press",
 	"jsDir": "internal/assets/public/js/components",
-	"jsPublicPath": "/pg-press/js"
+	"jsPublicPath": "/pg-press/js/components"
 }
