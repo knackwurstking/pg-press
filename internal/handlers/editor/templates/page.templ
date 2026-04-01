@@ -3,16 +3,16 @@ package templates
 import (
 	"fmt"
 
-	"github.com/knackwurstking/pg-press/internal/components"
-	"github.com/knackwurstking/pg-press/internal/components/accordion"
-	"github.com/knackwurstking/pg-press/internal/components/button"
-	"github.com/knackwurstking/pg-press/internal/components/checkbox"
-	"github.com/knackwurstking/pg-press/internal/components/form"
-	"github.com/knackwurstking/pg-press/internal/components/icon"
-	"github.com/knackwurstking/pg-press/internal/components/input"
-	"github.com/knackwurstking/pg-press/internal/components/textarea"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/templates/components"
+	"github.com/knackwurstking/pg-press/internal/templates/components/accordion"
+	"github.com/knackwurstking/pg-press/internal/templates/components/button"
+	"github.com/knackwurstking/pg-press/internal/templates/components/checkbox"
+	"github.com/knackwurstking/pg-press/internal/templates/components/form"
+	"github.com/knackwurstking/pg-press/internal/templates/components/icon"
+	"github.com/knackwurstking/pg-press/internal/templates/components/input"
+	"github.com/knackwurstking/pg-press/internal/templates/components/textarea"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/knackwurstking/ui"
 )
@@ -98,7 +98,7 @@ templ titleInput(title string) {
 		@form.Label(form.LabelProps{
 			For: "title",
 		}) {
-			Titel	
+			Titel
 		}
 		@input.Input(input.Props{
 			ID:          "title",

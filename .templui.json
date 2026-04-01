@@ -1,7 +1,7 @@
 {
-  "componentsDir": "internal/components",
-  "utilsDir": "internal/utils",
-  "moduleName": "github.com/knackwurstking/pg-press",
-  "jsDir": "internal/assets/public/js/components",
-  "jsPublicPath": "/pg-press/js"
+	"componentsDir": "internal/templates/components",
+	"utilsDir": "internal/utils",
+	"moduleName": "github.com/knackwurstking/pg-press",
+	"jsDir": "internal/assets/public/js/components",
+	"jsPublicPath": "/pg-press/js"
 }

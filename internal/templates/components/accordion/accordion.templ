@@ -1,9 +1,9 @@
-// templui component accordion - version: v1.6.0 installed by templui v1.6.0
+// templui component accordion - version: v1.9.3 installed by templui v1.9.3
 // 📚 Documentation: https://templui.io/docs/components/accordion
 package accordion
 
 import (
-	"github.com/knackwurstking/pg-press/internal/components/icon"
+	"github.com/knackwurstking/pg-press/internal/templates/components/icon"
 	"github.com/knackwurstking/pg-press/internal/utils"
 )
 
@@ -97,10 +97,7 @@ templ Trigger(props ...TriggerProps) {
 		{ p.Attributes... }
 	>
 		{ children... }
-		@icon.ChevronDown(icon.Props{
-			Size:  16,
-			Class: "size-4 shrink-0 translate-y-0.5 transition-transform duration-200 text-muted-foreground pointer-events-none",
-		})
+		@icon.ChevronDown(icon.Props{Class: "size-4 shrink-0 translate-y-0.5 transition-transform duration-200 text-muted-foreground pointer-events-none"})
 	</summary>
 }
 

@@ -1,9 +1,9 @@
 package components
 
 import (
-	"github.com/knackwurstking/pg-press/internal/components/button"
-	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/templates/components/button"
+	"github.com/knackwurstking/pg-press/internal/templates/components/icon"
 )
 
 type TableActionsOptions struct {
@@ -46,7 +46,7 @@ templ TableActions(options TableActionsOptions) {
 				},
 			}) {
 				@icon.Trash(icon.Props{
-					Color: "var(--destructive)",
+					Class: "text-destructive",
 				})
 			}
 		}

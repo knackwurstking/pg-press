@@ -53,7 +53,7 @@ func serverCommand() cli.Command {
  ******************************************************************************/
 
 func middlewareConfiguration(e *echo.Echo) {
-	e.Use(middleware.Logger()) // TODO: Update deps. and use the new RequestLogger middleware
+	e.Use(middleware.RequestLogger())
 	e.Use(middlewareKeyAuth())
 	e.Use(ui.EchoMiddlewareCache(pages))
 }

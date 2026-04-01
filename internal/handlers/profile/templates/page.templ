@@ -1,14 +1,14 @@
 package templates
 
 import (
-	"github.com/knackwurstking/pg-press/internal/components"
-	"github.com/knackwurstking/pg-press/internal/components/button"
-	"github.com/knackwurstking/pg-press/internal/components/dialog"
-	"github.com/knackwurstking/pg-press/internal/components/form"
-	"github.com/knackwurstking/pg-press/internal/components/icon"
-	"github.com/knackwurstking/pg-press/internal/components/input"
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/templates/components"
+	"github.com/knackwurstking/pg-press/internal/templates/components/button"
+	"github.com/knackwurstking/pg-press/internal/templates/components/dialog"
+	"github.com/knackwurstking/pg-press/internal/templates/components/form"
+	"github.com/knackwurstking/pg-press/internal/templates/components/icon"
+	"github.com/knackwurstking/pg-press/internal/templates/components/input"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
@@ -88,8 +88,7 @@ templ editUserDialog(user *shared.User) {
 		Open:             false,
 	}) {
 		@dialog.Content(dialog.ContentProps{
-			Class:            "overflow-auto max-h-[90vh]", // TODO: For now, this will fix the overflow issue
-			DisableAutoFocus: true,
+			Class: "overflow-auto max-h-[90vh]", // TODO: For now, this will fix the overflow issue
 		}) {
 			<form action={ urlb.Profile() } method="POST">
 				@form.Item() {

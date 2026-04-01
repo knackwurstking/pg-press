@@ -3,12 +3,12 @@ package dialogs
 import (
 	"fmt"
 
-	"github.com/knackwurstking/pg-press/internal/components/button"
-	"github.com/knackwurstking/pg-press/internal/components/dialog"
-	"github.com/knackwurstking/pg-press/internal/components/form"
-	"github.com/knackwurstking/pg-press/internal/components/input"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/templates/components/button"
+	"github.com/knackwurstking/pg-press/internal/templates/components/dialog"
+	"github.com/knackwurstking/pg-press/internal/templates/components/form"
+	"github.com/knackwurstking/pg-press/internal/templates/components/input"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
@@ -271,7 +271,7 @@ templ formSheets(value float64, ierrs ...*errors.InputError) {
 		@form.Label(form.LabelProps{
 			For: "value",
 		}) {
-			Blech (mm)	
+			Blech (mm)
 		}
 		@input.Input(input.Props{
 			ID:       "value",

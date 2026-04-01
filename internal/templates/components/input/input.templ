@@ -1,10 +1,10 @@
-// templui component input - version: v1.6.0 installed by templui v1.6.0
+// templui component input - version: v1.9.3 installed by templui v1.9.3
 // 📚 Documentation: https://templui.io/docs/components/input
 package input
 
 import (
-	"github.com/knackwurstking/pg-press/internal/components/button"
-	"github.com/knackwurstking/pg-press/internal/components/icon"
+	"github.com/knackwurstking/pg-press/internal/templates/components/button"
+	"github.com/knackwurstking/pg-press/internal/templates/components/icon"
 	"github.com/knackwurstking/pg-press/internal/utils"
 )
 
@@ -113,20 +113,20 @@ templ Input(props ...Props) {
 				Attributes: templ.Attributes{"data-tui-input-toggle-password": p.ID},
 			}) {
 				<span class="icon-open block">
-					@icon.Eye(icon.Props{
-						Size: 18,
-					})
+					@icon.Eye(icon.Props{Class: "size-[18px]"})
 				</span>
 				<span class="icon-closed hidden">
-					@icon.EyeOff(icon.Props{
-						Size: 18,
-					})
+					@icon.EyeOff(icon.Props{Class: "size-[18px]"})
 				</span>
 			}
 		}
 	</div>
 }
 
+var scriptOnce = templ.NewOnceHandle()
+
 templ Script() {
-	<script defer nonce={ templ.GetNonce(ctx) } src={ utils.ScriptURL("/pg-press/js/input.min.js") }></script>
+	@scriptOnce.Once() {
+		@utils.ComponentScript("input")
+	}
 }

@@ -3,10 +3,10 @@ package components
 import (
 	"fmt"
 
-	"github.com/knackwurstking/pg-press/internal/components/button"
-	"github.com/knackwurstking/pg-press/internal/components/card"
-	"github.com/knackwurstking/pg-press/internal/components/icon"
 	"github.com/knackwurstking/pg-press/internal/shared"
+	"github.com/knackwurstking/pg-press/internal/templates/components/button"
+	"github.com/knackwurstking/pg-press/internal/templates/components/card"
+	"github.com/knackwurstking/pg-press/internal/templates/components/icon"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 )
 
@@ -20,19 +20,19 @@ templ NoteCard(note *shared.Note, tools []*shared.Tool, props ...card.Props) {
 				switch note.Level {
 					case shared.LevelNormal:
 						@icon.StickyNote(icon.Props{
-							Color: "gray",
+							Class: "text-gray-500",
 						})
 					case shared.LevelInfo:
 						@icon.Info(icon.Props{
-							Color: "blue",
+							Class: "text-blue-500",
 						})
 					case shared.LevelAttention:
 						@icon.MessageSquareWarning(icon.Props{
-							Color: "orange",
+							Class: "text-orange-500",
 						})
 					case shared.LevelBroken:
 						@icon.TriangleAlert(icon.Props{
-							Color: "red",
+							Class: "text-red-500",
 						})
 					default:
 						{{ panic(fmt.Sprintf("unknown note level: %d", note.Level)) }}
@@ -68,7 +68,7 @@ templ NoteCard(note *shared.Note, tools []*shared.Tool, props ...card.Props) {
 					},
 				}) {
 					@icon.Trash(icon.Props{
-						Color: "var(--destructive)",
+						Class: "text-destructive",
 					})
 				}
 			</span>
@@ -93,10 +93,10 @@ templ NoteCard(note *shared.Note, tools []*shared.Tool, props ...card.Props) {
 										Href:    string(urlb.Tool(t.ID)),
 									}) {
 										{ fmt.Sprintf(
-											"Werkzeug %dx%d %s %s (%s)", 
-											t.Width, t.Height, 
-											t.Type, 
-											t.Code, 
+											"Werkzeug %dx%d %s %s (%s)",
+											t.Width, t.Height,
+											t.Type,
+											t.Code,
 											t.Position.German(),
 										) }
 									}
