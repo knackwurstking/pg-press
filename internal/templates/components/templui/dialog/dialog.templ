@@ -6,6 +6,7 @@ import (
 	"context"
 	"github.com/knackwurstking/pg-press/internal/templates/components/templui/icon"
 	"github.com/knackwurstking/pg-press/internal/utils"
+	"log/slog"
 )
 
 type contextKey string
@@ -122,6 +123,10 @@ templ Content(props ...ContentProps) {
 	if val := ctx.Value(openKey); val != nil {
 		{{ open = val.(bool) }}
 	}
+	{{
+		// TODO: Remove debug log
+		slog.Debug("Rendering Dialog Content", "open", open)
+	}}
 	<dialog
 		class={
 			utils.TwMerge(

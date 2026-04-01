@@ -84,7 +84,7 @@ var componentScriptBasePath = "/pg-press/js/components"
 
 // UseUnminifiedScripts switches component script loading to the unminified files.
 // Leave this false in normal use and set it to true during app startup for debugging.
-var UseUnminifiedScripts = false
+var UseUnminifiedScripts = true // TODO: Just for debugging the dialog problem
 
 // ComponentScript renders a deferred script tag for a component JavaScript file.
 // Example: ComponentScript("datepicker") → <script defer src="/templui/js/datepicker.min.js?..."></script>
