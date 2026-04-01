@@ -18,7 +18,9 @@ templ Page() {
 	) {
 		@components.Page() {
 			@tabs.Tabs() {
-				@tabs.List() {
+				@tabs.List(tabs.ListProps{
+					Class: "w-full",
+				}) {
 					@tabs.Trigger(tabs.TriggerProps{
 						Value: "press",
 					}) {
