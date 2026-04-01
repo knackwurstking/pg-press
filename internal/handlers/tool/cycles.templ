@@ -198,7 +198,11 @@ templ cyclesTable(prop *CyclesContentProps) {
 								Class: cycleClass,
 							}) {
 								@table.Cell() {
-									<span>{ press.German() }</span>
+									<span>
+										<a class="underline" href={ urlb.Press(press.ID) }>
+											{ press.German() }
+										</a>
+									</span>
 								}
 								@table.Cell() {
 									<span class="text-sm">{ cycle.Start.FormatDate() }</span>

@@ -86,7 +86,9 @@ templ renderPressCycleRow(cycle *shared.Cycle, tool *shared.Tool, user *shared.U
 			Class: "text-sm text-nowrap",
 		}) {
 			if tool != nil {
-				{ tool.German() }
+				<a class="underline" href={ string(urlb.Tool(tool.ID)) }>
+					{ tool.German() }
+				</a>
 			} else {
 				{ cycle.ToolID }
 			}

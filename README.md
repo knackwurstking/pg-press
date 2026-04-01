@@ -22,8 +22,8 @@ Run `pg-press --help` for more information.
 
 ## TODO
 
-- [ ] Make press cycles list tool entries an anchor for a faster navigation to a specific tool page [v0.2.0]
-- [ ] Make tool cycles list entries an anchor for a faster navigation to a specific press page [v0.2.0]
+- [x] Make press cycles list tool entries an anchor for a faster navigation to a specific tool page [v0.2.0]
+- [x] Make tool cycles list entries an anchor for a faster navigation to a specific press page [v0.2.0]
 - [ ] Make the tools tab bar full width [v0.2.0]
 - [ ] Switch logger to slog (JSON) [v0.2.0]
 - [ ] Improve project structure, move all templ components and pages to /internal/templates [v0.2.0]
