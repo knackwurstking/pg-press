@@ -72,7 +72,7 @@ templ toolSelection(
 		enctype="multipart/form-data"
 	>
 		@form.Item() {
-			{{ id := fmt.Sprintf("%s-tool-select", position) }}
+			{{ id := fmt.Sprintf("%d-tool-select", position) }}
 			@form.Label(form.LabelProps{
 				For: id,
 			}) {
