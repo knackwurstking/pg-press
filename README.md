@@ -30,5 +30,7 @@ Run `pg-press --help` for more information.
 - [x] Move all components/\* to a separate components package "/internal/templates/components/PACKAGE_NAME/" [v0.2.0]
 
 - [ ] Move all handler templates to "/internal/templates/pages/" [v0.3.0]
-- [ ] Add share for press cycles list, maybe a section action button [v0.3.0]
-- [ ] Implement an global alert system, like in picow-led v0.1.1, so the hx-on::response-error stuff can be removed [v0.3.0]
+- [ ] Update to templui v1.9.3, for this to work i need to change all dialog templates [v0.3.0]
+
+- [ ] Implement an global alert system, like in picow-led v0.1.1, so the hx-on::response-error stuff can be removed [v0.4.0]
+- [ ] Add share for press cycles list, maybe a section action button [v0.4.0]
