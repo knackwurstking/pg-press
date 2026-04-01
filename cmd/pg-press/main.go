@@ -4,11 +4,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/knackwurstking/pg-press/internal/logger"
 	"github.com/knackwurstking/pg-press/internal/version"
 
 	"github.com/SuperPaintman/nice/cli"
-	"github.com/knackwurstking/ui"
 )
 
 const (
@@ -20,12 +18,9 @@ const (
 var (
 	appName    string
 	configPath string
-	log        *ui.Logger
 )
 
 func init() {
-	log = logger.New("main")
-
 	appName = filepath.Base(os.Args[0])
 
 	p, err := os.UserConfigDir()

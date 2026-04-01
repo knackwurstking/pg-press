@@ -1,6 +1,8 @@
 package profile
 
 import (
+	"log/slog"
+
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/profile/templates"
@@ -60,7 +62,7 @@ func handleUserNameChange(c echo.Context, user *shared.User) *errors.HTTPError {
 	if herr != nil {
 		return herr
 	}
-	log.Info("User %#v changed their name to %#v\n", user.Name, userName)
+	slog.Info("User changed their name", "old_name", user.Name, "new_name", userName)
 
 	return nil
 }

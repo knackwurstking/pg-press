@@ -1,6 +1,7 @@
 package tool
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/internal/db"
@@ -62,7 +63,7 @@ func Regeneration(c echo.Context) *echo.HTTPError {
 		return echo.NewHTTPError(http.StatusBadRequest, "status is required")
 	}
 
-	log.Debug("Regeneration status change requested: tool ID %d, status %s", tool.ID, statusStr)
+	slog.Debug("Regeneration status change requested", "tool_id", tool.ID, "status", statusStr)
 
 	// Handle regeneration start/stop/abort only
 	switch statusStr {

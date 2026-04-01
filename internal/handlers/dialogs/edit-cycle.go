@@ -2,6 +2,7 @@ package dialogs
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -128,7 +129,7 @@ func PostCycle(c echo.Context) *echo.HTTPError {
 		return reRenderNewCycleDialog(c, true, data, ierrs...)
 	}
 
-	log.Debug("Create a new press cycles entry. [data=%#v]", data)
+	slog.Debug("Create a new press cycles entry.", "data", data)
 
 	cycle := shared.NewCycle(data.ToolID, data.PressID, data.PressCycles, data.Stop)
 	if herr := db.AddCycle(cycle); herr != nil {
@@ -157,7 +158,7 @@ func updateCycle(c echo.Context, cycleID shared.EntityID) *echo.HTTPError {
 	cycle.Stop = data.Stop
 	cycle.PressCycles = data.PressCycles
 
-	log.Debug("Update existing cycle with ID %d. [data=%#v]", cycle.ID, data)
+	slog.Debug("Update existing cycle.", "id", cycle.ID, "data", data)
 
 	if herr := db.UpdateCycle(cycle); herr != nil {
 		ierr := errors.NewInputError("", fmt.Sprintf("failed to update cycle: %v", herr))

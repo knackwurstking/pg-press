@@ -1,6 +1,7 @@
 package dialogs
 
 import (
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -33,7 +34,11 @@ func GetEditNote(c echo.Context) *echo.HTTPError {
 	}
 
 	if note != nil {
-		log.Debug("Rendering edit note dialog [note=%v, linked=%v, user_name=%s]", note, linked, c.Get("user-name"))
+		slog.Debug("Rendering edit note dialog",
+			"note", note,
+			"linked", linked,
+			"user_name", c.Get("user-name"))
+
 		t := EditNoteDialog(note.ID, NoteDialogProps{
 			NoteFormData: NoteFormData{
 				Level:   note.Level,
@@ -50,7 +55,9 @@ func GetEditNote(c echo.Context) *echo.HTTPError {
 		return nil
 	}
 
-	log.Debug("Rendering new note dialog [linked=%v, user_name=%s]", linked, c.Get("user-name"))
+	slog.Debug("Rendering new note dialog",
+		"linked", linked,
+		"user_name", c.Get("user-name"))
 
 	t := NewNoteDialog(NoteDialogProps{
 		NoteFormData: NoteFormData{
@@ -77,7 +84,9 @@ func PostNote(c echo.Context) *echo.HTTPError {
 		return reRenderNewNoteDialog(c, true, data, ierrs...)
 	}
 
-	log.Debug("Creating new note [data=%#v, user_name=%s]", data, c.Get("user-name"))
+	slog.Debug("Creating new note",
+		"data", data,
+		"user_name", c.Get("user-name"))
 
 	note := &shared.Note{
 		Level:     data.Level,
@@ -112,7 +121,9 @@ func updateNote(c echo.Context, id shared.EntityID) *echo.HTTPError {
 	note.Content = data.Content
 	note.Linked = data.Linked
 
-	log.Debug("Updating note [data=%#v, user_name=%s]", data, c.Get("user-name"))
+	slog.Debug("Updating note",
+		"data", data,
+		"user_name", c.Get("user-name"))
 
 	// Update the note
 	if herr := db.UpdateNote(note); herr != nil {

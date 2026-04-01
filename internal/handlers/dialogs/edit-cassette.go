@@ -2,6 +2,7 @@ package dialogs
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/internal/db"
@@ -28,7 +29,7 @@ func GetCassetteDialog(c echo.Context) *echo.HTTPError {
 	}
 
 	if tool != nil {
-		log.Debug("Rendering edit cassette dialog: %#v", tool.String())
+		slog.Debug("Rendering edit cassette dialog", "tool_string", tool.String())
 		t := EditCassetteDialog(tool.ID, CassetteDialogProps{
 			CassetteFormData: CassetteFormData{
 				Type:         tool.Type,
@@ -47,7 +48,7 @@ func GetCassetteDialog(c echo.Context) *echo.HTTPError {
 		return nil
 	}
 
-	log.Debug("Rendering new cassette dialog...")
+	slog.Debug("Rendering new cassette dialog...")
 	t := NewCassetteDialog(CassetteDialogProps{
 		OOB:  true,
 		Open: true,
@@ -80,7 +81,7 @@ func PostCassette(c echo.Context) *echo.HTTPError {
 		MaxThickness: formData.MaxThickness,
 	}
 
-	log.Debug("Creating new cassette: %#v", tool.String())
+	slog.Debug("Creating new cassette", "tool_string", tool.String())
 
 	if merr := db.AddTool(tool); merr != nil {
 		ierr := errors.NewInputError("", fmt.Sprintf("Failed to create cassette: %s", merr.Error()))
@@ -110,7 +111,7 @@ func updateCassette(c echo.Context, toolID shared.EntityID) *echo.HTTPError {
 	tool.MinThickness = formData.MinThickness
 	tool.MaxThickness = formData.MaxThickness
 
-	log.Debug("Updating cassette: %#v", tool)
+	slog.Debug("Updating cassette", "tool", tool)
 
 	if merr = db.UpdateTool(tool); merr != nil {
 		ierr := errors.NewInputError("", fmt.Sprintf("Failed to update cassette: %s", merr.Error()))
@@ -156,7 +157,7 @@ func parseCassetteForm(c echo.Context) (data CassetteFormData, ierrs []*errors.I
 	}
 	data.MaxThickness = float32(maxThickness)
 
-	log.Debug("Cassette dialog form values: %#v", data)
+	slog.Debug("Cassette dialog form values", "data", data)
 
 	return
 }

@@ -2,6 +2,7 @@ package dialogs
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/internal/db"
@@ -25,7 +26,7 @@ func GetToolDialog(c echo.Context) *echo.HTTPError {
 	}
 
 	if tool != nil {
-		log.Debug("Rendering edit tool dialog: %#v", tool)
+		slog.Debug("Rendering edit tool dialog", "tool", tool)
 		t := EditToolDialog(tool.ID, ToolDialogProps{
 			ToolFormData: ToolFormData{
 				Type:     tool.Type,
@@ -44,7 +45,7 @@ func GetToolDialog(c echo.Context) *echo.HTTPError {
 		return nil
 	}
 
-	log.Debug("Rendering new tool dialog...")
+	slog.Debug("Rendering new tool dialog...")
 	t := NewToolDialog(ToolDialogProps{
 		Open: true,
 		OOB:  true,
@@ -67,7 +68,7 @@ func PostTool(c echo.Context) *echo.HTTPError {
 	if len(ierrs) > 0 {
 		return reRenderNewToolDialog(c, true, formData, ierrs...)
 	}
-	log.Debug("Creating new tool: %#v", formData)
+	slog.Debug("Creating new tool", "form_data", formData)
 
 	tool := &shared.Tool{
 		Type:     formData.Type,
@@ -103,7 +104,7 @@ func updateTool(c echo.Context, toolID shared.EntityID) *echo.HTTPError {
 	tool.Width = formData.Width
 	tool.Height = formData.Height
 
-	log.Debug("Updating tool: %#v", tool)
+	slog.Debug("Updating tool", "tool", tool)
 
 	if merr = db.UpdateTool(tool); merr != nil {
 		ierr := errors.NewInputError("", fmt.Sprintf("Failed to update tool: %s", merr.Error()))
@@ -149,7 +150,7 @@ func parseToolForm(c echo.Context) (data ToolFormData, ierrs []*errors.InputErro
 		ierrs = append(ierrs, ierr)
 	}
 
-	log.Debug("Tool dialog form values: %#v", data)
+	slog.Debug("Tool dialog form values", "data", data)
 
 	return
 }

@@ -1,6 +1,8 @@
 package tools
 
 import (
+	"log/slog"
+
 	"github.com/knackwurstking/pg-press/internal/db"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
@@ -18,7 +20,7 @@ func Delete(c echo.Context) *echo.HTTPError {
 	if merr != nil {
 		return merr.Echo()
 	}
-	log.Debug("Deleted tool with ID: %d", id)
+	slog.Debug("Deleted tool", "id", id)
 
 	utils.SetHXRedirect(c, urlb.Tools())
 

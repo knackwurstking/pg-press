@@ -1,6 +1,7 @@
 package editor
 
 import (
+	"log/slog"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -28,7 +29,7 @@ func Save(c echo.Context) *echo.HTTPError {
 		useMarkdown = c.FormValue("use_markdown") == "on"
 	)
 
-	log.Info("Save editor content with type %s and ID %s", editorType, vID)
+	slog.Info("Save editor content", "editor_type", editorType, "vid", vID)
 
 	if editorType == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "editor type is required")
@@ -149,7 +150,7 @@ func processAttachments(c echo.Context) ([]string, error) {
 		fileName := utils.GetAttachmentFileName(fileHeader.Filename)
 		path := filepath.Join(env.ServerPathImages, fileName)
 		if err = os.WriteFile(path, data, 0644); err != nil {
-			log.Error("Failed to save attachment: %v", err)
+			slog.Error("Failed to save attachment", "error", err)
 			continue
 		}
 

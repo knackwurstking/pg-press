@@ -2,6 +2,7 @@ package auth
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -17,7 +18,7 @@ import (
 )
 
 func GetLoginPage(c echo.Context) *echo.HTTPError {
-	log.Debug("Login page requested from IP: %s", c.RealIP())
+	slog.Debug("Login page requested from IP", "real_ip", c.RealIP())
 
 	t := templates.Page(
 		templates.PageProps{
@@ -36,13 +37,13 @@ func GetLoginPage(c echo.Context) *echo.HTTPError {
 }
 
 func PostLoginPage(c echo.Context) *echo.HTTPError {
-	log.Debug("Login attempt from IP: %s", c.RealIP())
+	slog.Debug("Login attempt from IP", "real_ip", c.RealIP())
 
 	apiKey := c.FormValue("api-key")
 
 	err := processApiKeyLogin(apiKey, c)
 	if err != nil {
-		log.Warn("Login failed: %v", err)
+		slog.Warn("Login failed", "error", err)
 	}
 	if apiKey == "" || err != nil {
 		invalid := true
@@ -76,7 +77,9 @@ func processApiKeyLogin(apiKey string, ctx echo.Context) *errors.HTTPError {
 	}
 
 	if user.IsAdmin() {
-		log.Info("Administrator %s logged in from IP %s", user.Name, ctx.RealIP())
+		slog.Info("Administrator logged in",
+			"user_name", user.Name,
+			"real_ip", ctx.RealIP())
 	}
 
 	return nil

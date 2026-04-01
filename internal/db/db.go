@@ -14,6 +14,7 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -21,7 +22,6 @@ import (
 	"time"
 
 	"github.com/knackwurstking/pg-press/internal/errors"
-	"github.com/knackwurstking/pg-press/internal/logger"
 )
 
 // Scannable interface defines the required scanning method for database rows.
@@ -36,8 +36,6 @@ var (
 	dbNote    *sql.DB
 	dbUser    *sql.DB
 	dbReports *sql.DB
-
-	log = logger.New("db")
 )
 
 // Open initializes and opens all database connections.
@@ -65,7 +63,9 @@ func Open(path string, allowCreate bool) error {
 	names := []string{"tool", "press", "note", "user", "reports"}
 	chErr := make(chan error, len(names))
 	for _, name := range names {
-		log.Debug("Opening %s database at %s", name, path)
+		slog.Debug("Opening database",
+			"name", name,
+			"path", path)
 
 		wg.Go(func() {
 			path := fmt.Sprintf(

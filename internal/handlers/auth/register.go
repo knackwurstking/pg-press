@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/internal/env"
-	"github.com/knackwurstking/pg-press/internal/logger"
 
 	"github.com/knackwurstking/ui"
 	"github.com/labstack/echo/v4"
@@ -12,10 +11,6 @@ import (
 
 const (
 	CookieName = "pgpress-api-key"
-)
-
-var (
-	log = logger.New("handler: auth")
 )
 
 func Register(e *echo.Echo, path string) {

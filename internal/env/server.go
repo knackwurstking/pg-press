@@ -2,6 +2,7 @@ package env
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 )
 
@@ -18,6 +19,16 @@ var (
 )
 
 func init() {
+	level := slog.LevelInfo
+	if Verbose {
+		level = slog.LevelDebug
+	}
+	h := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		AddSource: true,
+		Level:     level,
+	})
+	slog.SetDefault(slog.New(h))
+
 	home, err := os.UserHomeDir()
 	if err != nil {
 		panic(err)

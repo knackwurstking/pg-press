@@ -4,14 +4,9 @@ import (
 	"net/http"
 
 	"github.com/knackwurstking/pg-press/internal/env"
-	"github.com/knackwurstking/pg-press/internal/logger"
 
 	"github.com/knackwurstking/ui"
 	"github.com/labstack/echo/v4"
-)
-
-var (
-	log = logger.New("handler: profile")
 )
 
 func Register(e *echo.Echo, path string) {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
 	"slices"
 	"strings"
 	"time"
@@ -10,25 +11,20 @@ import (
 	"github.com/knackwurstking/pg-press/internal/env"
 	"github.com/knackwurstking/pg-press/internal/errors"
 	"github.com/knackwurstking/pg-press/internal/handlers/auth"
-	"github.com/knackwurstking/pg-press/internal/logger"
 	"github.com/knackwurstking/pg-press/internal/shared"
 	"github.com/knackwurstking/pg-press/internal/urlb"
 	"github.com/knackwurstking/pg-press/internal/utils"
 
-	"github.com/knackwurstking/ui"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
 var (
-	logMiddleware      *ui.Logger
 	keyAuthFilesToSkip []string
 	pages              []string
 )
 
 func init() {
-	logMiddleware = logger.New("middleware")
-
 	// NOTE: Used for updating cookies
 	pages = []string{
 		env.ServerPathPrefix + "",
@@ -88,10 +84,12 @@ func middlewareKeyAuth() echo.MiddlewareFunc {
 			return keyAuthValidator(auth, ctx)
 		},
 		ErrorHandler: func(err error, c echo.Context) error {
-			logMiddleware.Error(
-				"KeyAuth error: %v [method=%s, path=%s, real_ip=%s]",
-				err, c.Request().Method, c.Request().URL.Path, c.RealIP(),
-			)
+			slog.Error("KeyAuth error",
+				"error", err,
+				"method", c.Request().Method,
+				"path", c.Request().URL.Path,
+				"real_ip", c.RealIP())
+
 			merr := utils.RedirectTo(c, urlb.Login("", nil))
 			if merr != nil {
 				return merr.Err()
@@ -114,10 +112,9 @@ func keyAuthValidator(auth string, ctx echo.Context) (bool, error) {
 
 	user, err := validateUserFromCookie(ctx)
 	if err != nil {
-		logMiddleware.Warn(
-			"Validate user from cookie failed: %v [real_ip=%s]",
-			err, realIP,
-		)
+		slog.Warn("Validate user from cookie failed",
+			"error", err,
+			"real_ip", realIP)
 
 		// Try to get user directly from the API key
 		var merr *errors.HTTPError
@@ -127,10 +124,9 @@ func keyAuthValidator(auth string, ctx echo.Context) (bool, error) {
 		}
 	}
 
-	logMiddleware.Debug(
-		"API-Key auth successful for %s [real_ip=%s]",
-		user.Name, realIP,
-	)
+	slog.Debug("API-Key auth successful",
+		"user_name", user.Name,
+		"real_ip", realIP)
 
 	ctx.Set("user", user)
 	ctx.Set("user-name", user.Name)
@@ -173,10 +169,10 @@ func validateUserFromCookie(ctx echo.Context) (*shared.User, error) {
 
 		merr = db.UpdateCookie(cookie)
 		if merr != nil {
-			logMiddleware.Error(
-				"Failed to update cookie: %v [user_name=%s, real_ip=%s]",
-				merr, user.Name, realIP,
-			)
+			slog.Error("Failed to update cookie",
+				"error", merr,
+				"user_name", user.Name,
+				"real_ip", realIP)
 		}
 	}
 

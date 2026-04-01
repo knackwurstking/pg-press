@@ -6,8 +6,7 @@
 package main
 
 import (
-	"bytes"
-	"fmt"
+	"log/slog"
 	"os"
 
 	"github.com/knackwurstking/pg-press/internal/assets"
@@ -36,6 +35,7 @@ func serverCommand() cli.Command {
 				return withDBOperation(*customDBPath, true, func() error {
 					e := echo.New()
 					e.HideBanner = true
+					e.HidePort = true
 
 					middlewareConfiguration(e)
 					setupRouter(e, env.ServerPathPrefix)
@@ -53,18 +53,7 @@ func serverCommand() cli.Command {
  ******************************************************************************/
 
 func middlewareConfiguration(e *echo.Echo) {
-	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Output:           os.Stderr,
-		Format:           "[${time_custom}] ${method} ${status} ${uri} ${latency_human} ${remote_ip} ${error} ${custom}\n",
-		CustomTimeFormat: "2006-01-02 15:04:05",
-		CustomTagFunc: func(c echo.Context, b *bytes.Buffer) (int, error) {
-			if c.Get("user-name") == nil || c.Get("user-name").(string) == "" {
-				return b.WriteString("[user_name=anonymous] ")
-			}
-			return fmt.Fprintf(b, "[user_name=%s] ", c.Get("user-name").(string))
-		},
-	}))
-
+	e.Use(middleware.Logger()) // TODO: Update deps. and use the new RequestLogger middleware
 	e.Use(middlewareKeyAuth())
 	e.Use(ui.EchoMiddlewareCache(pages))
 }
@@ -84,10 +73,10 @@ func setupRouter(e *echo.Echo, prefix string) {
  ******************************************************************************/
 
 func startServer(e *echo.Echo, address string) {
-	log.Info("Starting HTTP server at %#v", address)
+	slog.Info("Starting HTTP server", "address", address)
 
 	if err := e.Start(address); err != nil {
-		log.Error("Failed to start server: %v", err)
+		slog.Error("Failed to start server", "error", err)
 		os.Exit(exitCodeServerStart)
 	}
 }
