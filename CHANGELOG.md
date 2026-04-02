@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [v0.2.2] - 2026-04-02
+
+### Fixed
+
+- Add missing script import "popover" to fix `SelectBox` component not opening
+- Filter out already bound cassettes from the list of bindable cassettes in the tool binding `SelectBox` component
+
 ## [v0.2.1] - 2026-04-02
 
 ### Changed
