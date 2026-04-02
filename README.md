@@ -29,6 +29,8 @@ Run `pg-press --help` for more information.
 - [-] ~Update templui to v1.9.3 [v0.2.0]~ In v1.9, dialogs are broken, wont open after oob swap
 - [x] Move all components/\* to a separate components package "/internal/templates/components/PACKAGE_NAME/" [v0.2.0]
 
+- [x] Find a better slog handler to make logs more readable, i hate this JSON handler [v0.2.1]
+
 - [ ] Move all handler templates to "/internal/templates/pages/" [v0.3.0]
 - [ ] Update to templui v1.9, for this to work i need to change all dialog templates [v0.3.0]
 

@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"time"
+
+	"github.com/lmittmann/tint"
 )
 
 const (
@@ -23,11 +26,12 @@ func init() {
 	if Verbose {
 		level = slog.LevelDebug
 	}
-	h := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-		AddSource: true,
-		Level:     level,
-	})
-	slog.SetDefault(slog.New(h))
+	slog.SetDefault(slog.New(
+		tint.NewHandler(os.Stderr, &tint.Options{
+			Level:      level,
+			TimeFormat: time.Kitchen,
+		}),
+	))
 
 	home, err := os.UserHomeDir()
 	if err != nil {

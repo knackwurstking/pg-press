@@ -12,6 +12,7 @@ require (
 	github.com/jung-kurt/gofpdf/v2 v2.17.3
 	github.com/knackwurstking/ui v1.1.2-0.20260301060031-352f54cf6d6c
 	github.com/labstack/echo/v4 v4.15.1
+	github.com/lmittmann/tint v1.1.3
 	github.com/mattn/go-sqlite3 v1.14.38
 	github.com/williepotgieter/keymaker v1.0.0
 	github.com/yuin/goldmark v1.8.2

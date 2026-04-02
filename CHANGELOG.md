@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [v0.2.1] - 2026-04-02
+
+### Changed
+
+- Use tint slog handler for better log formatting and output
+
 ## [v0.2.0] - 2026-04-02
 
 ### Changed
